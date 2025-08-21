@@ -1,6 +1,7 @@
+"use client";
+
 import { Button, Flex } from "antd";
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { useDevice } from "../../hooks/use-device";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 
@@ -47,7 +48,6 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
 }) => {
   const { isMobile } = useDevice();
 
-  const navigate = useNavigate();
 
   return (
     <Flex

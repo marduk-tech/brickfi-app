@@ -1,6 +1,8 @@
+"use client";
+
 import { Button, Flex, Typography } from "antd";
+import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import { Brick360v2 } from "../components/brick-360/brick360-v2";
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { Loader } from "../components/common/loader";

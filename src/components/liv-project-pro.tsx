@@ -1,5 +1,7 @@
+"use client";
+
 import { Flex, List, Tabs, Tag, Timeline, Typography } from "antd";
-import { useParams } from "react-router-dom";
+import { useParams } from "next/navigation";
 import { useFetchProjectById } from "../hooks/use-project";
 import { Loader } from "./common/loader";
 import ProjectGallery from "./project-gallery";

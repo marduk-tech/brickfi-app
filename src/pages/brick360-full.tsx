@@ -1,7 +1,9 @@
+"use client";
+
+import { useParams } from "next/navigation";
 import React from "react";
-import { useFetchLvnzyProjectById } from "../hooks/use-lvnzy-project";
-import { useParams } from "react-router-dom";
 import { Loader } from "../components/common/loader";
+import { useFetchLvnzyProjectById } from "../hooks/use-lvnzy-project";
 
 const containerStyle: React.CSSProperties = {
   backgroundColor: "#f8f9fa",

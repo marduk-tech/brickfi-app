@@ -1,3 +1,4 @@
+"use client";
 import * as turf from "@turf/turf";
 import { Flex, Modal, Tag, Typography } from "antd";
 import L, { LatLngTuple } from "leaflet";

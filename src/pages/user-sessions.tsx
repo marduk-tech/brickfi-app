@@ -1,6 +1,8 @@
+"use client";
+
 import { RightOutlined } from "@ant-design/icons";
 import { Empty, List, Spin, Typography } from "antd";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useUser } from "../hooks/use-user";
 import { FONT_SIZE } from "../theme/style-constants";
 import DateObject from "react-date-object";
@@ -8,7 +10,7 @@ import DateObject from "react-date-object";
 const { Paragraph } = Typography;
 
 export default function UserSessions() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { user, isLoading, isError } = useUser();
 
   if (isLoading) {
@@ -65,7 +67,7 @@ export default function UserSessions() {
               padding: 16,
               cursor: "pointer",
             }}
-            onClick={() => navigate(`/${session.sessionId}`)}
+            onClick={() => router.push(`/${session.sessionId}`)}
             actions={[
               <RightOutlined key="open" style={{ color: "#8c8c8c" }} />,
             ]}

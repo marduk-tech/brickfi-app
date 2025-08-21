@@ -1,6 +1,8 @@
+"use client";
+
 import { Alert, AutoComplete, Button, Input, message, Modal, Spin } from "antd";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   useProjectSearch,
   WITHLVNZYRESPONSE,
@@ -35,7 +37,7 @@ export const ProjectSearch: React.FC<ProjectSearchProps> = ({
   placeholder = "Search projects...",
   style,
 }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { projects, isLoading } = useProjectSearch();
   const { user } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
@@ -112,7 +114,7 @@ export const ProjectSearch: React.FC<ProjectSearchProps> = ({
 
     handleCloseDialog();
     //hotfix for user-projects error
-    navigate(0);
+    router.refresh();
   };
 
   const handleRequestClick = async (project: WITHLVNZYRESPONSE) => {

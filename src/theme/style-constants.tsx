@@ -24,7 +24,7 @@ export const FONTS = {
   bold: "DM Sans",
 };
 
-const isMobile = !!window.matchMedia("((max-width: 576px))").matches;
+const isMobile = typeof window !== 'undefined' ? !!window.matchMedia("((max-width: 576px))").matches : false;
 export const FONT_SIZE = {
   SUB_TEXT: 12,
   PARA: 14,
@@ -37,4 +37,4 @@ export const FONT_SIZE = {
 export const MOBILE_MARGIN = 16;
 export const MAX_WIDTH = 1150;
 export const HORIZONTAL_PADDING =
-  window.innerWidth > MAX_WIDTH ? (window.innerWidth - MAX_WIDTH) / 2 : 16;
+  typeof window !== 'undefined' && window.innerWidth > MAX_WIDTH ? (window.innerWidth - MAX_WIDTH) / 2 : 16;

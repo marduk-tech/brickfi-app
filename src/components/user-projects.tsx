@@ -1,6 +1,8 @@
+"use client";
+
 import { Flex, Tooltip, Typography } from "antd";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDevice } from "../hooks/use-device";
 import { useUser } from "../hooks/use-user";
 import { BRICK360_CATEGORY, Brick360CategoryInfo } from "../libs/constants";
@@ -28,7 +30,7 @@ export function UserProjects({
 }) {
   const { user } = useUser();
 
-  const navigate = useNavigate();
+  const router = useRouter();
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
   const { isMobile } = useDevice();
 
@@ -70,7 +72,7 @@ export function UserProjects({
             : (window.innerWidth - 40 * 3 - HORIZONTAL_PADDING * 2) / 4,
         }}
         onClick={() => {
-          navigate(`/app/brick360/${itemInfo._id}`);
+          router.push(`/app/brick360/${itemInfo._id}`);
         }}
       >
         <Flex vertical style={{ width: "100%" }}>

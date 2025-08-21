@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Alert,
   Button,
@@ -12,8 +14,8 @@ import {
   Typography,
 } from "antd";
 import moment from "moment";
+import { useParams } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import GradientBar from "../components/common/grading-bar";
 import { Loader } from "../components/common/loader";

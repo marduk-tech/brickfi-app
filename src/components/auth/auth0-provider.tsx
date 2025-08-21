@@ -1,6 +1,8 @@
+"use client";
+
 import { AppState, Auth0Provider } from "@auth0/auth0-react";
+import { useRouter } from "next/navigation";
 import { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
 import {
   auth0CallbackUrl,
   auth0ClientId,
@@ -12,7 +14,7 @@ import {
  * @param children Child components to be wrapped by the Auth0 provider
  */
 export const CustomAuth0Provider = ({ children }: { children: ReactNode }) => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const domain = auth0Domain;
   const clientId = auth0ClientId;
@@ -23,7 +25,7 @@ export const CustomAuth0Provider = ({ children }: { children: ReactNode }) => {
    * @param appState The application state after authentication
    */
   const onRedirectCallback = (appState?: AppState) => {
-    navigate(appState?.returnTo || window.location.pathname);
+    router.push(appState?.returnTo || window.location.pathname);
   };
 
   if (!(domain && clientId && redirectUri)) {

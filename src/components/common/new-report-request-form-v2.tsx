@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Alert,
   AutoComplete,
@@ -14,7 +16,6 @@ import {
 import Link from "antd/es/typography/Link";
 import { AxiosError } from "axios";
 import { ReactNode, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { useDevice } from "../../hooks/use-device";
 import {
   ReraProject,
@@ -42,7 +43,6 @@ export const NewReportRequestFormV2 = () => {
     useReraProjectSearch();
   const createUser = useCreateUserMutation({ enableToasts: false });
   const sendMail = useSendUserMailMutation();
-  const navigate = useNavigate();
   const { user } = useUser();
   const { isMobile } = useDevice();
   const [reportsLeft, setReportsLeft] = useState<number>(3);

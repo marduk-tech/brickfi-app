@@ -1,7 +1,9 @@
+"use client";
+
 import { Flex, Typography } from "antd";
+import Link from "next/link";
 import { useDevice } from "../../hooks/use-device";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import Link from "antd/es/typography/Link";
 import { LandingConstants } from "../../libs/constants";
 
 export function LandingFooter() {
@@ -61,25 +63,25 @@ export function LandingFooter() {
         >
           <Link
             href="/app"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA }}
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
             Brickfi App
           </Link>
           <Link
             href={LandingConstants.brickAssistLink}
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA }}
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
             Consult With Us
           </Link>
           <Link
             href="/aboutus"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA }}
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
             About Us
           </Link>
           <Link
             href="/aboutus"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA }}
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
             Help
           </Link>
@@ -94,13 +96,17 @@ export function LandingFooter() {
         >
           <Link
             href="https://blog.brickfi.in"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA }}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
             Blog
           </Link>
           <Link
             href={LandingConstants.instaLink}
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA }}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
             Instagram
           </Link>

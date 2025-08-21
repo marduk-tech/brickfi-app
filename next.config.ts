@@ -4,9 +4,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: __dirname,
   },
-  output: 'export',
-  trailingSlash: true,
-  distDir: 'out',
+  // Removed output: 'export' for development - enables dynamic routing
   images: {
     unoptimized: true,
   },

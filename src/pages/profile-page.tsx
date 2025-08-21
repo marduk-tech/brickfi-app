@@ -1,5 +1,8 @@
+"use client";
+
 import { EditOutlined, LogoutOutlined } from "@ant-design/icons";
 import { Button, Flex, Modal, Typography } from "antd";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Loader } from "../components/common/loader";
 import { ProfileEditModal } from "../components/profile-edit-modal";
@@ -11,13 +14,14 @@ import { COLORS, FONT_SIZE } from "../theme/style-constants";
 export function ProfilePage() {
   const { isMobile } = useDevice();
   const { user, isLoading } = useUser();
+  const router = useRouter();
 
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
   const { logout } = useAuth();
 
   const handleLogout = () => {
     logout.mutate();
-    window.location.href = "/app";
+    router.push("/app");
     setIsLogoutModalVisible(false);
   };
 

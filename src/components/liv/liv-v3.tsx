@@ -1,7 +1,9 @@
+"use client";
+
 import { Button, Flex, Form, Input, message, Typography } from "antd";
 import { makeStreamingJsonRequest } from "http-streaming-request";
+import { useParams } from "next/navigation";
 import { forwardRef, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { useDevice } from "../../hooks/use-device";
 import { useFetchProjects } from "../../hooks/use-project";

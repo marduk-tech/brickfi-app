@@ -1,7 +1,9 @@
+"use client";
+
 import { ArrowRightOutlined, CloseOutlined } from "@ant-design/icons";
 import { Button, Flex, Typography } from "antd";
+import Link from "next/link";
 import React from "react";
-import { Link } from "react-router-dom";
 import { FONT_SIZE } from "../../../theme/style-constants";
 import { ILivIndexPlaces } from "../../../types/Common";
 import { LivIndexPlaceCard } from "./livindex-place-card";
@@ -43,7 +45,7 @@ export const PlaceCard = ({
             {place.name} *
           </Typography.Text>
           {isExpanded && (
-            <Link to={`/livindex-place/${place._id}`}>
+            <Link href={`/livindex-place/${place._id}`}>
               <Button
                 variant="outlined"
                 icon={<ArrowRightOutlined />}

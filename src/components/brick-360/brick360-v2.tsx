@@ -1,6 +1,8 @@
+"use client";
+
 import { Flex, Tabs, Tour, TourProps, Typography } from "antd";
+import { useParams } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import { useParams } from "react-router-dom";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import { useFetchLvnzyProjectById } from "../../hooks/use-lvnzy-project";
 

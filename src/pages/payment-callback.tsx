@@ -1,11 +1,13 @@
+"use client";
+
 import { Result, Spin } from "antd";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { useFetchPaymentByPaymentLinkId } from "../hooks/payment-hooks";
 
 export function PaymentCallbackPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [countdown, setCountdown] = useState(4);
 
   const status = searchParams.get("razorpay_payment_link_status");
@@ -25,7 +27,7 @@ export function PaymentCallbackPage() {
         setCountdown((prev) => {
           if (prev === 1) {
             clearInterval(timer);
-            navigate("/");
+            router.push("/");
           }
           return prev - 1;
         });

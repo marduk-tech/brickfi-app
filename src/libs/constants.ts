@@ -1,8 +1,8 @@
 import { IDriverPlace } from "../types/Project";
 
-export const envMode = import.meta.env.VITE_ENV;
+export const envMode = process.env.NEXT_PUBLIC_ENV;
 
-export const baseApiUrl = import.meta.env.VITE_API_URL;
+export const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 
 export const queryKeys = {
   projects: "projects",
@@ -24,11 +24,11 @@ export const LocalStorageKeys = {
   tour: "tour",
 };
 
-export const env = import.meta.env.VITE_ENV;
-export const auth0Domain = import.meta.env.VITE_AUTH0_DOMAIN;
-export const auth0ClientId = import.meta.env.VITE_AUTH0_CLIENT_ID;
-export const auth0CallbackUrl = import.meta.env.VITE_AUTH0_CALLBACK_URL;
-export const posthogkey = import.meta.env.VITE_POSTHOG_KEY;
+export const env = process.env.NEXT_PUBLIC_ENV;
+export const auth0Domain = process.env.NEXT_PUBLIC_AUTH0_DOMAIN;
+export const auth0ClientId = process.env.NEXT_PUBLIC_AUTH0_CLIENT_ID;
+export const auth0CallbackUrl = process.env.NEXT_PUBLIC_AUTH0_CALLBACK_URL;
+export const posthogkey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 
 export const LivIndexMegaDriverConfig = {
   macro: { label: "Macro Infra" },

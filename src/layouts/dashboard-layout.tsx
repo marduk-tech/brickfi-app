@@ -2,7 +2,7 @@
 
 import { Drawer, Flex, Image, Layout, Modal, Typography } from "antd";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { CustomErrorBoundary } from "../components/common/custom-error-boundary";
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
@@ -26,6 +26,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [showUserDetailsForm, setShowUserDetailsForm] = useState(false);
   const { isMobile } = useDevice();
+  const router = useRouter();
 
   const { lvnzyProjectId, collectionId } = useParams();
 
@@ -165,9 +166,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
               <Flex
                 onClick={() => {
                   if (lvnzyProjectId || collectionId) {
-                    window.location.assign("/app");
+                    router.push("/app");
                   } else {
-                    window.location.assign("/");
+                    router.push("/");
                   }
                 }}
                 style={{ height: 60, display: "flex", alignItems: "center" }}
@@ -182,7 +183,11 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 <img
                   src="/images/brickfi-assist.png"
                   onClick={() => {
-                    window.location.assign(LandingConstants.brickAssistLink);
+                    if (LandingConstants.brickAssistLink.startsWith('http')) {
+                      window.location.assign(LandingConstants.brickAssistLink);
+                    } else {
+                      router.push(LandingConstants.brickAssistLink);
+                    }
                   }}
                   style={{ height: 32, width: "auto", marginRight: 8 }}
                 ></img>

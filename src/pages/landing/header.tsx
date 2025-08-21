@@ -1,6 +1,9 @@
+"use client";
+
 import { Dropdown, Flex } from "antd";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import Link from "antd/es/typography/Link";
 import { useDevice } from "../../hooks/use-device";
 import { LandingConstants } from "../../libs/constants";
 import DynamicReactIcon from "../../components/common/dynamic-react-icon";
@@ -11,6 +14,7 @@ const LandingHeader: React.FC<{
   logo?: string;
 }> = ({ bgColor, color, logo }) => {
   const { isMobile } = useDevice();
+  const router = useRouter();
   const navItems = [
     {
       link: LandingConstants.genReportLink,
@@ -43,7 +47,7 @@ const LandingHeader: React.FC<{
     >
       <Flex
         onClick={() => {
-          window.location.assign("/");
+          router.push("/");
         }}
         style={{
           height: 60,
@@ -74,6 +78,7 @@ const LandingHeader: React.FC<{
                       style={{
                         color: COLORS.textColorMedium,
                         fontSize: FONT_SIZE.HEADING_2,
+                        textDecoration: 'none'
                       }}
                     >
                       {item.label}
@@ -100,6 +105,7 @@ const LandingHeader: React.FC<{
                 style={{
                   color: color || COLORS.textColorMedium,
                   fontSize: FONT_SIZE.PARA,
+                  textDecoration: 'none'
                 }}
               >
                 {item.label}

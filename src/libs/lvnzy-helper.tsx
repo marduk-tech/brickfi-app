@@ -1,6 +1,8 @@
+"use client";
+
 import posthog from "posthog-js";
 import { env, PLACE_TIMELINE } from "./constants";
-import { useLocation } from "react-router-dom";
+import { useSearchParams } from "next/navigation";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
 export const nestedPropertyAccessor = (
@@ -18,7 +20,7 @@ export const nestedPropertyAccessor = (
 };
 
 export function useUrlParams() {
-  return new URLSearchParams(useLocation().search);
+  return useSearchParams();
 }
 
 export const capitalize = (input: string) => {

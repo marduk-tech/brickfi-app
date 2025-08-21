@@ -1,6 +1,8 @@
+"use client";
+
 import { Flex, Typography } from "antd";
+import { useParams } from "next/navigation";
 import React, { useState } from "react";
-import { useParams } from "react-router-dom";
 import { useDevice } from "../hooks/use-device";
 import { useFetchProjectById } from "../hooks/use-project";
 import { captureAnalyticsEvent, rupeeAmountFormat } from "../libs/lvnzy-helper";

@@ -1,7 +1,8 @@
-import { useMutation } from "@tanstack/react-query";
+"use client";
 
+import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { queryClient } from "../libs/query-client";
@@ -13,7 +14,7 @@ export type LoginStatus =
   | "EDIT_MOBILE";
 
 export function useAuth() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [loginStatus, setLoginStatus] = useState<LoginStatus>("EDIT_MOBILE");
   const [verificationId, setVerificationId] = useState<string | undefined>();

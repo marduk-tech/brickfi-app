@@ -1,14 +1,17 @@
+"use client";
+
 import { Button, Flex, Form, Input, message, Typography } from "antd";
 import PhoneInput from "antd-phone-input";
-import { useDevice } from "../hooks/use-device";
-
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useDevice } from "../hooks/use-device";
 import { useCreateUserMutation } from "../hooks/user-hooks";
 import { getUserByMobile } from "../libs/api/user";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
 export function SignUpForm() {
   const [form] = Form.useForm();
+  const router = useRouter();
 
   const { isTabletOrMobile } = useDevice();
 
@@ -120,7 +123,7 @@ export function SignUpForm() {
               <Button
                 style={{ marginTop: 32 }}
                 onClick={() => {
-                  window.location.href = "/";
+                  router.push("/");
                 }}
               >
                 Starting Exploring Projects
@@ -144,7 +147,7 @@ export function SignUpForm() {
               <Button
                 style={{ marginTop: 32 }}
                 onClick={() => {
-                  window.location.href = "/";
+                  router.push("/");
                 }}
               >
                 Starting Exploring Projects
