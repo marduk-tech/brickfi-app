@@ -2,6 +2,7 @@ import { useMap } from "@vis.gl/react-google-maps";
 import { Flex, Modal, Tag, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { PLACE_TIMELINE } from "../../../libs/constants";
+import { safeWindow } from "../../../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 
 const { Paragraph } = Typography;
@@ -230,10 +231,10 @@ export const ConnectivityInfra: React.FC<any> = ({ connectivityData }) => {
       setPopupPosition(null);
     };
 
-    window.addEventListener("scroll", handleScroll);
+    safeWindow.addEventListener("scroll", handleScroll);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      safeWindow.removeEventListener("scroll", handleScroll);
     };
   }, []);
 

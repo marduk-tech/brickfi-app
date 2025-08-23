@@ -3,6 +3,7 @@
 import { Flex, List, Tabs, Tag, Timeline, Typography } from "antd";
 import { useParams } from "next/navigation";
 import { useFetchProjectById } from "../hooks/use-project";
+import { useWindowDimensions } from "../hooks/use-browser-safe";
 import { Loader } from "./common/loader";
 import ProjectGallery from "./project-gallery";
 import { FONT_SIZE } from "../theme/style-constants";
@@ -190,6 +191,7 @@ const DATA = {
 };
 const LivProjectPro = () => {
   const { projectId } = useParams();
+  const { height } = useWindowDimensions();
 
   const { data: projectData, isLoading: projectDataLoading } =
     useFetchProjectById(projectId!);
@@ -202,7 +204,7 @@ const LivProjectPro = () => {
       vertical
       style={{
         padding: 16,
-        height: window.innerHeight - 100,
+        height: height - 100,
         overflowY: "auto",
         scrollbarWidth: "none",
         paddingBottom: 150,

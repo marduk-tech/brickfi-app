@@ -1,6 +1,7 @@
 import { Button, Flex, Modal } from "antd";
 import { useEffect, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { DRIVER_CATEGORIES } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "../common/dynamic-react-icon";
@@ -13,6 +14,7 @@ interface MapTabProps {
 
 export const MapTab = ({ lvnzyProject }: MapTabProps) => {
   const { isMobile } = useDevice();
+  const { height } = useWindowDimensions();
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const [drivers, setDrivers] = useState<any[]>([]);
   const [surroundingElements, setSurroundingElements] = useState<any[]>([]);
@@ -49,7 +51,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
       <Flex
         style={{
           position: "relative",
-          height: window.innerHeight - 350,
+          height: height - 350,
           paddingBottom: 40,
         }}
         vertical
@@ -133,7 +135,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
         >
           <Flex
             style={{
-              height: Math.min(window.innerHeight - 75, 800),
+              height: Math.min(height - 75, 800),
               paddingTop: 28,
             }}
             vertical

@@ -1,6 +1,7 @@
 import { Button, Flex, Form, Input, Select, Typography } from "antd";
 import { useUser } from "../hooks/use-user";
 import { useUpdateUserMutation } from "../hooks/user-hooks";
+import { safeWindow } from "../libs/browser-utils";
 import { FONT_SIZE } from "../theme/style-constants";
 import { useState } from "react";
 import DynamicReactIcon from "./common/dynamic-react-icon";
@@ -47,7 +48,7 @@ export function UserDetailsForm({
       .then((user: any) => {
         setProfileUpdated(true);
         setTimeout(() => {
-          window.location.reload();
+          safeWindow.location.reload();
         }, 500);
       });
   };

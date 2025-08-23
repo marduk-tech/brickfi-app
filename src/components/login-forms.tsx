@@ -3,6 +3,7 @@ import PhoneInput from "antd-phone-input";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useUser } from "../hooks/use-user";
+import { safeWindow } from "../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
 export function LoginForm() {
@@ -104,7 +105,7 @@ export function LoginForm() {
         })
         .then((user: any) => {
           if (!showUserDetailsForm) {
-            window.location.reload();
+            safeWindow.location.reload();
           }
         });
     } catch (error) {

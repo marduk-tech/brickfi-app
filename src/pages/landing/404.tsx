@@ -1,16 +1,18 @@
 import { Flex } from "antd";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { SectionCenter } from "./section";
 import { LandingFooter } from "./footer";
 import LandingHeader from "./header";
 
 export function FourOFour() {
   const { isMobile } = useDevice();
+  const { height } = useWindowDimensions();
   return (
     <Flex
       vertical
       style={{
-        height: window.innerHeight,
+        height: height,
         overflowY: "scroll",
         position: "relative",
         paddingTop: isMobile ? 60 : 0,

@@ -1,4 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
+import { safeWindow } from "../../libs/browser-utils";
 
 /**
  * Logout Button component
@@ -10,7 +11,7 @@ const LogoutButton = () => {
   return (
     <button
       onClick={() =>
-        logout({ logoutParams: { returnTo: window.location.origin } })
+        logout({ logoutParams: { returnTo: safeWindow.location.origin } })
       }
     >
       Log Out

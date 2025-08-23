@@ -3,6 +3,7 @@
 import { Button, Flex } from "antd";
 import React from "react";
 import { useDevice } from "../../hooks/use-device";
+import { safeWindow } from "../../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 
 interface SectionProps {
@@ -72,7 +73,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
           minHeight: isMobile
             ? "auto"
             : sectionData.fullHeight
-            ? window.innerHeight
+            ? "100vh"
             : "auto",
           marginLeft: isMobile ? 16 : 64,
         }}
@@ -113,7 +114,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
               if (sectionData.btn?.btnAction) {
                 sectionData.btn?.btnAction();
               } else {
-                window.location.href = sectionData.btn!.link!;
+                safeWindow.location.href = sectionData.btn!.link!;
               }
             }}
             style={{
@@ -134,7 +135,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
           minHeight: isMobile
             ? "auto"
             : sectionData.fullHeight
-            ? window.innerHeight
+            ? "100vh"
             : "auto",
           padding: isMobile ? "0 16px" : "0 32px",
         }}
@@ -183,7 +184,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
           minHeight: isMobile
             ? "auto"
             : sectionData.fullHeight
-            ? window.innerHeight
+            ? "100vh"
             : "auto",
           padding: isMobile ? "0 16px" : "0 32px",
         }}
@@ -210,7 +211,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
           minHeight: isMobile
             ? "auto"
             : sectionData.fullHeight
-            ? window.innerHeight
+            ? "100vh"
             : "auto",
           marginLeft: isMobile ? 16 : 40,
           marginTop: isMobile ? 32 : 0,
@@ -253,7 +254,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
               if (sectionData.btn?.btnAction) {
                 sectionData.btn?.btnAction();
               } else {
-                window.location.href = sectionData.btn!.link!;
+                safeWindow.location.href = sectionData.btn!.link!;
               }
             }}
             style={{
@@ -329,7 +330,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
               if (sectionData.btn?.btnAction) {
                 sectionData.btn?.btnAction();
               } else {
-                window.location.href = sectionData.btn!.link!;
+                safeWindow.location.href = sectionData.btn!.link!;
               }
             }}
             style={{

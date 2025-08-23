@@ -2,6 +2,7 @@ import { Button, Flex, Modal, Typography } from "antd";
 import L from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { useFetchAllLivindexPlaces } from "../../hooks/use-livindex-places";
 import { SearchResult } from "../../hooks/use-place-search";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -29,6 +30,7 @@ export function MetroMapper() {
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
 
   const { isMobile } = useDevice();
+  const { height } = useWindowDimensions();
   const setValue = useStore((state) => state.setValue);
 
   // Filter only transit drivers from all places
@@ -359,7 +361,7 @@ export function MetroMapper() {
         }}
       >
         <Flex
-          style={{ height: Math.min(window.innerHeight - 20, 800) }}
+          style={{ height: Math.min(height - 20, 800) }}
           vertical
           gap={8}
         >

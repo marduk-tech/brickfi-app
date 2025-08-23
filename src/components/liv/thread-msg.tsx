@@ -3,6 +3,7 @@ import { Button, Flex, Modal, Spin, Typography } from "antd";
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "../../theme/style-constants";
 import { Project } from "../../types/Project";
 import remarkGfm from "remark-gfm";
@@ -23,6 +24,7 @@ const ThreadMsg: React.FC<{
   handleProjectClick: any;
 }> = ({ question, answer, streaming, allProjects, handleProjectClick }) => {
   const { isMobile } = useDevice();
+  const { width } = useWindowDimensions();
   const [toggleMapView, setToggleMapView] = useState(false);
   const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const [questionToDisplay, setQuestionToDisplay] = useState<string>("");
@@ -74,7 +76,7 @@ const ThreadMsg: React.FC<{
     return (
       <Flex
         style={{
-          width: fullScreen ? "95vw" : isMobile ? window.innerWidth : MAX_WIDTH,
+          width: fullScreen ? "95vw" : isMobile ? width : MAX_WIDTH,
           height: fullScreen ? "calc(95vh - 55px)" : 350,
           maxWidth: fullScreen ? "95vw" : undefined,
         }}

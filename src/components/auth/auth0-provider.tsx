@@ -8,6 +8,7 @@ import {
   auth0ClientId,
   auth0Domain,
 } from "../../libs/constants";
+import { safeWindow } from "../../libs/browser-utils";
 
 /**
  * Custom Auth0 Provider component
@@ -25,7 +26,7 @@ export const CustomAuth0Provider = ({ children }: { children: ReactNode }) => {
    * @param appState The application state after authentication
    */
   const onRedirectCallback = (appState?: AppState) => {
-    router.push(appState?.returnTo || window.location.pathname);
+    router.push(appState?.returnTo || safeWindow.location.pathname);
   };
 
   if (!(domain && clientId && redirectUri)) {

@@ -3,6 +3,7 @@ import { Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useState } from "react";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LandingFooter } from "./footer";
 import LandingHeader from "./header";
@@ -10,6 +11,7 @@ import { SectionCenter, SectionLeft, SectionRight } from "./section";
 
 export function BrickAssistLanding() {
   const { isMobile } = useDevice();
+  const { height } = useWindowDimensions();
 
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
@@ -215,7 +217,7 @@ export function BrickAssistLanding() {
     <Flex
       vertical
       style={{
-        height: window.innerHeight,
+        height: height,
         overflowY: "scroll",
         position: "relative",
         paddingTop: 0,

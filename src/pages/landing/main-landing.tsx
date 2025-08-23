@@ -1,6 +1,7 @@
 import { Flex, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
+import { safeWindow } from "../../libs/browser-utils";
 import { LandingConstants } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LandingFooter } from "./footer";
@@ -13,7 +14,7 @@ export function MainLanding() {
   const [newReportRequestFormOpen, setNewReportRequestFormOpen] =
     useState(false);
   useEffect(() => {
-    const hash = window.location.hash;
+    const hash = safeWindow.location.hash;
     if (hash) {
       const element = document.querySelector(hash);
       if (element) {
@@ -47,7 +48,7 @@ export function MainLanding() {
     <Flex
       vertical
       style={{
-        height: window.innerHeight,
+        height: "100vh",
         overflowY: "scroll",
         position: "relative",
         paddingTop: isMobile ? 60 : 0,

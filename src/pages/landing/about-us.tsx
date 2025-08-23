@@ -1,5 +1,6 @@
 import { Flex, Typography } from "antd";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { LandingFooter } from "./footer";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { SectionLeft, SectionRight } from "./section";
@@ -7,6 +8,7 @@ import LandingHeader from "./header";
 
 export function AboutUs() {
   const { isMobile } = useDevice();
+  const { height } = useWindowDimensions();
   const highlightStyle = {
     fontWeight: 500,
     color: COLORS.primaryColor,
@@ -55,7 +57,7 @@ export function AboutUs() {
     <Flex
       vertical
       style={{
-        height: window.innerHeight,
+        height: height,
         overflowY: "scroll",
         position: "relative",
         paddingTop: isMobile ? 60 : 0,

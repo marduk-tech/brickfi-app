@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { useFetchProjects } from "../../hooks/use-project";
 import { useUser } from "../../hooks/use-user";
 import { axiosApiInstance } from "../../libs/axios-api-Instance";
@@ -35,6 +36,7 @@ export interface LivAnswer {
 }
 
 export const LivV3 = forwardRef<LivRef, {}>((props, ref) => {
+  const { height } = useWindowDimensions();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
   const [currentAnswer, setCurrentAnswer] = useState<LivAnswer | undefined>();
 
@@ -177,7 +179,7 @@ export const LivV3 = forwardRef<LivRef, {}>((props, ref) => {
         ref={chatContainerRef}
         vertical
         style={{
-          height: window.innerHeight - 60,
+          height: height - 60,
           overflowY: "auto",
           scrollbarWidth: "none",
           paddingBottom: 150,

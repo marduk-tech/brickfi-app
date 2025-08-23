@@ -12,6 +12,7 @@ import { useFetchAllLvnzyProjects } from "../hooks/use-lvnzy-project";
 import { useUser } from "../hooks/use-user";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LandingConstants } from "../libs/constants";
+import { safeWindow } from "../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
 interface SavedLvnzyProject {
@@ -175,7 +176,7 @@ const BrickfiHome: React.FC = () => {
               <Button
                 style={{ marginTop: 48, fontSize: FONT_SIZE.HEADING_2 }}
                 onClick={() => {
-                  window.location.assign(LandingConstants.genReportFormLink);
+                  safeWindow.location.assign(LandingConstants.genReportFormLink);
                 }}
               >
                 Request New Report

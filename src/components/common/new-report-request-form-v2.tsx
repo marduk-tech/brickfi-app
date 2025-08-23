@@ -27,6 +27,7 @@ import {
   useSendUserMailMutation,
 } from "../../hooks/user-hooks";
 import { LandingConstants, queryKeys } from "../../libs/constants";
+import { safeWindow } from "../../libs/browser-utils";
 import { capitalize } from "../../libs/lvnzy-helper";
 import { queryClient } from "../../libs/query-client";
 import { LandingFooter } from "../../pages/landing/footer";
@@ -533,7 +534,7 @@ export const NewReportRequestFormV2 = () => {
                       style={{ width: 200 }}
                       key="home"
                       onClick={() => {
-                        window.location.replace("/");
+                        safeWindow.location.replace("/");
                       }}
                     >
                       Take me Home

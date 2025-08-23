@@ -4,6 +4,7 @@ import { Flex, Tooltip, Typography } from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useDevice } from "../hooks/use-device";
+import { useWindowDimensions } from "../hooks/use-browser-safe";
 import { useUser } from "../hooks/use-user";
 import { BRICK360_CATEGORY, Brick360CategoryInfo } from "../libs/constants";
 import {
@@ -29,6 +30,7 @@ export function UserProjects({
   lvnzyProjects: LvnzyProject[];
 }) {
   const { user } = useUser();
+  const { width } = useWindowDimensions();
 
   const router = useRouter();
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
@@ -69,7 +71,7 @@ export function UserProjects({
           backgroundColor: "white",
           width: isMobile
             ? "100%"
-            : (window.innerWidth - 40 * 3 - HORIZONTAL_PADDING * 2) / 4,
+            : (width - 40 * 3 - HORIZONTAL_PADDING * 2) / 4,
         }}
         onClick={() => {
           router.push(`/app/brick360/${itemInfo._id}`);

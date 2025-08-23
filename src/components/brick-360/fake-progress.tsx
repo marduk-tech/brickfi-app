@@ -1,4 +1,5 @@
 import { Flex, Progress, Typography } from "antd";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 
 interface FakeProgressProps {
@@ -7,7 +8,8 @@ interface FakeProgressProps {
 }
 
 export const FakeProgress = ({ progress, projectName }: FakeProgressProps) => {
-  const progressWidth = window.innerWidth < 800 ? window.innerWidth : 800;
+  const { width } = useWindowDimensions();
+  const progressWidth = width < 800 ? width : 800;
 
   return (
     <Flex

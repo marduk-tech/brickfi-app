@@ -1,6 +1,7 @@
 import { Button, Flex, Typography } from "antd";
 import { AxiosError } from "axios";
 import { ErrorBoundary } from "react-error-boundary";
+import { safeWindow } from "../../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 
 export function CustomErrorBoundary({
@@ -52,7 +53,7 @@ export function ErrorBoundaryFallback({ error }: { error: AxiosError<any> }) {
         </Typography.Text>
         <Button
           onClick={() => {
-            window.location.reload();
+            safeWindow.location.reload();
           }}
           size="small"
           type="primary"

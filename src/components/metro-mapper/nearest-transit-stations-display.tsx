@@ -1,6 +1,7 @@
 import { Flex, Modal, Spin, Typography } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import {
   NearestTransitStation,
   useNearestTransitStations,
@@ -23,6 +24,7 @@ export const NearestTransitStationsDisplay: React.FC<
   NearestTransitStationsDisplayProps
 > = ({ selectedResult, transitDrivers, onFetchedTransitDrivers }) => {
   const { isMobile } = useDevice();
+  const { width } = useWindowDimensions();
   const [mobileDetailsDialogContent, setMobileDetailsDialogContent] =
     useState<ReactNode>();
 
@@ -179,7 +181,7 @@ export const NearestTransitStationsDisplay: React.FC<
               key={`${station.driverId}-${index}`}
               vertical
               style={{
-                width: isMobile ? window.innerWidth - 100 : "100%",
+                width: isMobile ? width - 100 : "100%",
                 padding: "8px",
                 paddingBottom: 16,
                 margin: "0 0 8px 0",
