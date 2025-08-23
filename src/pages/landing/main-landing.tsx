@@ -1,3 +1,5 @@
+"use client";
+
 import { Flex, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
@@ -39,7 +41,7 @@ export function MainLanding() {
         style={{ fontSize: FONT_SIZE.HEADING_2, display: "block" }}
       >
         Get the exclusive Brick360 Report on new & under construction properties
-        across Bangalore. Verified, unbiased, marketing free insights you won’t
+        across Bangalore. Verified, unbiased, marketing free insights you won't
         find anywhere else.
       </Typography.Text>
     </Flex>
@@ -59,7 +61,7 @@ export function MainLanding() {
       <LandingHeader></LandingHeader>
       {/* <SectionLeft
         sectionData={{
-          heading: "Don’t Leave Your Next Property Purchase to Guesswork",
+          heading: "Don't Leave Your Next Property Purchase to Guesswork",
           mainImgUrl: "/images/landing/slide-1.png",
           mainImgAltText:
             "Buy your next property with confidence. Consult Brickfi.",
@@ -140,7 +142,7 @@ export function MainLanding() {
             txt: "Generate Free Report",
           },
           subHeading:
-            "Our AI analyses every data point so that you don’t have to. Get a clear understanding of what to look at, what’s important and why its important.",
+            "Our AI analyses every data point so that you don't have to. Get a clear understanding of what to look at, what's important and why its important.",
           mainImgUrl: "/images/landing/slide-6.png",
           mainImgAltText:
             "Brickfi uses AI to make sense of data points and provide you more clarity.",
