@@ -6,6 +6,7 @@ import { useState } from "react";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { queryClient } from "../libs/query-client";
+import { safeStorage } from "../libs/browser-utils";
 
 export type LoginStatus =
   | "OTP_SENT"
@@ -52,7 +53,7 @@ export function useAuth() {
     },
 
     async onSuccess({ data }) {
-      localStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.user));
+      safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.user));
 
       await queryClient.invalidateQueries({
         queryKey: [queryKeys.user],
@@ -68,7 +69,7 @@ export function useAuth() {
 
   const logout = useMutation({
     mutationFn: async () => {
-      localStorage.removeItem(LocalStorageKeys.user);
+      safeStorage.removeItem(LocalStorageKeys.user);
 
       await queryClient.removeQueries({
         queryKey: [queryKeys.user],

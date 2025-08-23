@@ -10,6 +10,7 @@ import { LoginForm } from "../components/login-forms";
 import { UserDetailsForm } from "../components/user-details-form";
 import { useUser } from "../hooks/use-user";
 import { LandingConstants, LocalStorageKeys } from "../libs/constants";
+import { safeStorage, safeWindow } from "../libs/browser-utils";
 import {
   COLORS,
   FONT_SIZE,
@@ -31,7 +32,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const { lvnzyProjectId, collectionId } = useParams();
 
   useEffect(() => {
-    const userItem = localStorage.getItem(LocalStorageKeys.user);
+    const userItem = safeStorage.getItem(LocalStorageKeys.user);
     const userLocal = userItem ? JSON.parse(userItem) : null;
     if (!userLocal) {
       setLoginModalOpen(true);
@@ -184,7 +185,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                   src="/images/brickfi-assist.png"
                   onClick={() => {
                     if (LandingConstants.brickAssistLink.startsWith('http')) {
-                      window.location.assign(LandingConstants.brickAssistLink);
+                      safeWindow.location.assign(LandingConstants.brickAssistLink);
                     } else {
                       router.push(LandingConstants.brickAssistLink);
                     }

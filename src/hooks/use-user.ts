@@ -3,12 +3,13 @@ import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { User } from "../types/User";
 import { useAuth } from "./use-auth";
+import { safeStorage } from "../libs/browser-utils";
 
 export function useUser() {
   const { logout } = useAuth();
 
   const getUser = async (): Promise<User> => {
-    const userItem = localStorage.getItem(LocalStorageKeys.user);
+    const userItem = safeStorage.getItem(LocalStorageKeys.user);
     const user = userItem ? JSON.parse(userItem) : null;
 
     if (!user) {
@@ -19,7 +20,7 @@ export function useUser() {
     // TODO: This should be done using an expiry logic.
     axiosApiInstance.get(`/auth/myinfo/${user._id}`, {}).then((data) => {
       if (data && data.data && data.data.mobile) {
-        localStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.data));
+        safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.data));
       }
     });
 

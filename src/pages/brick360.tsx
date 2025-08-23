@@ -24,6 +24,7 @@ import MapViewV2 from "../components/map-view/map-view-v2";
 import ProjectGallery from "../components/project-gallery";
 import { useDevice } from "../hooks/use-device";
 import { useFetchLvnzyProjectById } from "../hooks/use-lvnzy-project";
+import { useWindowDimensions } from "../hooks/use-browser-safe";
 
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -47,6 +48,7 @@ export function Brick360() {
   const { lvnzyProjectId } = useParams();
 
   const { isMobile } = useDevice();
+  const { width, height } = useWindowDimensions();
 
   const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } =
     useFetchLvnzyProjectById(lvnzyProjectId!);
@@ -273,7 +275,7 @@ export function Brick360() {
     }
   }, [lvnzyProject]);
 
-  const progressWidth = isMobile ? window.innerWidth : 800;
+  const progressWidth = isMobile ? width : 800;
 
   if (lvnzyProjectIsLoading) {
     return <Loader></Loader>;
@@ -1005,7 +1007,7 @@ export function Brick360() {
           </Space>
         }
         closable={false}
-        height={Math.min(700, window.innerHeight * 0.8)}
+        height={Math.min(700, height * 0.8)}
         onClose={() => {
           setDetailsModalOpen(false);
           if (!isMapFullScreen) {

@@ -1,14 +1,10 @@
-import { useMediaQuery } from "react-responsive";
+import { useMobileDetection } from './use-browser-safe';
 
 export function useDevice() {
-  const isTabletOrMobile = useMediaQuery({
-    query: "(max-width: 992px)",
-  });
-  const isMobile = useMediaQuery({
-    query: "(max-width: 576px)",
-  });
+  const { isMobile, isTabletOrMobile } = useMobileDetection();
+  
   return {
-    isTabletOrMobile,
     isMobile,
+    isTabletOrMobile,
   };
 }

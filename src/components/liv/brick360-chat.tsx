@@ -22,6 +22,7 @@ import {
 import { v4 as uuidv4 } from "uuid";
 import { useDevice } from "../../hooks/use-device";
 import { useUser } from "../../hooks/use-user";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { axiosApiInstance } from "../../libs/axios-api-Instance";
 import {
   baseApiUrl,
@@ -56,6 +57,7 @@ export interface Brick360Answer {
 
 export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
   ({ dataPoint, lvnzyProject }, ref) => {
+    const { height } = useWindowDimensions();
     const [currentQuestion, setCurrentQuestion] = useState<string>();
     const [currentAnswer, setCurrentAnswer] = useState<
       Brick360Answer | undefined
@@ -556,7 +558,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         }}
         closable={false}
         height={
-          isDrawerExpanded ? Math.min(700, window.innerHeight * 0.8) : 100
+          isDrawerExpanded ? Math.min(700, height * 0.8) : 100
         }
         onClose={closeDrawer}
         open={true}
@@ -880,7 +882,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         >
           <Flex
             style={{
-              height: Math.min(window.innerHeight - 75, 800),
+              height: Math.min(height - 75, 800),
             }}
             vertical
             gap={8}
