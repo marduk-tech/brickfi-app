@@ -214,6 +214,7 @@ export default function MainLanding() {
                   fontSize: FONT_SIZE.HEADING_1 * 1.5,
                   color: COLORS.primaryColor,
                   lineHeight: "100%",
+                  marginBottom: 32
                 }}
               >
                 Brickfi is Here to Fix it.
@@ -223,7 +224,7 @@ export default function MainLanding() {
           mainImgUrl: "/images/landing/slide-4-v2.png",
           textColor: "white",
           verticalPadding: 60,
-          primaryImageSize: "80%",
+          primaryImageSize: "70%",
         }}
       ></SectionCenter>
       <SectionLeft

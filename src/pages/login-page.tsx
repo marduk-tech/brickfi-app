@@ -1,3 +1,5 @@
+"use client";
+
 import { Flex } from "antd";
 import { LoginForm } from "../components/login-forms";
 

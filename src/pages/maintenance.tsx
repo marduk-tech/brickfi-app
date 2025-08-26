@@ -1,3 +1,5 @@
+"use client";
+
 import { Flex, Typography } from "antd";
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";

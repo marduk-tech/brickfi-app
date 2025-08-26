@@ -5,7 +5,9 @@ import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { DRIVER_CATEGORIES } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "../common/dynamic-react-icon";
-import MapViewV2 from "../map-view/map-view-v2";
+import dynamic from "next/dynamic";
+const MapViewV2 = dynamic(() => import("../map-view/map-view-v2"), { ssr: false });
+
 import { ScrollableContainer } from "../scrollable-container";
 
 interface MapTabProps {

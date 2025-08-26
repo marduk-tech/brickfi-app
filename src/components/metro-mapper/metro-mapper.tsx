@@ -1,5 +1,6 @@
+"use client";
+
 import { Button, Flex, Modal, Typography } from "antd";
-import L from "leaflet";
 import { useEffect, useRef, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
@@ -9,7 +10,10 @@ import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { IDriverPlace } from "../../types/Project";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import { Loader } from "../common/loader";
-import MapViewV2 from "../map-view/map-view-v2";
+
+import dynamic from "next/dynamic";
+const MapViewV2 = dynamic(() => import("../map-view/map-view-v2"), { ssr: false });
+
 import { LineFilters } from "./line-filters";
 import { SearchSidebar } from "./search-sidebar";
 import useStore from "./store";
@@ -78,6 +82,7 @@ export function MetroMapper() {
     return <Loader />;
   }
 
+  /*
   const addPersistentMarker = (result: SearchResult) => {
     if (!mapRef.current) return;
 
@@ -86,8 +91,10 @@ export function MetroMapper() {
       mapRef.current.removeLayer(temporaryMarkerRef.current);
     }
 
-    const markerIcon = L.divIcon({
-      html: `
+    (async () => {
+      const L = await import("leaflet"); // <-- imported only in browser
+      const markerIcon = L.divIcon({
+        html: `
         <div style="
           width: 30px;
           height: 30px;
@@ -115,15 +122,15 @@ export function MetroMapper() {
           }
         </style>
       `,
-      className: "persistent-marker",
-      iconSize: [30, 30],
-      iconAnchor: [15, 15],
-    });
+        className: "persistent-marker",
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+      });
 
-    // persistent marker with popup
-    const marker = L.marker(result.coordinates, { icon: markerIcon })
-      .bindPopup(
-        `
+      // persistent marker with popup
+      const marker = L.marker(result.coordinates, { icon: markerIcon })
+        .bindPopup(
+          `
         <div style="text-align: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
           <strong style="color: #333; font-size: 14px;">${
             result.name
@@ -133,17 +140,18 @@ export function MetroMapper() {
           }</span>
         </div>
       `,
-        {
-          closeButton: false,
-          className: "persistent-popup",
-        }
-      )
-      .addTo(mapRef.current);
+          {
+            closeButton: false,
+            className: "persistent-popup",
+          }
+        )
+        .addTo(mapRef.current);
+      marker.openPopup();
 
-    marker.openPopup();
-
-    temporaryMarkerRef.current = marker;
+      temporaryMarkerRef.current = marker;
+    })();
   };
+  */
 
   const handleSearchResultSelect = (result: SearchResult) => {
     if (!mapInstance) return;
@@ -164,7 +172,7 @@ export function MetroMapper() {
       mapRef.current.setView(result.coordinates, 15, {
         animate: true, // optional
       });
-      addPersistentMarker(result);
+      // addPersistentMarker(result);
     }, 1000);
   };
 
@@ -360,11 +368,7 @@ export function MetroMapper() {
           },
         }}
       >
-        <Flex
-          style={{ height: Math.min(height - 20, 800) }}
-          vertical
-          gap={8}
-        >
+        <Flex style={{ height: Math.min(height - 20, 800) }} vertical gap={8}>
           <MapViewV2
             key="metro-mapper-fullscreen"
             drivers={filteredTransitDrivers.map((driver) => ({

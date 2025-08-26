@@ -35,7 +35,8 @@ import { COLORS, FONT_SIZE, MAX_WIDTH } from "../../theme/style-constants";
 import { LvnzyProject } from "../../types/LvnzyProject";
 import { ISurroundingElement } from "../../types/Project";
 import DynamicReactIcon from "../common/dynamic-react-icon";
-import MapViewV2 from "../map-view/map-view-v2";
+import dynamic from "next/dynamic";
+const MapViewV2 = dynamic(() => import("../map-view/map-view-v2"), { ssr: false });
 
 export interface AICuratedProject {
   projectId: string;
