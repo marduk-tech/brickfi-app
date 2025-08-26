@@ -155,7 +155,18 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
               : "100%",
             maxWidth: 1000,
           }}
-        />: null}
+        />:  sectionData.mediaUrl ? (
+          <video
+            autoPlay
+            muted
+            loop
+            height={isMobile ? 500 : 700}
+            style={{ margin: "auto" }}
+          >
+            <source src={sectionData.mediaUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+        ) : null}
         
       </Flex>
     </Flex>
@@ -202,9 +213,20 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
             alt={sectionData.mainImgAltText || ""}
             style={{
               width: sectionData.primaryImageSize || "100%",
-              maxWidth: 1000,
+              maxWidth: 900,
             }}
           />
+        ) : sectionData.mediaUrl ? (
+          <video
+            autoPlay
+            muted
+            loop
+            height={isMobile ? 500 : 700}
+            style={{ margin: "auto" }}
+          >
+            <source src={sectionData.mediaUrl} type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
         ) : null}
       </Flex>
       <Flex
@@ -221,12 +243,12 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
           marginLeft: isMobile ? 16 : 40,
           marginTop: isMobile ? 32 : 0,
         }}
-        align={isMobile ? "center" : "flex-end"}
+        align={isMobile ? "center" : "flex-start"}
         justify="center"
         gap={16}
       >
         {typeof sectionData.heading == "string" ? (
-          <h1 style={{ ...styles.h1, fontSize: isMobile ? 50 : 60 }}>
+          <h1 style={{ ...styles.h1, fontSize: isMobile ? 50 : 60,  color: sectionData.textColor || COLORS.textColorDark, }}>
             {sectionData.heading}
           </h1>
         ) : (
