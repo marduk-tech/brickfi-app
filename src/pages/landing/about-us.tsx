@@ -24,7 +24,7 @@ export function AboutUs() {
         To upgrade how people buy & invest in homes.
       </span>
       What we saw was a clear gap in how bias and manipulated information is out
-      there and how people feel intimidated and confused of it. Brickfi's aims
+      there and how people feel intimidated and confused of it. Brickfi&apos;s aims
       to be a customer focused platform to demystify this industry for the
       everyday consumer.
     </Typography.Text>
@@ -104,7 +104,7 @@ export function AboutUs() {
                 Our driving philosophy is to help the home buyer who has to
                 navigate the complexities of housing market alone. We{" "}
                 <span style={highlightStyle}>
-                  don't market selected projects nor do we present bias
+                  don&apos;t market selected projects nor do we present bias
                   information
                 </span>{" "}
                 to buyers. We strongly believe in providing the most intelligent
@@ -139,14 +139,14 @@ export function AboutUs() {
             heading: "Technology Driven. Seamless Experience.",
             content: (
               <Typography.Text>
-                "Technology is what brings everything together for us. We use
+                Technology is what brings everything together for us. We use
                 latest tech including AI to collect data, refine it,{" "}
                 <span style={highlightStyle}>
                   generate insights and create a seamless experience
                 </span>{" "}
                 making it easier for us and for our end users to make effective
                 decisions. In a space where digital experiences are often broken
-                or lacking, we strive to deliver one that doesn’t overwhelm, but
+                or lacking, we strive to deliver one that doesn&apos;t overwhelm, but
                 simplifies things for the user.
               </Typography.Text>
             ),

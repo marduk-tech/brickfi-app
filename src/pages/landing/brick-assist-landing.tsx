@@ -96,7 +96,7 @@ export function BrickAssistLanding() {
                 fontWeight: "bold",
               }}
             >
-              We DON'T sell or market specific projects like other channel
+              We DON&apos;T sell or market specific projects like other channel
               partners/brokers.
             </p>
             Instead, we offer data backed advise, curation and analysis of
@@ -113,7 +113,7 @@ export function BrickAssistLanding() {
                 fontWeight: "bold",
               }}
             >
-              We DON'T provide superficial, biased marketing information.
+              We DON&apos;T provide superficial, biased marketing information.
             </p>{" "}
             Instead we refer verified sources of information and show both sides
             of the coin and go deep into understanding a particular project. Our
@@ -136,7 +136,7 @@ export function BrickAssistLanding() {
                 fontWeight: "bold",
               }}
             >
-              Our work DOESN'T stop once you make a decision.
+              Our work DOESN&apos;T stop once you make a decision.
             </p>{" "}
             We go the extra mile in terms of negotiation, post purchase
             formalities and any other assistance you might need once you have

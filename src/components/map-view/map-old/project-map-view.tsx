@@ -110,7 +110,7 @@ export const ProjectMapView = ({
                   ></ConnectivityInfra>
                 );
               } else {
-                let zIndex = index + 1;
+                const zIndex = index + 1;
                 const coordinates = originalLivIndexPlace!.location!;
                 if (!coordinates.lat || !coordinates.lng) {
                   return null;

@@ -82,7 +82,7 @@ export const SearchSidebarComponent: React.FC<SearchSidebarProps> = ({
           label: (
             <Flex align="center" justify="center" style={{ padding: "16px" }}>
               <Typography.Text style={{ color: COLORS.textColorLight }}>
-                No results found for "{debouncedSearchQuery}"
+                No results found for &quot;{debouncedSearchQuery}&quot;
               </Typography.Text>
             </Flex>
           ),

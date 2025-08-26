@@ -22,7 +22,8 @@ const eslintConfig = [
     ],
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
-       "react/jsx-key": "off"
+       "react/jsx-key": "off",
+       "react/display-name": "off"
     },
   },
 ];

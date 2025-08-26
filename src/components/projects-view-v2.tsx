@@ -20,7 +20,7 @@ const ProjectsViewV2: React.FC<{
       return;
     }
     captureAnalyticsEvent("app-homepage-open", {});
-    let filtered = projects;
+    const filtered = projects;
 
     setFilteredProjects(filtered);
   }, [categoryFilter, locationFilter, priceRange, projects]);
