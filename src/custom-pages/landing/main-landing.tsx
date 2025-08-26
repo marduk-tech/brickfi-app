@@ -20,7 +20,7 @@ export default function MainLanding() {
         style={{
           fontSize: FONT_SIZE.HEADING_2,
           textAlign: "left",
-          color: "white",
+          color: COLORS.textColorDark,
           margin: 0,
           fontWeight: 500,
           lineHeight: "120%",
@@ -39,12 +39,8 @@ export default function MainLanding() {
     );
   };
   const faqPanelStyle = {
-    marginBottom: 24,
-    background: COLORS.textColorDark,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    color: "white",
-    border: "none",
+    color: "black",
+    padding: "8px 0"
   };
   const faqs: CollapseProps["items"] = [
     {
@@ -65,7 +61,7 @@ export default function MainLanding() {
     },
     {
       key: "diff-q",
-      label: getFaqHeading("What is Brick360 ? "),
+      label: getFaqHeading("What is Brick360 Report? "),
       style: faqPanelStyle,
       children: getFaqText(
         <>
@@ -414,8 +410,8 @@ export default function MainLanding() {
 
       <SectionCenter
         sectionData={{
-          verticalPadding: isMobile ? 2 : 100,
-          heading: "",
+          verticalPadding: 100,
+          heading: "Our Partners" ,
           bgColor: "#fdf7f6",
           primaryImageSize: "100%",
           subHeading: "",
@@ -426,6 +422,18 @@ export default function MainLanding() {
             "Brickfi covers 6 micro markets, 100+ developers and 400+ projects across Bengaluru",
         }}
       ></SectionCenter>
+      <SectionRight
+        sectionData={{
+          verticalPadding: 100,
+          bgColor: "#fdf7f6",
+          heading: "Invest into the Pulse of Bangalore",
+          subHeading:
+            "Bangalore continues its strong growth as the IT Capital of India capturing the largest percentage  of Global Capability Centers (GCCs) at 35% in across India. For homebuyers and investors, this translates into stronger rental yields, better infrastructure, and future-proof property value.",
+          mainImgUrl: "/images/landing/slide-11-v2.png",
+          mainImgAltText: "Diversify with real estate",
+          primaryImageSize: "80%",
+        }}
+      ></SectionRight>
       <SectionCenter
         sectionData={{
           heading: "FAQ",
@@ -437,7 +445,6 @@ export default function MainLanding() {
                 expandIcon={({ isActive }) => (
                   <CaretRightOutlined
                     style={{
-                      color: "white",
                       fontSize: FONT_SIZE.HEADING_3,
                       marginTop: 4,
                     }}

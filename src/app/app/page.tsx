@@ -1,6 +1,6 @@
 "use client";
 
-import BrickfiHome from "../../pages/brickfi-home";
+import BrickfiHome from "../../custom-pages/brickfi-home";
 
 export default function AppHomePage() {
   return <BrickfiHome />;

@@ -1,6 +1,6 @@
 "use client";
 
-import SignUpForm from "@/pages/signup";
+import SignUpForm from "@/custom-pages/signup";
 
 
 export default function SignUpPage() {

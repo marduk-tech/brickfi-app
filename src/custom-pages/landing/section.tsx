@@ -301,6 +301,9 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
   sectionData,
 }) => {
   const { isMobile } = useDevice();
+  if (!sectionData) {
+    return null;
+  }
 
   return (
     <Flex

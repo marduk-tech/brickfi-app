@@ -1,6 +1,6 @@
 "use client";
 
-import UserSessions from "@/pages/user-sessions";
+import UserSessions from "@/custom-pages/user-sessions";
 
 
 export default function UserSessionsPage() {

@@ -15,7 +15,8 @@ import { COLORS } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
 import { Loader } from "../../../common/loader";
 import { getProjectTypeIcon } from "../../map-old/project-type-icon";
-import MapViewV2 from "../../map-view-v2";
+import dynamic from "next/dynamic";
+const MapViewV2 = dynamic(() => import("../../map-view-v2"), { ssr: false });
 
 export function LivIndexFull() {
   const [homeTypeFilter, setHomeTypeFilter] = useState("");

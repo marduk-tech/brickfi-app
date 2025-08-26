@@ -47,7 +47,7 @@ const FAKE_TIMER_SECS = 1000;
 const { Paragraph, Text } = Typography;
 
 export default function Brick360() {
-  const { lvnzyProjectId } = useParams() as { lvnzyProjectId: string };; 
+  const { lvnzyProjectId } = useParams< { lvnzyProjectId: string }>()!; 
 
   const { isMobile } = useDevice();
   const { width, height } = useWindowDimensions();

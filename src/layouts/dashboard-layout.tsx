@@ -29,7 +29,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const { isMobile } = useDevice();
   const router = useRouter();
 
-  const { lvnzyProjectId, collectionId } = useParams() as { lvnzyProjectId: string, collectionId: string };
+  const { lvnzyProjectId, collectionId } = useParams<{ lvnzyProjectId: string, collectionId: string }>()!;
 
   useEffect(() => {
     const userItem = safeStorage.getItem(LocalStorageKeys.user);

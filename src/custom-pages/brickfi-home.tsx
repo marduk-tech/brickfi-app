@@ -23,7 +23,7 @@ interface SavedLvnzyProject {
 
 const BrickfiHome: React.FC = () => {
   const { user, isLoading: userLoading } = useUser();
-  const { lvnzyProjectId, collectionId } = useParams() as { lvnzyProjectId: string, collectionId: string };;
+  const { lvnzyProjectId, collectionId } = useParams<{ lvnzyProjectId: string, collectionId: string }>()!;
 
   const [lvnzyProjects, setLvnzyProjects] = useState<any[]>([]);
   const [projectsLoading, setProjectsLoadng] = useState(true);

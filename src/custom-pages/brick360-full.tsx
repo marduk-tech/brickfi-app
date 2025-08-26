@@ -72,7 +72,7 @@ const RatingBlock = ({
 );
 
 export default function Brick360Full() {
-  const { lvnzyProjectId } = useParams() as { lvnzyProjectId: string };;
+  const { lvnzyProjectId } = useParams<{ lvnzyProjectId: string }>()!;
 
   const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } =
     useFetchLvnzyProjectById(lvnzyProjectId!);
