@@ -87,154 +87,46 @@ export default function MainLanding() {
         <>
           We offer two types of services
           <br></br>
-          <b style={{ color: COLORS.primaryColor }}>DIY Property Research</b>
+          <br></br>
+          <b style={{ color: COLORS.textColorDark }}>Brick360: DIY Property Research</b>
+          <br></br>
           You can request upto 3 Brick360 reports to do a thorough analysis and
           make an informed decision. This service is completely free.
           <br></br>
-          <b style={{ color: COLORS.primaryColor }}>
+          <a
+            href={LandingConstants.genReportFormLink}
+            style={{ fontSize: "90%", color: COLORS.primaryColor }}
+          >
+            Generate Free Report
+          </a>
+          <br></br>
+          <br></br>
+          <b style={{ color: COLORS.textColorDark }}>
             Brickfi Assist: Guided Home Buying
           </b>
+          <br></br>
           We offer expert consultation which includes services like area
           analysis, unlimited 360 reports, deal making, agreement review and
           more. We differ from other advisory services by being buyer focused &
-          our technology driven research. This service is also completely free for our customers. We usually charge commission from the developer. However, that does
-          not mean, that we prefer or have any bias with any particular
-          developer. Most of the developers have a set commisssion for
-          partners/advisors which is separate from the final cost quoted to the
-          buyer. That means, the buyer does not have to accomodate any part of
-          their cost when it comes to commissions.
-        </>
-      ),
-    },
-    {
-      key: "diff-q",
-      label: getFaqHeading("How are you different from other brokers ?"),
-      style: faqPanelStyle,
-      children: (
-        <Flex vertical gap={16}>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+          our technology driven research. This service is also completely free
+          for our customers*.
+          <br></br>
+          <a
+            href={LandingConstants.brickAssistLink}
+            style={{ fontSize: "90%", color: COLORS.primaryColor }}
           >
-            <p
-              style={{
-                color: COLORS.redIdentifier,
-                margin: 0,
-                fontWeight: "bold",
-              }}
-            >
-              We DON&apos;T sell or market specific projects like other channel
-              partners/brokers.
-            </p>
-            Instead, we offer data backed advise, curation and analysis of
-            projects across Bangalore.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            {" "}
-            <p
-              style={{
-                color: COLORS.redIdentifier,
-                margin: 0,
-                fontWeight: "bold",
-              }}
-            >
-              We DON&apos;T provide superficial, biased marketing information.
-            </p>{" "}
-            Instead we refer verified sources of information and show both sides
-            of the coin and go deep into understanding a particular project. Our
-            system has been integrated with source like{" "}
-            <span style={{ color: COLORS.primaryColor, marginRight: 8 }}>
-              RERA, Open Street, Google Maps, Open City
-            </span>
-            including how reliable the builder is, the location, upcoming
-            projects near the area, surroundings and more. We make sure you
-            understand the benefits as well as its shortcomings.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            {" "}
-            <p
-              style={{
-                color: COLORS.redIdentifier,
-                margin: 0,
-                fontWeight: "bold",
-              }}
-            >
-              Our work DOESN&apos;T stop once you make a decision.
-            </p>{" "}
-            We go the extra mile in terms of negotiation, post purchase
-            formalities and any other assistance you might need once you have
-            made your decision.
-          </Typography.Text>
-        </Flex>
-      ),
-    },
-
-    {
-      key: "4",
-      label: getFaqHeading("What all to expect during consultation?"),
-      style: faqPanelStyle,
-      children: (
-        <Flex vertical gap={16}>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            <b>INTRO CALL</b>
-            <br></br>
-            We initially do a intro call to discuss in detail your set of
-            requirements, provide overview of the Bangalore market in terms of
-            different micro markets
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            <b>SHORTLISTING</b>
-            <br></br>
-            Based on your requirements, we shortlist/curate set of projects and
-            share detailed BRICK360 reports to help you understand each property
-            in detail.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            <b>VISITS</b>
-            <br></br>
-            Once you have selected a few properties, we assist with you visits
-            as well as any other assistance related to pricing, timeline, etc
-            which can help you make an informed decision .
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            <b>DEAL MAKING</b>
-            <br></br>
-            Based on your final selection, we do strategic negotitation
-            including pricing negotiation, unit selection and payment planning.
-          </Typography.Text>
-        </Flex>
-      ),
-    },
-    {
-      key: "5",
-      label: getFaqHeading("How do you curate projects?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          We have an in house database of over{" "}
-          <span style={{ color: COLORS.primaryColor }}>
-            2000 projects across Bengaluru
-          </span>{" "}
-          including data around{" "}
-          <span style={{ color: COLORS.primaryColor }}>
-            builder credibility, upcoming infra projects near a location,
-            surroundings & more
-          </span>{" "}
-          . This helps us to narrow down the project based on your requirements.
-          For example, if you are looking for a home with more greenery nearby,
-          we can shortlist projects based on surroundings. If you are primary
-          purpose is investment, we can find projects near upcoming tech parks.
+            Explore Brickfi Assist
+          </a>
+          <br></br>
+          <br></br>
+          <div style={{ fontSize: "70%", lineHeight: "120%" }}>
+            * We usually charge commission from the developer. However, that
+            does not mean, that we prefer or have any bias with any particular
+            developer. Most of the developers have a set commisssion for
+            partners/advisors which is separate from the final cost quoted to
+            the buyer. That means, the buyer does not have to accomodate any
+            part of their cost when it comes to commissions.
+          </div>
         </>
       ),
     },
