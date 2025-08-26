@@ -65,72 +65,45 @@ export default function MainLanding() {
     },
     {
       key: "diff-q",
-      label: getFaqHeading("What is Brick360"),
+      label: getFaqHeading("What is Brick360 ? "),
       style: faqPanelStyle,
-      children: (
-        <Flex vertical gap={16}>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            <p
-              style={{
-                color: COLORS.redIdentifier,
-                margin: 0,
-                fontWeight: "bold",
-              }}
-            >
-              Brick360 provides a consolidated and comprehensive report about
-              any property in Bangalore covering information builder
-              credibility, location insights, property profile, price point
-              evaluation and more. We collect data over 200+ data points from
-              sources like RERA, Open City, BBMP, City info and then do an end to
-              end analysis using AI to create a report that enables you to
-              analyse the property and make a confident decision.
-            </p>
-            Instead, we offer data backed advise, curation and analysis of
-            projects across Bangalore.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            {" "}
-            <p
-              style={{
-                color: COLORS.redIdentifier,
-                margin: 0,
-                fontWeight: "bold",
-              }}
-            >
-              We DON&apos;T provide superficial, biased marketing information.
-            </p>{" "}
-            Instead we refer verified sources of information and show both sides
-            of the coin and go deep into understanding a particular project. Our
-            system has been integrated with source like{" "}
-            <span style={{ color: COLORS.primaryColor, marginRight: 8 }}>
-              RERA, Open Street, Google Maps, Open City
-            </span>
-            including how reliable the builder is, the location, upcoming
-            projects near the area, surroundings and more. We make sure you
-            understand the benefits as well as its shortcomings.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
-          >
-            {" "}
-            <p
-              style={{
-                color: COLORS.redIdentifier,
-                margin: 0,
-                fontWeight: "bold",
-              }}
-            >
-              Our work DOESN&apos;T stop once you make a decision.
-            </p>{" "}
-            We go the extra mile in terms of negotiation, post purchase
-            formalities and any other assistance you might need once you have
-            made your decision.
-          </Typography.Text>
-        </Flex>
+      children: getFaqText(
+        <>
+          Brick360 provides a consolidated and comprehensive report about any
+          property in Bangalore covering information builder credibility,
+          location insights, property profile, price point evaluation and more.
+          We collect data over 200+ data points from sources like RERA, Open
+          City, BBMP, City info and then do an end to end analysis using AI to
+          create a report that enables you to analyse the property and make a
+          confident decision.
+        </>
+      ),
+    },
+    {
+      key: "paid-q",
+      label: getFaqHeading("Is this a paid service ?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+          We offer two types of services
+          <br></br>
+          <b style={{ color: COLORS.primaryColor }}>DIY Property Research</b>
+          You can request upto 3 Brick360 reports to do a thorough analysis and
+          make an informed decision. This service is completely free.
+          <br></br>
+          <b style={{ color: COLORS.primaryColor }}>
+            Brickfi Assist: Guided Home Buying
+          </b>
+          We offer expert consultation which includes services like area
+          analysis, unlimited 360 reports, deal making, agreement review and
+          more. We differ from other advisory services by being buyer focused &
+          our technology driven research. This service is also completely free for our customers. We usually charge commission from the developer. However, that does
+          not mean, that we prefer or have any bias with any particular
+          developer. Most of the developers have a set commisssion for
+          partners/advisors which is separate from the final cost quoted to the
+          buyer. That means, the buyer does not have to accomodate any part of
+          their cost when it comes to commissions.
+        </>
       ),
     },
     {
@@ -198,25 +171,7 @@ export default function MainLanding() {
         </Flex>
       ),
     },
-    {
-      key: "paid-q",
-      label: getFaqHeading("Is this a paid service ?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          <b style={{ color: COLORS.primaryColor }}>
-            The service is completely free for our buyers.
-          </b>
-          <br></br>
-          We usually charge commission from the developer. However, that does
-          not mean, that we prefer or have any bias with any particular
-          developer. Most of the developers have a set commisssion for
-          partners/advisors which is separate from the final cost quoted to the
-          buyer. That means, the buyer does not have to accomodate any part of
-          their cost when it comes to commissions.
-        </>
-      ),
-    },
+
     {
       key: "4",
       label: getFaqHeading("What all to expect during consultation?"),

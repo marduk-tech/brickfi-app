@@ -20,7 +20,6 @@ export const SnapshotModal = ({ isOpen, onClose, pt }: SnapshotModalProps) => {
       closable={true}
       style={{ top: 100 }}
       onCancel={onClose}
-      onClose={onClose}
     >
       <Flex vertical>
         {pt}

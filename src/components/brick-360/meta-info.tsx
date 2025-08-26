@@ -110,9 +110,6 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
         open={isPmtPlanModalOpen}
         footer={null}
         closable={true}
-        onClose={() => {
-          setIsPmtPlanModalOpen(false);
-        }}
         onCancel={() => {
           setIsPmtPlanModalOpen(false);
         }}

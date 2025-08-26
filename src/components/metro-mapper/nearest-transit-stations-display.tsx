@@ -383,9 +383,6 @@ export const NearestTransitStationsDisplay: React.FC<
         onCancel={() => {
           setMobileDetailsDialogContent(undefined);
         }}
-        onClose={() => {
-          setMobileDetailsDialogContent(undefined);
-        }}
       >
         <Flex vertical>{mobileDetailsDialogContent}</Flex>
       </Modal>

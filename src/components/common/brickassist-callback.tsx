@@ -89,7 +89,6 @@ export function BrickAssistCallback({
     <Modal
       open={isOpen}
       closable={true}
-      onClose={handleClose}
       onCancel={handleClose}
       footer={null}
     >

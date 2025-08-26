@@ -110,9 +110,6 @@ export function DataSources({
         open={detailsModalOpen}
         footer={[]}
         closable={true}
-        onClose={() => {
-          setDetailsModalOpen(false);
-        }}
         onCancel={() => {
           setDetailsModalOpen(false);
         }}

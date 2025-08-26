@@ -20,7 +20,6 @@ export const PricePointModal = ({ content, onClose }: PricePointModalProps) => {
         },
       }}
       onCancel={onClose}
-      onClose={onClose}
     >
       <Flex
         style={{ height: 600, overflowY: "scroll", scrollbarWidth: "none" }}
