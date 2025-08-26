@@ -19,7 +19,7 @@ export function AboutUs() {
     <Typography.Text
       style={{ marginTop: 16, fontSize: FONT_SIZE.HEADING_3, display: "block" }}
     >
-      Brickfi's journey started with a single motivation.{" "}
+      Brickfi&apos;s journey started with a single motivation.{" "}
       <span style={highlightStyle}>
         To upgrade how people buy & invest in homes.
       </span>

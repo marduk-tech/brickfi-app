@@ -356,7 +356,7 @@ export function MainLandingV2() {
       </a>
       <Text style={responsiveStyles.whoAreWeText.text}>
         Get the exclusive Brick360 Report on new & under construction properties
-        across Bangalore. Verified, unbiased, marketing free insights you won't
+        across Bangalore. Verified, unbiased, marketing free insights you won&apos;t
         find anywhere else.
       </Text>
     </Flex>

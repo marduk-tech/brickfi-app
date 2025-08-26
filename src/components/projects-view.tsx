@@ -31,7 +31,7 @@ const ProjectsPage: React.FC<{
     }
     captureAnalyticsEvent("app-homepage-open", {});
 
-    let filtered = projects;
+    const filtered = projects;
 
     // if (categoryFilter) {
     //   filtered = filtered.filter(
