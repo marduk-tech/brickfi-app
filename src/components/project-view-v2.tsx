@@ -15,8 +15,6 @@ import ProjectGallery from "./project-gallery";
 
 const CostSnapshot: React.FC<{ project: Project }> = ({ project }) => {
   const costingDetails = project.ui.costingDetails;
-  const { isMobile } = useDevice();
-  const { projectId } = useParams();
 
   return (
     <Flex vertical>

@@ -79,7 +79,13 @@ export default function MainLanding() {
                 fontWeight: "bold",
               }}
             >
-             Brick360 provides a consolidated
+              Brick360 provides a consolidated and comprehensive report about
+              any property in Bangalore covering information builder
+              credibility, location insights, property profile, price point
+              evaluation and more. We collect data over 200+ data points from
+              sources like RERA, Open City, BBMP, City info and then do an end to
+              end analysis using AI to create a report that enables you to
+              analyse the property and make a confident decision.
             </p>
             Instead, we offer data backed advise, curation and analysis of
             projects across Bangalore.
@@ -192,7 +198,7 @@ export default function MainLanding() {
         </Flex>
       ),
     },
-     {
+    {
       key: "paid-q",
       label: getFaqHeading("Is this a paid service ?"),
       style: faqPanelStyle,

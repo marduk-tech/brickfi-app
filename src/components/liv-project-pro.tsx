@@ -190,7 +190,7 @@ const DATA = {
   },
 };
 const LivProjectPro = () => {
-  const { projectId } = useParams();
+  const { projectId } = useParams() as { projectId: string };;
   const { height } = useWindowDimensions();
 
   const { data: projectData, isLoading: projectDataLoading } =
