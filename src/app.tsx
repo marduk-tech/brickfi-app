@@ -5,7 +5,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { App as AntApp, AppProps, ConfigProvider } from "antd";
 import { FunctionComponent, useEffect } from "react";
 import { queryClient } from "./libs/query-client";
-import { Router } from "./routes/routes";
 import { antTheme } from "./theme/ant-theme";
 import "./theme/globals.scss";
 

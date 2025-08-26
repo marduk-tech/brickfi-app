@@ -48,7 +48,7 @@ export default function MainLanding() {
   };
   const faqs: CollapseProps["items"] = [
     {
-      key: "1",
+      key: "what-brickfi",
       label: getFaqHeading("What is Brickfi ?"),
       style: faqPanelStyle,
       children: getFaqText(
@@ -64,26 +64,71 @@ export default function MainLanding() {
       ),
     },
     {
-      key: "2",
-      label: getFaqHeading("Is this a paid service ?"),
+      key: "diff-q",
+      label: getFaqHeading("What is Brick360"),
       style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          <b style={{ color: COLORS.primaryColor }}>
-            The service is completely free for our buyers.
-          </b>
-          <br></br>
-          We usually charge commission from the developer. However, that does
-          not mean, that we prefer or have any bias with any particular
-          developer. Most of the developers have a set commisssion for
-          partners/advisors which is separate from the final cost quoted to the
-          buyer. That means, the buyer does not have to accomodate any part of
-          their cost when it comes to commissions.
-        </>
+      children: (
+        <Flex vertical gap={16}>
+          <Typography.Text
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+          >
+            <p
+              style={{
+                color: COLORS.redIdentifier,
+                margin: 0,
+                fontWeight: "bold",
+              }}
+            >
+             Brick360 provides a consolidated
+            </p>
+            Instead, we offer data backed advise, curation and analysis of
+            projects across Bangalore.
+          </Typography.Text>
+          <Typography.Text
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+          >
+            {" "}
+            <p
+              style={{
+                color: COLORS.redIdentifier,
+                margin: 0,
+                fontWeight: "bold",
+              }}
+            >
+              We DON&apos;T provide superficial, biased marketing information.
+            </p>{" "}
+            Instead we refer verified sources of information and show both sides
+            of the coin and go deep into understanding a particular project. Our
+            system has been integrated with source like{" "}
+            <span style={{ color: COLORS.primaryColor, marginRight: 8 }}>
+              RERA, Open Street, Google Maps, Open City
+            </span>
+            including how reliable the builder is, the location, upcoming
+            projects near the area, surroundings and more. We make sure you
+            understand the benefits as well as its shortcomings.
+          </Typography.Text>
+          <Typography.Text
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+          >
+            {" "}
+            <p
+              style={{
+                color: COLORS.redIdentifier,
+                margin: 0,
+                fontWeight: "bold",
+              }}
+            >
+              Our work DOESN&apos;T stop once you make a decision.
+            </p>{" "}
+            We go the extra mile in terms of negotiation, post purchase
+            formalities and any other assistance you might need once you have
+            made your decision.
+          </Typography.Text>
+        </Flex>
       ),
     },
     {
-      key: "3",
+      key: "diff-q",
       label: getFaqHeading("How are you different from other brokers ?"),
       style: faqPanelStyle,
       children: (
@@ -145,6 +190,25 @@ export default function MainLanding() {
             made your decision.
           </Typography.Text>
         </Flex>
+      ),
+    },
+     {
+      key: "paid-q",
+      label: getFaqHeading("Is this a paid service ?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+          <b style={{ color: COLORS.primaryColor }}>
+            The service is completely free for our buyers.
+          </b>
+          <br></br>
+          We usually charge commission from the developer. However, that does
+          not mean, that we prefer or have any bias with any particular
+          developer. Most of the developers have a set commisssion for
+          partners/advisors which is separate from the final cost quoted to the
+          buyer. That means, the buyer does not have to accomodate any part of
+          their cost when it comes to commissions.
+        </>
       ),
     },
     {
