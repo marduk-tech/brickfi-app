@@ -11,7 +11,7 @@ import { useDevice } from "../hooks/use-device";
 import { useUser } from "../hooks/use-user";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
-export function ProfilePage() {
+export default function ProfilePage() {
   const { isMobile } = useDevice();
   const { user, isLoading } = useUser();
   const router = useRouter();

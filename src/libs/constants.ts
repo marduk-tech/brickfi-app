@@ -377,6 +377,7 @@ export const SurroundingElementLabels = {
 
 export const LandingConstants = {
   brickAssistLink: "/brickassist",
+  aboutUsLink: "/aboutus",
   instaLink: "https://www.instagram.com/brickfi.in/",
   blogLink: "https://blog.brickfi.in/",
   genReportLink: "/",
