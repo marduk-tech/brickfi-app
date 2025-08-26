@@ -6,7 +6,7 @@ import { useDevice } from "../../hooks/use-device";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LandingConstants } from "../../libs/constants";
 
-export function LandingFooter() {
+export default function LandingFooter() {
   const { isMobile } = useDevice();
 
   return (

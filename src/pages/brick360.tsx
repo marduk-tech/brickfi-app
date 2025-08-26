@@ -44,8 +44,8 @@ import { ISurroundingElement } from "../types/Project";
 const FAKE_TIMER_SECS = 1000;
 const { Paragraph, Text } = Typography;
 
-export function Brick360() {
-  const { lvnzyProjectId } = useParams();
+export default function Brick360() {
+  const { lvnzyProjectId } = useParams() as { lvnzyProjectId: string };; 
 
   const { isMobile } = useDevice();
   const { width, height } = useWindowDimensions();
@@ -879,9 +879,6 @@ export function Brick360() {
           onCancel={() => {
             setQuickSnapshotDialogOpen(false);
           }}
-          onClose={() => {
-            setQuickSnapshotDialogOpen(false);
-          }}
         >
           <Flex
             vertical
@@ -963,9 +960,6 @@ export function Brick360() {
           },
         }}
         onCancel={() => {
-          setPmtDetailsModalContent(undefined);
-        }}
-        onClose={() => {
           setPmtDetailsModalContent(undefined);
         }}
       >

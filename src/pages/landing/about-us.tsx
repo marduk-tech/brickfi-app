@@ -1,12 +1,12 @@
 import { Flex, Typography } from "antd";
 import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
-import { LandingFooter } from "./footer";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { SectionLeft, SectionRight } from "./section";
 import LandingHeader from "./header";
+import LandingFooter from "./footer";
 
-export function AboutUs() {
+export default function AboutUs() {
   const { isMobile } = useDevice();
   const { height } = useWindowDimensions();
   const highlightStyle = {

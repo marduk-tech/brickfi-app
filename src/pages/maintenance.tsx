@@ -2,7 +2,7 @@ import { Flex, Typography } from "antd";
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
-export function Maintenance() {
+export default function Maintenance() {
   return (
     <Flex
       align="center"

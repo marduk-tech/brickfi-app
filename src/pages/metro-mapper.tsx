@@ -1,5 +1,5 @@
 import { MetroMapper } from "../components/metro-mapper/metro-mapper";
 
-export function MetroMapperPage() {
+export default function MetroMapperPage() {
   return <MetroMapper />;
 }

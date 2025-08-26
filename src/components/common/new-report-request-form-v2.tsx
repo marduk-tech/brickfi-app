@@ -30,10 +30,10 @@ import { LandingConstants, queryKeys } from "../../libs/constants";
 import { safeWindow } from "../../libs/browser-utils";
 import { capitalize } from "../../libs/lvnzy-helper";
 import { queryClient } from "../../libs/query-client";
-import { LandingFooter } from "../../pages/landing/footer";
 import LandingHeader from "../../pages/landing/header";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "./dynamic-react-icon";
+import LandingFooter from "@/pages/landing/footer";
 const { Paragraph } = Typography;
 
 export const NewReportRequestFormV2 = () => {

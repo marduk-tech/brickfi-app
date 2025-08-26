@@ -48,7 +48,7 @@ export const LivV3 = forwardRef<LivRef, {}>((props, ref) => {
     uuidv4()
   );
   const [queryStreaming, setQueryStreaming] = useState<boolean>(false);
-  const { sessionId } = useParams();
+  const { sessionId } = useParams() as { sessionId: string };
   const [loadingLivThread, setLoadingLivThread] = useState(false);
 
   const { user } = useUser();

@@ -9,7 +9,7 @@ import { useCreateUserMutation } from "../hooks/user-hooks";
 import { getUserByMobile } from "../libs/api/user";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
-export function SignUpForm() {
+export default function SignUpForm() {
   const [form] = Form.useForm();
   const router = useRouter();
 

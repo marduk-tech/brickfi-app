@@ -344,7 +344,7 @@ const LandingFooterV2 = () => (
 );
 
 // Main SSR-Safe Landing Component
-export function MainLandingV2() {
+export default function MainLandingV2() {
   // Static content - same as original but without hooks
   const whoAreWeText = (
     <Flex vertical>

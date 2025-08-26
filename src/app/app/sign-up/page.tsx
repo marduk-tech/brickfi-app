@@ -1,6 +1,7 @@
 "use client";
 
-import { SignUpForm } from "../../../pages/signup";
+import SignUpForm from "@/pages/signup";
+
 
 export default function SignUpPage() {
   return <SignUpForm />;

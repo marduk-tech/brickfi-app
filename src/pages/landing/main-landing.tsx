@@ -6,11 +6,11 @@ import { useDevice } from "../../hooks/use-device";
 import { safeWindow } from "../../libs/browser-utils";
 import { LandingConstants } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import { LandingFooter } from "./footer";
 import LandingHeader from "./header";
 import { SectionCenter, SectionLeft, SectionRight } from "./section";
+import LandingFooter from "./footer";
 
-export function MainLanding() {
+export default function MainLanding() {
   const { isMobile } = useDevice();
   useState(false);
   useEffect(() => {
@@ -293,7 +293,7 @@ export function MainLanding() {
           primaryImageSize: "95%",
           subHeading: "",
           mainImgUrl: isMobile
-            ? "/images/landing/slide-10-mobile.png"
+            ? "/images/landing/slide-10-mobile-v2.png"
             : "/images/landing/slide-10-v2.png",
           mainImgAltText:
             "Brickfi covers 6 micro markets, 100+ developers and 400+ projects across Bengaluru",

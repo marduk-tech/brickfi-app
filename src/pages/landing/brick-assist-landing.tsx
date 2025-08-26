@@ -5,11 +5,11 @@ import { BrickAssistCallback } from "../../components/common/brickassist-callbac
 import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import { LandingFooter } from "./footer";
 import LandingHeader from "./header";
 import { SectionCenter, SectionLeft, SectionRight } from "./section";
+import LandingFooter from "./footer";
 
-export function BrickAssistLanding() {
+export default function BrickAssistLanding() {
   const { isMobile } = useDevice();
   const { height } = useWindowDimensions();
 

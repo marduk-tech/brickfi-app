@@ -5,13 +5,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useFetchPaymentByPaymentLinkId } from "../hooks/payment-hooks";
 
-export function PaymentCallbackPage() {
-  const [searchParams] = useSearchParams();
+export default function PaymentCallbackPage() {
+  const searchParams = useSearchParams() ;
   const router = useRouter();
   const [countdown, setCountdown] = useState(4);
 
-  const status = searchParams.get("razorpay_payment_link_status");
-  const paymentLinkId = searchParams.get("razorpay_payment_link_id");
+  const status = searchParams?.get("razorpay_payment_link_status");
+  const paymentLinkId = searchParams?.get("razorpay_payment_link_id");
 
   const { data: payment, isLoading } = useFetchPaymentByPaymentLinkId(
     paymentLinkId as string
@@ -34,7 +34,7 @@ export function PaymentCallbackPage() {
       }, 1000);
       return () => clearInterval(timer);
     }
-  }, [status, payment, navigate]);
+  }, [status, payment]);
 
   if (isLoading || !payment) {
     return (
