@@ -12,8 +12,6 @@ import { SectionCenter, SectionLeft, SectionRight } from "./section";
 
 export function MainLanding() {
   const { isMobile } = useDevice();
-  const [requestReportDialogOpen, setRequestReportDialogOpen] = useState(false);
-  const [newReportRequestFormOpen, setNewReportRequestFormOpen] =
     useState(false);
   useEffect(() => {
     const hash = safeWindow.location.hash;
@@ -27,7 +25,7 @@ export function MainLanding() {
   }, []);
   const whoAreWeText = (
     <Flex vertical>
-      <a
+      {/* <a
         href={LandingConstants.sampleReport}
         style={{
           fontSize: FONT_SIZE.HEADING_3,
@@ -36,13 +34,14 @@ export function MainLanding() {
         }}
       >
         SEE SAMPLE BRICK360 REPORT
-      </a>
+      </a> */}
       <Typography.Text
         style={{ fontSize: FONT_SIZE.HEADING_2, display: "block" }}
       >
-        Get the exclusive Brick360 Report on new & under construction properties
-        across Bangalore. Verified, unbiased, marketing free insights you won't
-        find anywhere else.
+        Brickfi provides the most data backed and transaprent way to buy your
+        next property. Get a free Brick360 report covering key points like
+        builder credibility, price point assessment, property surroundings and
+        more!
       </Typography.Text>
     </Flex>
   );
@@ -59,33 +58,38 @@ export function MainLanding() {
       }}
     >
       <LandingHeader></LandingHeader>
-      {/* <SectionLeft
+      <SectionLeft
         sectionData={{
-          heading: "Don't Leave Your Next Property Purchase to Guesswork",
-          mainImgUrl: "/images/landing/slide-1.png",
-          mainImgAltText:
-            "Buy your next property with confidence. Consult Brickfi.",
-          fullHeight: true,
-        }}
-      ></SectionLeft> */}
-      <SectionRight
-        sectionData={{
-          heading: "The Only Report That Safeguards Your Home Investment",
+          heading: "Don't Leave Your Next Property Purchase To Guesswork",
           mainImgAltText: "About Brickfi",
           subHeading: whoAreWeText as any,
           primaryImageSize: "100%",
           bgColor: "#fdf7f6",
-          mainImgUrl: "/images/landing/brick360-landing-2.png",
+          bgImage: "../../images/landing/slide-1-bg.png",
+          imageContainerWidth: 50,
           btn: {
             link: "/requestreport",
             txt: "Generate Free Report",
           },
-          imageContainerWidth: 50,
           fullHeight: true,
-          verticalPadding: 32,
         }}
-      ></SectionRight>
+      ></SectionLeft>
 
+      <SectionCenter
+        sectionData={{
+          id: "demo-brkfi",
+          heading: (
+            <Flex vertical>
+              <Typography.Text style={{fontSize: FONT_SIZE.HEADING_1 * 1.5}}>Buying Property is Broken.</Typography.Text>
+              <Typography.Text style={{fontSize: FONT_SIZE.HEADING_1 * 1.5, color: COLORS.primaryColor}}>Brickfi is Here to Fix it.</Typography.Text>
+            </Flex>
+          ),
+          mainImgUrl: "/images/landing/slide-4-v2.png",
+          textColor: "white",
+          verticalPadding: 60,
+          primaryImageSize: "80%",
+        }}
+      ></SectionCenter>
       <SectionCenter
         sectionData={{
           id: "demo-brkfi",

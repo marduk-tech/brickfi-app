@@ -11,6 +11,7 @@ interface SectionProps {
   heading?: string | React.ReactNode;
   subHeading?: string | React.ReactNode;
   mainImgUrl?: string;
+  bgImage?: string;
   mainImgAltText?: string;
   bgColor?: string;
   textColor?: string;
@@ -57,6 +58,8 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
       style={{
         width: "100%",
         backgroundColor: sectionData.bgColor || "white",
+        backgroundImage: sectionData.bgImage ? `url('/images/data-src-logos/${sectionData.bgImage}')` : "none",
+        backgroundSize: "cover",
         padding: sectionData.verticalPadding
           ? `${sectionData.verticalPadding}px 0`
           : sectionData.fullHeight && !isMobile
@@ -127,6 +130,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
           </Button>
         )}
       </Flex>
+      
       <Flex
         style={{
           width: isMobile
@@ -142,7 +146,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
         align="center"
         justify="center"
       >
-        <img
+        {sectionData.mainImgUrl ? <img
           src={sectionData.mainImgUrl}
           alt={sectionData.mainImgAltText || ""}
           style={{
@@ -151,7 +155,8 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
               : "100%",
             maxWidth: 1000,
           }}
-        />
+        />: null}
+        
       </Flex>
     </Flex>
   );
@@ -293,7 +298,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
         vertical
         style={{
           width: isMobile ? "calc(100% - 32px)" : "100%",
-          textAlign: isMobile ? "left" : "center",
+          textAlign:  isMobile ? "left" : "center",
           marginLeft: isMobile ? 16 : 0,
         }}
         align="center"
