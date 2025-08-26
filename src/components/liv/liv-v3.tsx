@@ -25,7 +25,9 @@ export interface AICuratedProject {
   relevantDetails: string;
 }
 
-export interface LivRef {}
+export interface LivRef {
+  dummy?: string;
+}
 
 export interface LivAnswer {
   details: string | undefined;
