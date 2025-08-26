@@ -50,9 +50,6 @@ export const LivIndexPlaceCard: React.FC<LivIndexPlaceCardProps> = ({
         onCancel={() => {
           setModalOpen(false);
         }}
-        onClose={() => {
-          setModalOpen(false);
-        }}
       >
         <Flex
           vertical
