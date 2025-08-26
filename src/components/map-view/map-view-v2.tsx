@@ -4,6 +4,7 @@ import { Flex, Modal, Tag, Typography } from "antd";
 import L, { LatLngTuple } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import React, {
+  JSX,
   ReactNode,
   useCallback,
   useEffect,
