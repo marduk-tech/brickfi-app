@@ -200,6 +200,7 @@ export default function MainLanding() {
               <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                  marginBottom: 8,
                   lineHeight: "100%",
                 }}
               >
@@ -220,21 +221,29 @@ export default function MainLanding() {
           mainImgUrl: "/images/landing/slide-4-v2.png",
           textColor: "white",
           verticalPadding: 60,
-          primaryImageSize: "70%",
+          primaryImageSize: isMobile ? "100%": "70%",
         }}
       ></SectionCenter>
-      <SectionLeft
+       <Flex
+        style={{ backgroundColor: "#fdf7f6", paddingTop: isMobile ? 16 : 60 }}
+        justify="center"
+      >
+        <img
+          src="/images/landing/divider.png"
+          width={isMobile ? "80%" : "30%"}
+        ></img>
+      </Flex>
+      <SectionCenter
         sectionData={{
           bgColor: "#fdf7f6",
-          verticalPadding: 100,
-          heading: "Here's what our home buyers have to say",
+          heading: "",
           subHeading: "",
           primaryImageSize: "80%",
           mainImgUrl: "/images/landing/slide-9-v2.png",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
         }}
-      ></SectionLeft>
+      ></SectionCenter>
       <Typography.Text
         style={{
           fontSize: isMobile ? 50 : 60,
@@ -247,7 +256,7 @@ export default function MainLanding() {
       >
         Our Offerings
       </Typography.Text>
-      <SectionRight
+      <SectionLeft
         sectionData={{
           id: "demo-brkfi",
           bgColor: "#32495e",
@@ -290,11 +299,11 @@ export default function MainLanding() {
           subHeading: "",
           mainImgUrl: "/images/landing/offering-1.png",
           verticalPadding: 60,
-          primaryImageSize: "60%",
+          primaryImageSize: isMobile ? "100%":"60%",
           imageContainerWidth: 50,
         }}
-      ></SectionRight>
-      <SectionRight
+      ></SectionLeft>
+      <SectionLeft
         sectionData={{
           id: "demo-brkfi",
           heading: (
@@ -337,10 +346,10 @@ export default function MainLanding() {
           subHeading: "",
           mainImgUrl: "/images/landing/offering-2.png",
           verticalPadding: 60,
-          primaryImageSize: "60%",
+          primaryImageSize: isMobile ? "100%":"60%",
           imageContainerWidth: 50,
         }}
-      ></SectionRight>
+      ></SectionLeft>
       <Flex
         style={{ backgroundColor: "#32495e", paddingTop: isMobile ? 16 : 60 }}
         justify="center"
@@ -411,7 +420,7 @@ export default function MainLanding() {
       <SectionCenter
         sectionData={{
           verticalPadding: 100,
-          heading: "Our Partners" ,
+          heading: "Key Partners" ,
           bgColor: "#fdf7f6",
           primaryImageSize: "100%",
           subHeading: "",
