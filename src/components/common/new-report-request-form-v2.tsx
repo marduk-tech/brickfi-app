@@ -285,6 +285,7 @@ export const NewReportRequestFormV2 = () => {
             width: `calc(${isMobile ? "100%" : "50%"} - 32px)`,
             padding: 16,
             height: "100%",
+            maxWidth: 600,
             marginTop: 0,
           }}
           vertical

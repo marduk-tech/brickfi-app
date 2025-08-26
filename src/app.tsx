@@ -22,7 +22,6 @@ export const App: FunctionComponent<AppProps> = () => {
     <QueryClientProvider client={queryClient}>
       <ConfigProvider theme={antTheme}>
         <AntApp style={{ maxWidth: 2000, margin: "auto" }}>
-          <Router />
         </AntApp>
       </ConfigProvider>
       <ReactQueryDevtools />
