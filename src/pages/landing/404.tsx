@@ -5,7 +5,7 @@ import { SectionCenter } from "./section";
 import LandingHeader from "./header";
 import LandingFooter from "./footer";
 
-export function FourOFour() {
+export default function FourOFour() {
   const { isMobile } = useDevice();
   const { height } = useWindowDimensions();
   return (
