@@ -7,9 +7,9 @@ import { safeWindow } from "../../libs/browser-utils";
 import { LandingConstants } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import LandingHeader from "./header";
-import { SectionCenter, SectionLeft, SectionRight } from "./section";
 import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
+import { SectionLeft, SectionCenter, SectionRight } from "./section";
 
 
 

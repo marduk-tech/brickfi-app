@@ -409,3 +409,4 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
 };
 
 export { SectionCenter, SectionLeft, SectionRight };
+export default SectionCenter;
