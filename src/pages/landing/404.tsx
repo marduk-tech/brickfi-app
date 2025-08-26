@@ -2,8 +2,8 @@ import { Flex } from "antd";
 import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { SectionCenter } from "./section";
-import { LandingFooter } from "./footer";
 import LandingHeader from "./header";
+import LandingFooter from "./footer";
 
 export function FourOFour() {
   const { isMobile } = useDevice();
