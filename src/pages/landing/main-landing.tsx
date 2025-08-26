@@ -289,11 +289,12 @@ export function MainLanding() {
         sectionData={{
           verticalPadding: 100,
           heading: "",
-          primaryImageSize: "75%",
+          bgColor: "#fdf7f6",
+          primaryImageSize: "95%",
           subHeading: "",
           mainImgUrl: isMobile
             ? "/images/landing/slide-10-mobile.png"
-            : "/images/landing/slide-10.png",
+            : "/images/landing/slide-10-v2.png",
           mainImgAltText:
             "Brickfi covers 6 micro markets, 100+ developers and 400+ projects across Bengaluru",
         }}

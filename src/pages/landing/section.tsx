@@ -387,7 +387,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
               width: sectionData.primaryImageSize
                 ? sectionData.primaryImageSize
                 : "100%",
-              maxWidth: 900,
+              maxWidth: 1100,
               margin: "auto",
             }}
           />
