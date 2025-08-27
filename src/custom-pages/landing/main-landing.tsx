@@ -239,8 +239,8 @@ export default function MainLanding() {
           bgColor: "#fdf7f6",
           heading: "",
           subHeading: "",
-          primaryImageSize: "80%",
-          mainImgUrl: "/images/landing/slide-9-v2.png",
+          primaryImageSize: isMobile ? "100%": "80%",
+          mainImgUrl: isMobile ? "/images/landing/slide-9-v2-mob.png" : "/images/landing/slide-9-v2.png",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
         }}
