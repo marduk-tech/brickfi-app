@@ -152,7 +152,7 @@ export default function MainLanding() {
         SEE SAMPLE BRICK360 REPORT
       </a> */}
       <Typography.Text
-        style={{ fontSize: FONT_SIZE.HEADING_2, display: "block" }}
+        style={{ fontSize: FONT_SIZE.HEADING_2, display: "block", color: "white" }}
       >
         The only platform that makes property buying fully transparent and
         data-driven. Get detailed insights on builder credibility, price
@@ -178,9 +178,10 @@ export default function MainLanding() {
           heading: "Don't Leave Your Next Property Purchase To Guesswork",
           mainImgAltText: "About Brickfi",
           subHeading: whoAreWeText as any,
-          primaryImageSize: "100%",
-          bgColor: "#fdf7f6",
-          bgImage: "../../images/landing/slide-1-bg.png",
+          primaryImageSize: "90%",
+          bgColor: "#32495e",
+          textColor: "white",
+          mediaUrl: "/images/landing/demo-landing-small-2.mp4?v=1",
           imageContainerWidth: 50,
           btn: {
             link: "/requestreport",
@@ -350,7 +351,7 @@ export default function MainLanding() {
           imageContainerWidth: 50,
         }}
       ></SectionLeft>
-      <Flex
+      {/* <Flex
         style={{ backgroundColor: "#32495e", paddingTop: isMobile ? 16 : 60 }}
         justify="center"
       >
@@ -358,8 +359,8 @@ export default function MainLanding() {
           src="/images/landing/divider.png"
           width={isMobile ? "80%" : "30%"}
         ></img>
-      </Flex>
-      <SectionLeft
+      </Flex> */}
+      {/* <SectionLeft
         sectionData={{
           id: "demo-brkfi",
           heading: "BRICK360",
@@ -375,16 +376,16 @@ export default function MainLanding() {
           primaryImageSize: "80%",
           imageContainerWidth: 50,
         }}
-      ></SectionLeft>
+      ></SectionLeft> */}
 
       <SectionCenter
         sectionData={{
-          heading: "Data to Give a Full Picture",
+          heading: "BRICK360",
           fullHeight: true,
           bgColor: "#fdf7f6",
 
           subHeading:
-            "Our technology collects data points across different legitimate sources.",
+            <Typography.Text style={{fontSize: FONT_SIZE.HEADING_1, marginBottom: 16}}>Legit Sources. 200+ Data Points. One Report.</Typography.Text>,
           mainImgUrl: "/images/landing/slide-5.png",
           mainImgAltText:
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",

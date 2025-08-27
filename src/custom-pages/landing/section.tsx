@@ -60,6 +60,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
         backgroundColor: sectionData.bgColor || "white",
         backgroundImage: sectionData.bgImage ? `url('/images/data-src-logos/${sectionData.bgImage}')` : "none",
         backgroundSize: "cover",
+        backgroundPosition: "center",
         padding: sectionData.verticalPadding
           ? `${sectionData.verticalPadding}px 0`
           : sectionData.fullHeight && !isMobile
@@ -160,7 +161,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
             autoPlay
             muted
             loop
-            height={isMobile ? 500 : 700}
+            height={isMobile ? 500 : 625}
             style={{ margin: "auto" }}
           >
             <source src={sectionData.mediaUrl} type="video/mp4" />

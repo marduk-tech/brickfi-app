@@ -41,6 +41,7 @@ const LandingHeader: React.FC<{
         top: 0,
         width: "100%",
         padding: 16,
+        backgroundColor: "#32495e"
       }}
       align="center"
     >
@@ -55,7 +56,7 @@ const LandingHeader: React.FC<{
           cursor: "pointer",
         }}
       >
-        <img src={logo || "/images/brickfi-logo.png"} height="20"></img>
+        <img src={logo || "/images/brickfi-logo-white.png"} height="20"></img>
       </Flex>
       <Flex
         style={{
@@ -102,7 +103,7 @@ const LandingHeader: React.FC<{
               <Link
                 href={item.link}
                 style={{
-                  color: color || COLORS.textColorMedium,
+                  color: color || COLORS.textColorLight,
                   fontSize: FONT_SIZE.PARA,
                   textDecoration: 'none'
                 }}
