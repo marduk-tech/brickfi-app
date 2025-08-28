@@ -1,12 +1,14 @@
 import { Button, Flex, Modal } from "antd";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
+import { useDevice } from "../../hooks/use-device";
 import { DRIVER_CATEGORIES } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "../common/dynamic-react-icon";
-import dynamic from "next/dynamic";
-const MapViewV2 = dynamic(() => import("../map-view/map-view-v2"), { ssr: false });
+const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
+  ssr: false,
+});
 
 import { ScrollableContainer } from "../scrollable-container";
 
