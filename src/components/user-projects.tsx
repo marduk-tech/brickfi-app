@@ -271,10 +271,6 @@ export function UserProjects({
           )
           .map((p: any) => renderLvnzyProject(p))}
       </Flex>
-      {/* <BrickfiAssist
-        ref={chatRef}
-        lvnzyProjectsCollection={selectedCollection.name}
-      ></BrickfiAssist> */}
     </Flex>
   );
 }

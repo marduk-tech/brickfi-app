@@ -21,7 +21,7 @@ import {
   LocalStorageKeys,
 } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import Brick360Chat from "../liv/brick360-chat";
+import Brick360Chat from "./brick360-chat";
 
 const FAKE_TIMER_SECS = 700;
 
