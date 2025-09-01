@@ -1995,7 +1995,7 @@ const MapViewV2 = ({
           <MapCenterHandler projectData={primaryProject} projects={projects} />
           {onMapReady && <MapInstanceCapture onMapReady={onMapReady} />}
           <TileLayer
-            url="https://tile.jawg.io/9a737f1f-005e-423b-be7f-34aae5cf303f/{z}/{x}/{y}{r}.png?access-token=vXg5mvnWlqLoFPMM5htJQQcAKJeRjV691UPWRPir3UDzYb6o6q9aX7ymowUgB9s7"
+            url={`https://tile.jawg.io/9a737f1f-005e-423b-be7f-34aae5cf303f/{z}/{x}/{y}{r}.png?access-token=${process.env.NEXT_JAWG_ACCESS_TOKEN}`}
             attribution=""
           />
           {/* Process and render polygon data */}
