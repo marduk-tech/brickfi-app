@@ -71,7 +71,7 @@ export function UserProjects({
           backgroundColor: "white",
           width: isMobile
             ? "100%"
-            : (width - 40 * 3 - HORIZONTAL_PADDING * 2) / 4,
+            : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
         }}
         onClick={() => {
           router.push(`/app/brick360/${itemInfo._id}`);
@@ -261,7 +261,7 @@ export function UserProjects({
           width: "100%",
           flexWrap: "wrap",
           marginTop: 16,
-          padding: isMobile ? `0 8px` : 0,
+          padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
         }}
         gap={32}
       >
