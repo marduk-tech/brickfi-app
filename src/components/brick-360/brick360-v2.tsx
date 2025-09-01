@@ -20,13 +20,18 @@ import {
   Brick360DataPoints,
   LocalStorageKeys,
 } from "../../libs/constants";
-import { COLORS, FONT_SIZE } from "../../theme/style-constants";
+import { COLORS, FONT_SIZE, HORIZONTAL_PADDING } from "../../theme/style-constants";
 import Brick360Chat from "./brick360-chat";
+import { useDevice } from "@/hooks/use-device";
+import { useWindowDimensions } from "@/hooks/use-browser-safe";
 
 const FAKE_TIMER_SECS = 700;
 
 export function Brick360v2() {
   const { lvnzyProjectId } = useParams<{ lvnzyProjectId: string }>()!;
+  const {isMobile} = useDevice();
+    const { width } = useWindowDimensions();
+  
 
   const brick360ChatRef = useRef<{
     expandChat: () => void;
@@ -218,9 +223,11 @@ export function Brick360v2() {
     <Flex
       vertical
       style={{
-        width: "100%",
         margin: "auto",
         overflowX: "hidden",
+        width: isMobile
+                    ? "100%"
+                    : (width - HORIZONTAL_PADDING * 2),
       }}
     >
       <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />

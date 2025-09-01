@@ -42,20 +42,6 @@ import { CorridorMarkers } from "./map-markers/corridor-markers";
 import { SurroundingMarkers } from "./map-markers/surrounding-markers";
 import { processDriversToPolygons } from "./utils";
 
-// Types moved to ./types.ts
-
-// getIcon function moved to ./utils.ts
-
-// Map handlers moved to ./map-utils/map-handlers.tsx
-
-// BoundsAwareDrivers moved to ./map-utils/bounds-aware-drivers.tsx
-
-// MapResizeHandler moved to ./map-utils/map-handlers.tsx
-
-// processDriversToPolygons moved to ./utils.ts
-
-// MapInstanceCapture moved to ./map-utils/map-handlers.tsx
-
 interface MapViewV2Props {
   drivers?: any[];
   projectId?: string;
@@ -136,38 +122,6 @@ const MapViewV2Inner = ({
   const highlightedDrivers = useStore(
     (state) => state.values["highlightDrivers"]
   );
-
-  // Icon and filter logic now handled by custom hooks
-
-  // All icon and filter state management now handled by custom hooks and context
-
-  // processRoadFeatures moved to ./utils.ts
-
-  // renderLocalities moved to ./map-markers/locality-markers.tsx
-
-  // CorridorsComponent moved to ./map-markers/corridor-markers.tsx
-
-  // SurroundingsComponent extracted to ./map-markers/surrounding-markers.tsx
-
-  // fetchTravelDurationElement now imported from map-utils.ts
-  // Old RoadDriversComponent removed - now using extracted component from map-drivers/road-drivers.tsx
-
-  // Old TransitDriversComponent removed - now using extracted component from map-drivers/transit-drivers.tsx
-
-  // Remaining TransitDriversComponent content removed
-
-  // Old MicroMarketDriversComponent removed - now using extracted component from map-drivers/micro-market-drivers.tsx
-
-  // Old SimpleDriversRenderer removed - now using extracted component from map-drivers/simple-drivers.tsx
-  // Remaining SimpleDriversRenderer content removed
-
-  // renderProjectMarkers moved to ./map-markers/project-markers.tsx
-
-  // renderProjectsNearby moved to ./map-markers/project-markers.tsx
-
-  // Old renderDriverFilters function removed - now using extracted DriverFilters component
-
-  // Old renderSurroundingElementTypes function removed - now using extracted SurroundingFilters component
 
   // Process primary project bounds using imported utility
   const primaryProjectBounds = processPrimaryProjectBounds(primaryProject);

@@ -38,7 +38,7 @@ import DynamicReactIcon from "../common/dynamic-react-icon";
 
 //
 import dynamic from "next/dynamic";
-const MapViewV2 = dynamic(() => import("../map-view/map-view-v2"), { ssr: false });
+const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), { ssr: false });
 
 export interface AICuratedProject {
   projectId: string;

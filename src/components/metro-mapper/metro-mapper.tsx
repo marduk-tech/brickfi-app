@@ -12,7 +12,7 @@ import DynamicReactIcon from "../common/dynamic-react-icon";
 import { Loader } from "../common/loader";
 
 import dynamic from "next/dynamic";
-const MapViewV2 = dynamic(() => import("../map-view/map-view-v2"), { ssr: false });
+const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), { ssr: false });
 
 import { LineFilters } from "./line-filters";
 import { SearchSidebar } from "./search-sidebar";

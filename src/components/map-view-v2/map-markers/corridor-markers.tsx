@@ -33,9 +33,9 @@ export const CorridorMarkers = ({
             c.name,
             undefined,
             {
-              iconColor: COLORS.textColorDark,
-              borderColor: COLORS.textColorMedium,
-              iconBgColor: COLORS.bgColorMedium,
+              iconColor: "white",
+              borderColor: COLORS.borderColor,
+              iconBgColor: COLORS.bgColorDark,
               containerWidth: 125,
             }
           );
