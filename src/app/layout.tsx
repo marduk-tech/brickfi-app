@@ -19,6 +19,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  manifest: "/manifest.webmanifest",
   alternates: {
     canonical: "https://brickfi.in/",
   },
