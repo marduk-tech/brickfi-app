@@ -2,30 +2,34 @@ import { axiosApiInstance } from "@/libs/axios-api-Instance";
 import { RealEstateDeveloper } from "@/types/RealEstateDeveloper";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { cache } from "react";
 import RealEstateDeveloperClient from "./real-estate-developer-client";
 
 interface PageProps {
   params: Promise<{ developerId: string }>;
 }
 
-async function getRealEstateDeveloper(
-  id: string
-): Promise<RealEstateDeveloper | null> {
-  try {
-    const { data } = await axiosApiInstance.get(`/real-estate-developer/${id}`);
-    return data as RealEstateDeveloper;
-  } catch (error) {
-    console.error("Failed to fetch real estate developer:", error);
-    return null;
+const getCachedRealEstateDeveloper = cache(
+  async (id: string): Promise<RealEstateDeveloper | null> => {
+    try {
+      const { data } = await axiosApiInstance.get(
+        `/real-estate-developer/${id}`
+      );
+
+      return data as RealEstateDeveloper;
+    } catch (error) {
+      console.error("Failed to fetch real estate developer:", error);
+      return null;
+    }
   }
-}
+);
 
 // dynamic metadata
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { developerId } = await params;
-  const developer = await getRealEstateDeveloper(developerId);
+  const developer = await getCachedRealEstateDeveloper(developerId);
 
   if (!developer) {
     return {
@@ -70,7 +74,7 @@ export async function generateMetadata({
 export default async function RealEstateDeveloperPage({ params }: PageProps) {
   const { developerId } = await params;
 
-  const realEstateDeveloper = await getRealEstateDeveloper(developerId);
+  const realEstateDeveloper = await getCachedRealEstateDeveloper(developerId);
 
   if (!realEstateDeveloper) {
     notFound();
