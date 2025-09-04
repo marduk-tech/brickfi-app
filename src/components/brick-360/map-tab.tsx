@@ -65,9 +65,9 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
           <Flex
             style={{
               position: "absolute",
-              top: 66,
+              bottom: 24,
               right: 16,
-              zIndex: 9999,
+              zIndex: 1500,
             }}
           >
             <Button

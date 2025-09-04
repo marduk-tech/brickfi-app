@@ -84,7 +84,7 @@ export const SurroundingFilters = ({
         scrollbarWidth: "none",
         height: 32,
         position: "absolute",
-        zIndex: 9999,
+        zIndex: 1100,
         bottom: 32,
         paddingLeft: 8,
       }}

@@ -116,7 +116,7 @@ export const CorridorMarkerIcon = ({ name }: { name?: string }) => {
       style={{
         display: "flex",
         alignItems: "center",
-        zIndex: 999999999,
+        zIndex: 1300,
       }}
     >
       {/* {svgRings()} */}

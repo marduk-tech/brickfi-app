@@ -488,7 +488,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             position: "absolute",
             top: 16,
             right: 16,
-            zIndex: 99999,
+            zIndex: 1600,
           }}
           onClick={closeDrawer}
         >
@@ -618,7 +618,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                         position: "absolute",
                         top: 16,
                         right: 16,
-                        zIndex: 9999,
+                        zIndex: 1400,
                       }}
                     >
                       <Button

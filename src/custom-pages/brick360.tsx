@@ -104,7 +104,7 @@ export default function Brick360() {
           position: "absolute",
           top: 16,
           right: 16,
-          zIndex: 99999,
+          zIndex: 1700,
         }}
         onClick={() => {
           setDetailsModalOpen(false);
@@ -1029,7 +1029,7 @@ export default function Brick360() {
                   position: "absolute",
                   bottom: 16,
                   right: 16,
-                  zIndex: 9999,
+                  zIndex: 1450,
                 }}
               >
                 <Button

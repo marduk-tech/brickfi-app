@@ -23,6 +23,7 @@ import {
   useMapFiltersContext,
   useMapIconsContext,
   useMapModal,
+  useMapStyleContext,
 } from "./contexts/map-view-context";
 import { MapPolygons } from "./map-polygons";
 import {
@@ -46,6 +47,7 @@ import {
 } from "./map-markers/project-markers";
 import { SurroundingMarkers } from "./map-markers/surrounding-markers";
 import { MapModal } from "./map-modal";
+import { MapStyleControls } from "./map-style-switcher/map-style-controls";
 import { BoundsAwareDrivers } from "./map-utils/bounds-aware-drivers";
 import {
   MapCenterHandler,
@@ -53,6 +55,20 @@ import {
   MapResizeHandler,
 } from "./map-utils/map-handlers";
 import { processDriversToPolygons } from "./utils";
+import { MapStyleType } from "./map-style-switcher/map-style-dialog";
+
+// Utility function to get tile URL based on map style
+const getTileUrl = (style: MapStyleType): string => {
+  const jawgAccessToken = (import.meta as any).env?.VITE_JAWG_ACCESS_TOKEN || "vXg5mvnWlqLoFPMM5htJQQcAKJeRjV691UPWRPir3UDzYb6o6q9aX7ymowUgB9s7";
+  
+  switch (style) {
+    case "street":
+      return `https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=${jawgAccessToken}`;
+    case "minimal":
+    default:
+      return `https://tile.jawg.io/9a737f1f-005e-423b-be7f-34aae5cf303f/{z}/{x}/{y}{r}.png?access-token=${jawgAccessToken}`;
+  }
+};
 
 interface MapViewV2Props {
   drivers?: any[];
@@ -121,6 +137,7 @@ const MapViewV2Inner = ({
     setSelectedSurroundingElementType,
     isDriverMatchingFilter,
   } = useMapFiltersContext();
+  const { mapStyle, setMapStyle } = useMapStyleContext();
 
   // Keep only non-state related hooks
   const { data: corridors } = useFetchCorridors();
@@ -201,6 +218,10 @@ const MapViewV2Inner = ({
           position: "relative",
         }}
       >
+        <MapStyleControls
+          selectedStyle={mapStyle}
+          onStyleChange={setMapStyle}
+        />
         <MapContainer
           key={`map-v2`}
           center={[12.969999, 77.587841]}
@@ -214,7 +235,8 @@ const MapViewV2Inner = ({
           <MapCenterHandler projectData={primaryProject} projects={projects} />
           {onMapReady && <MapInstanceCapture onMapReady={onMapReady} />}
           <TileLayer
-            url="https://tile.jawg.io/9a737f1f-005e-423b-be7f-34aae5cf303f/{z}/{x}/{y}{r}.png?access-token=vXg5mvnWlqLoFPMM5htJQQcAKJeRjV691UPWRPir3UDzYb6o6q9aX7ymowUgB9s7"
+            key={mapStyle}
+            url={getTileUrl(mapStyle)}
             attribution=""
           />
           {/* Process and render polygon data */}

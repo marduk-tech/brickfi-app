@@ -124,7 +124,7 @@ export const DriverFilters = ({
     <Flex
       style={{
         position: "absolute",
-        zIndex: 9999,
+        zIndex: 1200,
         bottom: 24,
         paddingLeft: 8,
         width: "100%",

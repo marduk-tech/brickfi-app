@@ -3,6 +3,7 @@ import { MapModalContent } from "../map-modal";
 import { useMapIcons, UseMapIconsReturn } from "../use-map-icons";
 import { useMapFilters, UseMapFiltersReturn } from "../use-map-filters";
 import { IDriverPlace, ISurroundingElement } from "../../../types/Project";
+import { MapStyleType } from "../map-style-switcher/map-style-dialog";
 
 // Bounds state interface
 export interface MapBounds {
@@ -32,10 +33,14 @@ export interface MapViewContextState {
   // Bounds state
   bounds?: MapBounds;
   
+  // Map style state
+  mapStyle: MapStyleType;
+  
   // Actions
   openModal: (content: MapModalContent) => void;
   closeModal: () => void;
   updateBounds: (bounds: MapBounds) => void;
+  setMapStyle: (style: MapStyleType) => void;
 }
 
 // Context props interface for the provider
@@ -72,6 +77,9 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
   
   // Bounds state
   const [bounds, setBounds] = useState<MapBounds>();
+  
+  // Map style state
+  const [mapStyle, setMapStyleState] = useState<MapStyleType>("minimal");
 
   // Use custom hooks for icons and filters
   const icons = useMapIcons(drivers, primaryProject, projectsNearby, projectSqftPricing);
@@ -93,6 +101,11 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
     setBounds(newBounds);
   }, []);
 
+  // Map style actions
+  const setMapStyle = useCallback((style: MapStyleType) => {
+    setMapStyleState(style);
+  }, []);
+
   // Context value
   const contextValue: MapViewContextState = {
     modal: {
@@ -102,9 +115,11 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
     icons,
     filters,
     bounds,
+    mapStyle,
     openModal,
     closeModal,
     updateBounds,
+    setMapStyle,
   };
 
   return (
@@ -150,4 +165,12 @@ export const useMapIconsContext = () => {
 export const useMapFiltersContext = () => {
   const { filters } = useMapViewContext();
   return filters;
+};
+
+export const useMapStyleContext = () => {
+  const { mapStyle, setMapStyle } = useMapViewContext();
+  return {
+    mapStyle,
+    setMapStyle,
+  };
 };
