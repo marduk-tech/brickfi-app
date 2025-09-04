@@ -6,8 +6,7 @@ import { PLACE_TIMELINE } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { IDriverPlace } from "../../types/Project";
 import { dynamicImportMap } from "../common/dynamic-react-icon";
-import * as turf from "@turf/turf";
-import { GeoJSONFeature, GeoJSONCoordinate } from "./types";
+import { GeoJSONFeature } from "./types";
 
 /**
  * Gets the icon for map.
@@ -141,15 +140,15 @@ export const processRoadFeatures = (features: GeoJSONFeature[]) => {
 export const processDriversToPolygons = (
   data: any[],
   filterByDriverTypes = true,
-  selectedDriverFilters: string[] = []
+  selectedDriverFilter?: string
 ) => {
   return data
     .filter((driver) => {
       const hasGeojson = driver.details?.osm?.geojson;
       const matchesType =
         !filterByDriverTypes ||
-        selectedDriverFilters.length === 0 ||
-        selectedDriverFilters.includes(driver.driver);
+        !selectedDriverFilter ||
+        selectedDriverFilter === driver.driver;
       return hasGeojson && matchesType;
     })
     .map((driver) => {

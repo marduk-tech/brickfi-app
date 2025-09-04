@@ -1,6 +1,5 @@
 "use client";
-import * as turf from "@turf/turf";
-import { Typography } from "antd";
+
 import "leaflet/dist/leaflet.css";
 import React from "react";
 
@@ -15,31 +14,44 @@ import {
 import { useFetchCorridors } from "../../hooks/use-corridors";
 import { useFetchLocalities } from "../../hooks/use-localities";
 import { useFetchProjectById } from "../../hooks/use-project";
-import {
-  SurroundingElementLabels,
-} from "../../libs/constants";
+import { SurroundingElementLabels } from "../../libs/constants";
 import { COLORS } from "../../theme/style-constants";
 import { ISurroundingElement } from "../../types/Project";
 import useStore from "../metro-mapper/store";
+import {
+  MapViewContextProvider,
+  useMapFiltersContext,
+  useMapIconsContext,
+  useMapModal,
+} from "./contexts/map-view-context";
 import { MapPolygons } from "./map-polygons";
-import { MapViewContextProvider, useMapModal, useMapIconsContext, useMapFiltersContext } from "./contexts/map-view-context";
-import { fetchTravelDurationElement, processPrimaryProjectBounds } from "./map-utils";
+import {
+  fetchTravelDurationElement,
+  processPrimaryProjectBounds,
+} from "./map-utils";
 
 // New imports for extracted components
-import { RoadDriversComponent } from "./map-drivers/road-drivers";
-import { TransitDriversComponent } from "./map-drivers/transit-drivers";
-import { SimpleDriversRenderer } from "./map-drivers/simple-drivers";
 import { MicroMarketDriversComponent } from "./map-drivers/micro-market-drivers";
+import { RoadDriversComponent } from "./map-drivers/road-drivers";
+import { SimpleDriversRenderer } from "./map-drivers/simple-drivers";
+import { TransitDriversComponent } from "./map-drivers/transit-drivers";
 import { CategoryFilters } from "./map-filters/category-filters";
 import { DriverFilters } from "./map-filters/driver-filters";
 import { SurroundingFilters } from "./map-filters/surrounding-filters";
-import { MapModal } from "./map-modal";
-import { MapCenterHandler, MapResizeHandler, MapInstanceCapture } from "./map-utils/map-handlers";
-import { BoundsAwareDrivers } from "./map-utils/bounds-aware-drivers";
-import { ProjectMarkers, ProjectsNearbyMarkers } from "./map-markers/project-markers";
-import { LocalityMarkers } from "./map-markers/locality-markers";
 import { CorridorMarkers } from "./map-markers/corridor-markers";
+import { LocalityMarkers } from "./map-markers/locality-markers";
+import {
+  ProjectMarkers,
+  ProjectsNearbyMarkers,
+} from "./map-markers/project-markers";
 import { SurroundingMarkers } from "./map-markers/surrounding-markers";
+import { MapModal } from "./map-modal";
+import { BoundsAwareDrivers } from "./map-utils/bounds-aware-drivers";
+import {
+  MapCenterHandler,
+  MapInstanceCapture,
+  MapResizeHandler,
+} from "./map-utils/map-handlers";
 import { processDriversToPolygons } from "./utils";
 
 interface MapViewV2Props {
@@ -79,7 +91,12 @@ const MapViewV2Inner = ({
   primaryProject,
 }: MapViewV2Props & { primaryProject?: any }) => {
   // Use context hooks instead of local state
-  const { isOpen: infoModalOpen, content: modalContent, openModal, closeModal } = useMapModal();
+  const {
+    isOpen: infoModalOpen,
+    content: modalContent,
+    openModal,
+    closeModal,
+  } = useMapModal();
   const {
     simpleDriverMarkerIcons,
     surroundingElementIcons,
@@ -111,13 +128,21 @@ const MapViewV2Inner = ({
   const currentSelectedCategory = selectedCategory;
 
   // Primary project is now passed from the wrapper component via context
-  
+
   // Trigger surrounding element icon generation when surroundingElements changes
   React.useEffect(() => {
-    if (surroundingElements && surroundingElements.length && uniqueSurroundingElements.length) {
+    if (
+      surroundingElements &&
+      surroundingElements.length &&
+      uniqueSurroundingElements.length
+    ) {
       refreshSurroundingElementIcons(uniqueSurroundingElements);
     }
-  }, [surroundingElements, uniqueSurroundingElements, refreshSurroundingElementIcons]);
+  }, [
+    surroundingElements,
+    uniqueSurroundingElements,
+    refreshSurroundingElementIcons,
+  ]);
 
   const highlightedDrivers = useStore(
     (state) => state.values["highlightDrivers"]
@@ -139,7 +164,7 @@ const MapViewV2Inner = ({
       }}
     >
       {/* Category Selection Filters */}
-      <CategoryFilters 
+      <CategoryFilters
         categories={categories}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
@@ -198,13 +223,15 @@ const MapViewV2Inner = ({
             const projectPolygons = processDriversToPolygons(
               primaryProjectBounds,
               false,
-              driverFilters
+              selectedDriverFilter
             );
 
             // Render all components
             return (
               <>
-                <MapPolygons polygons={projectPolygons} />
+                {currentSelectedCategory !== "surroundings" && (
+                  <MapPolygons polygons={projectPolygons} />
+                )}
 
                 <ProjectMarkers
                   primaryProject={primaryProject}
@@ -234,7 +261,9 @@ const MapViewV2Inner = ({
                   <SurroundingMarkers
                     surroundingElements={surroundingElements}
                     surroundingElementIcons={surroundingElementIcons}
-                    selectedSurroundingElementType={selectedSurroundingElementType}
+                    selectedSurroundingElementType={
+                      selectedSurroundingElementType
+                    }
                     openModal={openModal}
                   />
                 ) : null}
@@ -262,7 +291,7 @@ const MapViewV2Inner = ({
                   <>
                     <BoundsAwareDrivers
                       renderRoadDrivers={(bounds) => (
-                        <RoadDriversComponent 
+                        <RoadDriversComponent
                           bounds={bounds}
                           drivers={drivers}
                           roadIcon={roadIcon}
@@ -275,7 +304,7 @@ const MapViewV2Inner = ({
                         />
                       )}
                       renderTransitDrivers={(bounds) => (
-                        <TransitDriversComponent 
+                        <TransitDriversComponent
                           bounds={bounds}
                           drivers={drivers}
                           transitStationIcon={transitStationIcon}
@@ -286,11 +315,13 @@ const MapViewV2Inner = ({
                           setModalContent={openModal}
                           setInfoModalOpen={() => {}}
                           isDriverMatchingFilter={isDriverMatchingFilter}
-                          fetchTravelDurationElement={fetchTravelDurationElement}
+                          fetchTravelDurationElement={
+                            fetchTravelDurationElement
+                          }
                         />
                       )}
                       renderSimpleDrivers={(bounds) => (
-                        <SimpleDriversRenderer 
+                        <SimpleDriversRenderer
                           bounds={bounds}
                           drivers={drivers}
                           simpleDriverMarkerIcons={simpleDriverMarkerIcons}
@@ -299,17 +330,21 @@ const MapViewV2Inner = ({
                           setModalContent={openModal}
                           setInfoModalOpen={() => {}}
                           isDriverMatchingFilter={isDriverMatchingFilter}
-                          fetchTravelDurationElement={fetchTravelDurationElement}
+                          fetchTravelDurationElement={
+                            fetchTravelDurationElement
+                          }
                         />
                       )}
                     />
-                    <MapPolygons
-                      polygons={processDriversToPolygons(
-                        drivers || [],
-                        true,
-                        driverFilters
-                      )}
-                    />
+                    {currentSelectedCategory !== "surroundings" && (
+                      <MapPolygons
+                        polygons={processDriversToPolygons(
+                          drivers || [],
+                          true,
+                          selectedDriverFilter
+                        )}
+                      />
+                    )}
                   </>
                 ) : null}
               </>
@@ -328,11 +363,11 @@ const MapViewV2Inner = ({
   );
 };
 
-// Main component wrapper with context provider  
+// Main component wrapper with context provider
 const MapViewV2 = (props: MapViewV2Props) => {
   // Fetch primary project data at the wrapper level
   const { data: primaryProject } = useFetchProjectById(props.projectId || "");
-  
+
   return (
     <MapViewContextProvider
       drivers={props.drivers}
