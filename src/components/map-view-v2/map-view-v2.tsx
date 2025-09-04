@@ -48,6 +48,7 @@ import {
 import { SurroundingMarkers } from "./map-markers/surrounding-markers";
 import { MapModal } from "./map-modal";
 import { MapStyleControls } from "./map-style-switcher/map-style-controls";
+import { MapStyleType } from "./map-style-switcher/map-style-dialog";
 import { BoundsAwareDrivers } from "./map-utils/bounds-aware-drivers";
 import {
   MapCenterHandler,
@@ -55,12 +56,11 @@ import {
   MapResizeHandler,
 } from "./map-utils/map-handlers";
 import { processDriversToPolygons } from "./utils";
-import { MapStyleType } from "./map-style-switcher/map-style-dialog";
 
 // Utility function to get tile URL based on map style
 const getTileUrl = (style: MapStyleType): string => {
-  const jawgAccessToken = (import.meta as any).env?.VITE_JAWG_ACCESS_TOKEN || "vXg5mvnWlqLoFPMM5htJQQcAKJeRjV691UPWRPir3UDzYb6o6q9aX7ymowUgB9s7";
-  
+  const jawgAccessToken = process.env.NEXT_PUBLIC_JAWG_ACCESS_TOKEN;
+
   switch (style) {
     case "street":
       return `https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=${jawgAccessToken}`;
@@ -234,11 +234,7 @@ const MapViewV2Inner = ({
           <MapResizeHandler />
           <MapCenterHandler projectData={primaryProject} projects={projects} />
           {onMapReady && <MapInstanceCapture onMapReady={onMapReady} />}
-          <TileLayer
-            key={mapStyle}
-            url={getTileUrl(mapStyle)}
-            attribution=""
-          />
+          <TileLayer key={mapStyle} url={getTileUrl(mapStyle)} attribution="" />
           {/* Process and render polygon data */}
           {(() => {
             // Process primary project bounds
