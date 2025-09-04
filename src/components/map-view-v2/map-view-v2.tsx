@@ -9,6 +9,7 @@ import {
   Polyline,
   TileLayer,
   useMap,
+  ZoomControl,
 } from "react-leaflet";
 
 import { useFetchCorridors } from "../../hooks/use-corridors";
@@ -228,9 +229,13 @@ const MapViewV2Inner = ({
           zoom={16}
           minZoom={minMapZoom || 12}
           maxZoom={19}
-          style={{ height: "100%", width: "100%" }}
-          zoomControl={true}
+          style={{ 
+            height: "100%", 
+            width: "100%"
+          }}
+          zoomControl={false}
         >
+          <ZoomControl position="bottomright" />
           <MapResizeHandler />
           <MapCenterHandler projectData={primaryProject} projects={projects} />
           {onMapReady && <MapInstanceCapture onMapReady={onMapReady} />}
