@@ -36,8 +36,7 @@ export const MapStyleControls = ({ selectedStyle, onStyleChange }: MapStyleContr
       >
         <Tooltip title="Change map style" placement="left">
           <Button
-            type="default"
-            shape="round"
+            type="link"
             icon={
               <DynamicReactIcon
                 iconSet="lu"
@@ -49,13 +48,12 @@ export const MapStyleControls = ({ selectedStyle, onStyleChange }: MapStyleContr
             onClick={handleOpenDialog}
             style={{
               backgroundColor: "white",
-              borderColor: COLORS.borderColor,
               boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 40,
-              height: 40,
+              width: 24,
+              height: 24,
             }}
           />
         </Tooltip>

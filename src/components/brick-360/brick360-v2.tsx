@@ -209,16 +209,6 @@ export function Brick360v2() {
     return <FakeProgress progress={fakeTimeoutProgress} projectName={""} />;
   }
 
-  // // Fake progress bar
-  // if (fakeTimeoutProgress < 130) {
-  //   return (
-  //     <FakeProgress
-  //       progress={fakeTimeoutProgress}
-  //       projectName={lvnzyProject?.meta.projectName}
-  //     />
-  //   );
-  // }
-
   return (
     <Flex
       vertical
