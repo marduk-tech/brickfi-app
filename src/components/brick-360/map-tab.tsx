@@ -11,6 +11,7 @@ const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
 });
 
 import { ScrollableContainer } from "../scrollable-container";
+import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
 
 interface MapTabProps {
   lvnzyProject: any;
@@ -62,41 +63,11 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
         gap={8}
       >
         {!isMapFullScreen && (
-          <Flex
-            style={{
-              position: "absolute",
-              top: 68,
-              left: 14,
-              zIndex: 1500,
+          <MapExpandBtn
+            onClick={() => {
+              setIsMapFullScreen(true);
             }}
-          >
-            <Button
-              size="small"
-              icon={
-                <DynamicReactIcon
-                  iconName="FaExpand"
-                  color="white"
-                  iconSet="fa"
-                  size={16}
-                />
-              }
-              style={{
-                marginLeft: "auto",
-                marginBottom: 8,
-                borderRadius: 8,
-                cursor: "pointer",
-                backgroundColor: COLORS.textColorDark,
-                color: "white",
-                fontSize: FONT_SIZE.HEADING_4,
-                height: 28,
-              }}
-              onClick={() => {
-                setIsMapFullScreen(true);
-              }}
-            >
-              Expand
-            </Button>
-          </Flex>
+          ></MapExpandBtn>
         )}
 
         {!isMapFullScreen && (

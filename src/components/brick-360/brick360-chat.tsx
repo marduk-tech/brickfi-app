@@ -38,7 +38,10 @@ import DynamicReactIcon from "../common/dynamic-react-icon";
 
 //
 import dynamic from "next/dynamic";
-const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), { ssr: false });
+import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
+const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
+  ssr: false,
+});
 
 export interface AICuratedProject {
   projectId: string;
@@ -560,9 +563,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
           marginLeft: isMobile ? 0 : `calc(50% - ${MAX_WIDTH / 2}px)`,
         }}
         closable={false}
-        height={
-          isDrawerExpanded ? Math.min(700, height * 0.8) : 100
-        }
+        height={isDrawerExpanded ? Math.min(700, height * 0.8) : 100}
         onClose={closeDrawer}
         open={true}
         mask={isDrawerExpanded ? true : false}
@@ -613,42 +614,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                       overflowX: "hidden",
                     }}
                   >
-                    <Flex
-                      style={{
-                        position: "absolute",
-                        top: 16,
-                        right: 16,
-                        zIndex: 1400,
+                    <MapExpandBtn
+                      topPos={16}
+                      onClick={() => {
+                        setIsDrawerExpanded(false);
+                        setIsMapFullScreen(true);
                       }}
-                    >
-                      <Button
-                        size="small"
-                        icon={
-                          <DynamicReactIcon
-                            iconName="FaExpand"
-                            color="white"
-                            iconSet="fa"
-                            size={16}
-                          />
-                        }
-                        style={{
-                          marginLeft: "auto",
-                          marginBottom: 8,
-                          borderRadius: 8,
-                          cursor: "pointer",
-                          backgroundColor: COLORS.textColorDark,
-                          color: "white",
-                          fontSize: FONT_SIZE.SUB_TEXT,
-                          height: 28,
-                        }}
-                        onClick={() => {
-                          setIsDrawerExpanded(false);
-                          setIsMapFullScreen(true);
-                        }}
-                      >
-                        Expand
-                      </Button>
-                    </Flex>
+                    ></MapExpandBtn>
                     <Flex
                       style={{
                         height: isMobile ? 200 : 300,
