@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ClientProviders } from "../components/client-providers";
+import AntdRegistry from "../components/antd-registry";
 import "../theme/globals.scss";
 
 export const metadata: Metadata = {
@@ -69,9 +70,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ClientProviders>
-          {children}
-        </ClientProviders>
+        <AntdRegistry>
+          <ClientProviders>
+            {children}
+          </ClientProviders>
+        </AntdRegistry>
       </body>
     </html>
   );

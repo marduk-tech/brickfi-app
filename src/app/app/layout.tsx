@@ -5,9 +5,8 @@ import { DashboardLayout } from "../../layouts/dashboard-layout";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <DashboardLayout>
-      {" "}
-      <ClientProviders>{children}</ClientProviders>
-    </DashboardLayout>
+    <ClientProviders>
+      <DashboardLayout>{children}</DashboardLayout>
+    </ClientProviders>
   );
 }

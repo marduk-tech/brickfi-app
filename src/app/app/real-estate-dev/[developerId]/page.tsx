@@ -1,35 +1,22 @@
-import { axiosApiInstance } from "@/libs/axios-api-Instance";
-import { RealEstateDeveloper } from "@/types/RealEstateDeveloper";
+import { getQueryClient } from "@/libs/query-client";
+import {
+  getDeveloper,
+  getRealEstateDevelopersQuery,
+} from "@/queries/real-estate-developer";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { cache } from "react";
 import RealEstateDeveloperClient from "./real-estate-developer-client";
 
 interface PageProps {
   params: Promise<{ developerId: string }>;
 }
 
-const getCachedRealEstateDeveloper = cache(
-  async (id: string): Promise<RealEstateDeveloper | null> => {
-    try {
-      const { data } = await axiosApiInstance.get(
-        `/real-estate-developer/${id}`
-      );
-
-      return data as RealEstateDeveloper;
-    } catch (error) {
-      console.error("Failed to fetch real estate developer:", error);
-      return null;
-    }
-  }
-);
-
-// dynamic metadata
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { developerId } = await params;
-  const developer = await getCachedRealEstateDeveloper(developerId);
+  const developer = await getDeveloper(developerId);
 
   if (!developer) {
     return {
@@ -73,12 +60,13 @@ export async function generateMetadata({
 // main page
 export default async function RealEstateDeveloperPage({ params }: PageProps) {
   const { developerId } = await params;
+  const queryClient = getQueryClient();
 
-  const realEstateDeveloper = await getCachedRealEstateDeveloper(developerId);
+  await queryClient.prefetchQuery(getRealEstateDevelopersQuery(developerId));
 
-  if (!realEstateDeveloper) {
-    notFound();
-  }
-
-  return <RealEstateDeveloperClient developer={realEstateDeveloper} />;
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <RealEstateDeveloperClient developerId={developerId} />
+    </HydrationBoundary>
+  );
 }
