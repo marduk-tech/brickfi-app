@@ -1,6 +1,7 @@
 "use client";
 
 import { useDevice } from "@/hooks/use-device";
+import { CustomError } from "@/libs/error-handler";
 import { getRealEstateDevelopersQuery } from "@/queries/real-estate-developer";
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "@/theme/style-constants";
 import { useQuery } from "@tanstack/react-query";
@@ -8,6 +9,7 @@ import { Alert, Flex, Spin, Tabs, TabsProps, Typography } from "antd";
 import React from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import RealEstateDeveloperLoading from "./loading";
 
 const { Paragraph } = Typography;
 
@@ -23,7 +25,7 @@ export default function RealEstateDeveloperClient({
     isLoading,
     isError,
     error,
-  } = useQuery(getRealEstateDevelopersQuery(developerId));
+  } = useQuery({ ...getRealEstateDevelopersQuery(developerId), retry: 3 });
 
   const { isMobile } = useDevice();
 
@@ -99,43 +101,15 @@ export default function RealEstateDeveloperClient({
       : [];
 
   if (isLoading) {
-    return (
-      <Flex
-        vertical
-        style={{
-          maxWidth: MAX_WIDTH,
-          margin: "auto",
-          padding: 16,
-          minHeight: "50vh",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Spin size="large" />
-        <Typography.Text style={{ marginTop: 16, color: "#666" }}>
-          Loading developer information...
-        </Typography.Text>
-      </Flex>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Flex vertical style={{ maxWidth: MAX_WIDTH, margin: "auto" }}>
-        <Flex vertical style={{ padding: 16 }}>
-          <Alert
-            message="Failed to load developer information"
-            description={error?.message || "Please try again later."}
-            type="error"
-            showIcon
-          />
-        </Flex>
-      </Flex>
-    );
+    return <RealEstateDeveloperLoading />;
   }
 
   if (!developer || !developer.genDetails) {
-    return null;
+    throw new CustomError({
+      status: 500,
+      title: "Something went super wrong",
+      description: "Please try again later",
+    });
   }
 
   return (

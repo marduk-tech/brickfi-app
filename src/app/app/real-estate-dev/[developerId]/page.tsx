@@ -16,6 +16,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { developerId } = await params;
+
   const developer = await getDeveloper(developerId);
 
   if (!developer) {
