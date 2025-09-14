@@ -1,12 +1,12 @@
 import { baseApiUrl } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 
-export const getDeveloper = async (id: string) => {
+export const getDeveloper = async (id: string, throwError = true) => {
   const res = await fetch(`${baseApiUrl}real-estate-developer/${id}`, {
     cache: "no-store",
   });
 
-  if (res.status === 404) {
+  if (throwError && res.status === 404) {
     throw new CustomError({
       status: 404,
       title: "Real Estate Developer Not Found",
@@ -14,7 +14,7 @@ export const getDeveloper = async (id: string) => {
     });
   }
 
-  if (res.status === 500) {
+  if (throwError && res.status === 500) {
     throw new CustomError({
       status: 500,
       title: "Invalid Developer ID",
@@ -22,7 +22,7 @@ export const getDeveloper = async (id: string) => {
     });
   }
 
-  if (!res.ok) {
+  if (throwError && !res.ok) {
     throw new CustomError({
       status: res.status,
       title: "Something went wrong",
