@@ -13,6 +13,10 @@ import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import Marquee from "react-fast-marquee";
 const { Paragraph } = Typography;
 
+const PAGE_COLORS = {
+  BLUISH: "#0f5f8c",
+};
+
 export default function ReportLanding() {
   const { isMobile } = useDevice();
 
@@ -221,18 +225,9 @@ export default function ReportLanding() {
           imageContainerWidth: 40,
           primaryImageSize: "100%",
           fullHeight: true,
-          verticalPadding: isMobile ? 100 : 0,
         }}
       ></SectionLeft>
-      <Flex
-        style={{ backgroundColor: "#fdf7f6", paddingTop: isMobile ? 16 : 0 }}
-        justify="center"
-      >
-        <img
-          src="/images/landing/divider.png"
-          width={isMobile ? "80%" : "30%"}
-        ></img>
-      </Flex>
+
       <SectionCenter
         sectionData={{
           bgColor: "#fdf7f6",
@@ -252,11 +247,18 @@ export default function ReportLanding() {
           primaryImageSize: isMobile ? "50%" : "100%",
           mediaUrl: "/images/landing/demo-2.mp4?v=1",
           imageContainerWidth: 50,
-
-          fullHeight: true,
+          verticalPadding: 8
         }}
       ></SectionCenter>
-
+      <Flex
+        style={{ backgroundColor: "#fdf7f6", paddingTop: isMobile ? 16 : 0 }}
+        justify="center"
+      >
+        <img
+          src="/images/landing/divider.png"
+          width={isMobile ? "80%" : "30%"}
+        ></img>
+      </Flex>
       <SectionCenter
         sectionData={{
           bgColor: "#fdf7f6",
@@ -271,38 +273,11 @@ export default function ReportLanding() {
         }}
       ></SectionCenter>
 
-      {/* <Flex
-        style={{ backgroundColor: "#32495e", paddingTop: isMobile ? 16 : 60 }}
-        justify="center"
-      >
-        <img
-          src="/images/landing/divider.png"
-          width={isMobile ? "80%" : "30%"}
-        ></img>
-      </Flex> */}
-      {/* <SectionLeft
-        sectionData={{
-          id: "demo-brkfi",
-          heading: "BRICK360",
-          subHeading: "Legit Sources. 200+ Data Points. One Report.",
-          mediaUrl: "/images/landing/demo-landing-small-2.mp4?v=1",
-          bgColor: "#32495e",
-          btn: {
-            link: LandingConstants.sampleReport,
-            txt: "See Sample Report",
-          },
-          textColor: "white",
-          verticalPadding: 60,
-          primaryImageSize: "80%",
-          imageContainerWidth: 50,
-        }}
-      ></SectionLeft> */}
-
       <SectionCenter
         sectionData={{
           heading: "The Most Data Backed Approach",
           fullHeight: true,
-          bgColor: "#006dcc",
+          bgColor: PAGE_COLORS.BLUISH,
           textColor: "white",
 
           subHeading: (
@@ -326,7 +301,7 @@ export default function ReportLanding() {
       <SectionLeft
         sectionData={{
           heading: "Find Red Flags, Challenges, Opportunites & More",
-          bgColor: "#006dcc",
+          bgColor: PAGE_COLORS.BLUISH,
           textColor: "white",
           btn: {
             link: "/requestreport",
@@ -346,7 +321,7 @@ export default function ReportLanding() {
           heading: "Nuanced Location Intelligence",
           verticalPadding: isMobile ? 2 : 60,
           subHeading: "",
-           bgColor: "#006dcc",
+           bgColor: PAGE_COLORS.BLUISH,
           textColor: "white",
           mainImgUrl: "/images/landing/slide-7.png",
           mainImgAltText:
@@ -356,11 +331,11 @@ export default function ReportLanding() {
 
       <SectionCenter
         sectionData={{
-          heading: "FAQ",
+          heading: <Typography.Text style={{fontSize: FONT_SIZE.HEADING_1, fontWeight: 200}}>Frequently Asked Questions</Typography.Text>,
           bgColor: "#fdf7f6",
           verticalPadding: isMobile ? 24 : 100,
           subHeading: (
-            <Flex>
+            <Flex style={{width: isMobile ? "100%": "auto"}}>
               <Collapse
                 expandIcon={({ isActive }) => (
                   <CaretRightOutlined
@@ -379,9 +354,23 @@ export default function ReportLanding() {
           ),
         }}
       ></SectionCenter>
-      <Flex vertical style={{ height: 700, padding: 48, backgroundColor: "#fdf7f6" }} align="center">
-        <Typography.Text style={{margin: "32px 0", fontSize: FONT_SIZE.HEADING_1 * 1.2, color: COLORS.primaryColor}}># Be a Smart Real Estate Investor</Typography.Text>
-        <Marquee>
+      <Flex
+        vertical
+        style={{ height: 700, padding: "8px 0", backgroundColor: "#fdf7f6", paddingBottom: 48 }}
+        align="center"
+      >
+        <Typography.Text
+          style={{
+            margin: "32px 0",
+            fontSize: isMobile
+              ? FONT_SIZE.HEADING_1
+              : FONT_SIZE.HEADING_1 * 1.2,
+            color: COLORS.primaryColor,
+          }}
+        >
+          #ChooseToInvestSmartly
+        </Typography.Text>
+        <Marquee speed={30}>
           {newsLinks.map((l: any) => {
             return (
               <Flex
@@ -408,19 +397,21 @@ export default function ReportLanding() {
                     borderTopRightRadius: 8,
                   }}
                 ></div>
-                <Flex  style={{
-                    padding: 8,
-                    height: 100
-                  }}>
-                <Paragraph
+                <Flex
                   style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    lineHeight: "110%",
+                    padding: 8,
+                    height: 100,
                   }}
-                  ellipsis={{ rows: 4, expandable: false }}
                 >
-                  {l.title}
-                </Paragraph>
+                  <Paragraph
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_3,
+                      lineHeight: "110%",
+                    }}
+                    ellipsis={{ rows: 4, expandable: false }}
+                  >
+                    {l.title}
+                  </Paragraph>
                 </Flex>
               </Flex>
             );
