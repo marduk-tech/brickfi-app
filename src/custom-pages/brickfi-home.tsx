@@ -14,6 +14,7 @@ import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LandingConstants } from "../libs/constants";
 import { safeWindow } from "../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
+import { Brick360v3 } from "@/components/brick-360/brick360-v3";
 
 interface SavedLvnzyProject {
   _id: string;
@@ -138,7 +139,7 @@ const BrickfiHome: React.FC = () => {
               placeholder="Search for a project"
             />
           </Flex> */}
-          {user && <RequestedProjectsList user={user} />}
+          {/* {user && <RequestedProjectsList user={user} />} */}
           {lvnzyProjects && lvnzyProjects.length ? (
             <UserProjects lvnzyProjects={lvnzyProjects} />
           ) : (
@@ -185,6 +186,7 @@ const BrickfiHome: React.FC = () => {
           )}
         </>
       )}
+      
     </Flex>
   );
 };

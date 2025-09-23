@@ -1,10 +1,10 @@
-import MainLanding from "@/custom-pages/landing/main-landing";
+import ReportLanding from "@/custom-pages/landing/report-landing";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Brickfi | Smartest Way to Buy your Next Property",
+  title: "Brickfi | Get a 360 Report Card across any property in Bangalore",
   description:
-    "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+    "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
   keywords: [
     "real estate",
     "property",
@@ -26,9 +26,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "The Smartest Way to Buy your Next Property",
+    title: "Brickfi | Get a 360 Report Card across any property in Bangalore",
     description:
-      "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+      "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
     url: "https://brickfi.in",
     siteName: "Brickfi",
     images: [
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
         url: "/images/brickfi-preview.png",
         width: 1200,
         height: 630,
-        alt: "Brickfi - The Smartest Way to Buy your Next Property",
+        alt: "Brickfi | Get a 360 Report Card across any property in Bangalore",
       },
     ],
     locale: "en_IN",
@@ -44,9 +44,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Smartest Way to Buy your Next Property",
+    title: "Brickfi | Get a 360 Report Card across any property in Bangalore",
     description:
-      "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+      "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
     images: ["/images/brickfi-preview.png"],
   },
   robots: {
@@ -62,6 +62,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
-  return <MainLanding />;
+export default function ReportLandingPage() {
+  return <ReportLanding />;
 }

@@ -246,9 +246,9 @@ export const PlaceholderContent = `# Liv is the AI Agent for Real Estate.
 `;
 
 export enum BRICK360_CATEGORY {
+  property = "property",
   areaConnectivity = "areaConnectivity",
   developer = "developer",
-  property = "property",
   financials = "financials",
 }
 
@@ -307,6 +307,7 @@ export const Brick360DataPoints = {
       ],
     },
     surroundings: { label: "Surroundings" },
+    landProfile: { label: "Land Profile" },
     designAndBuildQuality: { label: "Design/Build Quality" },
   },
   areaConnectivity: {

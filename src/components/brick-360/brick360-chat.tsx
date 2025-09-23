@@ -50,8 +50,9 @@ export interface AICuratedProject {
 }
 
 export interface Brick360Props {
-  lvnzyProject: LvnzyProject;
-  dataPoint: any;
+  lvnzyProject?: LvnzyProject;
+  dataPoint?: any;
+  userProjects?: {name: string, id: string}[]
 }
 interface Brick360ChatRef {
   expandChat: () => void;
@@ -62,7 +63,8 @@ export interface Brick360Answer {
 }
 
 export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
-  ({ dataPoint, lvnzyProject }, ref) => {
+  ({ dataPoint, lvnzyProject, userProjects }, ref) => {
+
     const { height } = useWindowDimensions();
     const [currentQuestion, setCurrentQuestion] = useState<string>();
     const [currentAnswer, setCurrentAnswer] = useState<
@@ -174,13 +176,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             );
 
             setMapDrivers([
-              ...lvnzyProject.neighborhood.drivers.filter(
+              ...lvnzyProject?.neighborhood.drivers.filter(
                 (d: any) =>
                   !!d &&
                   !!d.driverId &&
                   categoryDrivers.includes(d.driverId.driver)
               ),
-              ...lvnzyProject.connectivity.drivers.filter(
+              ...lvnzyProject?.connectivity.drivers.filter(
                 (d: any) =>
                   !!d &&
                   !!d.driverId &&
@@ -206,13 +208,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
               );
 
               setMapDrivers([
-                ...lvnzyProject.connectivity.drivers.filter(
+                ...lvnzyProject?.connectivity.drivers.filter(
                   (d: any) =>
                     !!d &&
                     !!d.driverId &&
                     categoryDrivers.includes(d.driverId.driver)
                 ),
-                ...lvnzyProject.neighborhood.drivers.filter(
+                ...lvnzyProject?.neighborhood.drivers.filter(
                   (d: any) =>
                     !!d &&
                     !!d.driverId &&
@@ -367,14 +369,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         }
 
         const stream = makeStreamingJsonRequest({
-          url: `${baseApiUrl}ai/ask-stream-brick360`,
+          url: `${baseApiUrl}ai/ask-stream-brick360-v2`,
           method: "POST",
           payload: {
             question,
             sessionId: currentSessionId,
             userId: user?._id,
-            dataPointCategory: dataPoint.dataPointCategory,
-            lvnzyProjectId: lvnzyProject._id,
+            userProjects
           },
         });
 

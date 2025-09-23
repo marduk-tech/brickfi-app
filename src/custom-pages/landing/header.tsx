@@ -41,7 +41,7 @@ const LandingHeader: React.FC<{
         top: 0,
         width: "100%",
         padding: 16,
-        backgroundColor: "#32495e"
+        backgroundColor: bgColor || "#32495e"
       }}
       align="center"
     >

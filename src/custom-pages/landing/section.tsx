@@ -400,7 +400,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
             autoPlay
             muted
             loop
-            height={isMobile ? 500 : 700}
+            height={isMobile ? 450 : 700}
             style={{ margin: "auto" }}
           >
             <source src={sectionData.mediaUrl} type="video/mp4" />

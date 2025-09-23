@@ -175,7 +175,7 @@ export default function MainLanding() {
       <LandingHeader></LandingHeader>
       <SectionLeft
         sectionData={{
-          heading: "Don't Leave Your Next Property Purchase To Guesswork",
+          heading: "Stress Free Home Buying",
           mainImgAltText: "About Brickfi",
           subHeading: whoAreWeText as any,
           primaryImageSize: "90%",

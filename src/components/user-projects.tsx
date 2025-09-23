@@ -2,7 +2,7 @@
 
 import { Flex, Tooltip, Typography } from "antd";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useDevice } from "../hooks/use-device";
 import { useWindowDimensions } from "../hooks/use-browser-safe";
 import { useUser } from "../hooks/use-user";
@@ -22,6 +22,7 @@ import { LvnzyProject } from "../types/LvnzyProject";
 import DynamicReactIcon from "./common/dynamic-react-icon";
 import GradientBar from "./common/grading-bar";
 import { Loader } from "./common/loader";
+import Brick360Chat from "./brick-360/brick360-chat";
 const { Paragraph } = Typography;
 
 export function UserProjects({
@@ -31,6 +32,9 @@ export function UserProjects({
 }) {
   const { user } = useUser();
   const { width } = useWindowDimensions();
+  const brick360ChatRef = useRef<{
+    expandChat: () => void;
+  } | null>(null);
 
   const router = useRouter();
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
@@ -271,6 +275,15 @@ export function UserProjects({
           )
           .map((p: any) => renderLvnzyProject(p))}
       </Flex>
+      <Brick360Chat
+        userProjects={lvnzyProjects.map((p) => {
+          return {
+            name: p.meta.projectName as string,
+            id: p._id as string,
+          };
+        })}
+        ref={brick360ChatRef}
+      />
     </Flex>
   );
 }

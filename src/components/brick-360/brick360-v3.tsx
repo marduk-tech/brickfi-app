@@ -20,18 +20,22 @@ import {
   Brick360DataPoints,
   LocalStorageKeys,
 } from "../../libs/constants";
-import { COLORS, FONT_SIZE, HORIZONTAL_PADDING } from "../../theme/style-constants";
+import {
+  COLORS,
+  FONT_SIZE,
+  HORIZONTAL_PADDING,
+} from "../../theme/style-constants";
 import Brick360Chat from "./brick360-chat";
 import { useDevice } from "@/hooks/use-device";
 import { useWindowDimensions } from "@/hooks/use-browser-safe";
+import { Brick360Details } from "./brick-360-details";
 
 const FAKE_TIMER_SECS = 700;
 
-export function Brick360v2() {
+export function Brick360v3() {
   const { lvnzyProjectId } = useParams<{ lvnzyProjectId: string }>()!;
-  const {isMobile} = useDevice();
-    const { width } = useWindowDimensions();
-  
+  const { isMobile } = useDevice();
+  const { width } = useWindowDimensions();
 
   const brick360ChatRef = useRef<{
     expandChat: () => void;
@@ -139,7 +143,6 @@ export function Brick360v2() {
   const [selectedDataPointTitle, setSelectedDataPointTitle] = useState("");
   const [fakeInterval, setFakeInterval] = useState<any>();
 
-
   const isLvnzyProjectLoadingRef = useRef(lvnzyProjectIsLoading);
   useEffect(() => {
     isLvnzyProjectLoadingRef.current = lvnzyProjectIsLoading;
@@ -209,128 +212,27 @@ export function Brick360v2() {
       style={{
         margin: "auto",
         overflowX: "hidden",
-        width: isMobile
-                    ? "100%"
-                    : (width - HORIZONTAL_PADDING * 2),
+        width: isMobile ? "100%" : width - HORIZONTAL_PADDING * 2,
       }}
     >
       <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
 
-      <Tabs
-        tabBarGutter={24}
-        defaultActiveKey="brick-360"
-        tabBarStyle={{}}
-        style={{ padding: "0 8px" }}
-        items={[
-          {
-            key: "brick-360",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="LiaGgCircle"
-                  iconSet="lia"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Brick 360
-                </Typography.Text>
-              </Flex>
-            ),
-            children: (
-              <Brick360Tab
-                lvnzyProject={lvnzyProject}
-                scoreParams={scoreParams}
-                ref={scoreParamTourRef}
-                onDataPointClick={(sc, item) => {
-                  brick360ChatRef.current?.expandChat();
-                  setSelectedDataPointCategory(sc.key);
-                  setSelectedDataPointSubCategory((item as any)[0]);
-                  setSelectedDataPoint((item as any)[1]);
-                  setSelectedDataPointTitle(
-                    `${sc.title} > ${
-                      (Brick360DataPoints as any)[sc.key][(item as any)[0]][
-                        "label"
-                      ]
-                    }`
-                  );
-                }}
-              />
-            ),
-          },
-          {
-            key: "units",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="RiLayout2Fill"
-                  iconSet="ri"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Price/Units
-                </Typography.Text>
-              </Flex>
-            ),
-            children: <UnitsTab lvnzyProject={lvnzyProject} />,
-          },
-          {
-            key: "map",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="LiaMapMarkedAltSolid"
-                  iconSet="lia"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Map
-                </Typography.Text>
-              </Flex>
-            ),
-            children: <MapTab lvnzyProject={lvnzyProject} />,
-          },
-          {
-            key: "media",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="PiImagesDuotone"
-                  iconSet="pi"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Media
-                </Typography.Text>
-              </Flex>
-            ),
-            children: <MediaTab lvnzyProject={lvnzyProject} />,
-          },
-        ]}
-      ></Tabs>
+      <Brick360Details
+        lvnzyProject={lvnzyProject}
+        scoreParams={scoreParams}
+        ref={scoreParamTourRef}
+        onDataPointClick={(sc, item) => {
+          brick360ChatRef.current?.expandChat();
+          setSelectedDataPointCategory(sc.key);
+          setSelectedDataPointSubCategory((item as any)[0]);
+          setSelectedDataPoint((item as any)[1]);
+          setSelectedDataPointTitle(
+            `${sc.title} > ${
+              (Brick360DataPoints as any)[sc.key][(item as any)[0]]["label"]
+            }`
+          );
+        }}
+      />
 
       <Brick360Chat
         ref={brick360ChatRef}
@@ -350,7 +252,6 @@ export function Brick360v2() {
         }}
         steps={tourSteps}
       />
-
     </Flex>
   );
 }
