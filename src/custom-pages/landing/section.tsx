@@ -58,7 +58,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
       style={{
         width: "100%",
         backgroundColor: sectionData.bgColor || "white",
-        backgroundImage: sectionData.bgImage ? `url('/images/data-src-logos/${sectionData.bgImage}')` : "none",
+        backgroundImage: sectionData.bgImage ? `url('${sectionData.bgImage}')` : "none",
         backgroundSize: "cover",
         backgroundPosition: "center",
         padding: sectionData.verticalPadding

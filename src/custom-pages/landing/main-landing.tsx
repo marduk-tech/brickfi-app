@@ -1,6 +1,6 @@
 "use client";
 
-import { Collapse, CollapseProps, Flex, Typography } from "antd";
+import { Button, Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
 import { safeWindow } from "../../libs/browser-utils";
@@ -10,6 +10,7 @@ import LandingHeader from "./header";
 import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
+import Marquee from "react-fast-marquee";
 
 export default function MainLanding() {
   const { isMobile } = useDevice();
@@ -54,7 +55,7 @@ export default function MainLanding() {
           technology driven research. By collecting data from hundreds of legit
           sources & using AI to analyse, we provide 360 insights around Builder
           Credibility, Property Density, Growth Drivers, Price Point etc.
-          <br></br>All this, so that you can shortlist properties faster,
+          <br></br>All this, so that you can da properties faster,
           eliminate guess work and take decisions more confidently.
         </>
       ),
@@ -152,11 +153,10 @@ export default function MainLanding() {
         SEE SAMPLE BRICK360 REPORT
       </a> */}
       <Typography.Text
-        style={{ fontSize: FONT_SIZE.HEADING_2, display: "block", color: "white" }}
+        style={{ fontSize: FONT_SIZE.HEADING_1, display: "block", lineHeight: "120%"}}
       >
         The only platform that makes property buying fully transparent and
-        data-driven. Get detailed insights on builder credibility, price
-        evaluation, neighborhood analysis, property profile and more.
+        data-driven. .
       </Typography.Text>
     </Flex>
   );
@@ -172,23 +172,18 @@ export default function MainLanding() {
         scrollbarWidth: "none",
       }}
     >
-      <LandingHeader></LandingHeader>
+      <LandingHeader bgColor="transparent" logo="/images/brickfi-logo.png" color={COLORS.textColorDark}></LandingHeader>
       <SectionLeft
         sectionData={{
           heading: "Stress Free Home Buying",
           mainImgAltText: "About Brickfi",
           subHeading: whoAreWeText as any,
           primaryImageSize: "90%",
-          bgColor: "#32495e",
-          textColor: "white",
-          mediaUrl: "/images/landing/demo-landing-small-2.mp4?v=1",
-          imageContainerWidth: 50,
-          btn: {
-            link: "/requestreport",
-            txt: "Generate Free Report",
-          },
+          bgImage: "/images/landing/slide-1-bg.png",
+          imageContainerWidth: 40,
           fullHeight: true,
           verticalPadding: isMobile ? 125 : 0,
+
         }}
       ></SectionLeft>
 
@@ -221,11 +216,11 @@ export default function MainLanding() {
           ),
           mainImgUrl: "/images/landing/slide-4-v2.png",
           textColor: "white",
-          verticalPadding: 60,
+          verticalPadding: 100,
           primaryImageSize: isMobile ? "100%": "70%",
         }}
       ></SectionCenter>
-       <Flex
+       {/* <Flex
         style={{ backgroundColor: "#fdf7f6", paddingTop: isMobile ? 16 : 60 }}
         justify="center"
       >
@@ -233,8 +228,8 @@ export default function MainLanding() {
           src="/images/landing/divider.png"
           width={isMobile ? "80%" : "30%"}
         ></img>
-      </Flex>
-      <SectionCenter
+      </Flex> */}
+      {/* <SectionCenter
         sectionData={{
           bgColor: "#fdf7f6",
           heading: "",
@@ -244,7 +239,7 @@ export default function MainLanding() {
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
         }}
-      ></SectionCenter>
+      ></SectionCenter> */}
       <Typography.Text
         style={{
           fontSize: isMobile ? 50 : 60,
@@ -252,7 +247,7 @@ export default function MainLanding() {
           fontWeight: "bold",
           textAlign: "center",
           color: "white",
-          paddingTop: 48,
+          padding: "48px 0",
         }}
       >
         Our Offerings
@@ -261,6 +256,7 @@ export default function MainLanding() {
         sectionData={{
           id: "demo-brkfi",
           bgColor: "#32495e",
+       
           textColor: "white",
           heading: (
             <Flex vertical align="flex-start">
@@ -295,15 +291,37 @@ export default function MainLanding() {
                 provide human insights. Get upto three Brick360 Report to
                 analyse and compare properties on your own
               </Typography.Text>
+              <Button
+            type="primary"
+            onClick={() => {
+                safeWindow.location.href = "/brick360";
+            }}
+            style={{
+              alignSelf: "flex-start",
+              marginTop: 16,
+              fontSize: FONT_SIZE.HEADING_2,
+            }}
+          >
+            Explore Brick360
+          </Button>
             </Flex>
           ),
           subHeading: "",
           mainImgUrl: "/images/landing/offering-1.png",
-          verticalPadding: 60,
+          verticalPadding: 4,
           primaryImageSize: isMobile ? "100%":"60%",
           imageContainerWidth: 50,
         }}
       ></SectionLeft>
+       <Flex
+        style={{ backgroundColor: "#32495e", padding: "48px 0"}}
+        justify="center"
+      >
+        <img
+          src="/images/landing/divider.png"
+          width={isMobile ? "80%" : "30%"}
+        ></img>
+      </Flex>
       <SectionLeft
         sectionData={{
           id: "demo-brkfi",
@@ -340,85 +358,49 @@ export default function MainLanding() {
                 technology driven research. Get a free consultation with one of
                 our experts.
               </Typography.Text>
+              <Button
+            type="primary"
+            onClick={() => {
+                safeWindow.location.href = "/brickassist";
+            }}
+            style={{
+              alignSelf: "flex-start",
+              marginTop: 16,
+              fontSize: FONT_SIZE.HEADING_2,
+            }}
+          >
+            Explore BrickAssist
+          </Button>
             </Flex>
           ),
           bgColor: "#32495e",
           textColor: "white",
           subHeading: "",
           mainImgUrl: "/images/landing/offering-2.png",
-          verticalPadding: 60,
+          verticalPadding: 32,
           primaryImageSize: isMobile ? "100%":"60%",
           imageContainerWidth: 50,
         }}
       ></SectionLeft>
-      {/* <Flex
-        style={{ backgroundColor: "#32495e", paddingTop: isMobile ? 16 : 60 }}
-        justify="center"
-      >
-        <img
-          src="/images/landing/divider.png"
-          width={isMobile ? "80%" : "30%"}
-        ></img>
-      </Flex> */}
-      {/* <SectionLeft
-        sectionData={{
-          id: "demo-brkfi",
-          heading: "BRICK360",
-          subHeading: "Legit Sources. 200+ Data Points. One Report.",
-          mediaUrl: "/images/landing/demo-landing-small-2.mp4?v=1",
-          bgColor: "#32495e",
-          btn: {
-            link: LandingConstants.sampleReport,
-            txt: "See Sample Report",
-          },
-          textColor: "white",
-          verticalPadding: 60,
-          primaryImageSize: "80%",
-          imageContainerWidth: 50,
-        }}
-      ></SectionLeft> */}
 
-      <SectionCenter
+      <SectionRight
         sectionData={{
-          heading: "BRICK360",
+          heading: <Typography.Text style={{fontSize: FONT_SIZE.HEADING_1*1.8, lineHeight: "100%", textAlign: "left"}}>Data Backed Research. <br></br>Catered For You.</Typography.Text>,
           fullHeight: true,
           bgColor: "#fdf7f6",
 
           subHeading:
-            <Typography.Text style={{fontSize: FONT_SIZE.HEADING_1, marginBottom: 16}}>Legit Sources. 200+ Data Points. One Report.</Typography.Text>,
-          mainImgUrl: "/images/landing/slide-5.png",
+            <Typography.Text style={{fontSize: FONT_SIZE.HEADING_2*1.3, marginBottom: 16}}>Legit Sources. 200+ Data Points. One Report.</Typography.Text>,
+          mainImgUrl: "/images/landing/research.png",
           mainImgAltText:
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
+            imageContainerWidth: 50,
+            primaryImageSize: "90%"
         }}
-      ></SectionCenter>
-      <SectionLeft
-        sectionData={{
-          heading: "Insights that Lead to Clarity",
-          bgColor: "#fdf7f6",
-          btn: {
-            link: "/requestreport",
-            txt: "Generate Free Report",
-          },
-          subHeading:
-            "Our AI analyses every data point so that you don't have to. Get a clear understanding of what to look at, what's important and why its important.",
-          mainImgUrl: "/images/landing/slide-6.png",
-          mainImgAltText:
-            "Brickfi uses AI to make sense of data points and provide you more clarity.",
-        }}
-      ></SectionLeft>
-      <SectionCenter
-        sectionData={{
-          heading: "Nuanced Location Intelligence",
-          verticalPadding: isMobile ? 2 : 60,
-          subHeading: "",
-          bgColor: "#fdf7f6",
-          mainImgUrl: "/images/landing/slide-7.png",
-          mainImgAltText:
-            "See location insights visually on a map with Brickfi.",
-        }}
-      ></SectionCenter>
+      ></SectionRight>
+     
 
-      <SectionCenter
+      {/* <SectionCenter
         sectionData={{
           verticalPadding: 100,
           heading: "Key Partners" ,
@@ -431,8 +413,18 @@ export default function MainLanding() {
           mainImgAltText:
             "Brickfi covers 6 micro markets, 100+ developers and 400+ projects across Bengaluru",
         }}
-      ></SectionCenter>
-      <SectionRight
+      ></SectionCenter> */}
+      <Flex style={{backgroundColor: "#fdf7f6", padding: "100px 0"}}>
+        
+        <Marquee speed={20}>
+          <Flex>
+          {[1,2,3,4,5].map((item: number) => {
+            return <img style={{marginRight: 24}} width={250} src={`/images/landing/brands/${item}.png`}/>
+          })}
+          </Flex>
+        </Marquee>
+        </Flex>
+      {/* <SectionRight
         sectionData={{
           verticalPadding: 100,
           bgColor: "#fdf7f6",
@@ -441,10 +433,10 @@ export default function MainLanding() {
             "Bangalore continues its strong growth as the IT Capital of India capturing the largest percentage  of Global Capability Centers (GCCs) at 35% in across India. For homebuyers and investors, this translates into stronger rental yields, better infrastructure, and future-proof property value.",
           mainImgUrl: "/images/landing/slide-11-v2.png",
           mainImgAltText: "Diversify with real estate",
-          primaryImageSize: "80%",
+          primaryImageSize: "60%",
         }}
-      ></SectionRight>
-      <SectionCenter
+      ></SectionRight> */}
+      {/* <SectionCenter
         sectionData={{
           heading: "FAQ",
           bgColor: "#fdf7f6",
@@ -468,7 +460,7 @@ export default function MainLanding() {
             </Flex>
           ),
         }}
-      ></SectionCenter>
+      ></SectionCenter> */}
       <LandingFooter></LandingFooter>
     </Flex>
   );
