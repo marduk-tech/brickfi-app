@@ -208,7 +208,7 @@ export default function ReportLanding() {
                 fontWeight: "bold",
               }}
             >
-              What Property Brochures or Billboars Won't Tell You
+              What Property Brochures or Billboards Won&apos;t Tell You
             </Typography.Text>
           ),
           subHeading: whoAreWeText,
