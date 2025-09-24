@@ -275,7 +275,7 @@ export function UserProjects({
           )
           .map((p: any) => renderLvnzyProject(p))}
       </Flex>
-      <Brick360Chat
+      {/* <Brick360Chat
         userProjects={lvnzyProjects.map((p) => {
           return {
             name: p.meta.projectName as string,
@@ -283,7 +283,7 @@ export function UserProjects({
           };
         })}
         ref={brick360ChatRef}
-      />
+      /> */}
     </Flex>
   );
 }
