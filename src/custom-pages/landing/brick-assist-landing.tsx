@@ -1,3 +1,5 @@
+"use client";
+
 import { CaretRightOutlined } from "@ant-design/icons";
 import { Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useState } from "react";

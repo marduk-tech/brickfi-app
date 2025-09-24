@@ -33,7 +33,7 @@ export const metadata: Metadata = {
     siteName: "Brickfi",
     images: [
       {
-        url: "/images/brickfi-preview.png",
+        url: "/images/brick360-preview.png",
         width: 1200,
         height: 630,
         alt: "Brickfi | Get a 360 Report Card across any property in Bangalore",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "Brickfi | Get a 360 Report Card across any property in Bangalore",
     description:
       "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
-    images: ["/images/brickfi-preview.png"],
+    images: ["/images/brick360-preview.png"],
   },
   robots: {
     index: true,

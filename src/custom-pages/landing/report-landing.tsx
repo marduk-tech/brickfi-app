@@ -13,10 +13,6 @@ import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import Marquee from "react-fast-marquee";
 const { Paragraph } = Typography;
 
-const PAGE_COLORS = {
-  BLUISH: "#0f5f8c",
-};
-
 export default function ReportLanding() {
   const { isMobile } = useDevice();
 
@@ -278,7 +274,7 @@ export default function ReportLanding() {
         sectionData={{
           heading: "The Most Data Backed Approach",
           fullHeight: true,
-          bgColor: PAGE_COLORS.BLUISH,
+          bgColor: COLORS.LANDING.BLUISH,
           textColor: "white",
 
           subHeading: (
@@ -302,7 +298,7 @@ export default function ReportLanding() {
       <SectionLeft
         sectionData={{
           heading: "Find Red Flags, Challenges, Opportunites & More",
-          bgColor: PAGE_COLORS.BLUISH,
+          bgColor: COLORS.LANDING.BLUISH,
           textColor: "white",
           btn: {
             link: "/requestreport",
@@ -322,7 +318,7 @@ export default function ReportLanding() {
           heading: "Nuanced Location Intelligence",
           verticalPadding: isMobile ? 2 : 60,
           subHeading: "",
-           bgColor: PAGE_COLORS.BLUISH,
+           bgColor: COLORS.LANDING.BLUISH,
           textColor: "white",
           mainImgUrl: "/images/landing/slide-7.png",
           mainImgAltText:
