@@ -17,7 +17,7 @@ const LandingHeader: React.FC<{
   const router = useRouter();
   const navItems = [
     {
-      link: LandingConstants.genReportLink,
+      link: LandingConstants.reportLink,
       label: "Brick360 Report",
     },
     {
@@ -105,7 +105,8 @@ const LandingHeader: React.FC<{
                 style={{
                   color: color || COLORS.textColorLight,
                   fontSize: FONT_SIZE.PARA,
-                  textDecoration: 'none'
+                  textDecoration: 'none',
+                  textShadow: "0.5px 0.5px 0 white"
                 }}
               >
                 {item.label}

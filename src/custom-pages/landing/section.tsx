@@ -54,6 +54,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
 
   return (
     <Flex
+    id={sectionData.id || `${Math.round(Math.random() * 1000)}`}
       vertical={isMobile}
       gap={isMobile ? 16 : 0}
       style={{

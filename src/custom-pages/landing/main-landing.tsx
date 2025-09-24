@@ -157,17 +157,15 @@ export default function MainLanding() {
     >
       <LandingHeader
         bgColor="transparent"
-        logo="/images/brickfi-logo.png"
         color={COLORS.textColorDark}
       ></LandingHeader>
       <SectionLeft
         sectionData={{
           itemsAlignSectionLeft: "flex-start",
-
           heading: (
             <Typography.Text
               style={{
-                fontSize: isMobile ? FONT_SIZE.HEADING_1 * 2 : FONT_SIZE.HEADING_1 * 2.5,
+                fontSize: isMobile ? FONT_SIZE.HEADING_1 * 2 : FONT_SIZE.HEADING_1 * 2.2,
                 lineHeight: "100%",
                 fontWeight: "bold",
                 textShadow: "3px 3px 0 white"
@@ -177,6 +175,10 @@ export default function MainLanding() {
             </Typography.Text>
           ),
           mainImgAltText: "About Brickfi",
+          btn: {
+            link: "/#brk360",
+            txt: "Explore Offerings",
+          },
           subHeading: (
             <Typography.Text
               style={{
@@ -190,8 +192,7 @@ export default function MainLanding() {
                 maxWidth: 500,
               }}
             >
-              The Unbiased, Customer Focused and Data Driven platform to enable
-              smart home buying.
+             The only platform which provides you unbiased and data backed advise for your next property purchase.
             </Typography.Text>
           ),
           primaryImageSize: "90%",
@@ -210,18 +211,20 @@ export default function MainLanding() {
             <Flex vertical>
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                  fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
                   marginBottom: 8,
                   lineHeight: "100%",
+                  fontWeight: 200
                 }}
               >
                 Buying Property is Broken.
               </Typography.Text>
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                  fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
                   color: COLORS.primaryColor,
                   lineHeight: "100%",
+                  fontWeight: 600,
                   marginBottom: 32,
                 }}
               >
@@ -237,10 +240,10 @@ export default function MainLanding() {
       ></SectionCenter>
 
       <Typography.Text
+        id="brk360"
         style={{
-          fontSize: isMobile ? 50 : 60,
+          fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
           backgroundColor: COLORS.LANDING.BLUISH,
-          fontWeight: "bold",
           textAlign: "center",
           color: "white",
           padding: "48px 0",
@@ -250,9 +253,7 @@ export default function MainLanding() {
       </Typography.Text>
       <SectionLeft
         sectionData={{
-          id: "demo-brkfi",
           bgColor: COLORS.LANDING.BLUISH,
-
           textColor: "white",
           heading: (
             <Flex vertical align="flex-start">
@@ -384,7 +385,7 @@ export default function MainLanding() {
           heading: (
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.8,
+                fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
                 lineHeight: "100%",
                 textAlign: "left",
               }}

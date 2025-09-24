@@ -383,7 +383,7 @@ export const LandingConstants = {
   aboutUsLink: "/aboutus",
   instaLink: "https://www.instagram.com/brickfi.in/",
   blogLink: "https://blog.brickfi.in/",
-  genReportLink: "/",
+  reportLink: "/brick360",
   genReportFormLink: "/requestreport",
   appLink: "/app",
   sampleReport: "/app/brick360/67e6534e1336dda74a5f0502",
@@ -513,3 +513,8 @@ export const DRIVER_CATEGORIES = {
     drivers: [],
   },
 };
+
+export const LANDING_CONSTANTS = {
+  title : "The Stress Free Home Buying Experience",
+  description: "The only platform which provides you unbiased and data backed advise for your next property purchase. Generate a free Brick360 report around property, investment, builder and more for any property in Bangalore"
+}
