@@ -2,7 +2,7 @@
 
 import { useDevice } from "@/hooks/use-device";
 import { CustomError } from "@/libs/error-handler";
-import { getRealEstateDevelopersQuery } from "@/queries/real-estate-developer";
+import { getRealEstateDeveloperBySlugQuery } from "@/queries/real-estate-developer";
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "@/theme/style-constants";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Flex, Spin, Tabs, TabsProps, Typography } from "antd";
@@ -14,18 +14,18 @@ import RealEstateDeveloperLoading from "./loading";
 const { Paragraph } = Typography;
 
 interface RealEstateDeveloperClientProps {
-  developerId: string;
+  slug: string;
 }
 
 export default function RealEstateDeveloperClient({
-  developerId,
+  slug,
 }: RealEstateDeveloperClientProps) {
   const {
     data: developer,
     isLoading,
     isError,
     error,
-  } = useQuery({ ...getRealEstateDevelopersQuery(developerId), retry: 3 });
+  } = useQuery({ ...getRealEstateDeveloperBySlugQuery(slug), retry: 3 });
 
   const { isMobile } = useDevice();
 
