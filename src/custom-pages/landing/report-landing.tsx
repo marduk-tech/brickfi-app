@@ -225,6 +225,7 @@ export default function ReportLanding() {
           imageContainerWidth: 40,
           primaryImageSize: "100%",
           fullHeight: true,
+          verticalPadding: isMobile ? 100 : 0
         }}
       ></SectionLeft>
 

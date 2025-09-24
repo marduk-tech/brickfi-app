@@ -20,6 +20,7 @@ interface SectionProps {
   primaryImageSize?: string;
   mediaUrl?: string;
   mainImgAlign?: string;
+  itemsAlignSectionLeft?: string; 
   btn?: {
     link?: string;
     txt: string;
@@ -81,7 +82,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
             : "auto",
           marginLeft: isMobile ? 16 : 64,
         }}
-        align={isMobile ? "center" : "flex-end"}
+        align={isMobile ? "center" : sectionData.itemsAlignSectionLeft ? sectionData.itemsAlignSectionLeft : "flex-end"}
         justify="center"
       >
         {typeof sectionData.heading == "string" ? (
