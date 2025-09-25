@@ -13,6 +13,8 @@ import RealEstateDeveloperLoading from "./loading";
 import LandingHeader from "@/custom-pages/landing/header";
 import LandingFooter from "@/custom-pages/landing/footer";
 import { capitalize } from "@/libs/lvnzy-helper";
+import { safeWindow } from "@/libs/browser-utils";
+import { LandingConstants } from "@/libs/constants";
 
 const { Paragraph } = Typography;
 
@@ -240,6 +242,9 @@ export default function RealEstateDeveloperClient({
             align="center"
             style={{ width: "100%", marginTop: 32 }}
             justify="center"
+            onClick={() => {
+              safeWindow.location.assign(LandingConstants.reportLink);
+            }}
           >
             <img
               style={{
