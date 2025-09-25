@@ -6,7 +6,7 @@ import { useUser } from "../hooks/use-user";
 import { safeWindow } from "../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
-export function LoginForm() {
+export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
   // auth
   const {
     generateOtp: generateOtpMutation,
@@ -22,8 +22,6 @@ export function LoginForm() {
 
   const [form] = Form.useForm();
 
-  const [showUserDetailsForm, setShowUserDetailsForm] = useState(false);
-
   useEffect(() => {
     let timer: any;
     if (resendTimer > 0 && loginStatus === "OTP_SENT") {
@@ -33,14 +31,6 @@ export function LoginForm() {
     }
     return () => clearTimeout(timer);
   }, [resendTimer, loginStatus]);
-
-  const { user, isLoading: userLoading } = useUser();
-
-  useEffect(() => {
-    if (user && !user.profile?.email) {
-      setShowUserDetailsForm(true);
-    }
-  }, [userLoading, user]);
 
   const generateOtp = async ({
     mobile,
@@ -104,7 +94,9 @@ export function LoginForm() {
           mobile: values.mobileNumber,
         })
         .then((user: any) => {
-          if (!showUserDetailsForm) {
+          if (onMobVerified) {
+            onMobVerified(user);
+          } else {
             safeWindow.location.reload();
           }
         });
@@ -119,30 +111,11 @@ export function LoginForm() {
     <>
       <div
         style={{
-          margin: "auto",
           backgroundColor: "rgba(255,255,255,0.95)",
           padding: 8,
           borderRadius: 4,
         }}
       >
-        <Flex vertical>
-          <Typography.Text
-            style={{ fontSize: FONT_SIZE.HEADING_1 * 1.35, fontWeight: 500 }}
-          >
-            Welcome To Brickfi
-          </Typography.Text>
-          <Typography.Text
-            style={{
-              fontSize: FONT_SIZE.HEADING_3,
-              marginBottom: 24,
-              color: COLORS.textColorMedium,
-            }}
-          >
-            {showUserDetailsForm
-              ? "Please update your basic details"
-              : "Login/Signup with your mobile number "}
-          </Typography.Text>
-        </Flex>
         {/* <Divider style={{ marginTop: 8, marginBottom: 32 }} /> */}
 
         <Flex>
@@ -198,15 +171,6 @@ export function LoginForm() {
                         disableParentheses
                       />
                     </Form.Item>
-                    {/* <Typography.Text
-style={{
-fontSize: FONT_SIZE.default,
-color: COLORS.textColorLight,
-width: "100%",
-}}
->
-By signing up, you agree to the terms & conditions.
-</Typography.Text> */}
 
                     {loginStatus === "OTP_SENT" && (
                       <Button
@@ -294,7 +258,8 @@ By signing up, you agree to the terms & conditions.
                   generateOtpMutation.isPending || loginMutation.isPending
                 }
                 style={{
-                  fontSize: FONT_SIZE.HEADING_2,
+                  fontSize: FONT_SIZE.HEADING_3,
+                  height: 40,
                   backgroundColor: COLORS.textColorDark,
                 }}
               >

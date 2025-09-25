@@ -34,10 +34,9 @@ import LandingHeader from "../../custom-pages/landing/header";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "./dynamic-react-icon";
 import LandingFooter from "@/custom-pages/landing/footer";
-import { LoginForm } from "../login-forms";
 const { Paragraph } = Typography;
 
-export const NewReportRequestFormV3 = () => {
+export const NewReportRequestForm = () => {
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
   const [selectedProjects, setSelectedProjects] = useState<ReraProject[]>([]);
@@ -438,10 +437,7 @@ export const NewReportRequestFormV3 = () => {
                   >
                     <Input />
                   </Form.Item>
-                  <LoginForm onMobVerified={(updatedUser: any) => {
-
-                  }}></LoginForm>
-                  {/* <Form.Item
+                  <Form.Item
                     name="mobile"
                     label={
                       <Flex vertical>
@@ -470,7 +466,7 @@ export const NewReportRequestFormV3 = () => {
                     ]}
                   >
                     <Input />
-                  </Form.Item> */}
+                  </Form.Item>
                 </Form>
               </>
             )}

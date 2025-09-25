@@ -1,8 +1,8 @@
 "use client";
 
-import { NewReportRequestFormV2 } from "@/components/common/new-report-request-form-v2";
+import { NewReportRequestForm } from "@/components/common/new-report-request-form";
 
 
 export default function RequestReportPage() {
-  return <NewReportRequestFormV2 />;
+  return <NewReportRequestForm />;
 }

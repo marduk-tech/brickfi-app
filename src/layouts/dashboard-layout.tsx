@@ -21,7 +21,9 @@ import { useDevice } from "../hooks/use-device";
 
 const { Header, Content } = Layout;
 
-export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { user, isLoading: userLoading } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -29,7 +31,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
   const { isMobile } = useDevice();
   const router = useRouter();
 
-  const { lvnzyProjectId, collectionId } = useParams<{ lvnzyProjectId: string, collectionId: string }>()!;
+  const { lvnzyProjectId, collectionId } = useParams<{
+    lvnzyProjectId: string;
+    collectionId: string;
+  }>()!;
 
   useEffect(() => {
     const userItem = safeStorage.getItem(LocalStorageKeys.user);
@@ -139,7 +144,28 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
         {showUserDetailsForm ? (
           <UserDetailsForm ignoreCity={true} />
         ) : (
-          <LoginForm></LoginForm>
+          <Flex vertical>
+            <Flex vertical>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_1 * 1.35,
+                  fontWeight: 500,
+                }}
+              >
+                Welcome To Brickfi
+              </Typography.Text>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_3,
+                  marginBottom: 24,
+                  color: COLORS.textColorMedium,
+                }}
+              >
+                Login/Signup with your mobile number
+              </Typography.Text>
+            </Flex>
+            <LoginForm></LoginForm>
+          </Flex>
         )}
       </Modal>
       <Layout
@@ -184,8 +210,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 <img
                   src="/images/brickfi-assist.png"
                   onClick={() => {
-                    if (LandingConstants.brickAssistLink.startsWith('http')) {
-                      safeWindow.location.assign(LandingConstants.brickAssistLink);
+                    if (LandingConstants.brickAssistLink.startsWith("http")) {
+                      safeWindow.location.assign(
+                        LandingConstants.brickAssistLink
+                      );
                     } else {
                       router.push(LandingConstants.brickAssistLink);
                     }
@@ -263,9 +291,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 scrollbarWidth: "none",
               }}
             >
-              <CustomErrorBoundary>
-{children}
-              </CustomErrorBoundary>
+              <CustomErrorBoundary>{children}</CustomErrorBoundary>
             </Content>
           )}
         </Layout>
