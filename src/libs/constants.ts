@@ -17,6 +17,7 @@ export const queryKeys = {
   user: "user",
   paymentById: "paymentById",
   getRealEstateDeveloperById: "getRealEstateDeveloperById",
+  glossary: "glossary",
 };
 
 export const LocalStorageKeys = {
