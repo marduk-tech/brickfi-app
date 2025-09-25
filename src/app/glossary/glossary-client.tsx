@@ -97,10 +97,10 @@ const GlossaryCard: React.FC<{ item: GlossaryItem }> = ({ item }) => {
         transition: "all 0.3s ease",
       }}
       styles={{
-        body: { padding: 24 },
+        body: { padding: 16 },
       }}
     >
-      <Flex vertical justify="space-between" style={{ minHeight: 180 }}>
+      <Flex vertical justify="space-between" style={{ minHeight: 100 }}>
         <div>
           {item.title && (
             <Typography.Title
@@ -108,6 +108,7 @@ const GlossaryCard: React.FC<{ item: GlossaryItem }> = ({ item }) => {
               style={{
                 fontSize: FONT_SIZE.HEADING_3,
                 fontWeight: 600,
+                margin: 0,
                 marginBottom: 12,
                 color: COLORS.textColorDark,
               }}

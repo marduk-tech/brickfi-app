@@ -208,7 +208,7 @@ export default function ReportLanding() {
                 fontWeight: "bold",
               }}
             >
-              What Property Brochures or Billboards Won&apos;t Tell You
+              360 Insights 
             </Typography.Text>
           ),
           subHeading: whoAreWeText,
@@ -236,7 +236,7 @@ export default function ReportLanding() {
                 marginBottom: 16,
               }}
             >
-              Backed By Legit Data. Qualified ratings across Builder, Property,
+              Qualified ratings across Builder, Property,
               Location & Financials.
             </Typography.Text>
           ),
