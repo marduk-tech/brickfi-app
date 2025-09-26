@@ -125,6 +125,7 @@ export default function RealEstateDeveloperClient({
           border: `1.5px solid ${COLORS.borderColor}`,
           borderRadius: 8,
           padding: 4,
+          margin: 8,
         }}
         vertical
       >
@@ -136,10 +137,11 @@ export default function RealEstateDeveloperClient({
             backgroundPosition: "center",
             backgroundSize: "60%",
             backgroundRepeat: "no-repeat",
-            height: 100,
+            height: isMobile ? 150 : 100,
             width: "100%",
           }}
         ></div>
+
         <Flex vertical style={{ marginTop: 8 }}>
           <Typography.Text
             style={{
@@ -181,9 +183,9 @@ export default function RealEstateDeveloperClient({
         vertical
         style={{
           maxWidth: MAX_WIDTH,
-          margin: "auto",
           paddingTop: 100,
           paddingBottom: 100,
+          margin: isMobile ? 8 : "auto",
         }}
       >
         <Typography.Text style={{ color: COLORS.textColorMedium }}>
@@ -196,19 +198,19 @@ export default function RealEstateDeveloperClient({
             {developer.name}
           </Typography.Text>
           <Paragraph
-            style={{ marginBottom: 32 }}
+            style={{ marginBottom: 32, fontSize: FONT_SIZE.HEADING_3 }}
             ellipsis={{ rows: 6, expandable: true }}
           >
             {developer.info?.oneLiner}
           </Paragraph>
 
+          <Typography.Text style={{ color: COLORS.primaryColor, margin: 8}}>
+            DEVELOPER PROJECTS
+          </Typography.Text>
           {/* <Tabs defaultActiveKey="projects" items={items} /> */}
-          <Flex style={{ width: "100%", flexWrap: "wrap" }} gap={16}>
+          <Flex style={{ width: "100%", flexWrap: "wrap" }} gap={8}>
             {developer.genDetails.details.projects
-              ?.slice(
-                0,
-                10
-              )
+              ?.slice(0, isMobile ? 5: 10)
               .map((project: any, index: number) => {
                 return renderProject(project, index);
               })}
@@ -240,7 +242,7 @@ export default function RealEstateDeveloperClient({
 
           <Flex
             align="center"
-            style={{ width: "100%", marginTop: 32 }}
+            style={{ width: "100%", marginTop: 72 }}
             justify="center"
             onClick={() => {
               safeWindow.location.assign(LandingConstants.reportLink);
@@ -250,10 +252,11 @@ export default function RealEstateDeveloperClient({
               style={{
                 border: `1px solid ${COLORS.borderColor}`,
                 borderRadius: 8,
+                maxWidth: 500
               }}
-              src="/images/builder-page/free-report-cta.png"
-              height={300}
-              width="auto"
+              src={isMobile ? "/images/builder-page/free-report-cta-mob.png":"/images/builder-page/free-report-cta.png"}
+              height="auto"
+              width="100%"
             ></img>
           </Flex>
         </Flex>
