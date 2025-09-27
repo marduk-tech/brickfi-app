@@ -20,7 +20,7 @@ export const COLORS = {
   bgColorBlue: "#e7f6ff",
 
   LANDING: {
-    BLUISH: "#0f5f8c",
+    BLUISH: "#0c4a6d",
     LIGHT_PINK : "#fdf7f6"
   },
 };

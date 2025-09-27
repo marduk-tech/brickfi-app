@@ -1,6 +1,6 @@
 "use client";
 
-import { Collapse, CollapseProps, Flex, Typography } from "antd";
+import { Button, Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
 import { safeWindow } from "../../libs/browser-utils";
@@ -11,6 +11,7 @@ import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import Marquee from "react-fast-marquee";
+import { NewReportRequestForm } from "@/components/common/new-report-request-form";
 const { Paragraph } = Typography;
 
 export default function ReportLanding() {
@@ -90,22 +91,6 @@ export default function ReportLanding() {
   };
   const faqs: CollapseProps["items"] = [
     {
-      key: "what-brickfi",
-      label: getFaqHeading("What is Brickfi ?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          Brickfi is a customer focused real estate platform & advisory in
-          Bangalore. <br></br> Our difference lies in being buyer focused & our
-          technology driven research. By collecting data from hundreds of legit
-          sources & using AI to analyse, we provide 360 insights around Builder
-          Credibility, Property Density, Growth Drivers, Price Point etc.
-          <br></br>All this, so that you can shortlist properties faster,
-          eliminate guess work and take decisions more confidently.
-        </>
-      ),
-    },
-    {
       key: "diff-q",
       label: getFaqHeading("What is Brick360 Report? "),
       style: faqPanelStyle,
@@ -123,7 +108,7 @@ export default function ReportLanding() {
     },
     {
       key: "paid-q",
-      label: getFaqHeading("Is this a paid service ?"),
+      label: getFaqHeading("Is this report free ?"),
       style: faqPanelStyle,
       children: getFaqText(
         <>
@@ -142,6 +127,83 @@ export default function ReportLanding() {
         </>
       ),
     },
+    {
+      key: "does-report-compare-properties",
+      label: getFaqHeading("Does the report compare multiple properties?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+          You can download report for multiple properties and do a side by side
+          comparison across different data points.
+        </>
+      ),
+    },
+    {
+      key: "how-accurate-is-data",
+      label: getFaqHeading("How accurate is the data in the report?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+          We have put a system in place to fetch data from verified government
+          and credible public sources. Besides, we also cross check as well as
+          manually check the data for accuracy.
+        </>
+      ),
+    },
+    {
+      key: "what-issues-revealed",
+      label: getFaqHeading("What kind of issues can the report reveal?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+         You can identify issues like high tension lines near the property, upcoming metro stations, understand premiumess of the property, look at timely delivery committment of the builder and much more. 
+        </>
+      ),
+    },
+    {
+      key: "will-property-appreciate",
+      label: getFaqHeading(
+        "Can this report tell me if the property will appreciate?"
+      ),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+          It includes a “Growth Potential” analysis based on location trends,
+          upcoming infrastructure, and historical price patterns.
+        </>
+      ),
+    },
+    {
+      key: "different-from-broker",
+      label: getFaqHeading("How is this different from a broker’s advice?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+          Brokers are often incentivized to sell specific properties and heavily market them. We do not have tie ups to specific properties and prioritize 100% data-driven and unbiased insights.
+        </>
+      ),
+    },
+    {
+      key: "how-quickly-report",
+      label: getFaqHeading("How quickly can I get my property report?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+         A Brick360 report can be generated in as little as an hour. In some cases, it may take longer to gather all the necessary property details, but the report will always be delivered within 24–48 hours.
+        </>
+      ),
+    },
+    {
+      key: "ask-questions-after-report",
+      label: getFaqHeading("What if I have a question with the report ?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        <>
+         The report is interactive and has an AI assistant which lets you ask unlimited questions
+          for clarity and to generate more insights. You can also reach out to the Brickfi team at hello@brickfi.in in case you have any more specific questions. 
+        </>
+      ),
+    }
   ];
 
   useState(false);
@@ -203,51 +265,86 @@ export default function ReportLanding() {
               style={{
                 fontSize: isMobile
                   ? FONT_SIZE.HEADING_1 * 1.5
-                  : FONT_SIZE.HEADING_1 * 2,
+                  : FONT_SIZE.HEADING_1 * 1.8,
                 lineHeight: "100%",
                 fontWeight: "bold",
+                paddingTop: isMobile ? 60: 0
               }}
             >
-              360 Insights 
+              The 360° Scorecard for Smarter Property Decisions
             </Typography.Text>
           ),
-          subHeading: whoAreWeText,
+          subHeading:
+            "Get an independent, data-backed property report with builder history, surroundings, pricing, growth potential & more. Powered by 100% verified government and public data.",
           mainImgUrl: "/images/landing/brick360-landing-2.png",
           bgColor: "#fdf7f6",
           btn: {
             link: "/requestreport",
             txt: "Generate Free Report",
           },
-          imageContainerWidth: 40,
+          imageContainerWidth: 45,
           primaryImageSize: "100%",
           fullHeight: true,
-          verticalPadding: isMobile ? 100 : 0
+          verticalPadding: isMobile ? 50 : 0,
         }}
       ></SectionLeft>
+      {/* <SectionCenter
+        sectionData={{
+          bgColor: "#fdf7f6",
+          heading: "",
+          subHeading: "",
+          mainImgAltText: "About Brickfi",
+          primaryImageSize: isMobile ? "100%":"60%",
+          mainImgUrl: "/images/landing/report-numbers.png",
+          imageContainerWidth: 50,
+          verticalPadding:1
+        }}
+      ></SectionCenter> */}
 
       <SectionCenter
         sectionData={{
-          bgColor: "#fdf7f6",
-          heading: "BRICK360",
+          bgColor: COLORS.LANDING.BLUISH,
+          heading: "",
           subHeading: (
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_1,
-                marginBottom: 16,
-              }}
-            >
-              Qualified ratings across Builder, Property,
-              Location & Financials.
-            </Typography.Text>
+            <Flex vertical>
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 1.2
+                    : FONT_SIZE.HEADING_1 * 1.4,
+                  marginBottom: 8,
+                  lineHeight: "100%",
+                  fontWeight: 200,
+                  color: COLORS.textColorVeryLight,
+                }}
+              >
+                Property Buying can be Risky & Confusing.
+              </Typography.Text>
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 1.2
+                    : FONT_SIZE.HEADING_1 * 1.4,
+                  color: COLORS.primaryColor,
+                  lineHeight: "100%",
+                  fontWeight: 600,
+                  marginBottom: 32,
+                }}
+              >
+                Brick360 Report Gives You Clarity & Confidence
+              </Typography.Text>
+            </Flex>
           ),
           mainImgAltText: "About Brickfi",
-          primaryImageSize: isMobile ? "50%" : "100%",
-          mediaUrl: "/images/landing/demo-2.mp4?v=1",
+          primaryImageSize: isMobile ? "100%" : "60%",
+          mainImgUrl: isMobile
+            ? "/images/landing/comparison-mob.png"
+            : "/images/landing/comparison.png",
           imageContainerWidth: 50,
-          verticalPadding: 8
+          verticalPadding: 42,
         }}
       ></SectionCenter>
-      <Flex
+      {/* <Flex
         style={{ backgroundColor: "#fdf7f6", paddingTop: isMobile ? 16 : 0 }}
         justify="center"
       >
@@ -255,10 +352,10 @@ export default function ReportLanding() {
           src="/images/landing/divider.png"
           width={isMobile ? "80%" : "30%"}
         ></img>
-      </Flex>
+      </Flex> */}
       <SectionCenter
         sectionData={{
-          bgColor: "#fdf7f6",
+          bgColor: COLORS.LANDING.BLUISH,
           heading: "",
           subHeading: "",
           primaryImageSize: isMobile ? "100%" : "80%",
@@ -267,27 +364,123 @@ export default function ReportLanding() {
             : "/images/landing/slide-9-v2.png",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
+          verticalPadding: 100,
         }}
       ></SectionCenter>
 
+      <SectionLeft
+        sectionData={{
+          heading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                lineHeight: "100%",
+              }}
+            >
+              Breaking Down The Layout
+            </Typography.Text>
+          ),
+          subHeading:
+            "Don't judge a property by its brochure (said someone); Brick360 looks at numbers like open space, unit density, unit distribution, amenities mix and more to give a deeper insights into property layout.",
+          imageContainerWidth: 50,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: "/images/landing/report-feature-layout.png",
+          primaryImageSize: "100%",
+          itemsAlignSectionLeft: "flex-start",
+          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          verticalPadding: 24,
+        }}
+      ></SectionLeft>
+
+      {isMobile ? <SectionLeft
+        sectionData={{
+          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          heading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                lineHeight: "100%",
+              }}
+            >
+              Dissecting the Location
+            </Typography.Text>
+          ),
+          subHeading:
+            "A location is more than just checking the nearest mall to your property. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
+          imageContainerWidth: 50,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: "/images/landing/report-feature-location.png",
+          primaryImageSize: "100%",
+          itemsAlignSectionLeft: "flex-start",
+          verticalPadding: 24,
+        }}
+      ></SectionLeft>: <SectionRight
+        sectionData={{
+          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          heading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                lineHeight: "100%",
+              }}
+            >
+              Dissecting the Location
+            </Typography.Text>
+          ),
+          subHeading:
+            "A location is more than just checking the nearest mall to your property. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
+          imageContainerWidth: 50,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: "/images/landing/report-feature-location.png",
+          primaryImageSize: "100%",
+          itemsAlignSectionLeft: "flex-start",
+          verticalPadding: 24,
+        }}
+      ></SectionRight>}
+     
+
+    
+      <SectionLeft
+        sectionData={{
+          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          heading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                lineHeight: "100%",
+              }}
+            >
+              Looking Beyond Builder's Popularity
+            </Typography.Text>
+          ),
+          subHeading:
+            "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity and more",
+          imageContainerWidth: 50,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: "/images/landing/report-feature-builder.png",
+          primaryImageSize: "100%",
+          itemsAlignSectionLeft: "flex-start",
+          verticalPadding: 24,
+        }}
+      ></SectionLeft>
+
       <SectionCenter
         sectionData={{
-          heading: "The Most Data Backed Approach",
+          
+          heading: <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_1 * 2,
+                lineHeight: "100%",
+                marginBottom: 60 ,
+                color: "white"
+              }}
+            >
+              The Most Data Backed Approach
+            </Typography.Text>,
           fullHeight: true,
           bgColor: COLORS.LANDING.BLUISH,
           textColor: "white",
-
-          subHeading: (
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_1,
-                marginBottom: 16,
-                color: "white",
-              }}
-            >
-              Over 10+ Legit Sources. 100+ Data Points.
-            </Typography.Text>
-          ),
+          primaryImageSize: isMobile ? "100%": "70%",
           mainImgUrl: isMobile
             ? "/images/landing/data-grid-mob.png"
             : "/images/landing/data-grid.png",
@@ -295,24 +488,18 @@ export default function ReportLanding() {
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
         }}
       ></SectionCenter>
-      <SectionLeft
+      <SectionCenter
         sectionData={{
-          heading: "Find Red Flags, Challenges, Opportunites & More",
+          fullHeight: true,
           bgColor: COLORS.LANDING.BLUISH,
           textColor: "white",
-          btn: {
-            link: "/requestreport",
-            txt: "Generate Free Report",
-          },
-          subHeading:
-            "Our AI analyses every data point so that you don't have to. Get a clear understanding of what to look at, what's important and why its important.",
-          mainImgUrl: isMobile
-            ? "/images/landing/insights-mob.png"
-            : "/images/landing/insights.png",
+          mainImgUrl: isMobile ? "/images/landing/report-numbers-mob.png": "/images/landing/report-numbers.png",
+          primaryImageSize: "80%",
           mainImgAltText:
-            "Brickfi uses AI to make sense of data points and provide you more clarity.",
+            "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
         }}
-      ></SectionLeft>
+      ></SectionCenter>
+
       {/* <SectionCenter
         sectionData={{
           heading: "Nuanced Location Intelligence",
@@ -328,11 +515,17 @@ export default function ReportLanding() {
 
       <SectionCenter
         sectionData={{
-          heading: <Typography.Text style={{fontSize: FONT_SIZE.HEADING_1, fontWeight: 200}}>Frequently Asked Questions</Typography.Text>,
+          heading: (
+            <Typography.Text
+              style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: 200 }}
+            >
+              Frequently Asked Questions
+            </Typography.Text>
+          ),
           bgColor: "#fdf7f6",
           verticalPadding: isMobile ? 24 : 100,
           subHeading: (
-            <Flex style={{width: isMobile ? "100%": "auto"}}>
+            <Flex style={{ width: isMobile ? "100%" : "auto" }}>
               <Collapse
                 expandIcon={({ isActive }) => (
                   <CaretRightOutlined
@@ -351,9 +544,14 @@ export default function ReportLanding() {
           ),
         }}
       ></SectionCenter>
-      <Flex
+      {/* <Flex
         vertical
-        style={{ height: 700, padding: "8px 0", backgroundColor: "#fdf7f6", paddingBottom: 48 }}
+        style={{
+          height: 700,
+          padding: "8px 0",
+          backgroundColor: "#fdf7f6",
+          paddingBottom: 48,
+        }}
         align="center"
       >
         <Typography.Text
@@ -414,7 +612,7 @@ export default function ReportLanding() {
             );
           })}
         </Marquee>
-      </Flex>
+      </Flex> */}
       <LandingFooter></LandingFooter>
     </Flex>
   );
