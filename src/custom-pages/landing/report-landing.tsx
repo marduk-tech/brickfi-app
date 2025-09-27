@@ -450,7 +450,7 @@ export default function ReportLanding() {
                 lineHeight: "100%",
               }}
             >
-              Looking Beyond Builder's Popularity
+              Looking Beyond Builder&apos;s Popularity
             </Typography.Text>
           ),
           subHeading:
