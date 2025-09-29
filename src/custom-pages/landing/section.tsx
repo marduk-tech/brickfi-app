@@ -43,7 +43,8 @@ const styles = {
     marginTop: 16,
     width: "100%",
     margin: 0,
-    fontWeight: "normal",
+    fontWeight: 300,
+    fontSize: FONT_SIZE.HEADING_2
   },
 };
 
