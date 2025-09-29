@@ -338,22 +338,35 @@ export default function ReportLanding() {
       ></SectionCenter>
 
       <Flex
-        align="center"
-        justify="center"
+        align="flex-start"
+        justify="flex-start"
         style={{
           backgroundColor: COLORS.LANDING.LIGHT_PINK,
           padding: "100px 0",
           fontWeight: 200,
+          width: "100%",
         }}
       >
-        <Typography.Text
-          style={{
-            fontSize: FONT_SIZE.HEADING_1 * 1.8,
-            lineHeight: "100%",
-          }}
-        >
-          <span style={{color: COLORS.LANDING.PINK}}>Clarity</span> You Need To Make a Confident Decision
-        </Typography.Text>
+        <Flex vertical style={{ maxWidth: 1400, margin: "auto" }}>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_1 * 1.5,
+              lineHeight: "100%",
+              fontWeight: 300
+            }}
+          >
+            Make a <span style={{ color: COLORS.LANDING.PINK }}>Confident</span>{" "}
+            Decision with Brick360 Report
+          </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_1,
+              lineHeight: "100%",
+            }}
+          >
+            A sneak peak of what you get in the report.
+          </Typography.Text>
+        </Flex>
       </Flex>
 
       <SectionLeft
@@ -361,12 +374,12 @@ export default function ReportLanding() {
           heading: (
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
-                marginBottom: 16
+                marginBottom: 16,
               }}
             >
-              Breaking Down The Layout
+              Detailed Breakdown of The Layout
             </Typography.Text>
           ),
           subHeading:
@@ -376,32 +389,32 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-layout.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
-          sectionMaxWidth: isMobile ? "100%" : "1200px",
-          verticalPadding: 24,
+          sectionMaxWidth: isMobile ? "100%" : "1300px",
+          verticalPadding: 8,
         }}
       ></SectionLeft>
 
       {[
         {
-          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
               }}
             >
-              Dissecting the Location
+              Assesing Livability
             </Typography.Text>
           ),
           subHeading:
-            "A location is more than just checking the nearest mall to your property. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
+            "Analysing livability is more than just checking the nearest mall. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
           imageContainerWidth: 60,
           bgColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: "/images/landing/report-feature-location.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
+          verticalPadding: 8,
         },
       ].map((a: any) => {
         return isMobile ? (
@@ -413,16 +426,16 @@ export default function ReportLanding() {
 
       <SectionLeft
         sectionData={{
-          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
-                marginBottom: 16
+                marginBottom: 16,
               }}
             >
-              Looking Beyond Builder&apos;s Popularity
+              Hidden Builder Complaints & Delays
             </Typography.Text>
           ),
           subHeading:
@@ -432,17 +445,17 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-builder.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
+          verticalPadding: 8,
         }}
       ></SectionLeft>
 
       {[
         {
-          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
               }}
             >
@@ -456,7 +469,7 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-financials.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
+          verticalPadding: 8,
         },
       ].map((a: any) => {
         return isMobile ? (
@@ -468,13 +481,13 @@ export default function ReportLanding() {
 
       <SectionLeft
         sectionData={{
-          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
-                marginBottom: 16
+                marginBottom: 16,
               }}
             >
               Go Deeper with AI.
@@ -487,7 +500,7 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-ai.png",
           primaryImageSize: "90%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
+          verticalPadding: 8,
         }}
       ></SectionLeft>
 
@@ -498,11 +511,27 @@ export default function ReportLanding() {
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 2,
                 lineHeight: "100%",
-                marginBottom: 60,
+                marginBottom: 16,
                 color: "white",
               }}
             >
               The Most Data Backed Approach
+            </Typography.Text>
+          ),
+          subHeading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_2,
+                lineHeight: "100%",
+                fontWeight: 200,
+                marginBottom: 32,
+                color: "white",
+                opacity: 0.9,
+                margin: "0 0 32px 0",
+              }}
+            >
+              Brickfi pioneers a data-first approach to exploring and evaluating
+              real estate in India
             </Typography.Text>
           ),
           fullHeight: true,
@@ -512,6 +541,68 @@ export default function ReportLanding() {
           mainImgUrl: isMobile
             ? "/images/landing/data-grid-mob.png"
             : "/images/landing/data-grid.png",
+          mainImgAltText:
+            "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
+        }}
+      ></SectionCenter>
+      <SectionCenter
+        sectionData={{
+          heading: (
+            <Flex style={{ width: "100%", maxWidth: 1000 }}>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_1 * 2,
+                  lineHeight: "100%",
+                  color: "white",
+                  margin: 0,
+                }}
+              >
+                How it Works ?
+              </Typography.Text>
+            </Flex>
+          ),
+          subHeading: (
+            <Flex
+              vertical
+              style={{ width: "100%", maxWidth: 1000, marginBottom: 60 }}
+              align="flex-start"
+            >
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_2,
+                  lineHeight: "100%",
+                  fontWeight: 200,
+                  color: "white",
+                  opacity: 0.9,
+                  margin: "0 0 32px 0",
+                }}
+              >
+                You can generate upto 2 free reports for any RERA registered
+                property across Bangalore
+              </Typography.Text>
+              <Button
+                type="primary"
+                onClick={() => {
+                  safeWindow.location.href = "/requestreport";
+                }}
+                style={{
+                  alignSelf: "flex-start",
+                  marginTop: 16,
+                  marginBottom: isMobile ? 32 : 0,
+                  fontSize: FONT_SIZE.HEADING_2,
+                }}
+              >
+                Generate Free Report
+              </Button>
+            </Flex>
+          ),
+          fullHeight: true,
+          bgColor: COLORS.LANDING.BLUISH,
+          textColor: "white",
+          primaryImageSize: isMobile ? "100%" : "70%",
+          mainImgUrl: isMobile
+            ? "/images/landing/how-it-works-mob.png"
+            : "/images/landing/how-it-works.png",
           mainImgAltText:
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
         }}
