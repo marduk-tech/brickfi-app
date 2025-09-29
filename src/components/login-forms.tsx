@@ -105,13 +105,33 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
         mobile: values.mobileNumber,
       });
 
-      if (onMobVerified && response?.data?.user) {
-        onMobVerified(response.data.user);
+      if (response?.data?.user) {
+        console.log(
+          "Login successful, user authenticated:",
+          response.data.user
+        );
+
+        setFeedbackText("Verification successful!");
+        setFeedbackType("success");
+        setLoginStatus("LOGIN_SUCCESS");
+
+        if (onMobVerified) {
+          console.log("Calling onMobVerified callback");
+          onMobVerified(response.data.user);
+        }
+
+        setTimeout(() => {
+          form.resetFields();
+          setLoginStatus("EDIT_MOBILE");
+          setFeedbackText("");
+        }, 1500);
       }
     } catch (error) {
+      console.error("Login failed:", error);
       setFeedbackText("Incorrect OTP. Please try again");
       setFeedbackType("error");
       form.resetFields(["otp"]);
+      setLoginStatus("OTP_SENT");
     }
   };
 
@@ -134,7 +154,7 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
             onFinish={(e) => e.preventDefault()}
           >
             <Form.Item noStyle shouldUpdate>
-              {({ getFieldValue, resetFields }) => {
+              {({ getFieldValue }) => {
                 return (
                   <>
                     <Form.Item
@@ -214,15 +234,16 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
                             }}
                             placeholder="Enter the OTP"
                             maxLength={6}
+                            disabled={loginMutation.isPending}
                           />
                         </Form.Item>
 
                         <Button
-                          disabled={resendTimer > 0}
+                          disabled={resendTimer > 0 || loginMutation.isPending}
                           style={{
                             padding: 0,
                             color:
-                              resendTimer > 0
+                              resendTimer > 0 || loginMutation.isPending
                                 ? COLORS.textColorLight
                                 : COLORS.textColorDark,
                           }}

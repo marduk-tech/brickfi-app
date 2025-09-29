@@ -8,16 +8,16 @@ import { CustomErrorBoundary } from "../components/common/custom-error-boundary"
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { LoginForm } from "../components/login-forms";
 import { UserDetailsForm } from "../components/user-details-form";
+import { useDevice } from "../hooks/use-device";
 import { useUser } from "../hooks/use-user";
-import { LandingConstants, LocalStorageKeys } from "../libs/constants";
 import { safeStorage, safeWindow } from "../libs/browser-utils";
+import { LandingConstants, LocalStorageKeys } from "../libs/constants";
 import {
   COLORS,
   FONT_SIZE,
   HORIZONTAL_PADDING,
 } from "../theme/style-constants";
 import { NavLink } from "../types/Common";
-import { useDevice } from "../hooks/use-device";
 
 const { Header, Content } = Layout;
 
@@ -47,10 +47,30 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    if (user && (!user.profile.email || !user.profile.name)) {
-      setShowUserDetailsForm(true);
+    if (user) {
+      // close login modal when user is successfully authenticated
+      setLoginModalOpen(false);
+
+      if (!user.profile.email || !user.profile.name) {
+        setShowUserDetailsForm(true);
+      }
     }
   }, [user]);
+
+  useEffect(() => {
+    const checkUserInStorage = () => {
+      const userItem = safeStorage.getItem(LocalStorageKeys.user);
+      if (userItem && loginModalOpen) {
+        console.log("Fallback: User found in localStorage, closing modal");
+        setLoginModalOpen(false);
+      }
+    };
+
+    checkUserInStorage();
+    const interval = setInterval(checkUserInStorage, 500);
+
+    return () => clearInterval(interval);
+  }, [loginModalOpen]);
 
   const navLinks: NavLink[] = [
     {
@@ -164,7 +184,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                 Login/Signup with your mobile number
               </Typography.Text>
             </Flex>
-            <LoginForm></LoginForm>
+            <LoginForm
+              onMobVerified={(user: any) => {
+                console.log("Login successful, closing modal", user);
+                setLoginModalOpen(false);
+              }}
+            ></LoginForm>
           </Flex>
         )}
       </Modal>

@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
+import { safeStorage } from "../libs/browser-utils";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { User } from "../types/User";
 import { useAuth } from "./use-auth";
-import { safeStorage } from "../libs/browser-utils";
 
 export function useUser() {
   const { logout } = useAuth();
@@ -33,6 +34,18 @@ export function useUser() {
     refetchOnWindowFocus: false,
     retry: 2,
   });
+
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === LocalStorageKeys.user && e.newValue) {
+        console.log("LocalStorage user changed, refetching...");
+        refetch();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, [refetch]);
 
   return { user: data, isLoading, isError, error, refetch };
 }
