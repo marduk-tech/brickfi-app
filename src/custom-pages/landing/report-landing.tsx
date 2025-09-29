@@ -347,7 +347,7 @@ export default function ReportLanding() {
           width: "100%",
         }}
       >
-        <Flex vertical style={{ maxWidth: 1400, margin: "auto" }}>
+        <Flex vertical style={{ maxWidth: 1400, margin: "auto", padding: "0 16px" }}>
           <Typography.Text
             style={{
               fontSize: FONT_SIZE.HEADING_1 * 1.5,
@@ -390,7 +390,7 @@ export default function ReportLanding() {
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
           sectionMaxWidth: isMobile ? "100%" : "1300px",
-          verticalPadding: 8,
+          verticalPadding: 24,
         }}
       ></SectionLeft>
 
@@ -414,7 +414,7 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-location.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 8,
+          verticalPadding: 24,
         },
       ].map((a: any) => {
         return isMobile ? (
@@ -445,7 +445,7 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-builder.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 8,
+          verticalPadding: 24,
         }}
       ></SectionLeft>
 
@@ -469,7 +469,7 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-financials.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 8,
+          verticalPadding: 24,
         },
       ].map((a: any) => {
         return isMobile ? (
@@ -489,8 +489,7 @@ export default function ReportLanding() {
                 lineHeight: "100%",
                 marginBottom: 16,
               }}
-            >
-              Go Deeper with AI.
+            >Go Deeper with AI.
             </Typography.Text>
           ),
           subHeading:
@@ -500,7 +499,7 @@ export default function ReportLanding() {
           mainImgUrl: "/images/landing/report-feature-ai.png",
           primaryImageSize: "90%",
           itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 8,
+          verticalPadding: 24,
         }}
       ></SectionLeft>
 
