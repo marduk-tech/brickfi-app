@@ -34,6 +34,7 @@ import LandingHeader from "../../custom-pages/landing/header";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "./dynamic-react-icon";
 import LandingFooter from "@/custom-pages/landing/footer";
+import { LoginForm } from "../login-forms";
 const { Paragraph } = Typography;
 
 export const NewReportRequestForm = () => {
@@ -50,6 +51,8 @@ export const NewReportRequestForm = () => {
   const [maxReportsRequested, setMaxReportsRequested] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [projectOptions, setProjectOptions] = useState<any[]>([]);
+  const [verifiedUser, setVerifiedUser] = useState<any>(null);
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
@@ -128,14 +131,18 @@ export const NewReportRequestForm = () => {
           },
         });
       } else {
+        // Use verified user data from mobile authentication
+        const userMobile = verifiedUser?.mobile || formValues.mobile;
+        const userCountryCode = verifiedUser?.countryCode || "91";
+
         responseUser = await createUser.mutateAsync({
           userData: {
             profile: {
               name: formValues.name,
               email: formValues.email,
             },
-            mobile: formValues.mobile,
-            countryCode: "91",
+            mobile: userMobile,
+            countryCode: userCountryCode,
             requestedReports,
           },
         });
@@ -437,36 +444,10 @@ export const NewReportRequestForm = () => {
                   >
                     <Input />
                   </Form.Item>
-                  <Form.Item
-                    name="mobile"
-                    label={
-                      <Flex vertical>
-                        {" "}
-                        <Typography.Text
-                          style={{ fontSize: FONT_SIZE.HEADING_3 }}
-                        >
-                          Your mobile number
-                        </Typography.Text>
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.PARA,
-                            color: COLORS.textColorLight,
-                          }}
-                        >
-                          You will need this mobile number later to access the
-                          reports.
-                        </Typography.Text>
-                      </Flex>
-                    }
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please enter your mobile number",
-                      },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
+                  <LoginForm onMobVerified={(updatedUser: any) => {
+                    setVerifiedUser(updatedUser);
+                    setIsMobileVerified(true);
+                  }}></LoginForm>
                 </Form>
               </>
             )}
@@ -525,6 +506,7 @@ export const NewReportRequestForm = () => {
                       key="submit"
                       type="primary"
                       loading={createUser.isPending}
+                      disabled={!isMobileVerified}
                       onClick={() => form.submit()}
                     >
                       Submit

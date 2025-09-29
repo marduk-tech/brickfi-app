@@ -34,17 +34,23 @@ export function useAuth() {
       });
     },
     onSuccess: async ({ data }) => {
-      setVerificationId(data.verificationId);
-      setLoginStatus("OTP_SENT");
+      if (data.verificationId) {
+        setVerificationId(data.verificationId);
+        setLoginStatus("OTP_SENT");
+      } else {
+        console.error("No verification ID received");
+        setLoginStatus("LOGIN_ERROR");
+      }
     },
     onError: (error) => {
       setVerificationId(undefined);
-      console.log(error.message);
+      setLoginStatus("LOGIN_ERROR");
+      console.error("Generate OTP error:", error);
     },
   });
 
   const login = useMutation({
-    mutationFn: ({ code, mobile }: { code: number; mobile: string }) => {
+    mutationFn: ({ code, mobile }: { code: number; mobile: any }) => {
       return axiosApiInstance.post(`/auth/otp/login`, {
         verificationId: verificationId,
         code: code,
@@ -53,17 +59,25 @@ export function useAuth() {
     },
 
     async onSuccess({ data }) {
-      safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.user));
+      if (data.user) {
+        safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.user));
 
-      await queryClient.invalidateQueries({
-        queryKey: [queryKeys.user],
-      });
+        await queryClient.invalidateQueries({
+          queryKey: [queryKeys.user],
+        });
 
-      return setVerificationId(undefined);
+        setLoginStatus("LOGIN_SUCCESS");
+        setVerificationId(undefined);
+        return data;
+      } else {
+        console.error("No user data received");
+        setLoginStatus("LOGIN_ERROR");
+      }
     },
 
     onError: (error) => {
-      console.log(error);
+      setLoginStatus("LOGIN_ERROR");
+      console.error("Login error:", error);
     },
   });
 

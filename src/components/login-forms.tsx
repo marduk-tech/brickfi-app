@@ -64,42 +64,50 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
     }
   };
 
-  const handleGenerateOtp = async () => {
-    const values = await form.validateFields();
-
-    let phoneNumber;
-    let countryCode;
-
-    if (values.mobileNumber) {
-      phoneNumber =
-        values.mobileNumber.areaCode + values.mobileNumber.phoneNumber;
-      countryCode = values.mobileNumber.countryCode;
+  const handleGenerateOtp = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
     }
 
-    setFeedbackText("Sending OTP. Please wait..");
-    setFeedbackType("info");
-    generateOtp({ mobile: phoneNumber, countryCode: `${countryCode}` });
+    try {
+      const values = await form.validateFields();
+
+      let phoneNumber;
+      let countryCode;
+
+      if (values.mobileNumber) {
+        phoneNumber =
+          values.mobileNumber.areaCode + values.mobileNumber.phoneNumber;
+        countryCode = values.mobileNumber.countryCode;
+      }
+
+      setFeedbackText("Sending OTP. Please wait..");
+      setFeedbackType("info");
+      await generateOtp({ mobile: phoneNumber, countryCode: `${countryCode}` });
+    } catch (error) {
+      console.error("Error generating OTP:", error);
+    }
   };
 
-  const handleLogin = async () => {
-    const values = await form.validateFields();
-
-    setFeedbackText("Verifying OTP. Please wait..");
-    setFeedbackType("info");
+  const handleLogin = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
 
     try {
-      await loginMutation
-        .mutateAsync({
-          code: values.otp,
-          mobile: values.mobileNumber,
-        })
-        .then((user: any) => {
-          if (onMobVerified) {
-            onMobVerified(user);
-          } else {
-            safeWindow.location.reload();
-          }
-        });
+      const values = await form.validateFields();
+
+      setFeedbackText("Verifying OTP. Please wait..");
+      setFeedbackType("info");
+
+      const response = await loginMutation.mutateAsync({
+        code: values.otp,
+        mobile: values.mobileNumber,
+      });
+
+      if (onMobVerified && response?.data?.user) {
+        onMobVerified(response.data.user);
+      }
     } catch (error) {
       setFeedbackText("Incorrect OTP. Please try again");
       setFeedbackType("error");
@@ -123,9 +131,7 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
             style={{ width: "100%" }}
             form={form}
             layout="vertical"
-            onFinish={
-              loginStatus === "OTP_SENT" ? handleLogin : handleGenerateOtp
-            }
+            onFinish={(e) => e.preventDefault()}
           >
             <Form.Item noStyle shouldUpdate>
               {({ getFieldValue, resetFields }) => {
@@ -253,9 +259,11 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
             <Form.Item style={{ marginTop: 32 }}>
               <Button
                 type="primary"
-                htmlType="submit"
                 loading={
                   generateOtpMutation.isPending || loginMutation.isPending
+                }
+                onClick={
+                  loginStatus === "OTP_SENT" ? handleLogin : handleGenerateOtp
                 }
                 style={{
                   fontSize: FONT_SIZE.HEADING_3,

@@ -51,6 +51,8 @@ export const NewReportRequestFormV3 = () => {
   const [maxReportsRequested, setMaxReportsRequested] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [projectOptions, setProjectOptions] = useState<any[]>([]);
+  const [verifiedUser, setVerifiedUser] = useState<any>(null);
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
@@ -129,14 +131,18 @@ export const NewReportRequestFormV3 = () => {
           },
         });
       } else {
+        // Use verified user data from mobile authentication
+        const userMobile = verifiedUser?.mobile || formValues.mobile;
+        const userCountryCode = verifiedUser?.countryCode || "91";
+
         responseUser = await createUser.mutateAsync({
           userData: {
             profile: {
               name: formValues.name,
               email: formValues.email,
             },
-            mobile: formValues.mobile,
-            countryCode: "91",
+            mobile: userMobile,
+            countryCode: userCountryCode,
             requestedReports,
           },
         });
@@ -439,7 +445,8 @@ export const NewReportRequestFormV3 = () => {
                     <Input />
                   </Form.Item>
                   <LoginForm onMobVerified={(updatedUser: any) => {
-
+                    setVerifiedUser(updatedUser);
+                    setIsMobileVerified(true);
                   }}></LoginForm>
                   {/* <Form.Item
                     name="mobile"
@@ -529,6 +536,7 @@ export const NewReportRequestFormV3 = () => {
                       key="submit"
                       type="primary"
                       loading={createUser.isPending}
+                      disabled={!isMobileVerified}
                       onClick={() => form.submit()}
                     >
                       Submit
