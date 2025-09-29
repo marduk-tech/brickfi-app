@@ -21,7 +21,8 @@ export const COLORS = {
 
   LANDING: {
     BLUISH: "#0c4a6d",
-    LIGHT_PINK : "#fdf7f6"
+    LIGHT_PINK : "#fdf7f6",
+    PINK: "#ff8975"
   },
 };
 

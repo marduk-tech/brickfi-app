@@ -11,9 +11,54 @@ import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import Marquee from "react-fast-marquee";
+const { Paragraph } = Typography;
 
 export default function MainLanding() {
   const { isMobile } = useDevice();
+
+   const newsLinks = [
+    {
+      url: "https://bangaloremirror.indiatimes.com/bangalore/civic/open-drains-heighten-public-health-concerns/articleshow/109354187.cms",
+      title: "Open drains heighten public health concerns",
+      img: "https://bangaloremirror.indiatimes.com/photo/109354187.cms?imgsize=55596",
+    },
+    {
+      url: "https://www.hindustantimes.com/real-estate/krera-update-over-2-600-real-estate-projects-delayed-in-karnataka-bengaluru-worst-hit-101749022326781.html",
+      title:
+        "KRERA update: Over 2,600 real estate projects delayed in Karnataka; Bengaluru worst hit",
+      img: "https://www.hindustantimes.com/ht-img/img/2025/06/04/550x309/asccsa_1748240643655_1749023747292.png",
+    },
+    {
+      url: "https://timesofindia.indiatimes.com/city/bengaluru/residents-unite-move-rera-authority-against-builder-after-decade-long-wait-in-bengaluru/articleshow/123350319.cms",
+      title:
+        "Residents unite, move Rera authority against builder after decade-long wait in Bengaluru",
+      img: "https://media.newindianexpress.com/TNIE/import/2021/9/1/original/rera.JPG?w=1200&h=675&auto=format%2Ccompress&fit=max&enlarge=true",
+    },
+    {
+      url: "https://www.moneycontrol.com/news/business/127-karnataka-homebuyers-lodge-fir-against-real-estate-developer-ozone-group-level-criminal-charges-8859721.html",
+      title:
+        "127 Karnataka homebuyers lodge FIR against real estate developer Ozone Group, level criminal charges",
+      img: "https://images.livemint.com/img/2020/05/26/600x338/f82c8c58-9f33-11ea-acb1-9d0caa391d0e_1590514632106_1590514707533.jpg",
+    },
+    {
+      url: "https://www.thehindu.com/news/cities/bangalore/metro-drives-property-boom-in-bengaluru/article67766840.ece",
+      title:
+        "Growing metro network puts new areas of Bengaluru on map of desirable real estate",
+      img: "https://etimg.etb2bimg.com/photo/121927905.cms",
+    },
+    {
+      url: "https://www.hindustantimes.com/real-estate/bengaluru-floods-karnataka-may-ban-basement-parking-in-flood-prone-areas-experts-flag-higher-costs-design-challenges-101747935363549.html",
+      title:
+        "Bengaluru floods: Karnataka may ban basement parking in flood-prone areas; Experts flag higher costs, design challenges",
+      img: "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/2YTZPRJP6RIPHCEHLQMK5GGURM.jpg",
+    },
+    {
+      url: "https://www.newindianexpress.com/business/2025/Mar/11/purchasing-the-right-address-why-smart-homebuyers-prioritize-location",
+      title:
+        "Purchasing the right address: Why smart homebuyers prioritize location",
+      img: "https://propertysimplify.com/wp-content/uploads/2025/02/Bangalore-Real-Estate-Investment.jpg",
+    },
+  ];
 
   const getFaqHeading = (text: string) => {
     return (
@@ -478,6 +523,75 @@ export default function MainLanding() {
           ),
         }}
       ></SectionCenter> */}
+      <Flex
+        vertical
+        style={{
+          height: 700,
+          padding: "8px 0",
+          backgroundColor: "#fdf7f6",
+          paddingBottom: 48,
+        }}
+        align="center"
+      >
+        <Typography.Text
+          style={{
+            margin: "32px 0",
+            fontSize: isMobile
+              ? FONT_SIZE.HEADING_1
+              : FONT_SIZE.HEADING_1 * 1.2,
+            color: COLORS.primaryColor,
+          }}
+        >
+          #ChooseToInvestSmartly
+        </Typography.Text>
+        <Marquee speed={30}>
+          {newsLinks.map((l: any) => {
+            return (
+              <Flex
+                style={{
+                  width: 225,
+                  border: `1px solid ${COLORS.borderColorMedium}`,
+                  borderRadius: 8,
+                  marginRight: 48,
+                }}
+                vertical
+                onClick={() => {
+                  safeWindow.location.assign(l.url);
+                }}
+              >
+                <div
+                  style={{
+                    backgroundImage: `url('${l.img}')`,
+                    backgroundSize: "cover",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                    height: 150,
+                    width: "100%",
+                    borderTopLeftRadius: 8,
+                    borderTopRightRadius: 8,
+                  }}
+                ></div>
+                <Flex
+                  style={{
+                    padding: 8,
+                    height: 100,
+                  }}
+                >
+                  <Paragraph
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_3,
+                      lineHeight: "110%",
+                    }}
+                    ellipsis={{ rows: 4, expandable: false }}
+                  >
+                    {l.title}
+                  </Paragraph>
+                </Flex>
+              </Flex>
+            );
+          })}
+        </Marquee>
+      </Flex>
       <LandingFooter></LandingFooter>
     </Flex>
   );

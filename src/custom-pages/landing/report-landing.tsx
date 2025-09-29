@@ -12,54 +12,9 @@ import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import Marquee from "react-fast-marquee";
 import { NewReportRequestForm } from "@/components/common/new-report-request-form";
-const { Paragraph } = Typography;
 
 export default function ReportLanding() {
   const { isMobile } = useDevice();
-
-  const newsLinks = [
-    {
-      url: "https://bangaloremirror.indiatimes.com/bangalore/civic/open-drains-heighten-public-health-concerns/articleshow/109354187.cms",
-      title: "Open drains heighten public health concerns",
-      img: "https://bangaloremirror.indiatimes.com/photo/109354187.cms?imgsize=55596",
-    },
-    {
-      url: "https://www.hindustantimes.com/real-estate/krera-update-over-2-600-real-estate-projects-delayed-in-karnataka-bengaluru-worst-hit-101749022326781.html",
-      title:
-        "KRERA update: Over 2,600 real estate projects delayed in Karnataka; Bengaluru worst hit",
-      img: "https://www.hindustantimes.com/ht-img/img/2025/06/04/550x309/asccsa_1748240643655_1749023747292.png",
-    },
-    {
-      url: "https://timesofindia.indiatimes.com/city/bengaluru/residents-unite-move-rera-authority-against-builder-after-decade-long-wait-in-bengaluru/articleshow/123350319.cms",
-      title:
-        "Residents unite, move Rera authority against builder after decade-long wait in Bengaluru",
-      img: "https://media.newindianexpress.com/TNIE/import/2021/9/1/original/rera.JPG?w=1200&h=675&auto=format%2Ccompress&fit=max&enlarge=true",
-    },
-    {
-      url: "https://www.moneycontrol.com/news/business/127-karnataka-homebuyers-lodge-fir-against-real-estate-developer-ozone-group-level-criminal-charges-8859721.html",
-      title:
-        "127 Karnataka homebuyers lodge FIR against real estate developer Ozone Group, level criminal charges",
-      img: "https://images.livemint.com/img/2020/05/26/600x338/f82c8c58-9f33-11ea-acb1-9d0caa391d0e_1590514632106_1590514707533.jpg",
-    },
-    {
-      url: "https://www.thehindu.com/news/cities/bangalore/metro-drives-property-boom-in-bengaluru/article67766840.ece",
-      title:
-        "Growing metro network puts new areas of Bengaluru on map of desirable real estate",
-      img: "https://etimg.etb2bimg.com/photo/121927905.cms",
-    },
-    {
-      url: "https://www.hindustantimes.com/real-estate/bengaluru-floods-karnataka-may-ban-basement-parking-in-flood-prone-areas-experts-flag-higher-costs-design-challenges-101747935363549.html",
-      title:
-        "Bengaluru floods: Karnataka may ban basement parking in flood-prone areas; Experts flag higher costs, design challenges",
-      img: "https://cloudfront-us-east-2.images.arcpublishing.com/reuters/2YTZPRJP6RIPHCEHLQMK5GGURM.jpg",
-    },
-    {
-      url: "https://www.newindianexpress.com/business/2025/Mar/11/purchasing-the-right-address-why-smart-homebuyers-prioritize-location",
-      title:
-        "Purchasing the right address: Why smart homebuyers prioritize location",
-      img: "https://propertysimplify.com/wp-content/uploads/2025/02/Bangalore-Real-Estate-Investment.jpg",
-    },
-  ];
 
   const getFaqHeading = (text: string) => {
     return (
@@ -156,7 +111,9 @@ export default function ReportLanding() {
       style: faqPanelStyle,
       children: getFaqText(
         <>
-         You can identify issues like high tension lines near the property, upcoming metro stations, understand premiumess of the property, look at timely delivery committment of the builder and much more. 
+          You can identify issues like high tension lines near the property,
+          upcoming metro stations, understand premiumess of the property, look
+          at timely delivery committment of the builder and much more.
         </>
       ),
     },
@@ -179,7 +136,9 @@ export default function ReportLanding() {
       style: faqPanelStyle,
       children: getFaqText(
         <>
-          Brokers are often incentivized to sell specific properties and heavily market them. We do not have tie ups to specific properties and prioritize 100% data-driven and unbiased insights.
+          Brokers are often incentivized to sell specific properties and heavily
+          market them. We do not have tie ups to specific properties and
+          prioritize 100% data-driven and unbiased insights.
         </>
       ),
     },
@@ -189,7 +148,9 @@ export default function ReportLanding() {
       style: faqPanelStyle,
       children: getFaqText(
         <>
-         A Brick360 report can be generated in as little as an hour. In some cases, it may take longer to gather all the necessary property details, but the report will always be delivered within 24–48 hours.
+          A Brick360 report can be generated in as little as an hour. In some
+          cases, it may take longer to gather all the necessary property
+          details, but the report will always be delivered within 24–48 hours.
         </>
       ),
     },
@@ -199,11 +160,13 @@ export default function ReportLanding() {
       style: faqPanelStyle,
       children: getFaqText(
         <>
-         The report is interactive and has an AI assistant which lets you ask unlimited questions
-          for clarity and to generate more insights. You can also reach out to the Brickfi team at hello@brickfi.in in case you have any more specific questions. 
+          The report is interactive and has an AI assistant which lets you ask
+          unlimited questions for clarity and to generate more insights. You can
+          also reach out to the Brickfi team at hello@brickfi.in in case you
+          have any more specific questions.
         </>
       ),
-    }
+    },
   ];
 
   useState(false);
@@ -264,11 +227,11 @@ export default function ReportLanding() {
             <Typography.Text
               style={{
                 fontSize: isMobile
-                  ? FONT_SIZE.HEADING_1 * 1.5
-                  : FONT_SIZE.HEADING_1 * 1.8,
+                  ? FONT_SIZE.HEADING_1 * 1.6
+                  : FONT_SIZE.HEADING_1 * 2,
                 lineHeight: "100%",
-                fontWeight: "bold",
-                paddingTop: isMobile ? 60: 0
+                fontWeight: 300,
+                paddingTop: isMobile ? 60 : 0,
               }}
             >
               The 360° Scorecard for Smarter Property Decisions
@@ -276,7 +239,7 @@ export default function ReportLanding() {
           ),
           subHeading:
             "Get an independent, data-backed property report with builder history, surroundings, pricing, growth potential & more. Powered by 100% verified government and public data.",
-          mainImgUrl: "/images/landing/brick360-landing-2.png",
+          mediaUrl: "/images/landing/demo-landing.mp4?v=1",
           bgColor: "#fdf7f6",
           btn: {
             link: "/requestreport",
@@ -288,19 +251,31 @@ export default function ReportLanding() {
           verticalPadding: isMobile ? 50 : 0,
         }}
       ></SectionLeft>
-      {/* <SectionCenter
-        sectionData={{
-          bgColor: "#fdf7f6",
-          heading: "",
-          subHeading: "",
-          mainImgAltText: "About Brickfi",
-          primaryImageSize: isMobile ? "100%":"60%",
-          mainImgUrl: "/images/landing/report-numbers.png",
-          imageContainerWidth: 50,
-          verticalPadding:1
-        }}
-      ></SectionCenter> */}
 
+      <SectionCenter
+        sectionData={{
+          fullHeight: true,
+          bgColor: COLORS.LANDING.BLUISH,
+          textColor: "white",
+          mainImgUrl: isMobile
+            ? "/images/landing/report-numbers-mob.png"
+            : "/images/landing/report-numbers.png",
+          primaryImageSize: isMobile ? "80%" : "70%",
+          mainImgAltText:
+            "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
+          verticalPadding: 100,
+        }}
+      ></SectionCenter>
+      <Flex
+        style={{ backgroundColor: COLORS.LANDING.BLUISH, paddingBottom: 60 }}
+        justify="center"
+      >
+        <img
+          src="/images/landing/divider.png"
+          width={isMobile ? "80%" : "40%"}
+          style={{ opacity: 0.3 }}
+        ></img>
+      </Flex>
       <SectionCenter
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,
@@ -309,9 +284,10 @@ export default function ReportLanding() {
             <Flex vertical>
               <Typography.Text
                 style={{
+                  textAlign: "left",
                   fontSize: isMobile
-                    ? FONT_SIZE.HEADING_1 * 1.2
-                    : FONT_SIZE.HEADING_1 * 1.4,
+                    ? FONT_SIZE.HEADING_1 * 1.4
+                    : FONT_SIZE.HEADING_1 * 1.7,
                   marginBottom: 8,
                   lineHeight: "100%",
                   fontWeight: 200,
@@ -322,9 +298,10 @@ export default function ReportLanding() {
               </Typography.Text>
               <Typography.Text
                 style={{
+                  textAlign: "left",
                   fontSize: isMobile
-                    ? FONT_SIZE.HEADING_1 * 1.2
-                    : FONT_SIZE.HEADING_1 * 1.4,
+                    ? FONT_SIZE.HEADING_1 * 1.4
+                    : FONT_SIZE.HEADING_1 * 1.7,
                   color: COLORS.primaryColor,
                   lineHeight: "100%",
                   fontWeight: 600,
@@ -344,15 +321,7 @@ export default function ReportLanding() {
           verticalPadding: 42,
         }}
       ></SectionCenter>
-      {/* <Flex
-        style={{ backgroundColor: "#fdf7f6", paddingTop: isMobile ? 16 : 0 }}
-        justify="center"
-      >
-        <img
-          src="/images/landing/divider.png"
-          width={isMobile ? "80%" : "30%"}
-        ></img>
-      </Flex> */}
+
       <SectionCenter
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,
@@ -368,6 +337,25 @@ export default function ReportLanding() {
         }}
       ></SectionCenter>
 
+      <Flex
+        align="center"
+        justify="center"
+        style={{
+          backgroundColor: COLORS.LANDING.LIGHT_PINK,
+          padding: "100px 0",
+          fontWeight: 200,
+        }}
+      >
+        <Typography.Text
+          style={{
+            fontSize: FONT_SIZE.HEADING_1 * 1.8,
+            lineHeight: "100%",
+          }}
+        >
+          <span style={{color: COLORS.LANDING.PINK}}>Clarity</span> You Need To Make a Confident Decision
+        </Typography.Text>
+      </Flex>
+
       <SectionLeft
         sectionData={{
           heading: (
@@ -375,6 +363,7 @@ export default function ReportLanding() {
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.5,
                 lineHeight: "100%",
+                marginBottom: 16
               }}
             >
               Breaking Down The Layout
@@ -392,8 +381,8 @@ export default function ReportLanding() {
         }}
       ></SectionLeft>
 
-      {isMobile ? <SectionLeft
-        sectionData={{
+      {[
+        {
           sectionMaxWidth: isMobile ? "100%" : "1200px",
           heading: (
             <Typography.Text
@@ -407,39 +396,21 @@ export default function ReportLanding() {
           ),
           subHeading:
             "A location is more than just checking the nearest mall to your property. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
-          imageContainerWidth: 50,
+          imageContainerWidth: 60,
           bgColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: "/images/landing/report-feature-location.png",
           primaryImageSize: "100%",
           itemsAlignSectionLeft: "flex-start",
           verticalPadding: 24,
-        }}
-      ></SectionLeft>: <SectionRight
-        sectionData={{
-          sectionMaxWidth: isMobile ? "100%" : "1200px",
-          heading: (
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.5,
-                lineHeight: "100%",
-              }}
-            >
-              Dissecting the Location
-            </Typography.Text>
-          ),
-          subHeading:
-            "A location is more than just checking the nearest mall to your property. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
-          imageContainerWidth: 50,
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: "/images/landing/report-feature-location.png",
-          primaryImageSize: "100%",
-          itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
-        }}
-      ></SectionRight>}
-     
+        },
+      ].map((a: any) => {
+        return isMobile ? (
+          <SectionLeft sectionData={a}></SectionLeft>
+        ) : (
+          <SectionRight sectionData={a}></SectionRight>
+        );
+      })}
 
-    
       <SectionLeft
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : "1200px",
@@ -448,13 +419,14 @@ export default function ReportLanding() {
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.5,
                 lineHeight: "100%",
+                marginBottom: 16
               }}
             >
               Looking Beyond Builder&apos;s Popularity
             </Typography.Text>
           ),
           subHeading:
-            "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity and more",
+            "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity to get a sense of execution risks and credibility.",
           imageContainerWidth: 50,
           bgColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: "/images/landing/report-feature-builder.png",
@@ -464,23 +436,79 @@ export default function ReportLanding() {
         }}
       ></SectionLeft>
 
+      {[
+        {
+          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          heading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                lineHeight: "100%",
+              }}
+            >
+              Navigating the Financials
+            </Typography.Text>
+          ),
+          subHeading:
+            "Making the right financial decisions becomes all the more necessary. Assess the price point, rental yield and growth potential with upto date pricing information. ",
+          imageContainerWidth: 50,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: "/images/landing/report-feature-financials.png",
+          primaryImageSize: "100%",
+          itemsAlignSectionLeft: "flex-start",
+          verticalPadding: 24,
+        },
+      ].map((a: any) => {
+        return isMobile ? (
+          <SectionLeft sectionData={a}></SectionLeft>
+        ) : (
+          <SectionRight sectionData={a}></SectionRight>
+        );
+      })}
+
+      <SectionLeft
+        sectionData={{
+          sectionMaxWidth: isMobile ? "100%" : "1200px",
+          heading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_1 * 1.5,
+                lineHeight: "100%",
+                marginBottom: 16
+              }}
+            >
+              Go Deeper with AI.
+            </Typography.Text>
+          ),
+          subHeading:
+            "Get answers to your questions and generate your own insights. Our AI assistant with every report can help you explore the hidden data and provide answers that any broker won't be able to.",
+          imageContainerWidth: 50,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: "/images/landing/report-feature-ai.png",
+          primaryImageSize: "90%",
+          itemsAlignSectionLeft: "flex-start",
+          verticalPadding: 24,
+        }}
+      ></SectionLeft>
+
       <SectionCenter
         sectionData={{
-          
-          heading: <Typography.Text
+          heading: (
+            <Typography.Text
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 2,
                 lineHeight: "100%",
-                marginBottom: 60 ,
-                color: "white"
+                marginBottom: 60,
+                color: "white",
               }}
             >
               The Most Data Backed Approach
-            </Typography.Text>,
+            </Typography.Text>
+          ),
           fullHeight: true,
           bgColor: COLORS.LANDING.BLUISH,
           textColor: "white",
-          primaryImageSize: isMobile ? "100%": "70%",
+          primaryImageSize: isMobile ? "100%" : "70%",
           mainImgUrl: isMobile
             ? "/images/landing/data-grid-mob.png"
             : "/images/landing/data-grid.png",
@@ -488,30 +516,6 @@ export default function ReportLanding() {
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
         }}
       ></SectionCenter>
-      <SectionCenter
-        sectionData={{
-          fullHeight: true,
-          bgColor: COLORS.LANDING.BLUISH,
-          textColor: "white",
-          mainImgUrl: isMobile ? "/images/landing/report-numbers-mob.png": "/images/landing/report-numbers.png",
-          primaryImageSize: "80%",
-          mainImgAltText:
-            "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
-        }}
-      ></SectionCenter>
-
-      {/* <SectionCenter
-        sectionData={{
-          heading: "Nuanced Location Intelligence",
-          verticalPadding: isMobile ? 2 : 60,
-          subHeading: "",
-           bgColor: COLORS.LANDING.BLUISH,
-          textColor: "white",
-          mainImgUrl: "/images/landing/slide-7.png",
-          mainImgAltText:
-            "See location insights visually on a map with Brickfi.",
-        }}
-      ></SectionCenter> */}
 
       <SectionCenter
         sectionData={{
@@ -544,75 +548,6 @@ export default function ReportLanding() {
           ),
         }}
       ></SectionCenter>
-      {/* <Flex
-        vertical
-        style={{
-          height: 700,
-          padding: "8px 0",
-          backgroundColor: "#fdf7f6",
-          paddingBottom: 48,
-        }}
-        align="center"
-      >
-        <Typography.Text
-          style={{
-            margin: "32px 0",
-            fontSize: isMobile
-              ? FONT_SIZE.HEADING_1
-              : FONT_SIZE.HEADING_1 * 1.2,
-            color: COLORS.primaryColor,
-          }}
-        >
-          #ChooseToInvestSmartly
-        </Typography.Text>
-        <Marquee speed={30}>
-          {newsLinks.map((l: any) => {
-            return (
-              <Flex
-                style={{
-                  width: 225,
-                  border: `1px solid ${COLORS.borderColorMedium}`,
-                  borderRadius: 8,
-                  marginRight: 48,
-                }}
-                vertical
-                onClick={() => {
-                  safeWindow.location.assign(l.url);
-                }}
-              >
-                <div
-                  style={{
-                    backgroundImage: `url('${l.img}')`,
-                    backgroundSize: "cover",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "center",
-                    height: 150,
-                    width: "100%",
-                    borderTopLeftRadius: 8,
-                    borderTopRightRadius: 8,
-                  }}
-                ></div>
-                <Flex
-                  style={{
-                    padding: 8,
-                    height: 100,
-                  }}
-                >
-                  <Paragraph
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_3,
-                      lineHeight: "110%",
-                    }}
-                    ellipsis={{ rows: 4, expandable: false }}
-                  >
-                    {l.title}
-                  </Paragraph>
-                </Flex>
-              </Flex>
-            );
-          })}
-        </Marquee>
-      </Flex> */}
       <LandingFooter></LandingFooter>
     </Flex>
   );
