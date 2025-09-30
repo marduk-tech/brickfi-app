@@ -75,8 +75,7 @@ export default async function RealEstateDeveloperPage({ params }: PageProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {/* <RealEstateDeveloperClient slug={slug} /> */}
-      <FourOFour></FourOFour>
+      <RealEstateDeveloperClient slug={slug} />
     </HydrationBoundary>
   );
 }
