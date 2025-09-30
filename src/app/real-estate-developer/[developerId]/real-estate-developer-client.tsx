@@ -349,18 +349,21 @@ export default function RealEstateDeveloperClient({
             {developer.info.credibility.projectsTheme}
           </Typography.Text>
 
-          <h3
+           <h2
             style={{
-              color: COLORS.textColorMedium,
+              color: COLORS.primaryColor,
               marginBottom: 0,
               fontWeight: 300,
+              textTransform: "uppercase",
+              marginTop: 16,
             }}
           >
-            FAQ
-          </h3>
+           FAQ
+          </h2>
+
 
           {renderFaq(developer.info.faq)}
-          <Flex
+          {/* <Flex
             align="center"
             style={{ width: "100%", marginTop: 72 }}
             justify="center"
@@ -382,7 +385,7 @@ export default function RealEstateDeveloperClient({
               height="auto"
               width="100%"
             ></img>
-          </Flex>
+          </Flex> */}
         </Flex>
       </Flex>
       <LandingFooter></LandingFooter>
