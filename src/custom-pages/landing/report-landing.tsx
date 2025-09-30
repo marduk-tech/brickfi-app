@@ -10,6 +10,7 @@ import LandingHeader from "./header";
 import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
+import { Loader } from "@/components/common/loader";
 
 export default function ReportLanding() {
   const { isMobile } = useDevice();
@@ -201,6 +202,22 @@ export default function ReportLanding() {
       </Typography.Text>
     </Flex>
   );
+
+  const [flickerWait, setFlickerWait] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFlickerWait(false);
+    }, 1500);
+  });
+
+  if (flickerWait) {
+    return (
+      <Flex style={{ marginTop: 200 }} align="center" justify="center">
+        <Loader></Loader>
+      </Flex>
+    );
+  }
   return (
     <Flex
       vertical
@@ -345,12 +362,15 @@ export default function ReportLanding() {
           width: "100%",
         }}
       >
-        <Flex vertical style={{ maxWidth: 1400, margin: "auto", padding: "0 16px" }}>
+        <Flex
+          vertical
+          style={{ maxWidth: 1400, margin: "auto", padding: "0 16px" }}
+        >
           <Typography.Text
             style={{
               fontSize: FONT_SIZE.HEADING_1 * 1.5,
               lineHeight: "100%",
-              fontWeight: 300
+              fontWeight: 300,
             }}
           >
             Make a <span style={{ color: COLORS.LANDING.PINK }}>Confident</span>{" "}
@@ -487,7 +507,8 @@ export default function ReportLanding() {
                 lineHeight: "100%",
                 marginBottom: 16,
               }}
-            >AI Assistance to Clarify Doubts & DIY Research.
+            >
+              AI Assistance to Clarify Doubts & DIY Research.
             </Typography.Text>
           ),
           subHeading:
