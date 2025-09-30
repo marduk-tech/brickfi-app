@@ -5,7 +5,7 @@ import { CustomError } from "@/libs/error-handler";
 import { getRealEstateDeveloperBySlugQuery } from "@/queries/real-estate-developer";
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "@/theme/style-constants";
 import { useQuery } from "@tanstack/react-query";
-import { Alert, Flex, Spin, Tabs, TabsProps, Typography } from "antd";
+import { Alert, Collapse, Flex, Spin, Tabs, TabsProps, Typography } from "antd";
 import React, { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -15,6 +15,8 @@ import LandingFooter from "@/custom-pages/landing/footer";
 import { capitalize } from "@/libs/lvnzy-helper";
 import { safeWindow } from "@/libs/browser-utils";
 import { LandingConstants } from "@/libs/constants";
+import { CaretRightOutlined } from "@ant-design/icons";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 const { Paragraph, Text } = Typography;
 
@@ -37,12 +39,10 @@ export default function RealEstateDeveloperClient({
   const { isMobile } = useDevice();
 
   useEffect(() => {
-
-
     setTimeout(() => {
       setFlickerWait(false);
-    }, 1000)
-  })
+    }, 1000);
+  });
 
   const items: TabsProps["items"] =
     developer && developer.genDetails
@@ -82,9 +82,7 @@ export default function RealEstateDeveloperClient({
                         <Text style={{ textWrap: "wrap" }}>
                           {project.location}
                         </Text>
-                        <Text style={{ textWrap: "wrap" }}>
-                          {project.type}
-                        </Text>
+                        <Text style={{ textWrap: "wrap" }}>{project.type}</Text>
                       </Flex>
                     );
                   }
@@ -126,16 +124,57 @@ export default function RealEstateDeveloperClient({
       description: "Please try again later",
     });
   }
+
+  const renderCTA = () => {
+    return (
+      <Flex
+        align="center"
+        gap={16}
+        style={{
+          cursor: "pointer",
+          backgroundColor: COLORS.primaryColor,
+          borderRadius: 4,
+          margin: "16px 0",
+          padding: 8,
+          maxWidth: 500,
+        }}
+        onClick={() => {
+          safeWindow.location.assign(LandingConstants.genReportFormLink)
+        }}
+      >
+        <img
+          src="/images/real-estate-dev/report-cta-icon.png"
+          height={60}
+        ></img>
+        <Flex vertical>
+          <Typography.Text
+            style={{ fontSize: FONT_SIZE.HEADING_2, color: "white" }}
+          >
+            Get a free Brick360 Report.
+          </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.PARA,
+              color: "white",
+              lineHeight: "110%",
+            }}
+          >
+            Get a free Brick360 report for detailed builder credibility analysis
+            including time committment, customer satisfaction and more.
+          </Typography.Text>
+        </Flex>
+      </Flex>
+    );
+  };
   const renderProject = (project: any, index: number) => {
     return (
       <Flex
         key={index}
         style={{
-          width: isMobile ? "100%" : 200,
+          minWidth: 200,
           border: `1.5px solid ${COLORS.borderColor}`,
           borderRadius: 8,
           padding: 4,
-          margin: 8,
         }}
         vertical
       >
@@ -159,13 +198,12 @@ export default function RealEstateDeveloperClient({
               fontWeight: 500,
               lineHeight: "100%",
               marginBottom: 8,
+              textWrap: "wrap",
             }}
           >
             {project.name}
           </Text>
-          <Text
-            style={{ textWrap: "wrap", fontSize: FONT_SIZE.PARA }}
-          >
+          <Text style={{ textWrap: "wrap", fontSize: FONT_SIZE.PARA }}>
             {capitalize(project.type)} | {capitalize(project.subType)}
           </Text>
           <Text
@@ -179,6 +217,36 @@ export default function RealEstateDeveloperClient({
           </Text>
         </Flex>
       </Flex>
+    );
+  };
+
+  const renderFaq = (faq: any) => {
+    const faqItems = faq.map((qa: any) => {
+      return {
+        key: qa.question.toLowerCase().replaceAll(" ", "-"),
+        label: qa.question,
+        children: (
+          <Markdown remarkPlugins={[remarkGfm]} className="liviq-content">
+            {qa.answer}
+          </Markdown>
+        ),
+      };
+    });
+    return (
+      <Collapse
+        expandIcon={({ isActive }) => (
+          <CaretRightOutlined
+            style={{
+              fontSize: FONT_SIZE.HEADING_3,
+              marginTop: 4,
+            }}
+            rotate={isActive ? 90 : 0}
+          />
+        )}
+        style={{ width: isMobile ? "100%" : 900, border: "none" }}
+        items={faqItems}
+        defaultActiveKey={["1"]}
+      />
     );
   };
 
@@ -202,54 +270,96 @@ export default function RealEstateDeveloperClient({
           Real Estate Developer &gt; {developer.name}
         </Text>
         <Flex vertical>
-          <Text
-            style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: "bold" }}
-          >
+          <Text style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: "bold" }}>
             {developer.name}
           </Text>
           <Paragraph
-            style={{ marginBottom: 32, fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ marginBottom: 16, fontSize: FONT_SIZE.HEADING_3 }}
             ellipsis={{ rows: 6, expandable: true }}
           >
             {developer.info?.oneLiner}
           </Paragraph>
 
-          <Text style={{ color: COLORS.primaryColor, margin: 8}}>
-            DEVELOPER PROJECTS
-          </Text>
+          <h2
+            style={{
+              color: COLORS.primaryColor,
+              marginBottom: 0,
+              fontWeight: 300,
+              textTransform: "uppercase",
+            }}
+          >
+            Projects
+          </h2>
           {/* <Tabs defaultActiveKey="projects" items={items} /> */}
-          <Flex style={{ width: "100%", flexWrap: "wrap" }} gap={8}>
+          <Flex
+            style={{
+              width: "100%",
+              overflowX: "scroll",
+              whiteSpace: "nowrap",
+              scrollbarWidth: "none",
+              marginBottom: 16,
+            }}
+            gap={16}
+          >
             {developer.genDetails.details.projects
-              ?.slice(0, isMobile ? 5: 10)
+              ?.slice(0, isMobile ? 5 : 10)
               .map((project: any, index: number) => {
                 return renderProject(project, index);
               })}
-
-            {/* <Flex
-              key={developer.genDetails.details.projects.length}
-              style={{
-                width: isMobile ? "100%" : 200,
-                border: `1.5px solid ${COLORS.borderColor}`,
-                borderRadius: 8,
-                padding: 4,
-                
-              }}
-              vertical
-            >
-              <div
-                style={{
-                  backgroundImage: `url(/images/builder-page/lock-symbol.png)`,
-                  backgroundPosition: "center",
-                  backgroundSize: "30%",
-                  backgroundRepeat: "no-repeat",
-                  height: "100%",
-                  width: "100%",
-                  opacity: 0.4
-                }}
-              ></div>
-            </Flex> */}
           </Flex>
+          {renderCTA()}
 
+          <h2
+            style={{
+              color: COLORS.primaryColor,
+              marginBottom: 0,
+              fontWeight: 300,
+              textTransform: "uppercase",
+              marginTop: 16,
+            }}
+          >
+            MORE ABOUT THE BUILDER
+          </h2>
+
+          <h3
+            style={{
+              color: COLORS.textColorMedium,
+              marginBottom: 0,
+              fontWeight: 300,
+            }}
+          >
+            Experience
+          </h3>
+
+          <Typography.Text>
+            {developer.info.credibility.experienceTime}
+          </Typography.Text>
+
+          <h3
+            style={{
+              color: COLORS.textColorMedium,
+              marginBottom: 0,
+              fontWeight: 300,
+            }}
+          >
+            Project Types
+          </h3>
+
+          <Typography.Text>
+            {developer.info.credibility.projectsTheme}
+          </Typography.Text>
+
+          <h3
+            style={{
+              color: COLORS.textColorMedium,
+              marginBottom: 0,
+              fontWeight: 300,
+            }}
+          >
+            FAQ
+          </h3>
+
+          {renderFaq(developer.info.faq)}
           <Flex
             align="center"
             style={{ width: "100%", marginTop: 72 }}
@@ -262,9 +372,13 @@ export default function RealEstateDeveloperClient({
               style={{
                 border: `1px solid ${COLORS.borderColor}`,
                 borderRadius: 8,
-                maxWidth: 500
+                maxWidth: 500,
               }}
-              src={isMobile ? "/images/builder-page/free-report-cta-mob.png":"/images/builder-page/free-report-cta.png"}
+              src={
+                isMobile
+                  ? "/images/builder-page/free-report-cta-mob.png"
+                  : "/images/builder-page/free-report-cta.png"
+              }
               height="auto"
               width="100%"
             ></img>
