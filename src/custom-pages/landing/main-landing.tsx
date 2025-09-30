@@ -11,9 +11,17 @@ import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import Marquee from "react-fast-marquee";
+import { Loader } from "@/components/common/loader";
 const { Paragraph } = Typography;
 
 export default function MainLanding() {
+  const [flickerWait, setFlickerWait] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFlickerWait(false);
+    }, 1000);
+  });
   const { isMobile } = useDevice();
 
   const newsLinks = [
@@ -187,6 +195,10 @@ export default function MainLanding() {
       }
     }
   }, []);
+
+  if (flickerWait) {
+    return <Flex style={{marginTop: 200}} align="center" justify="center"><Loader></Loader></Flex>
+  }
 
   return (
     <Flex
