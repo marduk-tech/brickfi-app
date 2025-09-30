@@ -240,7 +240,7 @@ export default function MainLanding() {
               }}
             >
               The only platform which provides you unbiased and data backed
-              advise for your next property purchase.
+              advise for your next property purchase. 
             </Typography.Text>
           ),
           primaryImageSize: "90%",
@@ -437,7 +437,7 @@ export default function MainLanding() {
                 textAlign: "left",
               }}
             >
-              Data Backed Research. <br></br>Catered For Home Buying
+              Data Backed Research. <br></br><span style={{color: COLORS.primaryColor}}>Catered For Home Buying</span>
             </Typography.Text>
           ),
           fullHeight: true,
@@ -529,7 +529,7 @@ export default function MainLanding() {
             fontSize: isMobile
               ? FONT_SIZE.HEADING_1
               : FONT_SIZE.HEADING_1 * 1.2,
-            color: COLORS.primaryColor,
+            color: COLORS.LANDING.PINK,
           }}
         >
           #ChooseToInvestSmartly
@@ -539,7 +539,7 @@ export default function MainLanding() {
             return (
               <Flex
                 style={{
-                  width: 200,
+                  width: 175,
                   borderRadius: 8,
                   marginRight: 48,
                 }}
@@ -555,7 +555,7 @@ export default function MainLanding() {
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "center",
                     filter: "grayscale(100%)",
-                    height: 150,
+                    height: 100,
                     width: "100%",
                     borderRadius: 8,
                   }}
