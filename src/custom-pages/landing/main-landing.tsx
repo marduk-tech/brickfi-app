@@ -212,13 +212,13 @@ export default function MainLanding() {
               style={{
                 fontSize: isMobile
                   ? FONT_SIZE.HEADING_1 * 2
-                  : FONT_SIZE.HEADING_1 * 2.2,
+                  : FONT_SIZE.HEADING_1 * 2.3,
                 lineHeight: "100%",
                 fontWeight: "bold",
                 textShadow: "3px 3px 0 white",
               }}
             >
-              The Stress Free Home Buying Experience
+              Stress Free Home Buying Experience
             </Typography.Text>
           ),
           mainImgAltText: "About Brickfi",
@@ -234,6 +234,7 @@ export default function MainLanding() {
                 lineHeight: "120%",
                 backgroundColor: COLORS.LANDING.LIGHT_PINK,
                 padding: 8,
+                border: `3px solid ${COLORS.LANDING.PINK}`,
                 borderRadius: 8,
                 marginTop: 16,
                 maxWidth: 500,
@@ -243,7 +244,6 @@ export default function MainLanding() {
               advise for your next property purchase. 
             </Typography.Text>
           ),
-          primaryImageSize: "90%",
           bgImage: "/images/landing/slide-1-bg.png",
           imageContainerWidth: 60,
           fullHeight: true,

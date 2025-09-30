@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 
 
 export const metadata: Metadata = {
-  title: "Brickfi | Smartest Way to Buy your Next Property",
+  title: "Brickfi | Stress Free Home Buying Experience",
   description:
     "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
   keywords: [

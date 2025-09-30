@@ -10,8 +10,6 @@ import LandingHeader from "./header";
 import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
-import Marquee from "react-fast-marquee";
-import { NewReportRequestForm } from "@/components/common/new-report-request-form";
 
 export default function ReportLanding() {
   const { isMobile } = useDevice();

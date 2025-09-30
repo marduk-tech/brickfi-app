@@ -2,7 +2,7 @@ import ReportLanding from "@/custom-pages/landing/report-landing";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Brickfi | Get a 360 Report Card across any property in Bangalore",
+  title: "Brickfi | Get a 360 Report Card for any property in Bangalore",
   description:
     "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
   keywords: [
