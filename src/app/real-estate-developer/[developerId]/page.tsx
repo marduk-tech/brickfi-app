@@ -7,6 +7,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import RealEstateDeveloperClient from "./real-estate-developer-client";
+import FourOFour from "@/custom-pages/landing/404";
 
 interface PageProps {
   params: Promise<{ developerId: string }>;
@@ -74,7 +75,8 @@ export default async function RealEstateDeveloperPage({ params }: PageProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <RealEstateDeveloperClient slug={slug} />
+      {/* <RealEstateDeveloperClient slug={slug} /> */}
+      <FourOFour></FourOFour>
     </HydrationBoundary>
   );
 }

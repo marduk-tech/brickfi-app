@@ -3,6 +3,7 @@ import { getGlossaryQuery } from "@/queries/marketing";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import GlossaryClient from "./glossary-client";
+import FourOFour from "@/custom-pages/landing/404";
 
 export const metadata: Metadata = {
   title: "Real Estate Glossary | Brickfi",
@@ -38,7 +39,9 @@ export default async function GlossaryPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <GlossaryClient />
+      {/* <GlossaryClient /> */}
+       <FourOFour></FourOFour>
     </HydrationBoundary>
+   
   );
 }

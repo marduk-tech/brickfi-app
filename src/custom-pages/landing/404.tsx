@@ -1,3 +1,5 @@
+"use client";
+
 import { Flex } from "antd";
 import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
@@ -24,7 +26,7 @@ export default function FourOFour() {
       <SectionCenter
         sectionData={{
           mainImgUrl: "/images/landing/404.png",
-          primaryImageSize: "50%",
+          primaryImageSize: isMobile ? "120%": "50%",
           verticalPadding: 125,
         }}
       ></SectionCenter>
