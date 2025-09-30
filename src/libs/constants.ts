@@ -514,8 +514,3 @@ export const DRIVER_CATEGORIES = {
     drivers: [],
   },
 };
-
-export const LANDING_CONSTANTS = {
-  title : "The Stress Free Home Buying Experience",
-  description: "The only platform which provides you unbiased and data backed advise for your next property purchase. Generate a free Brick360 report around property, investment, builder and more for any property in Bangalore"
-}

@@ -1,10 +1,13 @@
 import ReportLanding from "@/custom-pages/landing/report-landing";
 import type { Metadata } from "next";
 
+
+const META_DESCR = "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";
+const META_TITLE = "Brickfi | Get a 360 Report Card for any property in Bangalore";
 export const metadata: Metadata = {
-  title: "Brickfi | Get a 360 Report Card for any property in Bangalore",
+  title: META_TITLE,
   description:
-    "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+    META_DESCR,
   keywords: [
     "real estate",
     "property",
@@ -26,9 +29,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "Brickfi | Get a 360 Report Card across any property in Bangalore",
+    title: META_TITLE,
     description:
-      "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+      META_DESCR,
     url: "https://brickfi.in",
     siteName: "Brickfi",
     images: [
@@ -44,9 +47,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Brickfi | Get a 360 Report Card across any property in Bangalore",
+    title: META_TITLE,
     description:
-      "Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+      META_DESCR,
     images: ["/images/brick360-preview.png"],
   },
   robots: {

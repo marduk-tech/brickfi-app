@@ -1,12 +1,12 @@
 import MainLanding from "@/custom-pages/landing/main-landing";
-import { LANDING_CONSTANTS } from "@/libs/constants";
 import type { Metadata } from "next";
 
-
+const META_DESCR = "The stress-free way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.";
+const META_TITLE = "Brickfi | Stress Free Home Buying Experience";
 export const metadata: Metadata = {
-  title: "Brickfi | Stress Free Home Buying Experience",
+  title: META_TITLE,
   description:
-    "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+    META_DESCR,
   keywords: [
     "real estate",
     "property",
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: LANDING_CONSTANTS.title,
+    title: META_TITLE,
     description:
-      LANDING_CONSTANTS.description,
+      META_DESCR,
     url: "https://brickfi.in",
     siteName: "Brickfi",
     images: [
@@ -38,7 +38,7 @@ export const metadata: Metadata = {
         url: "/images/brickfi-preview.png",
         width: 1200,
         height: 630,
-        alt: "Brickfi - The Stress Free Home Buying Experience",
+        alt: META_TITLE,
       },
     ],
     locale: "en_IN",
@@ -46,9 +46,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: LANDING_CONSTANTS.title,
+    title: META_TITLE,
     description:
-      LANDING_CONSTANTS.description,
+      META_DESCR,
     images: ["/images/brickfi-preview.png"],
   },
   robots: {
