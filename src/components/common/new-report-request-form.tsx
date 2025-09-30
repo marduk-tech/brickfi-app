@@ -224,7 +224,7 @@ export const NewReportRequestForm = () => {
               >
                 {" "}
                 {userLimitReached
-                  ? "Oops! Looks like this mobile number has already requested max number of free reports."
+                  ? "Oops! Looks like this mobile has already requested max number of free reports."
                   : "You can generate report for upto 2 projects for free."}
               </Typography.Text>
             </Flex>
