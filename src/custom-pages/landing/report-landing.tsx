@@ -208,7 +208,7 @@ export default function ReportLanding() {
   useEffect(() => {
     setTimeout(() => {
       setFlickerWait(false);
-    }, 1500);
+    }, 1000);
   });
 
   if (flickerWait) {
@@ -249,7 +249,7 @@ export default function ReportLanding() {
                 paddingTop: isMobile ? 60 : 0,
               }}
             >
-              The 360° Scorecard for Smarter Property Decisions
+              The 360° Report Card for Smarter Property Decisions
             </Typography.Text>
           ),
           subHeading:
