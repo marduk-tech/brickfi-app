@@ -277,7 +277,7 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
                 );
               }}
             </Form.Item>
-            <Form.Item style={{ marginTop: 32 }}>
+            <Form.Item style={{ marginTop: 16 }}>
               <Button
                 type="primary"
                 loading={

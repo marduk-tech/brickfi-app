@@ -240,7 +240,7 @@ export default function MainLanding() {
               }}
             >
               The only platform which provides you unbiased and data backed
-              advise for your next property purchase. 
+              advise for your next property purchase.
             </Typography.Text>
           ),
           bgImage: "/images/landing/slide-1-bg.png",
@@ -436,7 +436,10 @@ export default function MainLanding() {
                 textAlign: "left",
               }}
             >
-              Data Backed Research. <br></br><span style={{color: COLORS.primaryColor}}>Catered For Home Buying</span>
+              Data Backed Research. <br></br>
+              <span style={{ color: COLORS.primaryColor }}>
+                Catered For Home Buying
+              </span>
             </Typography.Text>
           ),
           fullHeight: true,
@@ -446,8 +449,8 @@ export default function MainLanding() {
             <Typography.Text
               style={{ fontSize: FONT_SIZE.HEADING_2, marginBottom: 16 }}
             >
-              We trust legit data sources to gather over 1000+ data points around
-              Builder, Location, Property and Financials. 
+              We trust legit data sources to gather over 1000+ data points
+              around Builder, Location, Property and Financials.
             </Typography.Text>
           ),
           mainImgUrl: "/images/landing/research.png",
@@ -455,10 +458,9 @@ export default function MainLanding() {
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
           imageContainerWidth: 50,
           primaryImageSize: "100%",
-          verticalPadding: 50
+          verticalPadding: 50,
         }}
       ></SectionRight>
-
 
       {/* <Flex style={{ backgroundColor: "#fdf7f6", padding: "100px 0" }}>
         <Marquee speed={20}>

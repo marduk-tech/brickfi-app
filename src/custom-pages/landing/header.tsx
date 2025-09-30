@@ -102,6 +102,7 @@ const LandingHeader: React.FC<{
           navItems.map((item) => {
             return (
               <Link
+                key={item.label}
                 href={item.link}
                 style={{
                   color: color || COLORS.textColorLight,

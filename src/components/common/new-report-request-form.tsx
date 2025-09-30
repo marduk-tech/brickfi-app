@@ -37,6 +37,7 @@ import LandingFooter from "@/custom-pages/landing/footer";
 import { LoginForm } from "../login-forms";
 const { Paragraph } = Typography;
 
+const MAX_FREE_REPORTS = parseInt(process.env.NEXT_MAX_FREE_REPORTS || "2");
 export const NewReportRequestForm = () => {
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
@@ -47,7 +48,7 @@ export const NewReportRequestForm = () => {
   const sendMail = useSendUserMailMutation();
   const { user } = useUser();
   const { isMobile } = useDevice();
-  const [reportsLeft, setReportsLeft] = useState<number>(3);
+  const [reportsLeft, setReportsLeft] = useState<number>(MAX_FREE_REPORTS);
   const [maxReportsRequested, setMaxReportsRequested] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [projectOptions, setProjectOptions] = useState<any[]>([]);
@@ -89,11 +90,13 @@ export const NewReportRequestForm = () => {
       return;
     }
 
-    if (selectedProjects.length < 3) {
+    if (selectedProjects.length < MAX_FREE_REPORTS) {
       setSelectedProjects([...selectedProjects, newProject]);
       setSearchValue("");
     } else {
-      message.warning("You can select a maximum of 3 projects.");
+      message.warning(
+        `You can select a maximum of ${MAX_FREE_REPORTS} projects.`
+      );
     }
   };
   const handleRemoveProject = (projectId: string) => {
@@ -188,7 +191,7 @@ export const NewReportRequestForm = () => {
     await processReportRequest(values);
   };
 
-  const renderMaxReportsMsg = () => {
+  const renderMaxReportsMsg = (userLimitReached?: boolean) => {
     return (
       <Flex style={{ maxWidth: "100%", margin: "8px 0" }} vertical>
         <Tag
@@ -204,34 +207,40 @@ export const NewReportRequestForm = () => {
         >
           <Flex vertical>
             {" "}
-            {/* <DynamicReactIcon
-              iconName="PiSmileyMehLight"
-              iconSet="pi"
-              size={32}
-              color={COLORS.primaryColor}
-            ></DynamicReactIcon> */}
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_4,
-                lineHeight: "110%",
-                color: COLORS.textColorMedium,
-              }}
-            >
-              {" "}
-              Oops! Looks like this mobile number has already requested max
-              number of free reports.
-            </Typography.Text>
-            <Link
-              href="/brickassist"
-              style={{
-                fontSize: FONT_SIZE.HEADING_4,
-                marginTop: 16,
-                color: COLORS.primaryColor,
-              }}
-            >
-              {" "}
-              Looking for more ? Schedule a callback with us.
-            </Link>
+            <Flex align="center" gap={4}>
+              <DynamicReactIcon
+                iconName={!userLimitReached ? "IoMdInformationCircle": "BiSolidErrorCircle"}
+                iconSet={!userLimitReached ? "io": "bi"}
+                size={20}
+                color={COLORS.primaryColor}
+              ></DynamicReactIcon>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_4,
+                  lineHeight: "110%",
+                  color: COLORS.textColorMedium,
+                  display: "flex",
+                }}
+              >
+                {" "}
+                {userLimitReached
+                  ? "Oops! Looks like this mobile number has already requested max number of free reports."
+                  : "You can generate report for upto 2 projects for free."}
+              </Typography.Text>
+            </Flex>
+            {userLimitReached ? (
+              <Link
+                href="/brickassist"
+                style={{
+                  fontSize: FONT_SIZE.HEADING_4,
+                  marginTop: 16,
+                  color: COLORS.primaryColor,
+                }}
+              >
+                {" "}
+                Looking for more ? Schedule a callback with us.
+              </Link>
+            ) : null}
           </Flex>
         </Tag>
       </Flex>
@@ -269,8 +278,8 @@ export const NewReportRequestForm = () => {
   };
   useEffect(() => {
     if (user && user.requestedReports) {
-      setReportsLeft(3 - user.requestedReports.length);
-      if (3 - user.requestedReports.length <= 0) {
+      setReportsLeft(MAX_FREE_REPORTS - user.requestedReports.length);
+      if (MAX_FREE_REPORTS - user.requestedReports.length <= 0) {
         setMaxReportsRequested(true);
       }
     }
@@ -278,11 +287,15 @@ export const NewReportRequestForm = () => {
 
   return (
     <>
-      <LandingHeader bgColor="transparent" logo="/images/brickfi-logo.png" color={COLORS.textColorMedium}></LandingHeader>
+      <LandingHeader
+        bgColor="transparent"
+        logo="/images/brickfi-logo.png"
+        color={COLORS.textColorMedium}
+      ></LandingHeader>
       <Flex
         vertical={isMobile}
         style={{
-          paddingTop: isMobile ? 72 : 125,
+          paddingTop: isMobile ? 72 : 100,
           minHeight: "calc(100vh - 100px)",
         }}
       >
@@ -357,7 +370,11 @@ export const NewReportRequestForm = () => {
                       ? "Loading projects, please wait.."
                       : "Search project name..."
                   }
-                  disabled={!reportsLeft || selectedProjects.length >= 3}
+                  disabled={
+                    !reportsLeft ||
+                    selectedProjects.length >= MAX_FREE_REPORTS ||
+                    reraProjectNamesLoading
+                  }
                 >
                   <Input.Search loading={reraProjectNamesLoading} />
                 </AutoComplete>
@@ -376,12 +393,15 @@ export const NewReportRequestForm = () => {
                 </a>
 
                 <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
-                  {selectedProjects.map((p) => (
+                  {selectedProjects.map((p, index) => (
                     <Col key={p.projectId} style={{ width: "100%" }}>
                       <Flex
                         style={{
                           width: "100%",
-                          borderBottom: "1px solid",
+                          borderBottom:
+                            index == selectedProjects.length - 1
+                              ? "none"
+                              : `1px solid ${COLORS.borderColor}`,
                           borderColor: COLORS.borderColor,
                         }}
                       >
@@ -414,7 +434,10 @@ export const NewReportRequestForm = () => {
             {step === 2 && (
               <>
                 <Typography.Text style={{ marginBottom: 16 }}>
-                  Please provide your details to receive the reports.
+                  {!isMobileVerified
+                    ? "Verify your mobile number to receive the report"
+                    : "Share contact details"}
+                  .
                 </Typography.Text>
                 <Form
                   form={form}
@@ -422,32 +445,54 @@ export const NewReportRequestForm = () => {
                   onFinish={onFinish}
                   style={{ width: "100%", maxWidth: 500 }}
                 >
-                  <Form.Item
-                    name="name"
-                    label="Full Name"
-                    rules={[
-                      { required: true, message: "Please enter your name" },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-                  <Form.Item
-                    name="email"
-                    label="Email Address"
-                    rules={[
-                      { required: true, message: "Please enter your email" },
-                      {
-                        type: "email",
-                        message: "Please enter a valid email",
-                      },
-                    ]}
-                  >
-                    <Input />
-                  </Form.Item>
-                  <LoginForm onMobVerified={(updatedUser: any) => {
-                    setVerifiedUser(updatedUser);
-                    setIsMobileVerified(true);
-                  }}></LoginForm>
+                  {isMobileVerified && (
+                    <Form.Item
+                      name="name"
+                      label="Full Name"
+                      rules={[
+                        { required: true, message: "Please enter your name" },
+                      ]}
+                    >
+                      <Input />
+                    </Form.Item>
+                  )}
+
+                  {isMobileVerified && (
+                    <Form.Item
+                      name="email"
+                      label="Email Address"
+                      rules={[
+                        { required: true, message: "Please enter your email" },
+                        {
+                          type: "email",
+                          message: "Please enter a valid email",
+                        },
+                      ]}
+                    >
+                      <Input />
+                    </Form.Item>
+                  )}
+                  {isMobileVerified ? (
+                    <Flex align="center" gap={8}>
+                      <Typography.Text
+                        style={{ fontSize: FONT_SIZE.HEADING_2 }}
+                      >
+                        +91 - 9310846587
+                      </Typography.Text>
+                      <DynamicReactIcon
+                        iconName="MdVerifiedUser"
+                        iconSet="md"
+                        color={COLORS.primaryColor}
+                      ></DynamicReactIcon>
+                    </Flex>
+                  ) : (
+                    <LoginForm
+                      onMobVerified={(updatedUser: any) => {
+                        setVerifiedUser(updatedUser);
+                        setIsMobileVerified(true);
+                      }}
+                    ></LoginForm>
+                  )}
                 </Form>
               </>
             )}
@@ -481,7 +526,10 @@ export const NewReportRequestForm = () => {
             )}
           </Flex>
           {}
-          {step !== 3 && maxReportsRequested ? renderMaxReportsMsg() : null}
+          {step !== 3 && maxReportsRequested ? renderMaxReportsMsg(true) : null}
+          {step !== 3 && selectedProjects.length >= MAX_FREE_REPORTS
+            ? renderMaxReportsMsg()
+            : null}
           {step !== 3 && errorMsg ? errorMsg : null}
           {reportsLeft > 0 && (
             <Flex style={{ marginTop: 16 }} gap={16}>
