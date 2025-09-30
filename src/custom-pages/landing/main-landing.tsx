@@ -540,6 +540,7 @@ export default function MainLanding() {
             return (
               <Flex
                 style={{
+                  cursor: "pointer",
                   width: 175,
                   borderRadius: 8,
                   marginRight: 48,
