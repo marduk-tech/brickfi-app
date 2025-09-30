@@ -364,7 +364,7 @@ export default function ReportLanding() {
               lineHeight: "100%",
             }}
           >
-            A sneak peak of what you get in the report.
+            A sneak peak of what all you get.
           </Typography.Text>
         </Flex>
       </Flex>
@@ -404,7 +404,7 @@ export default function ReportLanding() {
                 lineHeight: "100%",
               }}
             >
-              Assesing Livability
+              Location Dissection to Assess Livability & Future Growth.
             </Typography.Text>
           ),
           subHeading:
@@ -435,7 +435,7 @@ export default function ReportLanding() {
                 marginBottom: 16,
               }}
             >
-              Hidden Builder Complaints & Delays
+              Builder Track Records, Complaints & Delays
             </Typography.Text>
           ),
           subHeading:
@@ -459,7 +459,7 @@ export default function ReportLanding() {
                 lineHeight: "100%",
               }}
             >
-              Navigating the Financials
+              Financials Assessment including Price Point, Rental Yield.
             </Typography.Text>
           ),
           subHeading:
@@ -489,7 +489,7 @@ export default function ReportLanding() {
                 lineHeight: "100%",
                 marginBottom: 16,
               }}
-            >Go Deeper with AI.
+            >AI Assistance to Clarify Doubts & DIY Research.
             </Typography.Text>
           ),
           subHeading:
@@ -530,7 +530,7 @@ export default function ReportLanding() {
               }}
             >
               Brickfi pioneers a data-first approach to exploring and evaluating
-              real estate in India
+              real estate in India.
             </Typography.Text>
           ),
           fullHeight: true,
