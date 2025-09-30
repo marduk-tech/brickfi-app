@@ -6,6 +6,7 @@ import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { SectionCenter } from "./section";
 import LandingHeader from "./header";
 import LandingFooter from "./footer";
+import { COLORS } from "@/theme/style-constants";
 
 export default function FourOFour() {
   const { isMobile } = useDevice();
@@ -22,7 +23,11 @@ export default function FourOFour() {
         scrollbarWidth: "none",
       }}
     >
-      <LandingHeader bgColor="white"></LandingHeader>
+      <LandingHeader
+        bgColor="transparent"
+        logo="/images/brickfi-logo.png"
+        color={COLORS.textColorMedium}
+      ></LandingHeader>
       <SectionCenter
         sectionData={{
           mainImgUrl: "/images/landing/404.png",
