@@ -16,7 +16,7 @@ const { Paragraph } = Typography;
 export default function MainLanding() {
   const { isMobile } = useDevice();
 
-   const newsLinks = [
+  const newsLinks = [
     {
       url: "https://bangaloremirror.indiatimes.com/bangalore/civic/open-drains-heighten-public-health-concerns/articleshow/109354187.cms",
       title: "Open drains heighten public health concerns",
@@ -210,10 +210,12 @@ export default function MainLanding() {
           heading: (
             <Typography.Text
               style={{
-                fontSize: isMobile ? FONT_SIZE.HEADING_1 * 2 : FONT_SIZE.HEADING_1 * 2.2,
+                fontSize: isMobile
+                  ? FONT_SIZE.HEADING_1 * 2
+                  : FONT_SIZE.HEADING_1 * 2.2,
                 lineHeight: "100%",
                 fontWeight: "bold",
-                textShadow: "3px 3px 0 white"
+                textShadow: "3px 3px 0 white",
               }}
             >
               The Stress Free Home Buying Experience
@@ -237,7 +239,8 @@ export default function MainLanding() {
                 maxWidth: 500,
               }}
             >
-             The only platform which provides you unbiased and data backed advise for your next property purchase.
+              The only platform which provides you unbiased and data backed
+              advise for your next property purchase.
             </Typography.Text>
           ),
           primaryImageSize: "90%",
@@ -256,17 +259,21 @@ export default function MainLanding() {
             <Flex vertical>
               <Typography.Text
                 style={{
-                  fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 1.5
+                    : FONT_SIZE.HEADING_1 * 1.75,
                   marginBottom: 8,
                   lineHeight: "100%",
-                  fontWeight: 200
+                  fontWeight: 200,
                 }}
               >
                 Buying Property is Broken.
               </Typography.Text>
               <Typography.Text
                 style={{
-                  fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 1.5
+                    : FONT_SIZE.HEADING_1 * 1.75,
                   color: COLORS.primaryColor,
                   lineHeight: "100%",
                   fontWeight: 600,
@@ -287,7 +294,9 @@ export default function MainLanding() {
       <Typography.Text
         id="brk360"
         style={{
-          fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
+          fontSize: isMobile
+            ? FONT_SIZE.HEADING_1 * 1.5
+            : FONT_SIZE.HEADING_1 * 1.75,
           backgroundColor: COLORS.LANDING.BLUISH,
           textAlign: "center",
           color: "white",
@@ -329,9 +338,9 @@ export default function MainLanding() {
                   lineHeight: "120%",
                 }}
               >
-                We collect data from hundreds of legit sources & use AI to
-                provide human insights. Get upto three Brick360 Report to
-                analyse and compare properties on your own
+                Evaluate any property before buying, with a Brick360 Report. We
+                collect data from hundreds of legit sources & use AI to provide
+                human insights.
               </Typography.Text>
               <Button
                 type="primary"
@@ -355,15 +364,6 @@ export default function MainLanding() {
           imageContainerWidth: 50,
         }}
       ></SectionLeft>
-      <Flex
-        style={{ backgroundColor: COLORS.LANDING.BLUISH, padding: "48px 0" }}
-        justify="center"
-      >
-        <img
-          src="/images/landing/divider.png"
-          width={isMobile ? "80%" : "30%"}
-        ></img>
-      </Flex>
       <SectionLeft
         sectionData={{
           id: "demo-brkfi",
@@ -376,7 +376,7 @@ export default function MainLanding() {
                   color: COLORS.primaryColor,
                 }}
               >
-                brickAssist
+                BrickfiAssist
               </Typography.Text>
               <Typography.Text
                 style={{
@@ -419,7 +419,7 @@ export default function MainLanding() {
           textColor: "white",
           subHeading: "",
           mainImgUrl: "/images/landing/offering-2.png",
-          verticalPadding: 32,
+          verticalPadding: 60,
           primaryImageSize: isMobile ? "100%" : "60%",
           imageContainerWidth: 50,
         }}
@@ -430,12 +430,14 @@ export default function MainLanding() {
           heading: (
             <Typography.Text
               style={{
-                fontSize: isMobile ? FONT_SIZE.HEADING_1 * 1.5 : FONT_SIZE.HEADING_1 * 1.75,
+                fontSize: isMobile
+                  ? FONT_SIZE.HEADING_1 * 1.5
+                  : FONT_SIZE.HEADING_1 * 1.75,
                 lineHeight: "100%",
                 textAlign: "left",
               }}
             >
-              Data Backed Research. <br></br>Catered For Home Buying.
+              Data Backed Research. <br></br>Catered For Home Buying
             </Typography.Text>
           ),
           fullHeight: true,
@@ -445,33 +447,21 @@ export default function MainLanding() {
             <Typography.Text
               style={{ fontSize: FONT_SIZE.HEADING_2, marginBottom: 16 }}
             >
-              We trust legit data sources to gather over 200+ data points around
-              Builder, Location, Property and Financials.
+              We trust legit data sources to gather over 1000+ data points around
+              Builder, Location, Property and Financials. 
             </Typography.Text>
           ),
           mainImgUrl: "/images/landing/research.png",
           mainImgAltText:
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
           imageContainerWidth: 50,
-          primaryImageSize: "90%",
+          primaryImageSize: "100%",
+          verticalPadding: 50
         }}
       ></SectionRight>
 
-      {/* <SectionCenter
-        sectionData={{
-          verticalPadding: 100,
-          heading: "Key Partners" ,
-          bgColor: "#fdf7f6",
-          primaryImageSize: "100%",
-          subHeading: "",
-          mainImgUrl: isMobile
-            ? "/images/landing/slide-10-mobile-v2.png"
-            : "/images/landing/slide-10-v2.png",
-          mainImgAltText:
-            "Brickfi covers 6 micro markets, 100+ developers and 400+ projects across Bengaluru",
-        }}
-      ></SectionCenter> */}
-      <Flex style={{ backgroundColor: "#fdf7f6", padding: "100px 0" }}>
+
+      {/* <Flex style={{ backgroundColor: "#fdf7f6", padding: "100px 0" }}>
         <Marquee speed={20}>
           <Flex>
             {[1, 2, 3, 4, 5].map((item: number) => {
@@ -485,7 +475,7 @@ export default function MainLanding() {
             })}
           </Flex>
         </Marquee>
-      </Flex>
+      </Flex> */}
       {/* <SectionRight
         sectionData={{
           verticalPadding: 100,
@@ -549,8 +539,7 @@ export default function MainLanding() {
             return (
               <Flex
                 style={{
-                  width: 225,
-                  border: `1px solid ${COLORS.borderColorMedium}`,
+                  width: 200,
                   borderRadius: 8,
                   marginRight: 48,
                 }}
@@ -565,24 +554,25 @@ export default function MainLanding() {
                     backgroundSize: "cover",
                     backgroundRepeat: "no-repeat",
                     backgroundPosition: "center",
+                    filter: "grayscale(100%)",
                     height: 150,
                     width: "100%",
-                    borderTopLeftRadius: 8,
-                    borderTopRightRadius: 8,
+                    borderRadius: 8,
                   }}
                 ></div>
                 <Flex
                   style={{
-                    padding: 8,
+                    padding: "8px 0",
                     height: 100,
                   }}
                 >
                   <Paragraph
                     style={{
                       fontSize: FONT_SIZE.HEADING_3,
+                      fontWeight: 500,
                       lineHeight: "110%",
                     }}
-                    ellipsis={{ rows: 4, expandable: false }}
+                    ellipsis={{ rows: 2, expandable: false }}
                   >
                     {l.title}
                   </Paragraph>
