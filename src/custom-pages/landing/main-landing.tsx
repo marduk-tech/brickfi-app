@@ -214,7 +214,7 @@ export default function MainLanding() {
                   ? FONT_SIZE.HEADING_1 * 2
                   : FONT_SIZE.HEADING_1 * 2.3,
                 lineHeight: "100%",
-                fontWeight: "bold",
+                fontWeight: 500,
                 textShadow: "3px 3px 0 white",
               }}
             >
@@ -232,9 +232,8 @@ export default function MainLanding() {
                 fontSize: FONT_SIZE.HEADING_2,
                 display: "block",
                 lineHeight: "120%",
-                backgroundColor: COLORS.LANDING.LIGHT_PINK,
+                backgroundColor: "rgba(253, 247, 246, 0.7)",
                 padding: 8,
-                border: `3px solid ${COLORS.LANDING.PINK}`,
                 borderRadius: 8,
                 marginTop: 16,
                 maxWidth: 500,

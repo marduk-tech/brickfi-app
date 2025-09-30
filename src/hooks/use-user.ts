@@ -35,17 +35,17 @@ export function useUser() {
     retry: 2,
   });
 
-  useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === LocalStorageKeys.user && e.newValue) {
-        console.log("LocalStorage user changed, refetching...");
-        refetch();
-      }
-    };
+  // useEffect(() => {
+  //   const handleStorageChange = (e: StorageEvent) => {
+  //     if (e.key === LocalStorageKeys.user && e.newValue) {
+  //       console.log("LocalStorage user changed, refetching...");
+  //       refetch();
+  //     }
+  //   };
 
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, [refetch]);
+  //   window.addEventListener("storage", handleStorageChange);
+  //   return () => window.removeEventListener("storage", handleStorageChange);
+  // }, [refetch]);
 
   return { user: data, isLoading, isError, error, refetch };
 }

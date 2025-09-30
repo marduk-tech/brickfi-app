@@ -278,7 +278,7 @@ export const NewReportRequestForm = () => {
 
   return (
     <>
-      <LandingHeader bgColor="#fff"></LandingHeader>
+      <LandingHeader bgColor="transparent" logo="/images/brickfi-logo.png" color={COLORS.textColorMedium}></LandingHeader>
       <Flex
         vertical={isMobile}
         style={{
