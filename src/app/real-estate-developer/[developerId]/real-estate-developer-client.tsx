@@ -6,7 +6,7 @@ import { getRealEstateDeveloperBySlugQuery } from "@/queries/real-estate-develop
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "@/theme/style-constants";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, Flex, Spin, Tabs, TabsProps, Typography } from "antd";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import RealEstateDeveloperLoading from "./loading";
@@ -16,7 +16,7 @@ import { capitalize } from "@/libs/lvnzy-helper";
 import { safeWindow } from "@/libs/browser-utils";
 import { LandingConstants } from "@/libs/constants";
 
-const { Paragraph } = Typography;
+const { Paragraph, Text } = Typography;
 
 interface RealEstateDeveloperClientProps {
   slug: string;
@@ -32,7 +32,17 @@ export default function RealEstateDeveloperClient({
     error,
   } = useQuery({ ...getRealEstateDeveloperBySlugQuery(slug), retry: 3 });
 
+  const [flickerWait, setFlickerWait] = useState(true);
+
   const { isMobile } = useDevice();
+
+  useEffect(() => {
+
+
+    setTimeout(() => {
+      setFlickerWait(false);
+    }, 1000)
+  })
 
   const items: TabsProps["items"] =
     developer && developer.genDetails
@@ -61,20 +71,20 @@ export default function RealEstateDeveloperClient({
                           padding: 4,
                         }}
                       >
-                        <Typography.Text
+                        <Text
                           style={{
                             fontSize: FONT_SIZE.HEADING_2,
                             fontWeight: 500,
                           }}
                         >
                           {project.name}
-                        </Typography.Text>
-                        <Typography.Text style={{ textWrap: "wrap" }}>
+                        </Text>
+                        <Text style={{ textWrap: "wrap" }}>
                           {project.location}
-                        </Typography.Text>
-                        <Typography.Text style={{ textWrap: "wrap" }}>
+                        </Text>
+                        <Text style={{ textWrap: "wrap" }}>
                           {project.type}
-                        </Typography.Text>
+                        </Text>
                       </Flex>
                     );
                   }
@@ -105,7 +115,7 @@ export default function RealEstateDeveloperClient({
         ]
       : [];
 
-  if (isLoading) {
+  if (isLoading || flickerWait) {
     return <RealEstateDeveloperLoading />;
   }
 
@@ -143,7 +153,7 @@ export default function RealEstateDeveloperClient({
         ></div>
 
         <Flex vertical style={{ marginTop: 8 }}>
-          <Typography.Text
+          <Text
             style={{
               fontSize: FONT_SIZE.HEADING_2,
               fontWeight: 500,
@@ -152,13 +162,13 @@ export default function RealEstateDeveloperClient({
             }}
           >
             {project.name}
-          </Typography.Text>
-          <Typography.Text
+          </Text>
+          <Text
             style={{ textWrap: "wrap", fontSize: FONT_SIZE.PARA }}
           >
             {capitalize(project.type)} | {capitalize(project.subType)}
-          </Typography.Text>
-          <Typography.Text
+          </Text>
+          <Text
             style={{
               textWrap: "wrap",
               fontSize: FONT_SIZE.PARA,
@@ -166,7 +176,7 @@ export default function RealEstateDeveloperClient({
             }}
           >
             {project.location}
-          </Typography.Text>
+          </Text>
         </Flex>
       </Flex>
     );
@@ -188,15 +198,15 @@ export default function RealEstateDeveloperClient({
           margin: isMobile ? 8 : "auto",
         }}
       >
-        <Typography.Text style={{ color: COLORS.textColorMedium }}>
+        <Text style={{ color: COLORS.textColorMedium }}>
           Real Estate Developer &gt; {developer.name}
-        </Typography.Text>
+        </Text>
         <Flex vertical>
-          <Typography.Text
+          <Text
             style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: "bold" }}
           >
             {developer.name}
-          </Typography.Text>
+          </Text>
           <Paragraph
             style={{ marginBottom: 32, fontSize: FONT_SIZE.HEADING_3 }}
             ellipsis={{ rows: 6, expandable: true }}
@@ -204,9 +214,9 @@ export default function RealEstateDeveloperClient({
             {developer.info?.oneLiner}
           </Paragraph>
 
-          <Typography.Text style={{ color: COLORS.primaryColor, margin: 8}}>
+          <Text style={{ color: COLORS.primaryColor, margin: 8}}>
             DEVELOPER PROJECTS
-          </Typography.Text>
+          </Text>
           {/* <Tabs defaultActiveKey="projects" items={items} /> */}
           <Flex style={{ width: "100%", flexWrap: "wrap" }} gap={8}>
             {developer.genDetails.details.projects

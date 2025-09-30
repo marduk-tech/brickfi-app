@@ -4,7 +4,7 @@ import React from "react";
 
 export default function RealEstateDeveloperLoading() {
   return (
-    <Flex vertical style={{ maxWidth: MAX_WIDTH, margin: "auto" }}>
+    <Flex vertical style={{ maxWidth: MAX_WIDTH, margin: "auto", paddingTop: 48 }}>
       <Flex vertical style={{ padding: 16 }}>
         {/* Developer name skeleton */}
         <Skeleton 
@@ -21,27 +21,6 @@ export default function RealEstateDeveloperLoading() {
           title={false}
           style={{ marginBottom: 24 }}
         />
-
-        {/* Tabs skeleton */}
-        <div style={{ marginBottom: 16 }}>
-          <Flex gap={24}>
-            <Skeleton 
-              active 
-              title={{ width: 80 }}
-              paragraph={false}
-            />
-            <Skeleton 
-              active 
-              title={{ width: 100 }}
-              paragraph={false}
-            />
-            <Skeleton 
-              active 
-              title={{ width: 90 }}
-              paragraph={false}
-            />
-          </Flex>
-        </div>
 
         {/* Projects grid skeleton */}
         <Flex
