@@ -84,7 +84,7 @@ const SectionHeader: React.FC<{
 const GlossaryCard: React.FC<{ item: GlossaryItem }> = ({ item }) => {
   const handleCardClick = () => {
     if (item.pageLink) {
-      window.open(item.pageLink, "_blank");
+      window.open(`/glossary/${item.pageLink}`, "_blank");
     }
   };
 
@@ -183,7 +183,7 @@ export default function GlossaryClient() {
     if (!glossary || !Array.isArray(glossary)) {
       return {};
     }
-    const items = glossary.map(doc => doc.content);
+    const items = glossary.map((doc) => doc.content);
     return groupItemsByLetter(items);
   }, [glossary]);
 
