@@ -35,6 +35,7 @@ import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "./dynamic-react-icon";
 import LandingFooter from "@/custom-pages/landing/footer";
 import { LoginForm } from "../login-forms";
+import { Loader } from "./loader";
 const { Paragraph } = Typography;
 
 const MAX_FREE_REPORTS = parseInt(process.env.NEXT_MAX_FREE_REPORTS || "2");
@@ -54,6 +55,14 @@ export const NewReportRequestForm = () => {
   const [projectOptions, setProjectOptions] = useState<any[]>([]);
   const [verifiedUser, setVerifiedUser] = useState<any>(null);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
+
+  const [flickerWait, setFlickerWait] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFlickerWait(false);
+    }, 1000);
+  });
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
@@ -209,8 +218,12 @@ export const NewReportRequestForm = () => {
             {" "}
             <Flex align="center" gap={4}>
               <DynamicReactIcon
-                iconName={!userLimitReached ? "IoMdInformationCircle": "BiSolidErrorCircle"}
-                iconSet={!userLimitReached ? "io": "bi"}
+                iconName={
+                  !userLimitReached
+                    ? "IoMdInformationCircle"
+                    : "BiSolidErrorCircle"
+                }
+                iconSet={!userLimitReached ? "io" : "bi"}
                 size={20}
                 color={COLORS.primaryColor}
               ></DynamicReactIcon>
@@ -284,6 +297,14 @@ export const NewReportRequestForm = () => {
       }
     }
   }, [user]);
+
+  if (flickerWait) {
+    return (
+      <Flex style={{ marginTop: 200 }} align="center" justify="center">
+        <Loader></Loader>
+      </Flex>
+    );
+  }
 
   return (
     <>
