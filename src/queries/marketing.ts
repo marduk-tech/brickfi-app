@@ -39,7 +39,7 @@ export const getMarketing = async (type: string, throwError = true) => {
 export const getGlossary = async (throwError = true) => {
   const data = await getMarketing("glossary", throwError);
 
-  if (data.length === 0 || (data.length > 1 && throwError)) {
+  if (data.length === 0 && throwError) {
     throw new CustomError({
       status: 404,
       title: "Something went wrong",
@@ -47,7 +47,7 @@ export const getGlossary = async (throwError = true) => {
     });
   }
 
-  return data[0];
+  return data;
 };
 
 // Query configuration for glossary data
