@@ -39,8 +39,7 @@ export default async function GlossaryPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {/* <GlossaryClient /> */}
-       <FourOFour></FourOFour>
+      <GlossaryClient />
     </HydrationBoundary>
    
   );
