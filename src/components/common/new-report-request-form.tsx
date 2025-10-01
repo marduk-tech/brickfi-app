@@ -35,6 +35,7 @@ import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "./dynamic-react-icon";
 import LandingFooter from "@/custom-pages/landing/footer";
 import { LoginForm } from "../login-forms";
+import { Loader } from "./loader";
 const { Paragraph } = Typography;
 
 const MAX_FREE_REPORTS = parseInt(process.env.NEXT_MAX_FREE_REPORTS || "2");
@@ -54,6 +55,14 @@ export const NewReportRequestForm = () => {
   const [projectOptions, setProjectOptions] = useState<any[]>([]);
   const [verifiedUser, setVerifiedUser] = useState<any>(null);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
+
+  const [flickerWait, setFlickerWait] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFlickerWait(false);
+    }, 1000);
+  });
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
@@ -208,12 +217,16 @@ export const NewReportRequestForm = () => {
           <Flex vertical>
             {" "}
             <Flex align="center" gap={4}>
-              <DynamicReactIcon
-                iconName={!userLimitReached ? "IoMdInformationCircle": "BiSolidErrorCircle"}
-                iconSet={!userLimitReached ? "io": "bi"}
+              {/* <DynamicReactIcon
+                iconName={
+                  !userLimitReached
+                    ? "IoMdInformationCircle"
+                    : "BiSolidErrorCircle"
+                }
+                iconSet={!userLimitReached ? "io" : "bi"}
                 size={20}
                 color={COLORS.primaryColor}
-              ></DynamicReactIcon>
+              ></DynamicReactIcon> */}
               <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_4,
@@ -284,6 +297,14 @@ export const NewReportRequestForm = () => {
       }
     }
   }, [user]);
+
+  if (flickerWait) {
+    return (
+      <Flex style={{ marginTop: 200 }} align="center" justify="center">
+        <Loader></Loader>
+      </Flex>
+    );
+  }
 
   return (
     <>
@@ -526,9 +547,9 @@ export const NewReportRequestForm = () => {
             )}
           </Flex>
           {}
-          {step !== 3 && maxReportsRequested ? renderMaxReportsMsg(true) : null}
-          {step !== 3 && selectedProjects.length >= MAX_FREE_REPORTS
-            ? renderMaxReportsMsg()
+          {(step !== 3 && maxReportsRequested) ||
+          (step == 1 && selectedProjects.length >= MAX_FREE_REPORTS)
+            ? renderMaxReportsMsg(maxReportsRequested)
             : null}
           {step !== 3 && errorMsg ? errorMsg : null}
           {reportsLeft > 0 && (
@@ -539,7 +560,7 @@ export const NewReportRequestForm = () => {
                       key="next"
                       type="primary"
                       onClick={handleNext}
-                      disabled={selectedProjects.length === 0}
+                      disabled={selectedProjects.length === 0 }
                       loading={createUser.isPending && !!user}
                     >
                       {user ? "Submit" : "Next"}
@@ -554,7 +575,7 @@ export const NewReportRequestForm = () => {
                       key="submit"
                       type="primary"
                       loading={createUser.isPending}
-                      disabled={!isMobileVerified}
+                      disabled={!isMobileVerified || maxReportsRequested}
                       onClick={() => form.submit()}
                     >
                       Submit
