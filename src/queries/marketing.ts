@@ -1,5 +1,6 @@
 import { baseApiUrl } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
+import { GlossaryArticle } from "@/types/Marketing";
 
 // Get marketing data by type
 export const getMarketing = async (type: string, throwError = true) => {
@@ -54,6 +55,45 @@ export const getGlossaryQuery = () => {
   return {
     queryKey: ["marketing", "glossary"],
     queryFn: () => getGlossary(),
+    throwOnError: true,
+  };
+};
+
+export const getGlossaryArticleBySlug = async (
+  slug: string,
+  throwError = true
+): Promise<GlossaryArticle> => {
+  try {
+    const { getGhostPageBySlug } = await import("@/libs/ghost-client");
+    const article = await getGhostPageBySlug(slug);
+    return article;
+  } catch (error) {
+    if (throwError) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+
+      if (errorMessage.includes("404")) {
+        throw new CustomError({
+          status: 404,
+          title: "Article Not Found",
+          description: "The requested glossary article could not be found.",
+        });
+      }
+
+      throw new CustomError({
+        status: 500,
+        title: "Something went wrong",
+        description: "An unexpected error occurred while fetching the article.",
+      });
+    }
+    throw error;
+  }
+};
+
+export const getGlossaryArticleBySlugQuery = (slug: string) => {
+  return {
+    queryKey: ["glossary-article", slug],
+    queryFn: () => getGlossaryArticleBySlug(slug),
     throwOnError: true,
   };
 };
