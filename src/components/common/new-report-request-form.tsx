@@ -217,7 +217,7 @@ export const NewReportRequestForm = () => {
           <Flex vertical>
             {" "}
             <Flex align="center" gap={4}>
-              <DynamicReactIcon
+              {/* <DynamicReactIcon
                 iconName={
                   !userLimitReached
                     ? "IoMdInformationCircle"
@@ -226,7 +226,7 @@ export const NewReportRequestForm = () => {
                 iconSet={!userLimitReached ? "io" : "bi"}
                 size={20}
                 color={COLORS.primaryColor}
-              ></DynamicReactIcon>
+              ></DynamicReactIcon> */}
               <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_4,
@@ -547,9 +547,9 @@ export const NewReportRequestForm = () => {
             )}
           </Flex>
           {}
-          {step !== 3 && maxReportsRequested ? renderMaxReportsMsg(true) : null}
-          {step !== 3 && selectedProjects.length >= MAX_FREE_REPORTS
-            ? renderMaxReportsMsg()
+          {(step !== 3 && maxReportsRequested) ||
+          (step == 1 && selectedProjects.length >= MAX_FREE_REPORTS)
+            ? renderMaxReportsMsg(maxReportsRequested)
             : null}
           {step !== 3 && errorMsg ? errorMsg : null}
           {reportsLeft > 0 && (
@@ -560,7 +560,7 @@ export const NewReportRequestForm = () => {
                       key="next"
                       type="primary"
                       onClick={handleNext}
-                      disabled={selectedProjects.length === 0}
+                      disabled={selectedProjects.length === 0 }
                       loading={createUser.isPending && !!user}
                     >
                       {user ? "Submit" : "Next"}
@@ -575,7 +575,7 @@ export const NewReportRequestForm = () => {
                       key="submit"
                       type="primary"
                       loading={createUser.isPending}
-                      disabled={!isMobileVerified}
+                      disabled={!isMobileVerified || maxReportsRequested}
                       onClick={() => form.submit()}
                     >
                       Submit
