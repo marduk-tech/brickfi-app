@@ -19,9 +19,12 @@ interface GlossaryItem {
   pageLink?: string;
 }
 
-interface GlossaryData {
-  content: GlossaryItem[];
+interface GlossaryDocument {
+  type: string;
+  content: GlossaryItem;
 }
+
+type GlossaryData = GlossaryDocument[];
 
 const ALPHABET_LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
@@ -81,7 +84,7 @@ const SectionHeader: React.FC<{
 const GlossaryCard: React.FC<{ item: GlossaryItem }> = ({ item }) => {
   const handleCardClick = () => {
     if (item.pageLink) {
-      window.open(item.pageLink, "_blank");
+      window.open(`/glossary/${item.pageLink}`, "_blank");
     }
   };
 
@@ -175,13 +178,14 @@ export default function GlossaryClient() {
 
   const { isMobile } = useDevice();
 
-  // Group glossary items by letter
+  // Extract items from glossary documents and group by letter
   const groupedItems = React.useMemo(() => {
-    if (!glossary?.content || !Array.isArray(glossary.content)) {
+    if (!glossary || !Array.isArray(glossary)) {
       return {};
     }
-    return groupItemsByLetter(glossary.content);
-  }, [glossary?.content]);
+    const items = glossary.map((doc) => doc.content);
+    return groupItemsByLetter(items);
+  }, [glossary]);
 
   // Get available letters that have content
   const availableLetters = React.useMemo(() => {
@@ -368,7 +372,7 @@ export default function GlossaryClient() {
             ))}
           </div>
         ) : (
-          // Fallback for non-array content or empty content
+          // Fallback for empty content
           <div
             style={{
               textAlign: "center",
@@ -384,11 +388,7 @@ export default function GlossaryClient() {
                 color: COLORS.textColorMedium,
               }}
             >
-              {!Array.isArray(glossary?.content) && glossary
-                ? typeof glossary.content === "string"
-                  ? glossary.content
-                  : JSON.stringify(glossary)
-                : "No glossary content available at this time."}
+              No glossary content available at this time.
             </Typography.Text>
           </div>
         )}

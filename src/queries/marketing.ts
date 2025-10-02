@@ -1,5 +1,6 @@
 import { baseApiUrl } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
+import { GlossaryArticle } from "@/types/Marketing";
 
 // Get marketing data by type
 export const getMarketing = async (type: string, throwError = true) => {
@@ -38,7 +39,7 @@ export const getMarketing = async (type: string, throwError = true) => {
 export const getGlossary = async (throwError = true) => {
   const data = await getMarketing("glossary", throwError);
 
-  if (data.length === 0 || (data.length > 1 && throwError)) {
+  if (data.length === 0 && throwError) {
     throw new CustomError({
       status: 404,
       title: "Something went wrong",
@@ -46,7 +47,7 @@ export const getGlossary = async (throwError = true) => {
     });
   }
 
-  return data[0];
+  return data;
 };
 
 // Query configuration for glossary data
@@ -54,6 +55,49 @@ export const getGlossaryQuery = () => {
   return {
     queryKey: ["marketing", "glossary"],
     queryFn: () => getGlossary(),
+    throwOnError: true,
+  };
+};
+
+export const getGlossaryArticleBySlug = async (
+  slug: string,
+  throwError = true
+): Promise<GlossaryArticle> => {
+  const res = await fetch(`${baseApiUrl}marketing/ghost-pages/${slug}`, {
+    cache: "no-store",
+  });
+
+  if (throwError && res.status === 404) {
+    throw new CustomError({
+      status: 404,
+      title: "Article Not Found",
+      description: "The requested glossary article could not be found.",
+    });
+  }
+
+  if (throwError && res.status === 500) {
+    throw new CustomError({
+      status: 500,
+      title: "Server Error",
+      description: "An error occurred while fetching the article.",
+    });
+  }
+
+  if (throwError && !res.ok) {
+    throw new CustomError({
+      status: res.status,
+      title: "Something went wrong",
+      description: "An unexpected error occurred while fetching the article.",
+    });
+  }
+
+  return res.json();
+};
+
+export const getGlossaryArticleBySlugQuery = (slug: string) => {
+  return {
+    queryKey: ["glossary-article", slug],
+    queryFn: () => getGlossaryArticleBySlug(slug),
     throwOnError: true,
   };
 };
