@@ -8,6 +8,7 @@ import { getGlossaryArticleBySlugQuery } from "@/queries/marketing";
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "@/theme/style-constants";
 import { useQuery } from "@tanstack/react-query";
 import { Flex, Spin, Typography } from "antd";
+import moment from "moment";
 import React from "react";
 
 interface GlossaryArticleClientProps {
@@ -67,7 +68,9 @@ export default function GlossaryArticleClient({
           paddingRight: isMobile ? 16 : 24,
         }}
       >
-        <Typography.Text style={{ color: COLORS.textColorMedium }}>
+        <Typography.Text
+          style={{ color: COLORS.textColorMedium,  }}
+        >
           Glossary &gt; {article.title}
         </Typography.Text>
 
@@ -89,23 +92,23 @@ export default function GlossaryArticleClient({
         <Typography.Title
           level={1}
           style={{
-            fontSize: FONT_SIZE.HEADING_1,
+            fontSize: FONT_SIZE.HEADING_1 * 1.2,
             fontWeight: "bold",
-            marginBottom: 24,
+            margin: "8px 0"
           }}
         >
           {article.title}
         </Typography.Title>
 
-        {article.published_at && (
+        {article.created_at && (
           <Typography.Text
             style={{
               color: COLORS.textColorMedium,
-              marginBottom: 32,
+              marginBottom: 24,
               display: "block",
             }}
           >
-            Published on {new Date(article.published_at).toLocaleDateString()}
+            Published on {moment(article.created_at).format("LL")}
           </Typography.Text>
         )}
 
@@ -126,7 +129,7 @@ export default function GlossaryArticleClient({
         .glossary-article-content h2 {
           font-size: ${FONT_SIZE.HEADING_2};
           font-weight: 600;
-          margin-top: 32px;
+          margin-top: 16px;
           margin-bottom: 16px;
           color: ${COLORS.textColorDark};
         }
@@ -146,7 +149,10 @@ export default function GlossaryArticleClient({
         .glossary-article-content ul,
         .glossary-article-content ol {
           margin-left: 24px;
+          font-size: ${FONT_SIZE.HEADING_3}px;
           margin-bottom: 16px;
+          line-height: 120%;
+           color: ${COLORS.textColorDark};
         }
 
         .glossary-article-content li {
@@ -191,6 +197,15 @@ export default function GlossaryArticleClient({
           overflow-x: auto;
           margin-bottom: 16px;
         }
+         .glossary-article-content p{
+         font-size: ${FONT_SIZE.HEADING_3}px;
+         line-height: 120%;
+         margin: 8px 0;
+          color: ${COLORS.textColorDark};
+         }
+         hr {
+          margin: 48px 0;
+         }
 
         .glossary-article-content pre code {
           background-color: transparent;

@@ -9,4 +9,5 @@ export interface GlossaryArticle {
   meta_description?: string;
   published_at?: string;
   updated_at?: string;
+  created_at?: string;
 }
