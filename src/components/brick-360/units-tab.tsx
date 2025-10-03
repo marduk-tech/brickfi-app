@@ -51,9 +51,13 @@ const getTotalFloors = (lvnzyProject: any) => {
 const getMinMaxSize = (configs: any[]) => {
   let sizes: number[] = [];
   configs.forEach((c: any) => {
-    const split = c.config.split("-");
-    if (split.length > 1) {
-      sizes.push(parseInt(split[1]));
+    if (c.sizeBuiltup) {
+      sizes.push(c.sizeBuiltup);
+    } else if (c.config) {
+      const split = c.config.split("-");
+      if (split.length > 1) {
+        sizes.push(parseInt(split[1]));
+      }
     }
   });
   if (sizes.length) {
@@ -99,7 +103,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
     let filters: string[] = [];
     lvnzyProject?.originalProjectId.info.unitConfigWithPricing.forEach(
       (unitConfig: any) => {
-        const bhkType = getBhkType(unitConfig.config);
+        const bhkType = unitConfig.type ? unitConfig.type : getBhkType(unitConfig.config);
         if (!filters.includes(bhkType)) {
           filters.push(bhkType);
         }
@@ -257,7 +261,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                 (c: any) =>
                   !configFilters ||
                   !configFilters.length ||
-                  getBhkType(c.config) == selectedConfigFilter
+                  (c.type || getBhkType(c.config)) == selectedConfigFilter
               )
               .sort((a: any, b: any) => a.price - b.price)
               .map((c: any, index: number) => {
