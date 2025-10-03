@@ -103,7 +103,9 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
     let filters: string[] = [];
     lvnzyProject?.originalProjectId.info.unitConfigWithPricing.forEach(
       (unitConfig: any) => {
-        const bhkType = unitConfig.type ? unitConfig.type : getBhkType(unitConfig.config);
+        const bhkType = unitConfig.type
+          ? unitConfig.type
+          : getBhkType(unitConfig.config);
         if (!filters.includes(bhkType)) {
           filters.push(bhkType);
         }
@@ -236,6 +238,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                     fontSize: FONT_SIZE.HEADING_3,
                     padding: "4px 8px",
                     borderRadius: 8,
+                    cursor:"pointer"
                   }}
                   onClick={() => {
                     setSelectedConfigFilter(filter);
@@ -277,15 +280,39 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                       border: `2px solid ${COLORS.borderColor}`,
                     }}
                   >
-                    <Typography.Text
-                      style={{
-                        fontSize: FONT_SIZE.HEADING_4,
-                        textTransform: "uppercase",
-                        color: COLORS.primaryColor,
-                      }}
-                    >
-                      {c.config}
-                    </Typography.Text>
+                    {c.sizeBuiltup ? (
+                      <Flex vertical style={{marginBottom: 8}}>
+                        <Typography.Text
+                          style={{
+                            fontSize: FONT_SIZE.HEADING_4,
+                            color: COLORS.primaryColor,
+                          }}
+                        >
+                          {c.type} - {c.sizeBuiltup} sq.ft
+                        </Typography.Text>
+                        <Typography.Text
+                          style={{
+                            fontSize: FONT_SIZE.SUB_TEXT,
+                            color: COLORS.textColorMedium
+                          }}
+                        >
+                          Carpet Area: {c.sizeCarpet} sq.ft
+                        </Typography.Text>
+                      </Flex>
+                    ) : (
+                      <Flex>
+                        <Typography.Text
+                          style={{
+                            fontSize: FONT_SIZE.HEADING_4,
+                            textTransform: "uppercase",
+                            color: COLORS.primaryColor,
+                          }}
+                        >
+                          {c.config}
+                        </Typography.Text>
+                      </Flex>
+                    )}
+
                     <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2 }}>
                       ₹{rupeeAmountFormat(c.price)}
                     </Typography.Text>

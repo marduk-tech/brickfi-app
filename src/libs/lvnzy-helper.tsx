@@ -50,7 +50,7 @@ export const rupeeAmountFormat = (amt: string) => {
     return amt;
   }
   const val = Math.abs(amtNum);
-  if (val >= 10000000) return `${(amtNum / 10000000).toFixed(1)} Crs`;
+  if (val >= 10000000) return `${(amtNum / 10000000).toFixed(2)} Crs`;
   if (val >= 100000) return `${(amtNum / 100000).toFixed(2)} Lacs`;
   return amtNum;
 };
