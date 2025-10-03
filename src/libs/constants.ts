@@ -445,7 +445,9 @@ export const DRIVER_CATEGORIES = {
         return (
           ["food"].includes(driver.driver) &&
           driver.tags &&
-          driver.tags.some((t) => ["popular brand", "fine dining"].includes(t))
+          driver.tags.some((t) =>
+            ["popular brand", "fine dining", "highly rated"].includes(t)
+          )
         );
       }
       if (filter == "hospital") {
@@ -479,7 +481,7 @@ export const DRIVER_CATEGORIES = {
       { label: "Upcoming Tech Park", key: "upcoming-tech" },
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
-       if (filter == "est-infra") {
+      if (filter == "est-infra") {
         return (
           ["industrial-general", "industrial-hitech", "transit"].includes(
             driver.driver

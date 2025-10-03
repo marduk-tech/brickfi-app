@@ -41,6 +41,21 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     );
   };
 
+  const getMinMaxPrices = (prices: number[]) => {
+    if (!Array.isArray(prices) || prices.length === 0) {
+      return null; // or throw an error
+    }
+    let min = prices[0];
+    let max = prices[0];
+
+    for (let num of prices) {
+      if (num < min) min = num;
+      if (num > max) max = num;
+    }
+
+    return `${rupeeAmountFormat(min)} - ${rupeeAmountFormat(max)}`
+  };
+
   return (
     <>
       <Flex vertical style={{ marginTop: 4 }}>
@@ -52,14 +67,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
               color: COLORS.textColorDark,
             }}
           >
-            {rupeeAmountFormat(
-              lvnzyProject?.originalProjectId.info.rate.minimumUnitCost
-            )}{" "}
-            ·{" "}
-            {rupeeAmountFormat(
-              lvnzyProject?.originalProjectId.info.rate.minimumUnitSize
-            )}
-            sqft
+            {getMinMaxPrices(lvnzyProject?.originalProjectId.info.unitConfigWithPricing.map((c: any) => c.price))}
           </Typography.Text>
           {pmtPlan ? (
             <Flex

@@ -44,8 +44,8 @@ export const driverStatusLabel = (status: string) => {
   }
 };
 
-export const rupeeAmountFormat = (amt: string) => {
-  const amtNum = parseInt(amt);
+export const rupeeAmountFormat = (amt: string|number) => {
+  const amtNum = typeof amt == "string" ? parseInt(amt): Math.round(amt);
   if (!amtNum || isNaN(amtNum)) {
     return amt;
   }
@@ -64,6 +64,7 @@ export const captureAnalyticsEvent = (event: string, props: any) => {
     }
   }
 };
+
 
 export const getCategoryScore = (dataPt: any) => {
   if (!dataPt) {
