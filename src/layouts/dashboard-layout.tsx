@@ -51,7 +51,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
 
 
   useEffect(() => {
-    if (user && user._id && !window.location.href.includes("localhost")) {
+    if (posthogkey && user && user._id && !window.location.href.includes("localhost")) {
       console.log(user);
       posthog.init(posthogkey, {
         api_host: "https://us.i.posthog.com",
