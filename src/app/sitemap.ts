@@ -35,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const developers = await getAllDevelopers();
     const developerRoutes: MetadataRoute.Sitemap = developers
-      .filter((dev: any) => dev.slug) // Only include developers with slugs
+      .filter((dev: any) => dev.slug && dev.info && dev.info.oneLiner) // Only include developers with slugs
       .map((dev: any) => ({
         url: `${baseUrl}/real-estate-developer/${dev.slug}`,
         lastModified: new Date(dev.updatedAt || dev.createdAt || new Date()),
