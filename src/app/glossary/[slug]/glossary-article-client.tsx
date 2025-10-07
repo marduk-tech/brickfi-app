@@ -1,6 +1,6 @@
 "use client";
 
-import { ReportCTABar } from "@/components/common/report-cta-bar";
+import ReportCTABar from "@/components/common/report-cta-bar";
 import LandingFooter from "@/custom-pages/landing/footer";
 import LandingHeader from "@/custom-pages/landing/header";
 import { useDevice } from "@/hooks/use-device";
@@ -69,9 +69,7 @@ export default function GlossaryArticleClient({
           paddingRight: isMobile ? 16 : 24,
         }}
       >
-        <Typography.Text
-          style={{ color: COLORS.textColorMedium,  }}
-        >
+        <Typography.Text style={{ color: COLORS.textColorMedium }}>
           Glossary &gt; {article.title}
         </Typography.Text>
 
@@ -95,7 +93,7 @@ export default function GlossaryArticleClient({
           style={{
             fontSize: FONT_SIZE.HEADING_1 * 1.2,
             fontWeight: "bold",
-            margin: "8px 0"
+            margin: "8px 0",
           }}
         >
           {article.title}
@@ -105,7 +103,7 @@ export default function GlossaryArticleClient({
           <Typography.Text
             style={{
               color: COLORS.textColorMedium,
-              marginBottom: 24,
+              marginBottom: 0,
               display: "block",
             }}
           >
@@ -122,24 +120,25 @@ export default function GlossaryArticleClient({
           }}
           dangerouslySetInnerHTML={{ __html: article.html }}
         />
-              <ReportCTABar></ReportCTABar>
-
+        <Flex align="center" justify="center">
+          <ReportCTABar></ReportCTABar>
+        </Flex>
       </Flex>
 
       <LandingFooter />
 
       <style jsx global>{`
         .glossary-article-content h2 {
-          font-size: ${FONT_SIZE.HEADING_2};
-          font-weight: 600;
-          margin-top: 16px;
-          margin-bottom: 16px;
-          color: ${COLORS.textColorDark};
+          font-size: ${FONT_SIZE.HEADING_2 * 1.2}px;
+          font-weight: 100;
+          margin-top: 32px;
+          margin-bottom: 0px;
+          color: ${COLORS.textColorMedium};
         }
 
         .glossary-article-content h3 {
           font-size: ${FONT_SIZE.HEADING_3};
-          font-weight: 600;
+          font-weight: 300;
           margin-top: 24px;
           margin-bottom: 12px;
           color: ${COLORS.textColorDark};
@@ -155,7 +154,10 @@ export default function GlossaryArticleClient({
           font-size: ${FONT_SIZE.HEADING_3}px;
           margin-bottom: 16px;
           line-height: 120%;
-           color: ${COLORS.textColorDark};
+          color: ${COLORS.textColorDark};
+          padding-left: 8px;
+          margin-left: 16px;
+          margin-top: 8px;
         }
 
         .glossary-article-content li {
@@ -200,15 +202,15 @@ export default function GlossaryArticleClient({
           overflow-x: auto;
           margin-bottom: 16px;
         }
-         .glossary-article-content p{
-         font-size: ${FONT_SIZE.HEADING_3}px;
-         line-height: 120%;
-         margin: 8px 0;
+        .glossary-article-content p {
+          font-size: ${FONT_SIZE.HEADING_3}px;
+          line-height: 120%;
+          margin: 8px 0;
           color: ${COLORS.textColorDark};
-         }
-         hr {
+        }
+        hr {
           margin: 48px 0;
-         }
+        }
 
         .glossary-article-content pre code {
           background-color: transparent;

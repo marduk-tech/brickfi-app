@@ -140,7 +140,7 @@ export default function RealEstateDeveloperClient({
           maxWidth: 500,
         }}
         onClick={() => {
-          safeWindow.location.assign(LandingConstants.genReportFormLink)
+          safeWindow.location.assign(LandingConstants.genReportFormLink);
         }}
       >
         <img
@@ -308,7 +308,10 @@ export default function RealEstateDeveloperClient({
                 return renderProject(project, index);
               })}
           </Flex>
-          <ReportCTABar></ReportCTABar>
+          <ReportCTABar
+            msg="Get a free Brick360 report for detailed builder credibility analysis
+            including time committment, customer satisfaction and more."
+          ></ReportCTABar>
           <h2
             style={{
               color: COLORS.primaryColor,
@@ -349,7 +352,7 @@ export default function RealEstateDeveloperClient({
             {developer.info.credibility.projectsTheme}
           </Typography.Text>
 
-           <h2
+          <h2
             style={{
               color: COLORS.primaryColor,
               marginBottom: 0,
@@ -358,9 +361,8 @@ export default function RealEstateDeveloperClient({
               marginTop: 16,
             }}
           >
-           FAQ
+            FAQ
           </h2>
-
 
           {renderFaq(developer.info.faq)}
           {/* <Flex
