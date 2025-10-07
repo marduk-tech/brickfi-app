@@ -48,7 +48,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     let min = prices[0];
     let max = prices[0];
 
-    for (let num of prices) {
+    for (const num of prices) {
       if (num < min) min = num;
       if (num > max) max = num;
     }
