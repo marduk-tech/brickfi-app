@@ -1,5 +1,6 @@
 "use client";
 
+import { ReportCTABar } from "@/components/common/report-cta-bar";
 import LandingFooter from "@/custom-pages/landing/footer";
 import LandingHeader from "@/custom-pages/landing/header";
 import { useDevice } from "@/hooks/use-device";
@@ -121,6 +122,8 @@ export default function GlossaryArticleClient({
           }}
           dangerouslySetInnerHTML={{ __html: article.html }}
         />
+              <ReportCTABar></ReportCTABar>
+
       </Flex>
 
       <LandingFooter />

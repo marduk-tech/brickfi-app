@@ -17,6 +17,7 @@ import { safeWindow } from "@/libs/browser-utils";
 import { LandingConstants } from "@/libs/constants";
 import { CaretRightOutlined } from "@ant-design/icons";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
+import { ReportCTABar } from "@/components/common/report-cta-bar";
 
 const { Paragraph, Text } = Typography;
 
@@ -307,8 +308,7 @@ export default function RealEstateDeveloperClient({
                 return renderProject(project, index);
               })}
           </Flex>
-          {renderCTA()}
-
+          <ReportCTABar></ReportCTABar>
           <h2
             style={{
               color: COLORS.primaryColor,
