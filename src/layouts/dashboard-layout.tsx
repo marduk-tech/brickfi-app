@@ -18,6 +18,9 @@ import {
   HORIZONTAL_PADDING,
 } from "../theme/style-constants";
 import { NavLink } from "../types/Common";
+import posthog from "posthog-js";
+import { posthogkey } from "../libs/constants";
+
 
 const { Header, Content } = Layout;
 
@@ -45,6 +48,21 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
       setLoginModalOpen(false);
     }
   }, []);
+
+
+  useEffect(() => {
+    if (user && user._id && !window.location.href.includes("localhost")) {
+      console.log(user);
+      posthog.init(posthogkey, {
+        api_host: "https://us.i.posthog.com",
+        person_profiles: "identified_only", // or 'always' to create profiles for anonymous users as well
+      });
+
+      posthog.identify(user._id, {
+        countryCode: user.countryCode,
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (user) {
