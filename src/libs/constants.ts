@@ -383,6 +383,7 @@ export const LandingConstants = {
   brickAssistLink: "/brickassist",
   aboutUsLink: "/aboutus",
   instaLink: "https://www.instagram.com/brickfi.in/",
+  twitterLink: "https://x.com/brickfi_in",
   blogLink: "https://blog.brickfi.in/",
   reportLink: "/brick360",
   genReportFormLink: "/requestreport",

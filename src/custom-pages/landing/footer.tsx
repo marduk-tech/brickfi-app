@@ -110,6 +110,14 @@ export default function LandingFooter() {
           >
             Instagram
           </Link>
+          <Link
+            href={LandingConstants.twitterLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
+          >
+            X/Twitter
+          </Link>
         </Flex>
       </Flex>
       <Typography.Text
