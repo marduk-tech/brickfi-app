@@ -226,8 +226,8 @@ export default function MainLanding() {
                   ? FONT_SIZE.HEADING_1 * 2
                   : FONT_SIZE.HEADING_1 * 2.3,
                 lineHeight: "100%",
-                fontWeight: 500,
-                textShadow: "3px 3px 0 white",
+                fontWeight: 800,
+                textShadow: "2px 2px 0 white",
               }}
             >
               Stress Free Home Buying Experience
@@ -241,7 +241,7 @@ export default function MainLanding() {
           subHeading: (
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_2,
+                fontSize: FONT_SIZE.HEADING_2 * 1.1,
                 display: "block",
                 lineHeight: "120%",
                 backgroundColor: "rgba(253, 247, 246, 0.7)",
@@ -259,6 +259,7 @@ export default function MainLanding() {
           imageContainerWidth: 60,
           fullHeight: true,
           verticalPadding: isMobile ? 125 : 0,
+          sectionMaxWidth: "1500px"
         }}
       ></SectionLeft>
 

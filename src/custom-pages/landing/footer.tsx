@@ -107,7 +107,7 @@ export default function LandingFooter() {
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-          >
+        >
             Instagram
           </Link>
           <Link

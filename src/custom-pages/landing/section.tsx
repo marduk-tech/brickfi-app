@@ -77,6 +77,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
       <Flex
         vertical={isMobile}
         style={{
+          width: "100%",
           maxWidth: sectionData.sectionMaxWidth || "100%",
         }}
        
