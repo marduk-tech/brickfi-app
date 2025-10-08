@@ -247,9 +247,9 @@ export const PlaceholderContent = `# Liv is the AI Agent for Real Estate.
 `;
 
 export enum BRICK360_CATEGORY {
-  property = "property",
   areaConnectivity = "areaConnectivity",
   developer = "developer",
+  property = "property",
   financials = "financials",
 }
 
@@ -263,11 +263,6 @@ export const Brick360CategoryInfo: Record<
     note?: string;
   }
 > = {
-  property: {
-    title: "Property",
-    iconName: "MdOutlineMapsHomeWork",
-    iconSet: "md",
-  },
   areaConnectivity: {
     title: "Location",
     iconName: "BiMapPin",
@@ -279,6 +274,11 @@ export const Brick360CategoryInfo: Record<
     iconName: "FaPeopleGroup",
     iconSet: "fa6",
     note: "Only projects registered under RERA Karnataka are taken up for complete analysis.",
+  },
+  property: {
+    title: "Property",
+    iconName: "MdOutlineMapsHomeWork",
+    iconSet: "md",
   },
   financials: {
     title: "Financials",
@@ -335,7 +335,7 @@ export const Brick360DataPoints = {
     },
     timeCommitment: {
       label: "Time Committment",
-      prompts: ["Delayed projects", ""],
+      prompts: ["Delayed projects", "Average delay"],
     },
     customerSatisfaction: {
       label: "Customer Satisfaction",
@@ -388,7 +388,8 @@ export const LandingConstants = {
   genReportFormLink: "/requestreport",
   appLink: "/app",
   sampleReport: "/app/brick360/67e6534e1336dda74a5f0502",
-  brick360Descr: "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore."
+  brick360Descr:
+    "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.",
 };
 
 export const DRIVER_CATEGORIES = {

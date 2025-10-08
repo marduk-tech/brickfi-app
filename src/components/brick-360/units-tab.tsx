@@ -151,7 +151,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
               per sq.ft
             </Typography.Text>
           </Flex>
-          <Flex gap={4} style={{ color: COLORS.textColorMedium }}>
+          <Flex gap={4} style={{ color: COLORS.textColorMedium, overflowX: "scroll", whiteSpace: "nowrap", scrollbarWidth: "none" }}>
             <Typography.Text
               style={{
                 fontSize: FONT_SIZE.HEADING_4,
