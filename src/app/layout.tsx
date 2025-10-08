@@ -2,15 +2,24 @@ import type { Metadata } from "next";
 import { ClientProviders } from "../components/client-providers";
 import AntdRegistry from "../components/antd-registry";
 import "../theme/globals.scss";
+import PosthogProvider from "@/components/common/posthog-provider";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://brickfi.in"),
   title: {
     default: "Brickfi | The Smartest Way to Buy your Next Property",
-    template: "%s | Brickfi"
+    template: "%s | Brickfi",
   },
-  description: "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
-  keywords: ["real estate", "property", "bangalore", "investment", "brick360", "brickfi"],
+  description:
+    "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+  keywords: [
+    "real estate",
+    "property",
+    "bangalore",
+    "investment",
+    "brick360",
+    "brickfi",
+  ],
   authors: [{ name: "Brickfi" }],
   creator: "Brickfi",
   publisher: "Brickfi",
@@ -30,7 +39,8 @@ export const metadata: Metadata = {
     url: "https://brickfi.in",
     siteName: "Brickfi",
     title: "The Smartest Way to Buy your Next Property",
-    description: "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+    description:
+      "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
     images: [
       {
         url: "/images/brickfi-preview.png",
@@ -43,7 +53,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "The Smartest Way to Buy your Next Property",
-    description: "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+    description:
+      "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
     images: ["/images/brickfi-preview.png"],
   },
   robots: {
@@ -67,13 +78,14 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  
+
   return (
     <html lang="en">
       <body>
         <AntdRegistry>
-          <ClientProviders>
-            {children}
-          </ClientProviders>
+          <ClientProviders>{children}</ClientProviders>
         </AntdRegistry>
       </body>
     </html>

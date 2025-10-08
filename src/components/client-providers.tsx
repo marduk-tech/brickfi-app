@@ -8,6 +8,7 @@ import { App as AntApp, ConfigProvider } from "antd";
 import { useEffect } from "react";
 import { getQueryClient } from "../libs/query-client";
 import { antTheme } from "../theme/ant-theme";
+import PosthogProvider from "./common/posthog-provider";
 
 interface ClientProvidersProps {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ export function ClientProviders({ children }: ClientProvidersProps) {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <PosthogProvider></PosthogProvider>
       <ConfigProvider theme={antTheme}>
         <AntApp style={{ maxWidth: 2000, margin: "auto" }}>{children}</AntApp>
       </ConfigProvider>

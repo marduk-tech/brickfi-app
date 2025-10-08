@@ -4,10 +4,8 @@ import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { safeStorage } from "../libs/browser-utils";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { User } from "../types/User";
-import { useAuth } from "./use-auth";
 
 export function useUser() {
-  const { logout } = useAuth();
 
   const getUser = async (): Promise<User> => {
     const userItem = safeStorage.getItem(LocalStorageKeys.user);
