@@ -182,7 +182,7 @@ export default function RealEstateDeveloperClient({
         <div
           style={{
             backgroundImage: `url(/images/builder-page/${
-              project.type == "residential" ? project.subType : "commercial"
+              project.type.toLowerCase() == "residential" ? project.subType.toLowerCase() : "commercial"
             }.png)`,
             backgroundPosition: "center",
             backgroundSize: "60%",
