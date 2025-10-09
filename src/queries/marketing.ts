@@ -101,3 +101,14 @@ export const getGlossaryArticleBySlugQuery = (slug: string) => {
     throwOnError: true,
   };
 };
+
+// Get all glossary terms (server-side compatible for sitemap)
+export const getAllGlossaryTerms = async () => {
+  try {
+    const data = await getMarketing("glossary", false);
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error("Error fetching glossary terms:", error);
+    return [];
+  }
+};

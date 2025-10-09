@@ -307,13 +307,17 @@ export default function GlossaryClient() {
 
           {/* Alphabetical Navigation */}
           <Flex
-            justify="center"
+            justify={isMobile ? "flex-start" : "center"}
             gap={isMobile ? 4 : 8}
             style={{
               marginTop: 24,
               overflowX: isMobile ? "auto" : "visible",
               paddingBottom: isMobile ? 8 : 0,
+              scrollbarWidth: "none", // Firefox
+              msOverflowStyle: "none", // IE/Edge
+              WebkitOverflowScrolling: "touch", // iOS smooth scrolling
             }}
+            className={isMobile ? "hide-scrollbar" : ""}
           >
             {ALPHABET_LETTERS.map((letter) => {
               const hasContent = availableLetters.includes(letter);
