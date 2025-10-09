@@ -27,18 +27,18 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
       const match = pt.match(/<b>(.*?)<\/b>/);
       const title = match ? match[1] : null;
 
-      function reasoningStmt(truncate: boolean) {
+      function reasoningStmt(isDialog: boolean) {
         return (
           <Flex vertical>
-            <Flex align="center" gap={4}>
-              <DynamicReactIcon
+            <Flex align="flex-start" gap={4} style={{marginBottom: 8}}>
+              {isDialog ? null : <DynamicReactIcon
                 size={isPro ? 20 : 24}
                 iconName={isPro ? "FaRegLaugh" : "PiSmileySadBold"}
                 iconSet={isPro ? "fa" : "pi"}
                 color={isPro ? COLORS.primaryColor : COLORS.redIdentifier}
-              ></DynamicReactIcon>
+              ></DynamicReactIcon> }
               <Typography.Text
-                style={{ fontWeight: 500, fontSize: FONT_SIZE.HEADING_2 }}
+                style={{ fontWeight: 500, fontSize: FONT_SIZE.HEADING_2, lineHeight: "110%", marginTop: isDialog? 24: 0 }}
               >
                 {title}
               </Typography.Text>
@@ -46,18 +46,19 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
             <div
               dangerouslySetInnerHTML={{
                 __html: `${pt.replace(`<b>${title}</b><br>`, "")} ${
-                  truncate ? '<span class="read-more">Read more</span>' : ""
+                  !isDialog ? '<span class="read-more">Read more</span>' : ""
                 }`,
               }}
-              className={`reasoning ${truncate ? "truncated" : ""} ${
+              className={`reasoning ${!isDialog ? "truncated" : ""} ${
                 isPro ? "" : "con"
               }`}
               style={{
-                fontSize: truncate ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
+                fontSize: !isDialog ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
                 margin: 0,
-                marginTop: truncate ? 0 : 16,
-                width: truncate ? 275 : "100%",
+                marginTop: !isDialog ? 0 : 16,
+                width: !isDialog ? 275 : "100%",
                 color: COLORS.textColorMedium,
+                
                 textWrap: "wrap",
               }}
             ></div>
@@ -78,12 +79,12 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
           }}
           onClick={() => {
             setQuickSnapshotDialogOpen(true);
-            setQuickSnapshotDialogContent(reasoningStmt(false));
+            setQuickSnapshotDialogContent(reasoningStmt(true));
           }}
           gap={4}
           vertical
         >
-          {reasoningStmt(true)}
+          {reasoningStmt(false)}
         </Flex>
       );
     }

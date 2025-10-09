@@ -151,7 +151,15 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
               per sq.ft
             </Typography.Text>
           </Flex>
-          <Flex gap={4} style={{ color: COLORS.textColorMedium, overflowX: "scroll", whiteSpace: "nowrap", scrollbarWidth: "none" }}>
+          <Flex
+            gap={4}
+            style={{
+              color: COLORS.textColorMedium,
+              overflowX: "scroll",
+              whiteSpace: "nowrap",
+              scrollbarWidth: "none",
+            }}
+          >
             <Typography.Text
               style={{
                 fontSize: FONT_SIZE.HEADING_4,
@@ -238,7 +246,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                     fontSize: FONT_SIZE.HEADING_3,
                     padding: "4px 8px",
                     borderRadius: 8,
-                    cursor:"pointer"
+                    cursor: "pointer",
                   }}
                   onClick={() => {
                     setSelectedConfigFilter(filter);
@@ -281,7 +289,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                     }}
                   >
                     {c.sizeBuiltup ? (
-                      <Flex vertical style={{marginBottom: 8}}>
+                      <Flex vertical style={{ marginBottom: 8 }}>
                         <Typography.Text
                           style={{
                             fontSize: FONT_SIZE.HEADING_4,
@@ -290,14 +298,16 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                         >
                           {c.type} - {c.sizeBuiltup} sq.ft
                         </Typography.Text>
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.SUB_TEXT,
-                            color: COLORS.textColorMedium
-                          }}
-                        >
-                          Carpet Area: {c.sizeCarpet} sq.ft
-                        </Typography.Text>
+                        {c.sizeCarpet ? (
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.SUB_TEXT,
+                              color: COLORS.textColorMedium,
+                            }}
+                          >
+                            Carpet Area: {c.sizeCarpet} sq.ft
+                          </Typography.Text>
+                        ): null}
                       </Flex>
                     ) : (
                       <Flex>
@@ -316,7 +326,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                     <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2 }}>
                       ₹{rupeeAmountFormat(c.price)}
                     </Typography.Text>
-                    {c.floorplans && c.floorplans.length > 0 && (
+                    {c.floorplans && c.floorplans.filter((f: string) => !!f).length > 0 ? (
                       <Flex
                         style={{
                           overflowX: "auto",
@@ -340,7 +350,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                           );
                         })}
                       </Flex>
-                    )}
+                    ): null}
                   </Flex>
                 );
               })}
