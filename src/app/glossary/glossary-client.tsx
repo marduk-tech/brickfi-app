@@ -10,7 +10,7 @@ import { ArrowRightOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Card, Col, Flex, Row, Spin, Typography } from "antd";
 import Link from "next/link";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface GlossaryItem {
   title?: string;
@@ -178,6 +178,14 @@ export default function GlossaryClient() {
 
   const { isMobile } = useDevice();
 
+  const [flickerWait, setFlickerWait] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setFlickerWait(false);
+    }, 1000);
+  });
+
   // Extract items from glossary documents and group by letter
   const groupedItems = React.useMemo(() => {
     if (!glossary || !Array.isArray(glossary)) {
@@ -204,7 +212,7 @@ export default function GlossaryClient() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || flickerWait) {
     return (
       <Flex
         align="center"
@@ -308,7 +316,7 @@ export default function GlossaryClient() {
           {/* Alphabetical Navigation */}
           <Flex
             justify={isMobile ? "flex-start" : "center"}
-            gap={isMobile ? 4 : 8}
+            gap={16}
             style={{
               marginTop: 24,
               overflowX: isMobile ? "auto" : "visible",
@@ -330,7 +338,7 @@ export default function GlossaryClient() {
                   style={{
                     minWidth: isMobile ? 24 : 28,
                     height: isMobile ? 24 : 28,
-                    fontSize: isMobile ? FONT_SIZE.SUB_TEXT : FONT_SIZE.PARA,
+                    fontSize: FONT_SIZE.HEADING_3,
                     color: hasContent
                       ? COLORS.primaryColor
                       : COLORS.textColorLight,
