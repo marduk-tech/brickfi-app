@@ -14,11 +14,11 @@ import { capitalize } from "../../../../libs/lvnzy-helper";
 import { COLORS } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
 import { Loader } from "../../../common/loader";
-import { getProjectTypeIcon } from "../../map-old/project-type-icon";
+import { getProjectTypeIcon } from "../project-type-icon";
 import dynamic from "next/dynamic";
 const MapViewV2 = dynamic(() => import("../../map-view-v2"), { ssr: false });
 
-export function LivIndexFull() {
+export function BrickMap() {
   const [homeTypeFilter, setHomeTypeFilter] = useState("");
 
   const { data: livindexPlaces, isLoading: livindexPlacesLoading } =
@@ -236,7 +236,7 @@ export function LivIndexFull() {
               projects={filteredProjects}
               projectId={selectedProjectId || undefined}
               fullSize={false}
-              showLocalities={false}
+              showLocalities={true}
             />
           </>
         </Flex>
