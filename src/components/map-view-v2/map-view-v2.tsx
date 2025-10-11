@@ -226,7 +226,7 @@ const MapViewV2Inner = ({
         <MapContainer
           key={`map-v2`}
           center={[12.969999, 77.587841]}
-          zoom={16}
+          zoom={minMapZoom || 15}
           minZoom={minMapZoom || 12}
           maxZoom={19}
           style={{ 

@@ -1,24 +1,24 @@
 import { AutoComplete, Flex, Select, Typography } from "antd";
 import { useEffect, useState } from "react";
-import { useFetchAllLivindexPlaces } from "../../../../hooks/use-livindex-places";
-import { useFetchProjects } from "../../../../hooks/use-project";
+import { useFetchAllLivindexPlaces } from "../../../hooks/use-livindex-places";
+import { useFetchProjects } from "../../../hooks/use-project";
 import {
   useFetchProjectsForMapView,
   useProjectSearch,
-} from "../../../../hooks/use-project-search";
+} from "../../../hooks/use-project-search";
 import {
   LivIndexDriversConfig,
   ProjectHomeType,
-} from "../../../../libs/constants";
-import { capitalize } from "../../../../libs/lvnzy-helper";
-import { COLORS } from "../../../../theme/style-constants";
-import { IDriverPlace } from "../../../../types/Project";
-import { Loader } from "../../../common/loader";
-import { getProjectTypeIcon } from "../project-type-icon";
+} from "../../../libs/constants";
+import { capitalize } from "../../../libs/lvnzy-helper";
+import { COLORS } from "../../../theme/style-constants";
+import { IDriverPlace } from "../../../types/Project";
+import { Loader } from "../../common/loader";
+import { getProjectTypeIcon } from "../../map-view/map-old/project-type-icon";
 import dynamic from "next/dynamic";
-const MapViewV2 = dynamic(() => import("../../map-view-v2"), { ssr: false });
+const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
-export function BrickMap() {
+export function BrickMapAdmin() {
   const [homeTypeFilter, setHomeTypeFilter] = useState("");
 
   const { data: livindexPlaces, isLoading: livindexPlacesLoading } =
@@ -31,18 +31,14 @@ export function BrickMap() {
 
   // Use different hooks based on whether there's a selected project (search mode)
   const isSearchMode = !!selectedProjectId;
-  const { data: allProjects, isLoading: allProjectsLoading } =
-    useFetchProjects();
-  const { data: typeFilteredProjects, isLoading: filteredProjectsLoading } =
-    useFetchProjectsForMapView(homeTypeFilter);
+  const { data: allProjects, isLoading: allProjectsLoading } = useFetchProjects(
+    {
+      statusFilter: "basic-details-ready,data-populated,report-verified",
+      homeType: homeTypeFilter,
+      searchKeyword: searchValue,
+    }
+  );
 
-  // Use appropriate data and loading state based on mode
-  const projects = isSearchMode ? allProjects : typeFilteredProjects;
-  const projectIsLoading = isSearchMode
-    ? allProjectsLoading
-    : filteredProjectsLoading;
-
-  const { projects: searchProjects } = useProjectSearch();
   const [driverFilters, setDriverFilters] = useState<string[]>([
     "industrial-hitech",
     "airport",
@@ -52,8 +48,8 @@ export function BrickMap() {
   const [filteredDrivers, setFilteredDrivers] = useState<IDriverPlace[]>([]);
 
   useEffect(() => {
-    if (projects && projects.length) {
-      console.log("Total projects from API:", projects.length);
+    if (allProjects && allProjects.length) {
+      console.log("Total projects from API:", allProjects.length);
       console.log("Projects filtered by homeType:", homeTypeFilter);
       console.log(
         "Search mode:",
@@ -64,7 +60,7 @@ export function BrickMap() {
 
       if (isSearchMode && selectedProjectId) {
         // In search mode, show only the selected project
-        const selectedProject = projects.find(
+        const selectedProject = allProjects.find(
           (p) => p._id === selectedProjectId
         );
         if (selectedProject) {
@@ -74,12 +70,12 @@ export function BrickMap() {
         }
       } else {
         // Normal mode - show all projects (API already filters by type)
-        setFilteredProjects(projects);
+        setFilteredProjects(allProjects);
       }
     } else {
       setFilteredProjects([]);
     }
-  }, [projects, homeTypeFilter, isSearchMode, selectedProjectId]);
+  }, [allProjects, homeTypeFilter, isSearchMode, selectedProjectId]);
 
   // update filtered drivers when places or filters change
   useEffect(() => {
@@ -130,10 +126,10 @@ export function BrickMap() {
   };
 
   const projectOptions =
-    searchProjects?.map((project) => ({
-      value: project.projectId,
-      label: project.projectName,
-      projectId: project.projectId,
+    allProjects?.map((project) => ({
+      value: project._id,
+      label: project.info.name,
+      projectId: project._id,
     })) || [];
 
   if (livindexPlacesLoading) {
@@ -141,7 +137,6 @@ export function BrickMap() {
   }
 
   if (livindexPlaces) {
-    console.log(projects);
 
     return (
       <Flex vertical style={{ height: "calc(100vh - 64px)" }}>
@@ -164,7 +159,7 @@ export function BrickMap() {
           <Select
             value={homeTypeFilter}
             style={{ width: 200 }}
-            loading={projectIsLoading}
+            loading={allProjectsLoading}
             disabled={isSearchMode}
             onChange={handleHomeTypeSelect}
             options={Object.keys(ProjectHomeType).map((k: string) => {
@@ -220,7 +215,7 @@ export function BrickMap() {
                   marginLeft: "auto",
                 }}
               >
-                {projectIsLoading
+                {allProjects
                   ? "Loading projects..."
                   : isSearchMode
                   ? `Showing search result: ${filteredProjects.length} project`

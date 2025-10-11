@@ -4,6 +4,7 @@ import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import {
   capitalize,
   fetchPmtPlan,
+  getMinMaxPrices,
   rupeeAmountFormat,
 } from "../../libs/lvnzy-helper";
 import moment from "moment";
@@ -41,20 +42,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     );
   };
 
-  const getMinMaxPrices = (prices: number[]) => {
-    if (!Array.isArray(prices) || prices.length === 0) {
-      return null; // or throw an error
-    }
-    let min = prices[0];
-    let max = prices[0];
 
-    for (const num of prices) {
-      if (num < min) min = num;
-      if (num > max) max = num;
-    }
-
-    return `${rupeeAmountFormat(min)} - ${rupeeAmountFormat(max)}`
-  };
 
   return (
     <>

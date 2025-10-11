@@ -23,6 +23,20 @@ export function useUrlParams() {
   return useSearchParams();
 }
 
+export const getMinMaxPrices = (prices: number[]) => {
+  if (!Array.isArray(prices) || prices.length === 0) {
+    return null; // or throw an error
+  }
+  let min = prices[0];
+  let max = prices[0];
+
+  for (const num of prices) {
+    if (num < min) min = num;
+    if (num > max) max = num;
+  }
+
+  return max == min ? rupeeAmountFormat(min): `${rupeeAmountFormat(min)} - ${rupeeAmountFormat(max)}`;
+};
 export const capitalize = (input: string) => {
   if (!input) {
     return "";
@@ -44,8 +58,8 @@ export const driverStatusLabel = (status: string) => {
   }
 };
 
-export const rupeeAmountFormat = (amt: string|number) => {
-  const amtNum = typeof amt == "string" ? parseInt(amt): Math.round(amt);
+export const rupeeAmountFormat = (amt: string | number) => {
+  const amtNum = typeof amt == "string" ? parseInt(amt) : Math.round(amt);
   if (!amtNum || isNaN(amtNum)) {
     return amt;
   }
@@ -64,7 +78,6 @@ export const captureAnalyticsEvent = (event: string, props: any) => {
     }
   }
 };
-
 
 export const getCategoryScore = (dataPt: any) => {
   if (!dataPt) {
@@ -98,7 +111,7 @@ export const renderCitations = (citations: any) => {
   if (!citations || !Array.isArray(citations)) {
     return [];
   }
-  
+
   return citations
     .filter((c: any) => c.url.indexOf("wikipedia") == -1)
     .map((citation: any) => {

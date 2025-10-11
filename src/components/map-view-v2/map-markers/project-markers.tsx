@@ -1,9 +1,10 @@
 import React, { JSX } from "react";
 import L from "leaflet";
 import { Marker } from "react-leaflet";
-import { capitalize } from "../../../libs/lvnzy-helper";
-import { COLORS } from "../../../theme/style-constants";
+import { capitalize, getMinMaxPrices } from "../../../libs/lvnzy-helper";
+import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { MapModalContent } from "../map-modal";
+import { Flex, Tag, Typography } from "antd";
 
 interface ProjectMarkersProps {
   primaryProject?: any;
@@ -81,8 +82,82 @@ export const ProjectMarkers = ({
             eventHandlers={{
               click: () => {
                 setModalContent({
-                  title: project.info?.name || "Unnamed Project",
-                  content: project.info?.description || "",
+                  title: (
+                    <Flex vertical style={{ marginBottom: 0 }}>
+                      <Typography.Text
+                        style={{
+                          color: COLORS.primaryColor,
+                          textTransform: "uppercase",
+                          fontSize: FONT_SIZE.PARA,
+                        }}
+                      >
+                        {project.info.developerId.name}
+                      </Typography.Text>
+                      <Typography.Text
+                        style={{ fontSize: FONT_SIZE.HEADING_1 }}
+                      >
+                        {project.info.name}
+                      </Typography.Text>
+                    </Flex>
+                  ),
+                  content: (
+                    <Flex vertical gap={2}>
+                      <Flex style={{marginBottom: 16}}>
+                        {project.info.homeType.map((t: string) => (
+                          <Typography.Text style={{ marginLeft: 4, fontSize: FONT_SIZE.HEADING_3 }}>
+                            {capitalize(t)} ·{" "}
+                          </Typography.Text>
+                        ))}
+                        <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, marginLeft: 2}}>
+                          {getMinMaxPrices(
+                            project.info.unitConfigWithPricing.map(
+                              (c: any) => c.price
+                            )
+                          )}{" "}
+                          ·{" "}
+                        </Typography.Text>
+
+                        <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, marginLeft: 2}}>
+                          ₹
+                          {Math.round(
+                            project.info.rate.minimumUnitCost /
+                              project.info.rate.minimumUnitSize
+                          )}{" "}
+                          per sq.ft
+                        </Typography.Text>
+                      </Flex>
+                      <Flex
+                        gap={8}
+                        style={{
+                          overflowX: "scroll",
+                          whiteSpace: "nowrap",
+                          width: "100%",
+                          scrollbarWidth: "none",
+                        }}
+                      >
+                        <Flex gap={8}>
+                        {project.media
+                          .filter((i: any) => !!i.image && !!i.image.url && i.image.tags.length && !i.image.tags.includes("na"))
+                          .map((i: any) => {
+                            return (
+                              <div
+                                style={{
+                                  backgroundImage: `url('${i.image.url}')`,
+                                  backgroundSize: "cover",
+                                  backgroundPosition: "center",
+                                  backgroundRepeat: "no-repeat",
+                                  width: 200,
+                                  height: 200,
+                                  borderRadius: 8,
+                                  border: `1px solid ${COLORS.borderColor}`
+                                }}
+                              ></div>
+                            );
+                          })}
+                          </Flex>
+                      </Flex>
+                    </Flex>
+                  ),
                 });
                 setInfoModalOpen(true);
               },

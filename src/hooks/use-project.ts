@@ -9,15 +9,39 @@ import { Project } from "../types/Project";
  * Custom hook to fetch all projects
  * @returns {UseQueryResult<Project[], Error>} The result of the useQuery hook containing an array of projects
  */
-export const useFetchProjects = () => {
+export const useFetchProjects = (params: {
+  homeType?: string;
+  statusFilter?: string;
+  searchKeyword?: string;
+  projectIds?: string;
+  limit?: number;
+  sortBy?: string;
+}) => {
   return useQuery<Project[], Error>({
     refetchOnWindowFocus: false, // Disable refetch on window focus
     refetchOnReconnect: false, // Disable refetch on network reconnect
     staleTime: Infinity, // Data will never be marked as stale
-    queryKey: [queryKeys.projects],
+    queryKey: [queryKeys.projects, Object.entries(params).map(([key, value]) => value).join(",")],
     queryFn: async () => {
-      const { data } = await axiosApiInstance.get(`/projects?source=app`);
-      return data;
+      if (Object.entries(params).length) {
+        let url = `/projects?source=app`;
+        if (params.statusFilter) {
+          url += `&statusFilter=${params.statusFilter}`;
+        }
+        if (params.homeType) {
+          url += `&homeType=${params.homeType}`;
+        }
+        if (params.searchKeyword) {
+          url += `&searchKeyword=${params.searchKeyword}`;
+        }
+         if (params.projectIds) {
+          url += `&projectIds=${params.projectIds}`;
+        }
+        const { data } = await axiosApiInstance.get(url);
+        return data;
+      }
+      return [];
+      
     },
   });
 };

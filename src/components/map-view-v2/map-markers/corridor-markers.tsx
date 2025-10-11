@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Marker } from "react-leaflet";
+import { Marker, Polygon } from "react-leaflet";
 import { COLORS } from "../../../theme/style-constants";
 import { MapModalContent } from "../map-modal";
 import { getIcon } from "../utils";
@@ -16,14 +16,15 @@ export const CorridorMarkers = ({
   setModalContent,
   setInfoModalOpen,
 }: CorridorMarkersProps) => {
-  const [corridorsElements, setCorridorElements] = useState<React.ReactNode[]>();
+  const [corridorsElements, setCorridorElements] =
+    useState<React.ReactNode[]>();
 
   useEffect(() => {
     if (!corridors) {
       return;
     }
-    
-    const loadIcons = async () => {
+
+    const renderCorridorElements = async () => {
       const elements = await Promise.all(
         corridors.map(async (c) => {
           const CorridorIcon = await getIcon(
@@ -41,35 +42,52 @@ export const CorridorMarkers = ({
           );
 
           return (
-            <Marker
-              key={`corridor-${c._id}`}
-              icon={CorridorIcon!}
-              zIndexOffset={100}
-              position={[c.location.lat, c.location.lng]}
-              eventHandlers={{
-                click: () => {
-                  setModalContent({
-                    title: c.name,
-                    content: c.description || "",
-                    titleIcon: (
-                      <DynamicReactIcon
-                        iconName="LuMilestone"
-                        iconSet="lu"
-                        size={20}
-                        color={COLORS.textColorDark}
-                      />
-                    ),
-                    tags: [
-                      {
-                        label: "Growth corridor",
-                        color: COLORS.textColorDark,
-                      },
-                    ],
-                  });
-                  setInfoModalOpen(true);
-                },
-              }}
-            />
+            <>
+              <Marker
+                key={`corridor-${c._id}`}
+                icon={CorridorIcon!}
+                zIndexOffset={100}
+                position={[c.location.lat, c.location.lng]}
+                eventHandlers={{
+                  click: () => {
+                    setModalContent({
+                      title: c.name,
+                      content: c.description || "",
+                      titleIcon: (
+                        <DynamicReactIcon
+                          iconName="LuMilestone"
+                          iconSet="lu"
+                          size={20}
+                          color={COLORS.textColorDark}
+                        />
+                      ),
+                      tags: [
+                        {
+                          label: "Growth corridor",
+                          color: COLORS.textColorDark,
+                        },
+                      ],
+                    });
+                    setInfoModalOpen(true);
+                  },
+                }}
+              />
+              {c.geoJson ? (
+                <Polygon
+                  key={`corr-${c.name.toLowerCase().replaceAll(" ", "-")}`}
+                  positions={c.geoJson.features[0].geometry.coordinates.map(
+                    ([lng, lat]: [number, number]) =>
+                      [lat, lng] as [number, number]
+                  )}
+                  pathOptions={{
+                    color: COLORS.textColorMedium,
+                    weight: 1,
+                    fillOpacity: 0.1,
+                    fillColor: COLORS.textColorDark,
+                  }}
+                />
+              ) : null}
+            </>
           );
         })
       );
@@ -77,7 +95,7 @@ export const CorridorMarkers = ({
       setCorridorElements(elements);
     };
 
-    loadIcons();
+    renderCorridorElements();
   }, [corridors, setModalContent, setInfoModalOpen]);
 
   if (!corridors) {
