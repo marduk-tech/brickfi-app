@@ -84,15 +84,18 @@ export const ProjectMarkers = ({
                 setModalContent({
                   title: (
                     <Flex vertical style={{ marginBottom: 0 }}>
-                      <Typography.Text
-                        style={{
-                          color: COLORS.primaryColor,
-                          textTransform: "uppercase",
-                          fontSize: FONT_SIZE.PARA,
-                        }}
-                      >
-                        {project.info.developerId.name}
-                      </Typography.Text>
+                      {project.info.developerId ? (
+                        <Typography.Text
+                          style={{
+                            color: COLORS.primaryColor,
+                            textTransform: "uppercase",
+                            fontSize: FONT_SIZE.PARA,
+                          }}
+                        >
+                          {project.info.developerId.name}
+                        </Typography.Text>
+                      ) : null}
+
                       <Typography.Text
                         style={{ fontSize: FONT_SIZE.HEADING_1 }}
                       >
@@ -102,29 +105,49 @@ export const ProjectMarkers = ({
                   ),
                   content: (
                     <Flex vertical gap={2}>
-                      <Flex style={{marginBottom: 16}}>
+                      <Flex style={{ marginBottom: 16 }}>
                         {project.info.homeType.map((t: string) => (
-                          <Typography.Text style={{ marginLeft: 4, fontSize: FONT_SIZE.HEADING_3 }}>
+                          <Typography.Text
+                            style={{
+                              marginLeft: 4,
+                              fontSize: FONT_SIZE.HEADING_3,
+                            }}
+                          >
                             {capitalize(t)} ·{" "}
                           </Typography.Text>
                         ))}
-                        <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, marginLeft: 2}}>
-                          {getMinMaxPrices(
-                            project.info.unitConfigWithPricing.map(
-                              (c: any) => c.price
-                            )
-                          )}{" "}
-                          ·{" "}
-                        </Typography.Text>
+                        {project.info.unitConfigWithPricing &&
+                        project.info.unitConfigWithPricing.length ? (
+                          <Flex>
+                            <Typography.Text
+                              style={{
+                                fontSize: FONT_SIZE.HEADING_3,
+                                marginLeft: 2,
+                              }}
+                            >
+                              {getMinMaxPrices(
+                                project.info.unitConfigWithPricing.map(
+                                  (c: any) => c.price
+                                )
+                              )}{" "}
+                              ·{" "}
+                            </Typography.Text>
 
-                        <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, marginLeft: 2}}>
-                          ₹
-                          {Math.round(
-                            project.info.rate.minimumUnitCost /
-                              project.info.rate.minimumUnitSize
-                          )}{" "}
-                          per sq.ft
-                        </Typography.Text>
+                            <Typography.Text
+                              style={{
+                                fontSize: FONT_SIZE.HEADING_3,
+                                marginLeft: 2,
+                              }}
+                            >
+                              ₹
+                              {Math.round(
+                                project.info.rate.minimumUnitCost /
+                                  project.info.rate.minimumUnitSize
+                              )}{" "}
+                              per sq.ft
+                            </Typography.Text>
+                          </Flex>
+                        ) : null}
                       </Flex>
                       <Flex
                         gap={8}
@@ -136,25 +159,31 @@ export const ProjectMarkers = ({
                         }}
                       >
                         <Flex gap={8}>
-                        {project.media
-                          .filter((i: any) => !!i.image && !!i.image.url && i.image.tags.length && !i.image.tags.includes("na"))
-                          .map((i: any) => {
-                            return (
-                              <div
-                                style={{
-                                  backgroundImage: `url('${i.image.url}')`,
-                                  backgroundSize: "cover",
-                                  backgroundPosition: "center",
-                                  backgroundRepeat: "no-repeat",
-                                  width: 200,
-                                  height: 200,
-                                  borderRadius: 8,
-                                  border: `1px solid ${COLORS.borderColor}`
-                                }}
-                              ></div>
-                            );
-                          })}
-                          </Flex>
+                          {project.media
+                            .filter(
+                              (i: any) =>
+                                !!i.image &&
+                                !!i.image.url &&
+                                i.image.tags.length &&
+                                !i.image.tags.includes("na")
+                            )
+                            .map((i: any) => {
+                              return (
+                                <div
+                                  style={{
+                                    backgroundImage: `url('${i.image.url}')`,
+                                    backgroundSize: "cover",
+                                    backgroundPosition: "center",
+                                    backgroundRepeat: "no-repeat",
+                                    width: 200,
+                                    height: 200,
+                                    borderRadius: 8,
+                                    border: `1px solid ${COLORS.borderColor}`,
+                                  }}
+                                ></div>
+                              );
+                            })}
+                        </Flex>
                       </Flex>
                     </Flex>
                   ),
