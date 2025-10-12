@@ -163,7 +163,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                 categories = ["conveniences"];
                 break;
               case "transport":
-                categories = ["connectivity"];
+                categories = ["roads", "metro"];
                 break;
             }
             setMapCategories(categories);
