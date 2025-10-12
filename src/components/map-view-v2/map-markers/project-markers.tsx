@@ -110,7 +110,7 @@ export const ProjectMarkers = ({
                           <Typography.Text
                             style={{
                               marginLeft: 4,
-                              fontSize: FONT_SIZE.HEADING_3,
+                              fontSize: FONT_SIZE.HEADING_4,
                             }}
                           >
                             {capitalize(t)} ·{" "}
@@ -121,7 +121,7 @@ export const ProjectMarkers = ({
                           <Flex>
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_3,
+                                fontSize: FONT_SIZE.HEADING_4,
                                 marginLeft: 2,
                               }}
                             >
@@ -135,7 +135,7 @@ export const ProjectMarkers = ({
 
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_3,
+                                fontSize: FONT_SIZE.HEADING_4,
                                 marginLeft: 2,
                               }}
                             >

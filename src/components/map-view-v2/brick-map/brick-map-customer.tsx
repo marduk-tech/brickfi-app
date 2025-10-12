@@ -63,7 +63,12 @@ export function BrickMapCustomer({
   //   })) || [];
 
   if (livindexPlacesLoading) {
-    return <Loader />;
+    return (
+      <Flex vertical align="center" justify="center" style={{ width: "100%", marginTop: 100 }}>
+        <Loader />
+        <Typography.Text>Initializing Map..</Typography.Text>
+      </Flex>
+    );
   }
 
   if (livindexPlaces) {
