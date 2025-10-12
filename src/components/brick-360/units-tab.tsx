@@ -95,6 +95,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
 
   useEffect(() => {
     if (
+      lvnzyProject?.originalProjectId.info.homeType.includes("plot") ||
       !lvnzyProject?.originalProjectId.info.unitConfigWithPricing ||
       lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length < 5
     ) {
