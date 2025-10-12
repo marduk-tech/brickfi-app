@@ -2,7 +2,7 @@ import React from "react";
 import { Flex, Typography } from "antd";
 import { DRIVER_CATEGORIES } from "../../../libs/constants";
 import { capitalize } from "../../../libs/lvnzy-helper";
-import { COLORS } from "../../../theme/style-constants";
+import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
 
 interface CategoryFiltersProps {
@@ -48,7 +48,7 @@ export const CategoryFilters = ({
                 : COLORS.borderColor
             }`,
             marginRight: 0,
-            padding: "4px 12px",
+            padding: "4px 8px",
             borderRadius: 16,
             backgroundColor:
               selectedCategory === category ? COLORS.primaryColor : "white",
@@ -70,6 +70,7 @@ export const CategoryFilters = ({
                 selectedCategory === category
                   ? "white"
                   : COLORS.textColorDark,
+                  fontSize: FONT_SIZE.SUB_TEXT
             }}
           >
             {capitalize(category)}

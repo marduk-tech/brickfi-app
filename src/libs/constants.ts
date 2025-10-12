@@ -394,80 +394,30 @@ export const LandingConstants = {
 };
 
 export const DRIVER_CATEGORIES = {
-  schools: {
-    icon: { name: "IoMdSchool", set: "io" },
-    drivers: ["school", "university"],
+  roads: {
+    drivers: ["highway"],
+    icon: { name: "FaRoad", set: "fa" },
+  },
+  metro: {
+    drivers: ["transit"],
     filters: [
-      { label: "CBSE", key: "cbse" },
-      { label: "ICSE", key: "icse" },
-      { label: "International", key: "international" },
-      { label: "Pre School", key: "pre-school" },
-      { label: "University", key: "university" },
+      { label: "Namma Metro", key: "metro" },
+      { label: "Suburban Rail", key: "kride" },
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
-      if (filter == "international") {
-        return (
-          driver.tags?.includes("ib") ||
-          driver.tags?.includes("cambridge-igcse")
-        );
+      if (filter == "metro") {
+        return driver.name.toLowerCase().includes("metro");
       }
-      if (filter == "pre-school") {
-        return (
-          driver.tags?.includes("pre-school") &&
-          driver.distance &&
-          driver.distance <= 5
-        );
-      }
-      if (filter == "cbse") {
-        return driver.tags?.includes("cbse");
-      }
-      if (filter == "icse") {
-        return driver.tags?.includes("icse");
-      }
-      if (filter == "university") {
-        return driver.driver === "university";
+      if (filter == "kride") {
+        return driver.name.toLowerCase().includes("suburban");
       }
       return false;
     },
+    icon: { name: "FaTrain", set: "fa" },
   },
   workplace: {
     icon: { name: "BiSolidFactory", set: "bi" },
     drivers: ["industrial-hitech", "industrial-general"],
-  },
-  conveniences: {
-    icon: { name: "FaStore", set: "fa" },
-    drivers: ["food", "hospital", "commercial", "micro-market"],
-    filters: [
-      { key: "pop-dining", label: "Popular Dining" },
-      { key: "hospital", label: "Hospital" },
-      { key: "malls", label: "Large Mall" },
-      { key: "market", label: "Market Area" },
-    ],
-    onFilter: (filter: string, driver: IDriverPlace) => {
-      if (filter == "pop-dining") {
-        return (
-          ["food"].includes(driver.driver) &&
-          driver.tags &&
-          driver.tags.some((t) =>
-            ["popular brand", "fine dining", "highly rated"].includes(t)
-          )
-        );
-      }
-      if (filter == "hospital") {
-        return driver.driver == "hospital";
-      }
-      if (filter == "malls") {
-        return driver.driver == "commercial";
-      }
-      if (filter == "market") {
-        return driver.driver == "micro-market";
-      }
-      return false;
-    },
-  },
-  connectivity: {
-    drivers: ["highway", "transit"],
-    icon: { name: "FaRoad", set: "fa" },
   },
   "growth potential": {
     icon: { name: "TbChartAreaLineFilled", set: "tb" },
@@ -514,6 +464,75 @@ export const DRIVER_CATEGORIES = {
       return false;
     },
   },
+  schools: {
+    icon: { name: "IoMdSchool", set: "io" },
+    drivers: ["school", "university"],
+    filters: [
+      { label: "CBSE", key: "cbse" },
+      { label: "ICSE", key: "icse" },
+      { label: "International", key: "international" },
+      { label: "Pre School", key: "pre-school" },
+      { label: "University", key: "university" },
+    ],
+    onFilter: (filter: string, driver: IDriverPlace) => {
+      if (filter == "international") {
+        return (
+          driver.tags?.includes("ib") ||
+          driver.tags?.includes("cambridge-igcse")
+        );
+      }
+      if (filter == "pre-school") {
+        return (
+          driver.tags?.includes("pre-school") &&
+          driver.distance &&
+          driver.distance <= 5
+        );
+      }
+      if (filter == "cbse") {
+        return driver.tags?.includes("cbse");
+      }
+      if (filter == "icse") {
+        return driver.tags?.includes("icse");
+      }
+      if (filter == "university") {
+        return driver.driver === "university";
+      }
+      return false;
+    },
+  },
+
+  conveniences: {
+    icon: { name: "FaStore", set: "fa" },
+    drivers: ["food", "hospital", "commercial", "micro-market"],
+    filters: [
+      { key: "pop-dining", label: "Popular Dining" },
+      { key: "hospital", label: "Hospital" },
+      { key: "malls", label: "Large Mall" },
+      { key: "market", label: "Market Area" },
+    ],
+    onFilter: (filter: string, driver: IDriverPlace) => {
+      if (filter == "pop-dining") {
+        return (
+          ["food"].includes(driver.driver) &&
+          driver.tags &&
+          driver.tags.some((t) =>
+            ["popular brand", "fine dining", "highly rated"].includes(t)
+          )
+        );
+      }
+      if (filter == "hospital") {
+        return driver.driver == "hospital";
+      }
+      if (filter == "malls") {
+        return driver.driver == "commercial";
+      }
+      if (filter == "market") {
+        return driver.driver == "micro-market";
+      }
+      return false;
+    },
+  },
+
   surroundings: {
     icon: { name: "TbMapPlus", set: "tb" },
     drivers: [],

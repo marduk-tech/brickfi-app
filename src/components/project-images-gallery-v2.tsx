@@ -290,7 +290,7 @@ export const ProjectGalleryV2 = ({
                             style={{
                               width: "100%",
                               height: "100%",
-                              objectFit: "cover",
+                              objectFit: "contain",
                               border: "1px solid",
                               borderColor: COLORS.borderColorMedium,
                             }}

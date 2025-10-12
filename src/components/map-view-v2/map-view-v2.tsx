@@ -229,9 +229,9 @@ const MapViewV2Inner = ({
           zoom={minMapZoom || 15}
           minZoom={minMapZoom || 12}
           maxZoom={19}
-          style={{ 
-            height: "100%", 
-            width: "100%"
+          style={{
+            height: "100%",
+            width: "100%",
           }}
           zoomControl={false}
         >

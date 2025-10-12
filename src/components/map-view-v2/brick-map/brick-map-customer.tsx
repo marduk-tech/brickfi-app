@@ -1,7 +1,10 @@
 import { Flex, Select, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useFetchAllLivindexPlaces } from "../../../hooks/use-livindex-places";
-import { LivIndexDriversConfig } from "../../../libs/constants";
+import {
+  DRIVER_CATEGORIES,
+  LivIndexDriversConfig,
+} from "../../../libs/constants";
 import { capitalize } from "../../../libs/lvnzy-helper";
 import { IDriverPlace } from "../../../types/Project";
 import { Loader } from "../../common/loader";
@@ -11,45 +14,38 @@ import { useUser } from "@/hooks/use-user";
 import { useFetchProjects } from "@/hooks/use-project";
 const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
-export function BrickMapCustomer() {
+export function BrickMapCustomer({
+  projectIds,
+  excludeMapCategories,
+}: {
+  projectIds: string[];
+  excludeMapCategories?: string[];
+}) {
   const { data: livindexPlaces, isLoading: livindexPlacesLoading } =
     useFetchAllLivindexPlaces();
 
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null
-  );
-
   const [driverFilters, setDriverFilters] = useState<string[]>([]);
   const [filteredDrivers, setFilteredDrivers] = useState<IDriverPlace[]>([]);
-  const [projectIds, setProjectIds] = useState<string[]>([]);
 
-  const { data: allProjects, isLoading: allProjectsLoading, refetch: refetchProjects } = useFetchProjects(
-    {
-      projectIds: projectIds.join(","),
-    }
-  );
-
-  const { user } = useUser();
+  const {
+    data: allProjects,
+    isLoading: allProjectsLoading,
+    refetch: refetchProjects,
+  } = useFetchProjects({
+    projectIds: projectIds.join(","),
+  });
 
   // update filtered drivers when places or filters change
   useEffect(() => {
     if (livindexPlaces && livindexPlaces.length) {
       console.log("Updating filtered drivers with filters:", driverFilters);
-      const drivers = livindexPlaces.filter((p) =>
-        driverFilters.includes(p.driver)
-      );
-      console.log("Filtered drivers count:", drivers.length);
-      setFilteredDrivers(drivers);
+      // const drivers = livindexPlaces.filter((p) =>
+      //   driverFilters.includes(p.driver)
+      // );
+      // console.log("Filtered drivers count:", drivers.length);
+      setFilteredDrivers(livindexPlaces);
     }
   }, [livindexPlaces, driverFilters]);
-
-  useEffect(() => {
-    if (user && user.savedProjects) {
-      setProjectIds(user.savedProjects);
-      refetchProjects();
-    }
-  }, [user]);
-
   // log when filtered drivers change
   useEffect(() => {
     console.log("FilteredDrivers updated:", filteredDrivers?.length);
@@ -72,7 +68,7 @@ export function BrickMapCustomer() {
 
   if (livindexPlaces) {
     return (
-      <Flex vertical style={{ height: "calc(100vh - 64px)" }}>
+      <Flex vertical style={{ height: "calc(100vh - 120px)", width: "100%" }}>
         <Flex
           gap={16}
           style={{ padding: 8, backgroundColor: "white", zIndex: 1 }}
@@ -112,7 +108,7 @@ export function BrickMapCustomer() {
               };
             })}
           /> */}
-          <Select
+          {/* <Select
             style={{ width: 350 }}
             mode="multiple"
             showSearch
@@ -125,7 +121,7 @@ export function BrickMapCustomer() {
                 label: capitalize((LivIndexDriversConfig as any)[k].label),
               };
             })}
-          />
+          /> */}
         </Flex>
         <Flex style={{ flex: 1, position: "relative", minHeight: "600px" }}>
           <>
@@ -162,10 +158,13 @@ export function BrickMapCustomer() {
                 duration: p.distance ? Math.round(p.distance / 60) : 0,
               }))}
               projects={allProjects}
-              projectId={selectedProjectId || undefined}
               fullSize={false}
               showLocalities={false}
-              minMapZoom={12}
+              minMapZoom={11}
+              categories={Object.keys(DRIVER_CATEGORIES).filter(
+                (k) =>
+                  !excludeMapCategories || !excludeMapCategories.includes(k)
+              )}
             />
           </>
         </Flex>

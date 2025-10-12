@@ -42,12 +42,12 @@ export const MapStyleControls = ({ selectedStyle, onStyleChange }: MapStyleContr
                 iconSet="lu"
                 iconName="LuLayers3"
                 size={16}
-                color={COLORS.textColorDark}
+                color="white"
               />
             }
             onClick={handleOpenDialog}
             style={{
-              backgroundColor: "white",
+              backgroundColor:"rgba(0,0,0,0.6)" ,
               boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
               display: "flex",
               alignItems: "center",

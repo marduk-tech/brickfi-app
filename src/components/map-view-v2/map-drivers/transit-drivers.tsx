@@ -137,7 +137,7 @@ export const TransitDriversComponent = ({
           });
 
           let stations = null;
-          if (map.getZoom() > 12.5) {
+          if (map.getZoom() > 13.5) {
             stations = pointFeatures
               .filter((feature: any) => {
                 const [lng, lat] = feature.geometry.coordinates;

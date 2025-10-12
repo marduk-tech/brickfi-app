@@ -23,6 +23,7 @@ import DynamicReactIcon from "./common/dynamic-react-icon";
 import GradientBar from "./common/grading-bar";
 import { Loader } from "./common/loader";
 import Brick360Chat from "./brick-360/brick360-chat";
+import { BrickMapCustomer } from "./map-view-v2/brick-map/brick-map-customer";
 const { Paragraph } = Typography;
 
 export function UserProjects({
@@ -32,6 +33,7 @@ export function UserProjects({
 }) {
   const { user } = useUser();
   const { width } = useWindowDimensions();
+  const [selectedViewType, setSelectedViewType] = useState<string>("list");
   const brick360ChatRef = useRef<{
     expandChat: () => void;
   } | null>(null);
@@ -233,48 +235,96 @@ export function UserProjects({
       }}
       vertical
     >
-      {/* {uniqueCorridors &&
-      uniqueCorridors.length > 0 &&
-      lvnzyProjects.length > 5 ? (
-        <>
-          <Flex gap={8} style={{ marginBottom: 16 }}>
-            <Select
-              style={{ width: 225, height: 42 }}
-              placeholder="Select corridor"
-              value={selectedCorridor}
-              onChange={(value: string) => setSelectedCorridor(value)}
-              options={[
-                { value: "all", label: "All Corridors" },
-                ...uniqueCorridors.map((c) => ({
-                  value: c,
-                  label: c,
-                })),
-              ]}
-            />
-          </Flex>
-          <Flex vertical>
-            <Typography.Title level={4} style={{ margin: 0 }}>
-              {filteredProjects.length} projects
-            </Typography.Title>
-          </Flex>
-        </>
-      ) : null} */}
-
       <Flex
         style={{
-          width: "100%",
-          flexWrap: "wrap",
-          marginTop: 16,
           padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
+          marginLeft: "auto"
         }}
-        gap={32}
       >
-        {filteredProjects
-          .sort((a: any, b: any) =>
-            a.meta.projectName > b.meta.projectName ? 1 : -1
-          )
-          .map((p: any) => renderLvnzyProject(p))}
+        <Flex
+          style={{
+            backgroundColor: "white",
+            borderRadius: 8,
+            marginTop: 8,
+            border: `1px solid ${COLORS.borderColorMedium}`,
+            cursor: "pointer",
+            marginBottom: 8,
+          }}
+        >
+          <Flex
+            style={{
+              backgroundColor:
+                selectedViewType == "list" ? COLORS.textColorDark : "white",
+              borderTopLeftRadius: 8,
+              borderBottomLeftRadius: 8,
+              padding: "8px 16px",
+              cursor: "pointer",
+            }}
+            onClick={() => {
+              setSelectedViewType("list");
+            }}
+          >
+            <DynamicReactIcon
+              iconName="FaRegListAlt"
+              iconSet="fa"
+              size={16}
+              color={
+                selectedViewType == "list" ? "white" : COLORS.textColorDark
+              }
+            ></DynamicReactIcon>
+          </Flex>
+          <Flex
+            style={{
+              backgroundColor:
+                selectedViewType == "map" ? COLORS.textColorDark : "white",
+              borderTopRightRadius: 8,
+              borderBottomRightRadius: 8,
+              padding: "8px 16px",
+            }}
+            onClick={() => {
+              setSelectedViewType("map");
+            }}
+          >
+            <DynamicReactIcon
+              iconName="FaMapMarked"
+              iconSet="fa"
+              size={16}
+              color={selectedViewType == "map" ? "white" : COLORS.textColorDark}
+            ></DynamicReactIcon>
+          </Flex>
+        </Flex>
       </Flex>
+
+      {selectedViewType == "list" ? (
+        <Flex
+          style={{
+            width: "100%",
+            flexWrap: "wrap",
+            marginTop: 16,
+            padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
+          }}
+          gap={32}
+        >
+          {filteredProjects
+            .sort((a: any, b: any) =>
+              a.meta.projectName > b.meta.projectName ? 1 : -1
+            )
+            .map((p: any) => renderLvnzyProject(p))}
+        </Flex>
+      ) : null}
+
+      {selectedViewType == "map" ? (
+        <Flex
+          style={{
+            padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
+          }}
+        >
+          <BrickMapCustomer
+            projectIds={lvnzyProjects.map((p) => p.originalProjectId._id)}
+            excludeMapCategories={["surroundings", "conveniences", "growth potential"]}
+          ></BrickMapCustomer>
+        </Flex>
+      ) : null}
       {/* <Brick360Chat
         userProjects={lvnzyProjects.map((p) => {
           return {

@@ -26,9 +26,9 @@ export const MapExpandBtn = ({
         icon={
           <DynamicReactIcon
             iconName="FaExpand"
-            color={COLORS.textColorDark}
+            color="white"
             iconSet="fa"
-            size={16}
+            size={12}
           />
         }
         style={{
@@ -36,10 +36,10 @@ export const MapExpandBtn = ({
           marginBottom: 8,
           borderRadius: 8,
           cursor: "pointer",
-          backgroundColor: "white",
-          color: COLORS.textColorDark,
-          fontSize: FONT_SIZE.HEADING_4,
-          height: 28,
+          backgroundColor: "rgba(0,0,0,0.75)",
+          color: "white",
+          fontSize: FONT_SIZE.SUB_TEXT,
+          height: 24,
         }}
         onClick={() => {
           onClick();

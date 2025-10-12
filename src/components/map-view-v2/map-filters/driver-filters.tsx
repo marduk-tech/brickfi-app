@@ -44,16 +44,16 @@ export const DriverFilters = ({
           style={{
             display: "flex",
             alignItems: "center",
-            borderRadius: 16,
-            padding: "4px 8px",
+            borderRadius: 8,
+            padding: "0px 8px",
             marginRight: 4,
             backgroundColor: isSelected
-              ? COLORS.textColorDark
+              ? "rgba(0,0,0,0.7)"
               : " rgba(255,255,255,.9)",
             color: isSelected ? "white" : "initial",
             marginLeft: 0,
             cursor: "pointer",
-            border: `1.5px solid ${COLORS.textColorDark}`,
+            
           }}
           onClick={() => {
             setSelectedDriverFilter(filterItem.key);
@@ -63,7 +63,6 @@ export const DriverFilters = ({
             style={{
               color: isSelected ? "white" : COLORS.textColorDark,
               fontSize: FONT_SIZE.SUB_TEXT,
-              fontWeight: 500,
             }}
           >
             {filterItem.label}

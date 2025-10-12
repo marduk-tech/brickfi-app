@@ -35,11 +35,33 @@ export const CorridorMarkers = ({
             undefined,
             {
               iconColor: "white",
-              borderColor: COLORS.borderColor,
+              borderColor: COLORS.bgColorDark,
               iconBgColor: COLORS.bgColorDark,
               containerWidth: 125,
             }
           );
+
+          function corridorClickHandler() {
+            setModalContent({
+              title: c.name,
+              content: c.description || "",
+              titleIcon: (
+                <DynamicReactIcon
+                  iconName="LuMilestone"
+                  iconSet="lu"
+                  size={20}
+                  color={COLORS.textColorDark}
+                />
+              ),
+              tags: [
+                {
+                  label: "Growth corridor",
+                  color: COLORS.textColorDark,
+                },
+              ],
+            });
+            setInfoModalOpen(true);
+          }
 
           return (
             <>
@@ -49,27 +71,7 @@ export const CorridorMarkers = ({
                 zIndexOffset={100}
                 position={[c.location.lat, c.location.lng]}
                 eventHandlers={{
-                  click: () => {
-                    setModalContent({
-                      title: c.name,
-                      content: c.description || "",
-                      titleIcon: (
-                        <DynamicReactIcon
-                          iconName="LuMilestone"
-                          iconSet="lu"
-                          size={20}
-                          color={COLORS.textColorDark}
-                        />
-                      ),
-                      tags: [
-                        {
-                          label: "Growth corridor",
-                          color: COLORS.textColorDark,
-                        },
-                      ],
-                    });
-                    setInfoModalOpen(true);
-                  },
+                  click: corridorClickHandler,
                 }}
               />
               {c.geoJson ? (
@@ -79,6 +81,9 @@ export const CorridorMarkers = ({
                     ([lng, lat]: [number, number]) =>
                       [lat, lng] as [number, number]
                   )}
+                  eventHandlers={{
+                    click: corridorClickHandler,
+                  }}
                   pathOptions={{
                     color: COLORS.textColorMedium,
                     weight: 1,

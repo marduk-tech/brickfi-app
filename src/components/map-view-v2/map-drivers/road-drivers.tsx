@@ -125,7 +125,7 @@ export const RoadDriversComponent = ({
               
               return (
                 <React.Fragment key={`road-line-${driver._id}-${lineIndex}`}>
-                  {map.getZoom() > 12.5
+                  {map.getZoom() > 13.5
                     ? points.map((p, pointIndex) => (
                         <Marker
                           key={`road-${driver._id}-${lineIndex}-${pointIndex}`}
