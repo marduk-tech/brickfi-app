@@ -632,7 +632,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                     >
                       <MapViewV2
                         projectId={lvnzyProject?.originalProjectId?._id}
-                        hideAllFilters={true}
+                        hideAllFilters={false}
                         surroundingElements={surroundingElements}
                         projectSqftPricing={Math.round(
                           lvnzyProject?.originalProjectId.info.rate
@@ -652,6 +652,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                         })}
                         categories={mapCategories}
                         fullSize={false}
+                        minMapZoom={11}
                       />
                     </Flex>
                   </Flex>

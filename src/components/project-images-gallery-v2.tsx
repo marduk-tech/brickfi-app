@@ -4,6 +4,15 @@ import "../theme/gallery.css";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 import { IMedia } from "../types/Project";
 
+// fixed order for tags
+const TAGS_ORDER = [
+  "exterior",
+  "layout",
+  "amenities",
+  "floorplan",
+  "house",
+  "construction",
+];
 export const ProjectGalleryV2 = ({
   media,
   selectedImageId,
@@ -41,22 +50,12 @@ export const ProjectGalleryV2 = ({
       }
     });
 
-    // fixed order for tags
-    const fixedOrder = [
-      "exterior",
-      "layout",
-      "amenities",
-      "floorplan",
-      "house",
-      "construction",
-    ];
-
     const tagArray = ["all"];
     if (hasVideos) {
       tagArray.push("Videos");
     }
 
-    fixedOrder.forEach((tag) => {
+    TAGS_ORDER.forEach((tag) => {
       if (tags.has(tag)) {
         tagArray.push(tag);
       }
@@ -76,7 +75,11 @@ export const ProjectGalleryV2 = ({
     );
     const imageMedia = media.filter(
       (item) =>
-        item.type === "image" && item.image && !item.image.tags.includes("na")
+        item.type === "image" &&
+        item.image &&
+        (!item.image.tags ||
+          !item.image.tags.length ||
+          !item.image.tags.find((t) => !TAGS_ORDER.includes(t)))
     );
     const allMedia = [...videoMedia, ...imageMedia];
     const result: Record<string, IMedia[]> = {};
