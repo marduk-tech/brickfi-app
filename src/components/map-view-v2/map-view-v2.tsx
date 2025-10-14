@@ -90,6 +90,7 @@ interface MapViewV2Props {
   initialZoom?: number;
   categories?: string[];
   hideAllFilters?: boolean;
+  corridorIds?: string[]
 }
 
 const MapViewV2Inner = ({
@@ -108,6 +109,7 @@ const MapViewV2Inner = ({
   categories,
   hideAllFilters,
   primaryProject,
+  corridorIds
 }: MapViewV2Props & { primaryProject?: any }) => {
   // Use context hooks instead of local state
   const {
@@ -276,7 +278,7 @@ const MapViewV2Inner = ({
                 {/* {renderSurroundings()} */}
                 {showCorridors && (
                   <CorridorMarkers
-                    corridors={corridors}
+                    corridors={corridorIds ? corridors?.filter(c => corridorIds.includes(c._id)): corridors}
                     setModalContent={openModal}
                     setInfoModalOpen={() => {}}
                   />

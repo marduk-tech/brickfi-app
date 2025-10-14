@@ -627,6 +627,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
 
                     <MapViewV2
                       projectId={lvnzyProject?.originalProjectId?._id}
+                      corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
                       hideAllFilters={false}
                       surroundingElements={surroundingElements}
                       projectSqftPricing={Math.round(
@@ -866,6 +867,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             <MapViewV2
               projectId={lvnzyProject?.originalProjectId?._id}
               hideAllFilters={false}
+               corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
               surroundingElements={surroundingElements}
               projectSqftPricing={Math.round(
                 lvnzyProject?.originalProjectId.info.rate.minimumUnitCost /
