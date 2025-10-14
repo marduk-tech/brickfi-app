@@ -52,7 +52,7 @@ export interface AICuratedProject {
 export interface Brick360Props {
   lvnzyProject?: LvnzyProject;
   dataPoint?: any;
-  userProjects?: {name: string, id: string}[]
+  userProjects?: { name: string; id: string }[];
 }
 interface Brick360ChatRef {
   expandChat: () => void;
@@ -64,7 +64,6 @@ export interface Brick360Answer {
 
 export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
   ({ dataPoint, lvnzyProject, userProjects }, ref) => {
-
     const { height } = useWindowDimensions();
     const [currentQuestion, setCurrentQuestion] = useState<string>();
     const [currentAnswer, setCurrentAnswer] = useState<
@@ -377,7 +376,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             userId: user?._id,
             userProjects,
             lvnzyProjectId: lvnzyProject?._id,
-            dataPointCategory: dataPointSelected.selectedDataPointCategory
+            dataPointCategory: dataPointSelected.selectedDataPointCategory,
           },
         });
 
@@ -599,7 +598,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                         color: "white",
                         borderRadius: 8,
                         padding: "4px 8px",
-                        marginBottom: 8,
+                        marginBottom: 16,
                       }}
                     >
                       {dataPointSelected.selectedDataPointTitle}
@@ -615,46 +614,42 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                       position: "relative",
                       borderRadius: 16,
                       overflowX: "hidden",
+                      height: isMobile ? 200 : 300,
+                      width: "100%",
                     }}
                   >
                     <MapExpandBtn
-                      topPos={16}
                       onClick={() => {
                         setIsDrawerExpanded(false);
                         setIsMapFullScreen(true);
                       }}
                     ></MapExpandBtn>
-                    <Flex
-                      style={{
-                        height: isMobile ? 200 : 300,
-                        width: "100%",
-                      }}
-                    >
-                      <MapViewV2
-                        projectId={lvnzyProject?.originalProjectId?._id}
-                        hideAllFilters={false}
-                        surroundingElements={surroundingElements}
-                        projectSqftPricing={Math.round(
+
+                    <MapViewV2
+                      projectId={lvnzyProject?.originalProjectId?._id}
+                      hideAllFilters={false}
+                      surroundingElements={surroundingElements}
+                      projectSqftPricing={Math.round(
+                        lvnzyProject?.originalProjectId.info.rate
+                          .minimumUnitCost /
                           lvnzyProject?.originalProjectId.info.rate
-                            .minimumUnitCost /
-                            lvnzyProject?.originalProjectId.info.rate
-                              .minimumUnitSize
-                        )}
-                        projectsNearby={projectsNearby}
-                        drivers={mapDrivers.map((d) => {
-                          return {
-                            ...d.driverId,
-                            distance: d.distanceKms,
-                            duration: d.durationMins
-                              ? d.durationMins
-                              : Math.round(d.mapsDurationSeconds / 60),
-                          };
-                        })}
-                        categories={mapCategories}
-                        fullSize={false}
-                        minMapZoom={11}
-                      />
-                    </Flex>
+                            .minimumUnitSize
+                      )}
+                      projectsNearby={projectsNearby}
+                      drivers={mapDrivers.map((d) => {
+                        return {
+                          ...d.driverId,
+                          distance: d.distanceKms,
+                          duration: d.durationMins
+                            ? d.durationMins
+                            : Math.round(d.mapsDurationSeconds / 60),
+                        };
+                      })}
+                      categories={mapCategories}
+                      fullSize={false}
+                      minMapZoom={11}
+                      initialZoom={11}
+                    />
                   </Flex>
                 ) : null}
 
@@ -851,12 +846,14 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             },
           }}
           closeIcon={
+            <Flex style={{marginTop: 8}}>
             <DynamicReactIcon
               iconName="IoCloseCircle"
               iconSet="io5"
               size={32}
               color={COLORS.textColorMedium}
             ></DynamicReactIcon>
+            </Flex>
           }
         >
           <Flex
@@ -884,6 +881,8 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                     : Math.round(d.mapsDurationSeconds / 60),
                 };
               })}
+              minMapZoom={11}
+              initialZoom={11}
               categories={mapCategories}
               fullSize={true}
             />

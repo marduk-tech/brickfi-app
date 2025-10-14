@@ -16,8 +16,8 @@ export const MapExpandBtn = ({
     <Flex
       style={{
         position: "absolute",
-        top: topPos || 68,
-        left: 14,
+        top: topPos || 8,
+        right: 8,
         zIndex: 1500,
       }}
     >
@@ -40,6 +40,7 @@ export const MapExpandBtn = ({
           color: "white",
           fontSize: FONT_SIZE.SUB_TEXT,
           height: 24,
+          padding: "12px 8px"
         }}
         onClick={() => {
           onClick();

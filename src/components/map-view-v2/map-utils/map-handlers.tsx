@@ -6,9 +6,10 @@ import { useMap } from "react-leaflet";
 interface MapCenterHandlerProps {
   projectData: any;
   projects?: any[];
+  initialZoom?: number;
 }
 
-export const MapCenterHandler = ({ projectData, projects }: MapCenterHandlerProps) => {
+export const MapCenterHandler = ({ projectData, projects, initialZoom }: MapCenterHandlerProps) => {
   const map = useMap();
   
   useEffect(() => {
@@ -19,7 +20,7 @@ export const MapCenterHandler = ({ projectData, projects }: MapCenterHandlerProp
     ) {
       map.setView(
         [projectData.info.location.lat, projectData.info.location.lng],
-        13
+        initialZoom || 12
       );
     } else if (projects && projects.length && projects.length < 10) {
       const projectsLoc = turf.points(

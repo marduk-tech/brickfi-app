@@ -29,7 +29,7 @@ export const MapStyleControls = ({ selectedStyle, onStyleChange }: MapStyleContr
       <div
         style={{
           position: "absolute",
-          top: 10,
+          bottom: 100,
           right: 10,
           zIndex: 1000,
         }}
@@ -41,7 +41,7 @@ export const MapStyleControls = ({ selectedStyle, onStyleChange }: MapStyleContr
               <DynamicReactIcon
                 iconSet="lu"
                 iconName="LuLayers3"
-                size={16}
+                size={18}
                 color="white"
               />
             }
@@ -52,8 +52,8 @@ export const MapStyleControls = ({ selectedStyle, onStyleChange }: MapStyleContr
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              width: 24,
-              height: 24,
+              width: 32,
+              height: 32,
             }}
           />
         </Tooltip>

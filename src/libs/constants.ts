@@ -65,11 +65,11 @@ export const LivIndexDriversConfig = {
   },
   "industrial-hitech": {
     label: "Tech Parks",
-    icon: { name: "BiSolidFactory", set: "bi" },
+    icon: { name: "PiBuildingOfficeFill", set: "pi" },
   },
   "industrial-general": {
     label: "Industrial Area",
-    icon: { name: "RiStore3Fill", set: "ri" },
+    icon: { name: "FaIndustry", set: "fa" },
   },
   airport: {
     label: "International Airport",
@@ -416,8 +416,27 @@ export const DRIVER_CATEGORIES = {
     icon: { name: "FaTrain", set: "fa" },
   },
   workplace: {
-    icon: { name: "BiSolidFactory", set: "bi" },
+    icon: { name: "MdOutlineWork", set: "md" },
     drivers: ["industrial-hitech", "industrial-general"],
+    filters: [
+      { label: "Tech Hubs", key: "tech-hubs" },
+      { label: "Indutrial Zones", key: "ind-zones" },
+    ],
+     onFilter: (filter: string, driver: IDriverPlace) => {
+      if (filter == "tech-hubs") {
+        return (
+          ["industrial-hitech"].includes(
+            driver.driver
+          ));
+      }
+      if (filter == "ind-zones") {
+        return (
+          ["industrial-general"].includes(
+            driver.driver
+          ));
+      }
+      return false
+    }
   },
   "growth potential": {
     icon: { name: "TbChartAreaLineFilled", set: "tb" },

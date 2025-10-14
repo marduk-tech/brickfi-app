@@ -30,7 +30,11 @@ export const CategoryFilters = ({
         overflowX: "auto",
         scrollbarWidth: "none",
         flexShrink: 0,
-        marginBottom: 20,
+        position: "absolute",
+        top: 8,
+        zIndex: 1000,
+        left: 8,
+        width: "100%"
       }}
       gap={8}
     >
@@ -44,14 +48,14 @@ export const CategoryFilters = ({
             textTransform: "capitalize",
             border: `1px solid ${
               selectedCategory === category
-                ? COLORS.primaryColor
+                ? COLORS.textColorDark
                 : COLORS.borderColor
             }`,
             marginRight: 0,
             padding: "4px 8px",
-            borderRadius: 16,
+            borderRadius: 4,
             backgroundColor:
-              selectedCategory === category ? COLORS.primaryColor : "white",
+              selectedCategory === category ? COLORS.textColorDark : "white",
             whiteSpace: "nowrap",
             cursor: "pointer",
           }}

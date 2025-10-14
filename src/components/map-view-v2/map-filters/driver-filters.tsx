@@ -44,7 +44,7 @@ export const DriverFilters = ({
           style={{
             display: "flex",
             alignItems: "center",
-            borderRadius: 8,
+            borderRadius: 4,
             padding: "0px 8px",
             marginRight: 4,
             backgroundColor: isSelected
@@ -102,7 +102,7 @@ export const DriverFilters = ({
           style={{
             color: isSelected ? "white" : COLORS.textColorDark,
             marginLeft: 4,
-            fontSize: FONT_SIZE.PARA,
+            fontSize: FONT_SIZE.SUB_TEXT,
             fontWeight: isSelected ? 400 : 600,
           }}
         >

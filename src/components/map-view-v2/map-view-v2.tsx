@@ -87,6 +87,7 @@ interface MapViewV2Props {
   onMapReady?: (map: any) => void;
   showCorridors?: boolean;
   minMapZoom?: number;
+  initialZoom?: number;
   categories?: string[];
   hideAllFilters?: boolean;
 }
@@ -102,7 +103,8 @@ const MapViewV2Inner = ({
   showLocalities,
   onMapReady,
   showCorridors = true,
-  minMapZoom = 12,
+  minMapZoom,
+  initialZoom,
   categories,
   hideAllFilters,
   primaryProject,
@@ -226,18 +228,18 @@ const MapViewV2Inner = ({
         <MapContainer
           key={`map-v2`}
           center={[12.969999, 77.587841]}
-          zoom={minMapZoom || 15}
           minZoom={minMapZoom || 11}
           maxZoom={19}
           style={{
             height: "100%",
             width: "100%",
           }}
+          zoom={12}
           zoomControl={false}
         >
           <ZoomControl position="bottomright" />
           <MapResizeHandler />
-          <MapCenterHandler projectData={primaryProject} projects={projects} />
+          <MapCenterHandler projectData={primaryProject} projects={projects} initialZoom={initialZoom} />
           {onMapReady && <MapInstanceCapture onMapReady={onMapReady} />}
           <TileLayer key={mapStyle} url={getTileUrl(mapStyle)} attribution="" />
           {/* Process and render polygon data */}
