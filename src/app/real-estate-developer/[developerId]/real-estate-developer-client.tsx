@@ -168,6 +168,14 @@ export default function RealEstateDeveloperClient({
     );
   };
   const renderProject = (project: any, index: number) => {
+    const regex = /\b(plot|apartment|villa)(?=s?\b)/gi;
+    let subType = project.subType ? project.subType.match(regex): "";
+    if (!subType) {
+      subType = `${project.type.toLowerCase()}, ${project.unitVariations.toLowerCase()}`.match(regex);
+      subType = subType && subType.length ? subType[0]: "";
+    }
+    let type = project.type.toLowerCase() == "residential" ? "Residential Community": project.type;
+    
     return (
       <Flex
         key={index}
@@ -182,7 +190,11 @@ export default function RealEstateDeveloperClient({
         <div
           style={{
             backgroundImage: `url(/images/builder-page/${
-              project.type.toLowerCase() == "residential" ? project.subType.toLowerCase() : "commercial"
+              project.type.toLowerCase() == "residential" || project.type.toLowerCase().includes("residential")
+                ? subType
+                  ? subType.toLowerCase()
+                  : "apartment"
+                : "commercial"
             }.png)`,
             backgroundPosition: "center",
             backgroundSize: "60%",
@@ -192,31 +204,41 @@ export default function RealEstateDeveloperClient({
           }}
         ></div>
 
-        <Flex vertical style={{ marginTop: 8 }}>
           <Text
             style={{
               fontSize: FONT_SIZE.HEADING_2,
               fontWeight: 500,
               lineHeight: "100%",
-              marginBottom: 8,
               textWrap: "wrap",
             }}
           >
             {project.name}
           </Text>
-          <Text style={{ textWrap: "wrap", fontSize: FONT_SIZE.PARA }}>
-            {capitalize(project.type)} | {capitalize(project.subType)}
-          </Text>
-          <Text
+           <Text
             style={{
               textWrap: "wrap",
               fontSize: FONT_SIZE.PARA,
               color: COLORS.textColorMedium,
+              marginBottom: 8,
+              lineHeight: "110%"
             }}
           >
             {project.location}
           </Text>
-        </Flex>
+          <Text style={{ textWrap: "wrap", fontSize: FONT_SIZE.HEADING_4, lineHeight: "110%", marginTop: "0" }}>
+            {capitalize(type)} {subType ? `| ${capitalize(subType)}`: ""}
+          </Text>
+         
+           {/* <Text
+            style={{
+              textWrap: "wrap",
+              fontSize: FONT_SIZE.PARA,
+              color: COLORS.textColorMedium,
+              lineHeight: "110%"
+            }}
+          >
+            {project.unitVariations}
+          </Text> */}
       </Flex>
     );
   };
