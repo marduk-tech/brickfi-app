@@ -38,6 +38,20 @@ export const useFetchLvnzyProjectsByIds = (ids: string) => {
   });
 };
 
+export const useFetchLvnzyProjectBySlug = (slug: string) => {
+  return useQuery<LvnzyProject, Error>({
+    queryKey: [queryKeys.getLvnzyProjectById, "slug", slug],
+    queryFn: async () => {
+      const { data } = await axiosApiInstance.get(
+        `/lvnzy-projects/slug/${slug.toLowerCase()}`
+      );
+      return data as LvnzyProject;
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+};
+
 /**
  * Custom hook to fetch all lvnzy projects for admin users
  * @param {boolean} enabled - Whether to enable the query (should be true only for admin users)

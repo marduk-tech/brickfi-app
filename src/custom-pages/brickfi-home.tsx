@@ -130,7 +130,7 @@ const BrickfiHome: React.FC = () => {
   return (
     <Flex vertical>
       {lvnzyProjectId ? (
-        <Brick360v2 />
+        <Brick360v2 slug={lvnzyProjectId} />
       ) : (
         <>
           {/* <Flex style={{ padding: "16px 16px 8px 16px" }}>

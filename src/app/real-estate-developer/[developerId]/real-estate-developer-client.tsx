@@ -174,7 +174,7 @@ export default function RealEstateDeveloperClient({
       subType = `${project.type.toLowerCase()}, ${project.unitVariations.toLowerCase()}`.match(regex);
       subType = subType && subType.length ? subType[0]: "";
     }
-    let type = project.type.toLowerCase() == "residential" ? "Residential Community": project.type;
+    const type = project.type.toLowerCase() == "residential" ? "Residential Community": project.type;
     
     return (
       <Flex

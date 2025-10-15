@@ -4,7 +4,7 @@ import { Flex, Tabs, Tour, TourProps, Typography } from "antd";
 import { useParams } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import DynamicReactIcon from "../common/dynamic-react-icon";
-import { useFetchLvnzyProjectById } from "../../hooks/use-lvnzy-project";
+import { useFetchLvnzyProjectBySlug } from "../../hooks/use-lvnzy-project";
 
 import { Brick360Tab } from "./brick-360-tab";
 import { ConfigurationsModal } from "./configurations-modal";
@@ -27,18 +27,21 @@ import { useWindowDimensions } from "@/hooks/use-browser-safe";
 
 const FAKE_TIMER_SECS = 700;
 
-export function Brick360v2() {
-  const { lvnzyProjectId } = useParams<{ lvnzyProjectId: string }>()!;
+interface Brick360v2Props {
+  slug: string;
+}
+
+export function Brick360v2({ slug }: Brick360v2Props) {
   const {isMobile} = useDevice();
     const { width } = useWindowDimensions();
-  
+
 
   const brick360ChatRef = useRef<{
     expandChat: () => void;
   } | null>(null);
 
   const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } =
-    useFetchLvnzyProjectById(lvnzyProjectId!);
+    useFetchLvnzyProjectBySlug(slug);
 
   const scoreParamTourRef = useRef(null);
   const pmtPlanTourRef = useRef(null);
