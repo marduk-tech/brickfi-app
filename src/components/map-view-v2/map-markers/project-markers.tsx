@@ -141,10 +141,10 @@ export const ProjectMarkers = ({
                             >
                               ₹
                               {Math.round(
-                                project.info.rate.minimumUnitCost /
-                                  project.info.rate.minimumUnitSize
-                              )}{" "}
-                              per sq.ft
+                                (project.info.rate.minimumUnitCost /
+                                  (project.info.rate.minimumUnitSize * 1000) * 10)
+                              )/10}k{" "}
+                               per sq.ft
                             </Typography.Text>
                           </Flex>
                         ) : null}
