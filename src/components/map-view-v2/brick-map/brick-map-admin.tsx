@@ -33,7 +33,6 @@ export function BrickMapAdmin() {
   const isSearchMode = !!selectedProjectId;
   const { data: allProjects, isLoading: allProjectsLoading } = useFetchProjects(
     {
-      statusFilter: "basic-details-ready,data-populated,report-verified",
       homeType: homeTypeFilter,
       searchKeyword: searchValue,
     }
