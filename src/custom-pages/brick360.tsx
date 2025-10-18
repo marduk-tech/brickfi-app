@@ -339,7 +339,7 @@ export default function Brick360() {
       <Flex vertical style={{ padding: 0 }}>
         {/* Project Gallery */}
         <ProjectGallery
-          media={lvnzyProject?.originalProjectId.media}
+          media={lvnzyProject?.originalProjectId?.media}
         ></ProjectGallery>
         {/* Name */}{" "}
         <Flex
@@ -590,7 +590,7 @@ export default function Brick360() {
                         Per sqft comparison with other nearby projects.
                       </Typography.Text>
                       <MapViewV2
-                        projectId={lvnzyProject?.originalProjectId._id}
+                        projectId={lvnzyProject?.originalProjectId?._id}
                         fullSize={true}
                         projectSqftPricing={Math.round(
                           lvnzyProject?.meta.costingDetails.minimumUnitCost /
@@ -857,7 +857,7 @@ export default function Brick360() {
           <MapViewV2
             fullSize={true}
             surroundingElements={surroundingElements}
-            projectId={lvnzyProject?.originalProjectId._id}
+            projectId={lvnzyProject?.originalProjectId?._id}
             drivers={mapDrivers.map((d) => {
               return {
                 id: d.driverId._id,
@@ -1068,7 +1068,7 @@ export default function Brick360() {
                 }}
               >
                 <MapViewV2
-                  projectId={lvnzyProject?.originalProjectId._id}
+                  projectId={lvnzyProject?.originalProjectId?._id}
                   surroundingElements={surroundingElements}
                   drivers={mapDrivers.map((d) => {
                     return {
