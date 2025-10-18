@@ -24,6 +24,7 @@ export const LocalStorageKeys = {
   authToken: "authToken",
   user: "user",
   tour: "tour",
+  utmHistory: "utm_history",
 };
 
 export const env = process.env.NEXT_PUBLIC_ENV;

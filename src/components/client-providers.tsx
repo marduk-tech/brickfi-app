@@ -8,6 +8,7 @@ import { App as AntApp, ConfigProvider } from "antd";
 import { useEffect } from "react";
 import { getQueryClient } from "../libs/query-client";
 import { antTheme } from "../theme/ant-theme";
+import { extractUtmParams, saveUtmToHistory } from "../libs/utm-utils";
 import PosthogProvider from "./common/posthog-provider";
 
 interface ClientProvidersProps {
@@ -19,6 +20,13 @@ export function ClientProviders({ children }: ClientProvidersProps) {
     if (Capacitor.isNativePlatform()) {
       StatusBar.setOverlaysWebView({ overlay: false });
       StatusBar.setStyle({ style: Style.Default });
+    }
+  }, []);
+
+  useEffect(() => {
+    const utmParams = extractUtmParams();
+    if (utmParams) {
+      saveUtmToHistory(utmParams);
     }
   }, []);
 

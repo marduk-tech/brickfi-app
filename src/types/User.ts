@@ -4,6 +4,16 @@ export interface ChatSession {
   createdAt: string;
 }
 
+export interface UtmEntry {
+  utm_source?: string;
+  utm_medium?: string;
+  utm_campaign?: string;
+  utm_term?: string;
+  utm_content?: string;
+  landingPage?: string;
+  capturedAt: Date;
+}
+
 export interface User {
   _id: string;
   mobile: string;
@@ -23,6 +33,9 @@ export interface User {
     projectName: string;
     reraId: string;
   }[];
+  metrics?: {
+    utm?: UtmEntry[];
+  };
 }
 
 interface Profile {

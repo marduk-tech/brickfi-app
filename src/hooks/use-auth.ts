@@ -7,6 +7,7 @@ import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { queryClient } from "../libs/query-client";
 import { safeStorage } from "../libs/browser-utils";
+import { getUtmHistory, clearUtmHistory } from "../libs/utm-utils";
 
 export type LoginStatus =
   | "OTP_SENT"
@@ -65,6 +66,24 @@ export function useAuth() {
         await queryClient.invalidateQueries({
           queryKey: [queryKeys.user],
         });
+
+        const utmHistory = getUtmHistory();
+        if (utmHistory.length > 0 && data.user._id) {
+          try {
+            const response = await axiosApiInstance.post(`/user/${data.user._id}`, {
+              metrics: {
+                utm: utmHistory,
+              },
+            });
+
+            if (response.status === 200) {
+              clearUtmHistory();
+              console.log("UTM parameters synced and cleared successfully");
+            }
+          } catch (error) {
+            console.error("Failed to sync UTM parameters:", error);
+          }
+        }
 
         setLoginStatus("LOGIN_SUCCESS");
         setVerificationId(undefined);
