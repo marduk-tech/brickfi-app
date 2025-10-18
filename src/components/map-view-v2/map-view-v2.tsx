@@ -64,7 +64,7 @@ const getTileUrl = (style: MapStyleType): string => {
 
   switch (style) {
     case "street":
-      return `https://tile.jawg.io/jawg-streets/{z}/{x}/{y}{r}.png?access-token=${jawgAccessToken}`;
+      return `https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png`;
     case "minimal":
     default:
       return `https://tile.jawg.io/9a737f1f-005e-423b-be7f-34aae5cf303f/{z}/{x}/{y}{r}.png?access-token=${jawgAccessToken}`;

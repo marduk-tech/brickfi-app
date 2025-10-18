@@ -16,7 +16,7 @@ export const antTheme: ThemeConfig = {
       defaultColor: COLORS.primaryColor,
     },
     Tabs: {
-      inkBarColor: COLORS.textColorDark,
+      inkBarColor: COLORS.primaryColor,
       itemColor: COLORS.textColorMedium,
       itemSelectedColor: COLORS.textColorDark,
       titleFontSize: FONT_SIZE.HEADING_3,

@@ -80,7 +80,7 @@ export function UserProjects({
             : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
         }}
         onClick={() => {
-          router.push(`/app/brick360/${itemInfo._id}`);
+          router.push(`/app/brick360/${itemInfo.slug || itemInfo._id}`);
         }}
       >
         <Flex vertical style={{ width: "100%" }}>
@@ -320,7 +320,7 @@ export function UserProjects({
           }}
         >
           <BrickMapCustomer
-            projectIds={lvnzyProjects.map((p) => p.originalProjectId._id)}
+            projectIds={lvnzyProjects.map((p) => p.originalProjectId?._id)}
             excludeMapCategories={["surroundings", "conveniences", "growth potential"]}
           ></BrickMapCustomer>
         </Flex>

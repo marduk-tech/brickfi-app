@@ -142,7 +142,7 @@ export const processDriversToPolygons = (
   filterByDriverTypes = true,
   selectedDriverFilter?: string
 ) => {
-  return data
+  const polygons =  data
     .filter((driver) => {
       const hasGeojson = driver.details?.osm?.geojson;
       const matchesType =
@@ -176,4 +176,6 @@ export const processDriversToPolygons = (
       }
     })
     .filter((p): p is NonNullable<typeof p> => p !== null);
+
+    return polygons;
 };
