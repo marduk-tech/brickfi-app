@@ -39,10 +39,11 @@ export const useFetchLvnzyProjectsByIds = (ids: string) => {
 };
 
 export const useFetchLvnzyProjectBySlug = (slug: string) => {
+  const isId = /^[a-f\d]{24}$/i.test(slug);
   return useQuery<LvnzyProject, Error>({
-    queryKey: [queryKeys.getLvnzyProjectById, "slug", slug],
+    queryKey: isId ? [queryKeys.getLvnzyProjectById, slug]: [queryKeys.getLvnzyProjectById, "slug", slug] ,
     queryFn: async () => {
-      const { data } = await axiosApiInstance.get(
+      const { data } = isId ? await axiosApiInstance.get(`/lvnzy-projects/${slug}`): await axiosApiInstance.get(
         `/lvnzy-projects/slug/${slug.toLowerCase()}`
       );
       return data as LvnzyProject;
