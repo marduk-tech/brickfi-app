@@ -46,10 +46,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
     expandChat: () => void;
   } | null>(null);
 
-  const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } =
-    /^[a-f\d]{24}$/i.test(slug)
-      ? useFetchLvnzyProjectById(slug)
-      : useFetchLvnzyProjectBySlug(slug);
+  const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } = useFetchLvnzyProjectBySlug(slug);
 
   const scoreParamTourRef = useRef(null);
   const pmtPlanTourRef = useRef(null);
