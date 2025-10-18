@@ -1,9 +1,12 @@
-import { Flex, Image, Tag, Typography } from "antd";
-import { rupeeAmountFormat } from "../../libs/lvnzy-helper";
+import { Flex, Image, Modal, Tag, Typography } from "antd";
+import { fetchPmtPlan, rupeeAmountFormat } from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { ScrollableContainer } from "../scrollable-container";
 import { useDevice } from "../../hooks/use-device";
 import { useEffect, useState } from "react";
+import DynamicReactIcon from "../common/dynamic-react-icon";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface UnitsTabProps {
   lvnzyProject: any;
@@ -92,6 +95,15 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
   const { isMobile } = useDevice();
   const [configFilters, setConfigFilters] = useState<string[]>([]);
   const [selectedConfigFilter, setSelectedConfigFilter] = useState<string>();
+  const [isPmtPlanModalOpen, setIsPmtPlanModalOpen] = useState(false);
+  const [pmtPlan, setPmtPlan] = useState();
+  useEffect(() => {
+    if (lvnzyProject && lvnzyProject.originalProjectId?.info?.financialPlan) {
+      setPmtPlan(
+        fetchPmtPlan(lvnzyProject.originalProjectId.info.financialPlan)
+      );
+    }
+  }, [lvnzyProject]);
 
   useEffect(() => {
     if (
@@ -129,28 +141,62 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
         <Flex vertical style={{ marginBottom: 8, paddingBottom: 80 }}>
           {/* Sqft & Configs */}
 
-          <Flex align="flex-start">
-            {lvnzyProject?.meta.costingDetails && (
-              <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_1 }}>
-                ₹
-                {rupeeAmountFormat(
-                  `${Math.round(
-                    lvnzyProject?.originalProjectId.info.rate.minimumUnitCost /
-                      lvnzyProject?.originalProjectId.info.rate.minimumUnitSize
-                  )}`
-                )}{" "}
+          <Flex gap={8} align="center">
+            <Flex align="flex-start">
+              {lvnzyProject?.meta.costingDetails && (
+                <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_1 }}>
+                  ₹
+                  {rupeeAmountFormat(
+                    `${Math.round(
+                      lvnzyProject?.originalProjectId.info.rate
+                        .minimumUnitCost /
+                        lvnzyProject?.originalProjectId.info.rate
+                          .minimumUnitSize
+                    )}`
+                  )}{" "}
+                </Typography.Text>
+              )}
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_3,
+                  color: COLORS.textColorDark,
+                  marginTop: 4,
+                  marginLeft: 2,
+                }}
+              >
+                per sq.ft
               </Typography.Text>
-            )}
-            <Typography.Text
+            </Flex>
+            {pmtPlan ? <Flex
+              align="center"
               style={{
-                fontSize: FONT_SIZE.HEADING_3,
-                color: COLORS.textColorDark,
-                marginTop: 4,
-                marginLeft: 2,
+                padding: "2px 8px",
+                borderRadius: 8,
+                backgroundColor: COLORS.textColorDark,
+                border: `1px solid ${COLORS.textColorDark}`,
               }}
+              gap={2}
             >
-              per sq.ft
-            </Typography.Text>
+              <DynamicReactIcon
+                iconName="RiDiscountPercentFill"
+                iconSet="ri"
+                size={20}
+                color="white"
+              ></DynamicReactIcon>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_4,
+
+                  color: "white",
+                }}
+                onClick={() => {
+                  setIsPmtPlanModalOpen(true);
+                }}
+              >
+                {pmtPlan}
+              </Typography.Text>
+            </Flex>: null}
+            
           </Flex>
           <Flex
             gap={4}
@@ -168,8 +214,8 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
               }}
             >
               {Math.round(
-                lvnzyProject?.property.layout.totalLandArea / 4046.8564
-              )}{" "}
+                lvnzyProject?.property.layout.totalLandArea / 404.68564
+              ) / 10}{" "}
               Acre
             </Typography.Text>{" "}
             ·
@@ -308,7 +354,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                           >
                             Carpet Area: {c.sizeCarpet} sq.ft
                           </Typography.Text>
-                        ): null}
+                        ) : null}
                       </Flex>
                     ) : (
                       <Flex>
@@ -327,7 +373,8 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                     <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2 }}>
                       ₹{rupeeAmountFormat(c.price)}
                     </Typography.Text>
-                    {c.floorplans && c.floorplans.filter((f: string) => !!f).length > 0 ? (
+                    {c.floorplans &&
+                    c.floorplans.filter((f: string) => !!f).length > 0 ? (
                       <Flex
                         style={{
                           overflowX: "auto",
@@ -351,13 +398,35 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                           );
                         })}
                       </Flex>
-                    ): null}
+                    ) : null}
                   </Flex>
                 );
               })}
           </Flex>
         </Flex>
       </Flex>
+      <Modal
+        open={isPmtPlanModalOpen}
+        footer={null}
+        closable={true}
+        onCancel={() => {
+          setIsPmtPlanModalOpen(false);
+        }}
+      >
+        <Flex
+          style={{
+            height: 600,
+            overflowY: "scroll",
+            scrollbarWidth: "none",
+            paddingTop: 32,
+          }}
+        >
+          <Markdown remarkPlugins={[remarkGfm]} className="liviq-content">
+            {lvnzyProject.originalProjectId?.info?.financialPlan ||
+              "No financial plan available"}
+          </Markdown>
+        </Flex>
+      </Modal>
     </ScrollableContainer>
   );
 };

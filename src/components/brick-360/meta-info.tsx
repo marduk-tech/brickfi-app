@@ -18,15 +18,7 @@ type MetaInfoProps = {
 };
 
 const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
-  const [isPmtPlanModalOpen, setIsPmtPlanModalOpen] = useState(false);
-  const [pmtPlan, setPmtPlan] = useState();
-  useEffect(() => {
-    if (lvnzyProject && lvnzyProject.originalProjectId?.info?.financialPlan) {
-      setPmtPlan(
-        fetchPmtPlan(lvnzyProject.originalProjectId.info.financialPlan)
-      );
-    }
-  }, [lvnzyProject]);
+
 
   const renderText = (text: string, color?: string) => {
     return (
@@ -83,53 +75,22 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
 
   return (
     <>
-      <Flex vertical style={{ marginTop: 4 }}>
+      <Flex vertical style={{ marginTop: 4, marginBottom: 0 }}>
         <Flex align="center" gap={8}>
           <Typography.Text
             style={{
-              fontSize: FONT_SIZE.HEADING_3,
+              fontSize: FONT_SIZE.HEADING_4,
               margin: 0,
-              color: COLORS.textColorDark,
+              color: COLORS.textColorMedium,
             }}
           >
             {getMinMaxPrices(
-              lvnzyProject?.originalProjectId.info.unitConfigWithPricing.map(
+              lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
                 (c: any) => c.price
               )
             )}
           </Typography.Text>
-          {pmtPlan ? (
-            <Flex
-              align="center"
-              ref={ref}
-              style={{
-                padding: "2px 8px",
-                borderRadius: 8,
-                backgroundColor: COLORS.textColorDark,
-                border: `1px solid ${COLORS.textColorDark}`,
-              }}
-              gap={2}
-            >
-              <DynamicReactIcon
-                iconName="RiDiscountPercentFill"
-                iconSet="ri"
-                size={20}
-                color="white"
-              ></DynamicReactIcon>
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_4,
-
-                  color: "white",
-                }}
-                onClick={() => {
-                  setIsPmtPlanModalOpen(true);
-                }}
-              >
-                {pmtPlan}
-              </Typography.Text>
-            </Flex>
-          ) : null}
+  
         </Flex>
         <Flex align="center">
           {renderText(`
@@ -152,28 +113,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           )} */}
         </Flex>
       </Flex>
-      <Modal
-        open={isPmtPlanModalOpen}
-        footer={null}
-        closable={true}
-        onCancel={() => {
-          setIsPmtPlanModalOpen(false);
-        }}
-      >
-        <Flex
-          style={{
-            height: 600,
-            overflowY: "scroll",
-            scrollbarWidth: "none",
-            paddingTop: 32,
-          }}
-        >
-          <Markdown remarkPlugins={[remarkGfm]} className="liviq-content">
-            {lvnzyProject.originalProjectId?.info?.financialPlan ||
-              "No financial plan available"}
-          </Markdown>
-        </Flex>
-      </Modal>
+      
     </>
   );
 });

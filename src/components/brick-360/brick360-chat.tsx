@@ -159,7 +159,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                 categories = ["workplace", "schools"];
                 break;
               case "conveniences":
-                categories = ["conveniences"];
+                categories = ["conveniences", "commercial"];
                 break;
               case "transport":
                 categories = ["roads", "metro"];
@@ -368,7 +368,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         }
 
         const stream = makeStreamingJsonRequest({
-          url: `${baseApiUrl}ai/ask-stream-brick360`,
+          url: `${baseApiUrl}ai/ask-stream-brick360-v2`,
           method: "POST",
           payload: {
             question,
@@ -376,7 +376,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             userId: user?._id,
             userProjects,
             lvnzyProjectId: lvnzyProject?._id,
-            dataPointCategory: dataPointSelected.selectedDataPointCategory,
+            dataPointCategory: dataPointSelected ? dataPointSelected.selectedDataPointCategory: "",
           },
         });
 

@@ -4,7 +4,10 @@ import { Flex, Tabs, Tour, TourProps, Typography } from "antd";
 import { useParams } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import DynamicReactIcon from "../common/dynamic-react-icon";
-import { useFetchLvnzyProjectBySlug } from "../../hooks/use-lvnzy-project";
+import {
+  useFetchLvnzyProjectById,
+  useFetchLvnzyProjectBySlug,
+} from "../../hooks/use-lvnzy-project";
 
 import { Brick360Tab } from "./brick-360-tab";
 import { ConfigurationsModal } from "./configurations-modal";
@@ -20,28 +23,33 @@ import {
   Brick360DataPoints,
   LocalStorageKeys,
 } from "../../libs/constants";
-import { COLORS, FONT_SIZE, HORIZONTAL_PADDING } from "../../theme/style-constants";
+import {
+  COLORS,
+  FONT_SIZE,
+  HORIZONTAL_PADDING,
+} from "../../theme/style-constants";
 import Brick360Chat from "./brick360-chat";
 import { useDevice } from "@/hooks/use-device";
 import { useWindowDimensions } from "@/hooks/use-browser-safe";
 
-const FAKE_TIMER_SECS = 700;
+const FAKE_TIMER_SECS = 500;
 
 interface Brick360v2Props {
   slug: string;
 }
 
 export function Brick360v2({ slug }: Brick360v2Props) {
-  const {isMobile} = useDevice();
-    const { width } = useWindowDimensions();
-
+  const { isMobile } = useDevice();
+  const { width } = useWindowDimensions();
 
   const brick360ChatRef = useRef<{
     expandChat: () => void;
   } | null>(null);
 
   const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } =
-    useFetchLvnzyProjectBySlug(slug);
+    /^[a-f\d]{24}$/i.test(slug)
+      ? useFetchLvnzyProjectById(slug)
+      : useFetchLvnzyProjectBySlug(slug);
 
   const scoreParamTourRef = useRef(null);
   const pmtPlanTourRef = useRef(null);
@@ -131,6 +139,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
   });
 
   const [scoreParams, setScoreParams] = useState<any[]>([]);
+  const [selectedTabKey, setSelectedTabKey] = useState<string>("brick360");
 
   const [selectedDataPointCategory, setSelectedDataPointCategory] =
     useState<any>();
@@ -141,7 +150,6 @@ export function Brick360v2({ slug }: Brick360v2Props) {
   const [fakeTimeoutProgress, setFakeTimeoutProgress] = useState<any>(10);
   const [selectedDataPointTitle, setSelectedDataPointTitle] = useState("");
   const [fakeInterval, setFakeInterval] = useState<any>();
-
 
   const isLvnzyProjectLoadingRef = useRef(lvnzyProjectIsLoading);
   useEffect(() => {
@@ -202,6 +210,53 @@ export function Brick360v2({ slug }: Brick360v2Props) {
     }
   }, [lvnzyProject]);
 
+  function renderTabHeader(
+    title: string,
+    iconName: string,
+    iconSet: any,
+    tabKey: string
+  ) {
+    return (
+      <Flex gap={0} align="center" vertical style={{ position: "relative", padding: 0 }}>
+        {tabKey == "units" && lvnzyProject && lvnzyProject.originalProjectId?.info?.financialPlan ? (
+          <Flex style={{ position: "absolute", right: -2, top: -8 }}>
+            <DynamicReactIcon
+              iconName="BiSolidOffer"
+              iconSet="bi"
+              size={20}
+              color={
+                selectedTabKey == tabKey
+                  ? COLORS.primaryColor
+                  : COLORS.textColorMedium
+              }
+            ></DynamicReactIcon>
+          </Flex>
+        ) : null}
+        <DynamicReactIcon
+          iconName={iconName}
+          iconSet={iconSet}
+          color={
+            selectedTabKey == tabKey
+              ? COLORS.primaryColor
+              : COLORS.textColorMedium
+          }
+          size={32}
+        ></DynamicReactIcon>
+        <Typography.Text
+          style={{
+            fontSize: FONT_SIZE.SUB_TEXT,
+            color:
+              selectedTabKey == tabKey
+                ? COLORS.primaryColor
+                : COLORS.textColorMedium,
+          }}
+        >
+          {title}
+        </Typography.Text>
+      </Flex>
+    );
+  }
+
   if (lvnzyProjectIsLoading) {
     return <FakeProgress progress={fakeTimeoutProgress} projectName={""} />;
   }
@@ -212,38 +267,27 @@ export function Brick360v2({ slug }: Brick360v2Props) {
       style={{
         margin: "auto",
         overflowX: "hidden",
-        width: isMobile
-                    ? "100%"
-                    : (width - HORIZONTAL_PADDING * 2),
+        width: isMobile ? "100%" : width - HORIZONTAL_PADDING * 2,
       }}
     >
       <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
 
       <Tabs
-        tabBarGutter={24}
+        tabBarGutter={40}
         defaultActiveKey="brick-360"
+        onChange={(activeKey: string) => {
+          setSelectedTabKey(activeKey);
+        }}
         tabBarStyle={{}}
         style={{ padding: "0 8px" }}
         items={[
           {
-            key: "brick-360",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="LiaGgCircle"
-                  iconSet="lia"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Brick 360
-                </Typography.Text>
-              </Flex>
+            key: "brick360",
+            label: renderTabHeader(
+              "Brick 360",
+              "TbView360Number",
+              "tb",
+              "brick360"
             ),
             children: (
               <Brick360Tab
@@ -268,68 +312,22 @@ export function Brick360v2({ slug }: Brick360v2Props) {
           },
           {
             key: "units",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="RiLayout2Fill"
-                  iconSet="ri"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Price/Units
-                </Typography.Text>
-              </Flex>
+            label: renderTabHeader(
+              "Price/Units",
+              "RiLayout2Fill",
+              "ri",
+              "units"
             ),
             children: <UnitsTab lvnzyProject={lvnzyProject} />,
           },
           {
             key: "map",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="LiaMapMarkedAltSolid"
-                  iconSet="lia"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Map
-                </Typography.Text>
-              </Flex>
-            ),
+            label: renderTabHeader("Map", "LiaMapMarkedAltSolid", "lia", "map"),
             children: <MapTab lvnzyProject={lvnzyProject} />,
           },
           {
             key: "media",
-            label: (
-              <Flex gap={4} align="center">
-                <DynamicReactIcon
-                  iconName="PiImagesDuotone"
-                  iconSet="pi"
-                  color={COLORS.textColorDark}
-                  size={20}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  Media
-                </Typography.Text>
-              </Flex>
-            ),
+            label: renderTabHeader("Media", "PiImagesDuotone", "pi", "media"),
             children: <MediaTab lvnzyProject={lvnzyProject} />,
           },
         ]}
@@ -353,7 +351,6 @@ export function Brick360v2({ slug }: Brick360v2Props) {
         }}
         steps={tourSteps}
       />
-
     </Flex>
   );
 }

@@ -34,7 +34,7 @@ export const FakeProgress = ({ progress, projectName }: FakeProgressProps) => {
       <Flex vertical style={{ marginTop: 16 }}>
         {" "}
         <Typography.Text
-          style={{ padding: "0 8px", fontSize: FONT_SIZE.HEADING_2 }}
+          style={{ padding: "0 8px", fontSize: FONT_SIZE.HEADING_2, marginBottom: -8 }}
         >
           {progress < 35
             ? "Fetching Data"

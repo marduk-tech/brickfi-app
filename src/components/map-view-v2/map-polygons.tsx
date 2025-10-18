@@ -32,10 +32,19 @@ export const MapPolygons = ({
   };
 
   useEffect(() => {
+    if (!polygons || !polygons.length) {
+      return;
+    }
     updateVisiblePolygons(); // Initial update
 
-    map.on("zoomend", updateVisiblePolygons);
-    map.on("moveend", updateVisiblePolygons);
+    map.on("zoomend", () => {
+      console.log("here");
+      updateVisiblePolygons();
+    });
+    map.on("moveend", () => {
+      console.log("here");
+      updateVisiblePolygons();
+    });
 
     return () => {
       map.off("zoomend", updateVisiblePolygons);
