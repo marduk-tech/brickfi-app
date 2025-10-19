@@ -368,7 +368,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         }
 
         const stream = makeStreamingJsonRequest({
-          url: `${baseApiUrl}ai/ask-stream-brick360-v2`,
+          url: `${baseApiUrl}ai/ask-stream-brick360`,
           method: "POST",
           payload: {
             question,
