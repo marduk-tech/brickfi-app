@@ -2,13 +2,8 @@ import React from "react";
 import * as turf from "@turf/turf";
 import L from "leaflet";
 import { Marker, Polyline, useMap } from "react-leaflet";
-import {
-  DRIVER_CATEGORIES,
-  PLACE_TIMELINE,
-} from "../../../libs/constants";
-import {
-  driverStatusLabel,
-} from "../../../libs/lvnzy-helper";
+import { DRIVER_CATEGORIES, PLACE_TIMELINE } from "../../../libs/constants";
+import { driverStatusLabel } from "../../../libs/lvnzy-helper";
 import { COLORS } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 import { RoadDriverPlace } from "../types";
@@ -53,8 +48,8 @@ export const RoadDriversComponent = ({
             ? true
             : (() => {
                 const categoryDrivers =
-                  (DRIVER_CATEGORIES as any)[currentSelectedCategory]?.drivers ||
-                  [];
+                  (DRIVER_CATEGORIES as any)[currentSelectedCategory]
+                    ?.drivers || [];
                 return (
                   Array.isArray(categoryDrivers) &&
                   categoryDrivers.includes(driver.driver)
@@ -119,10 +114,12 @@ export const RoadDriversComponent = ({
               const points = [];
               for (let i = 0; i < numPoints; i++) {
                 const distance = (i * totalLength) / numPoints;
-                const point = turf.along(line, distance, { units: "kilometers" });
+                const point = turf.along(line, distance, {
+                  units: "kilometers",
+                });
                 points.push(point.geometry.coordinates);
               }
-              
+
               return (
                 <React.Fragment key={`road-line-${driver._id}-${lineIndex}`}>
                   {map.getZoom() > 13.5
@@ -145,7 +142,15 @@ export const RoadDriversComponent = ({
                         feature.properties?.strokeColor || COLORS.textColorDark,
                       weight: 5,
                       opacity: 0.5,
-                      dashArray: isDashed ? "10, 10" : undefined,
+                      dashArray:
+                        isDashed ||
+                        (feature.properties &&
+                        feature.properties.status &&
+                        feature.properties.status == "construction"
+                          ? true
+                          : false)
+                          ? "10, 10"
+                          : undefined,
                     }}
                     eventHandlers={{
                       click: handleRoadDriverClick,
