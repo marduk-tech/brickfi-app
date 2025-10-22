@@ -58,10 +58,15 @@ export function UserProjects({
       itemInfo && itemInfo.originalProjectId && itemInfo.originalProjectId.media
         ? itemInfo.originalProjectId.media.filter((m: any) => m.type == "image")
         : [];
-    const previewImage =
+    let previewImage =
       imgs && imgs.length
-        ? (imgs.find((i: any) => i.isPreview) || imgs[0]).image.url!
-        : "";
+        ? imgs.find((i: any) => i.isPreview) ||
+          imgs.find((i: any) => i.image && i.image.tags && i.image.tags.includes("exterior")) ||
+          imgs.find((i: any) => i.image && i.image.tags && !i.image.tags.includes("na"))
+        : null;
+    if (previewImage && previewImage.image) {
+      previewImage = previewImage.image.url;
+    }
 
     const primaryCorridor = itemInfo.meta.projectCorridors.sort(
       (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms
@@ -238,7 +243,7 @@ export function UserProjects({
       <Flex
         style={{
           padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
-          marginLeft: "auto"
+          marginLeft: "auto",
         }}
       >
         <Flex
@@ -321,7 +326,11 @@ export function UserProjects({
         >
           <BrickMapCustomer
             projectIds={lvnzyProjects.map((p) => p.originalProjectId?._id)}
-            excludeMapCategories={["surroundings", "conveniences", "growth potential"]}
+            excludeMapCategories={[
+              "surroundings",
+              "conveniences",
+              "growth potential",
+            ]}
           ></BrickMapCustomer>
         </Flex>
       ) : null}
