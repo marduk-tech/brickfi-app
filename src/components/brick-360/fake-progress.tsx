@@ -27,20 +27,22 @@ export const FakeProgress = ({ progress, projectName }: FakeProgressProps) => {
           margin: 0,
           padding: 8,
           fontSize: FONT_SIZE.HEADING_1,
+          textTransform: "uppercase",
+          color: COLORS.primaryColor
         }}
       >
-        Loading Brick360 Report
+        Brick360 Report
       </Typography.Text>
       <Flex vertical style={{ marginTop: 16 }}>
         {" "}
         <Typography.Text
-          style={{ padding: "0 8px", fontSize: FONT_SIZE.HEADING_2, marginBottom: -8 }}
+          style={{ padding: "0 8px", fontSize: FONT_SIZE.HEADING_2, marginBottom: -8, color: COLORS.textColorMedium }}
         >
           {progress < 35
-            ? "Fetching Data"
+            ? "Loading Report"
             : progress < 70
-            ? "Analysing"
-            : "Finishing up"}
+            ? "Loading Report"
+            : "Loading Report"}
         </Typography.Text>
         <Progress
           strokeColor={COLORS.primaryColor}
