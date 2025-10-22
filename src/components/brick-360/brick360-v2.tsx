@@ -46,7 +46,8 @@ export function Brick360v2({ slug }: Brick360v2Props) {
     expandChat: () => void;
   } | null>(null);
 
-  const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } = useFetchLvnzyProjectBySlug(slug);
+  const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } =
+    useFetchLvnzyProjectBySlug(slug);
 
   const scoreParamTourRef = useRef(null);
   const pmtPlanTourRef = useRef(null);
@@ -214,8 +215,15 @@ export function Brick360v2({ slug }: Brick360v2Props) {
     tabKey: string
   ) {
     return (
-      <Flex gap={0} align="center" vertical style={{ position: "relative", padding: 0 }}>
-        {tabKey == "units" && lvnzyProject && lvnzyProject.originalProjectId?.info?.financialPlan ? (
+      <Flex
+        gap={0}
+        align="center"
+        vertical
+        style={{ position: "relative", padding: 0 }}
+      >
+        {tabKey == "units" &&
+        lvnzyProject &&
+        lvnzyProject.originalProjectId?.info?.financialPlan ? (
           <Flex style={{ position: "absolute", right: -2, top: -8 }}>
             <DynamicReactIcon
               iconName="BiSolidOffer"
@@ -330,16 +338,19 @@ export function Brick360v2({ slug }: Brick360v2Props) {
         ]}
       ></Tabs>
 
-      <Brick360Chat
-        ref={brick360ChatRef}
-        lvnzyProject={lvnzyProject!}
-        dataPoint={{
-          selectedDataPointTitle,
-          selectedDataPointCategory,
-          selectedDataPoint,
-          selectedDataPointSubCategory,
-        }}
-      />
+      {selectedTabKey == "brick360" ? (
+        <Brick360Chat
+          ref={brick360ChatRef}
+          lvnzyProject={lvnzyProject!}
+          dataPoint={{
+            selectedDataPointTitle,
+            selectedDataPointCategory,
+            selectedDataPoint,
+            selectedDataPointSubCategory,
+          }}
+        />
+      ) : null}
+
       <Tour
         open={tourOpen}
         onClose={() => {
