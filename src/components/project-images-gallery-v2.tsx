@@ -80,7 +80,11 @@ export const ProjectGalleryV2 = ({
         (!item.image.tags ||
           !item.image.tags.length ||
           !item.image.tags.find((t) => !TAGS_ORDER.includes(t)))
-    );
+    ).sort((a: any, b: any) => {
+      const seqA = TAGS_ORDER.indexOf(a.image.tags[0]);
+      const seqB = TAGS_ORDER.indexOf(b.image.tags[0]);
+      return seqA - seqB
+    });
     const allMedia = [...videoMedia, ...imageMedia];
     const result: Record<string, IMedia[]> = {};
 
