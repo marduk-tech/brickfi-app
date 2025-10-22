@@ -498,7 +498,7 @@ export const NewReportRequestForm = () => {
                       <Typography.Text
                         style={{ fontSize: FONT_SIZE.HEADING_2 }}
                       >
-                        +91 - 9310846587
+                        +{verifiedUser?.countryCode}{" "}{verifiedUser?.mobile}
                       </Typography.Text>
                       <DynamicReactIcon
                         iconName="MdVerifiedUser"
