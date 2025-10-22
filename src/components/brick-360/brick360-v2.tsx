@@ -245,7 +245,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
               ? COLORS.primaryColor
               : COLORS.textColorMedium
           }
-          size={32}
+          size={28}
         ></DynamicReactIcon>
         <Typography.Text
           style={{
