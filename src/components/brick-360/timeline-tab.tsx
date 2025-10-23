@@ -85,7 +85,7 @@ const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
       // Step 3: Sort events by date
       events.sort((a, b) => moment(a.date).diff(moment(b.date)));
       setEvents(events);
-      let minDate = dayjs(events[0].date);
+      const minDate = dayjs(events[0].date);
       setMinDate(minDate);
       const maxDate = dayjs(events[events.length - 1].date);
       setTotalDays(maxDate.diff(minDate, "day"));
