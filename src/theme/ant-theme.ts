@@ -21,5 +21,8 @@ export const antTheme: ThemeConfig = {
       itemSelectedColor: COLORS.textColorDark,
       titleFontSize: FONT_SIZE.HEADING_3,
     },
+    Timeline: {
+      itemPaddingBottom: 48
+    }
   },
 };

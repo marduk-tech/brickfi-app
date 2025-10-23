@@ -31,6 +31,8 @@ import {
 import Brick360Chat from "./brick360-chat";
 import { useDevice } from "@/hooks/use-device";
 import { useWindowDimensions } from "@/hooks/use-browser-safe";
+import TimelineTab from "./timeline-tab";
+import TimelineTabV2 from "./timeline-tab-v2";
 
 const FAKE_TIMER_SECS = 500;
 
@@ -286,55 +288,76 @@ export function Brick360v2({ slug }: Brick360v2Props) {
         tabBarStyle={{}}
         style={{ padding: "0 8px" }}
         items={[
-          {
-            key: "brick360",
-            label: renderTabHeader(
-              "Brick 360",
-              "TbView360Number",
-              "tb",
-              "brick360"
-            ),
-            children: (
-              <Brick360Tab
-                lvnzyProject={lvnzyProject}
-                scoreParams={scoreParams}
-                ref={scoreParamTourRef}
-                onDataPointClick={(sc, item) => {
-                  brick360ChatRef.current?.expandChat();
-                  setSelectedDataPointCategory(sc.key);
-                  setSelectedDataPointSubCategory((item as any)[0]);
-                  setSelectedDataPoint((item as any)[1]);
-                  setSelectedDataPointTitle(
-                    `${sc.title} > ${
-                      (Brick360DataPoints as any)[sc.key][(item as any)[0]][
-                        "label"
-                      ]
-                    }`
-                  );
-                }}
-              />
-            ),
-          },
-          {
-            key: "units",
-            label: renderTabHeader(
-              "Price/Units",
-              "RiLayout2Fill",
-              "ri",
-              "units"
-            ),
-            children: <UnitsTab lvnzyProject={lvnzyProject} />,
-          },
-          {
-            key: "map",
-            label: renderTabHeader("Map", "LiaMapMarkedAltSolid", "lia", "map"),
-            children: <MapTab lvnzyProject={lvnzyProject} />,
-          },
-          {
-            key: "media",
-            label: renderTabHeader("Media", "PiImagesDuotone", "pi", "media"),
-            children: <MediaTab lvnzyProject={lvnzyProject} />,
-          },
+          ...[
+            {
+              key: "brick360",
+              label: renderTabHeader(
+                "Brick 360",
+                "TbView360Number",
+                "tb",
+                "brick360"
+              ),
+              children: (
+                <Brick360Tab
+                  lvnzyProject={lvnzyProject}
+                  scoreParams={scoreParams}
+                  ref={scoreParamTourRef}
+                  onDataPointClick={(sc, item) => {
+                    brick360ChatRef.current?.expandChat();
+                    setSelectedDataPointCategory(sc.key);
+                    setSelectedDataPointSubCategory((item as any)[0]);
+                    setSelectedDataPoint((item as any)[1]);
+                    setSelectedDataPointTitle(
+                      `${sc.title} > ${
+                        (Brick360DataPoints as any)[sc.key][(item as any)[0]][
+                          "label"
+                        ]
+                      }`
+                    );
+                  }}
+                />
+              ),
+            },
+            {
+              key: "units",
+              label: renderTabHeader(
+                "Price/Units",
+                "RiLayout2Fill",
+                "ri",
+                "units"
+              ),
+              children: <UnitsTab lvnzyProject={lvnzyProject} />,
+            },
+            {
+              key: "map",
+              label: renderTabHeader(
+                "Map",
+                "LiaMapMarkedAltSolid",
+                "lia",
+                "map"
+              ),
+              children: <MapTab lvnzyProject={lvnzyProject} />,
+            },
+            {
+              key: "media",
+              label: renderTabHeader("Media", "PiImagesDuotone", "pi", "media"),
+              children: <MediaTab lvnzyProject={lvnzyProject} />,
+            },
+          ],
+          ...(lvnzyProject?.property.layout.totalPhases > 1
+            ? [
+                {
+                  key: "timeline",
+                  label: renderTabHeader(
+                    "Timeline",
+                    "LuCalendarRange",
+                    "lu",
+                    "timeline"
+                  ),
+                  children: <TimelineTabV2 lvnzyProject={lvnzyProject} />,
+                },
+              ]
+            : []),
         ]}
       ></Tabs>
 
