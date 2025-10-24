@@ -526,7 +526,7 @@ export const DRIVER_CATEGORIES = {
         return (
           ["food"].includes(driver.driver) &&
           driver.tags &&
-          driver.tags.some((t) => ["popular brand", "fine dining", "high rated"].includes(t))
+          driver.tags.some((t) => ["popular brand", "fine dining", "highly rated"].includes(t))
         );
       }
       if (filter == "hospital") {
