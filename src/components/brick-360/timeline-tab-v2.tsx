@@ -77,6 +77,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
             ),
             children: (
               <Flex vertical>
+                <Flex gap={8} align="center" style={{marginBottom: 4}}>
                 <Typography.Text
                   style={{
                     fontSize: FONT_SIZE.PARA,
@@ -89,17 +90,8 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                     "MMM YYYY"
                   )}
                 </Typography.Text>
-                <Flex align="center" gap={8}>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_2,
-                      lineHeight: "110%",
-                      width: "75%",
-                    }}
-                  >
-                    {capitalize(t.name)}
-                  </Typography.Text>
-                  {t.timeline.length > 1 ? (
+                {t.timeline.length > 1 ? (
+                    <Flex>
                     <Typography.Text
                       style={{
                         color: COLORS.orangeIdentifier,
@@ -111,7 +103,22 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                     >
                       DELAYED
                     </Typography.Text>
+                    </Flex>
                   ) : null}
+                  </Flex>
+                <Flex align="center" gap={8}>
+                  <Flex>
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_2,
+                      lineHeight: "110%",
+                      
+                    }}
+                  >
+                    {capitalize(t.name)}
+                  </Typography.Text>
+                  </Flex>
+                  
                 </Flex>
                 <Flex vertical>
                   {t.timeline.map((entry: any, index: number) => {
