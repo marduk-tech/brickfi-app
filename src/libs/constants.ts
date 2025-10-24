@@ -309,7 +309,10 @@ export const Brick360DataPoints = {
       ],
     },
     surroundings: { label: "Surroundings" },
-    landProfile: { label: "Land Profile" },
+    landProfile: { label: "Land Profile",   prompts: [
+        "All land parcels",
+        "Land Owners",
+      ], },
     designAndBuildQuality: { label: "Design/Build Quality" },
   },
   areaConnectivity: {
