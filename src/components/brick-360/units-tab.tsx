@@ -167,36 +167,37 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                 per sq.ft
               </Typography.Text>
             </Flex>
-            {pmtPlan ? <Flex
-              align="center"
-              style={{
-                padding: "2px 8px",
-                borderRadius: 8,
-                backgroundColor: COLORS.textColorDark,
-                border: `1px solid ${COLORS.textColorDark}`,
-              }}
-              gap={2}
-            >
-              <DynamicReactIcon
-                iconName="RiDiscountPercentFill"
-                iconSet="ri"
-                size={20}
-                color="white"
-              ></DynamicReactIcon>
-              <Typography.Text
+            {pmtPlan ? (
+              <Flex
+                align="center"
                 style={{
-                  fontSize: FONT_SIZE.HEADING_4,
-
-                  color: "white",
+                  padding: "2px 8px",
+                  borderRadius: 8,
+                  backgroundColor: COLORS.textColorDark,
+                  border: `1px solid ${COLORS.textColorDark}`,
                 }}
-                onClick={() => {
-                  setIsPmtPlanModalOpen(true);
-                }}
+                gap={2}
               >
-                {pmtPlan}
-              </Typography.Text>
-            </Flex>: null}
-            
+                <DynamicReactIcon
+                  iconName="RiDiscountPercentFill"
+                  iconSet="ri"
+                  size={20}
+                  color="white"
+                ></DynamicReactIcon>
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_4,
+
+                    color: "white",
+                  }}
+                  onClick={() => {
+                    setIsPmtPlanModalOpen(true);
+                  }}
+                >
+                  {pmtPlan}
+                </Typography.Text>
+              </Flex>
+            ) : null}
           </Flex>
           <Flex
             gap={4}
@@ -280,30 +281,34 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
             </Flex>
           ) : null}
 
-          <Flex style={{ marginTop: 24 }}>
-            {configFilters?.map((filter: string) => {
-              return (
-                <Tag
-                  color={
-                    filter == selectedConfigFilter
-                      ? COLORS.primaryColor
-                      : "default"
-                  }
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    padding: "4px 8px",
-                    borderRadius: 8,
-                    cursor: "pointer",
-                  }}
-                  onClick={() => {
-                    setSelectedConfigFilter(filter);
-                  }}
-                >
-                  {filter}
-                </Tag>
-              );
-            })}
-          </Flex>
+          {configFilters.length <
+          lvnzyProject?.originalProjectId.info.unitConfigWithPricing ? (
+            <Flex style={{ marginTop: 24 }}>
+              {configFilters?.map((filter: string) => {
+                return (
+                  <Tag
+                    color={
+                      filter == selectedConfigFilter
+                        ? COLORS.primaryColor
+                        : "default"
+                    }
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_3,
+                      padding: "4px 8px",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      setSelectedConfigFilter(filter);
+                    }}
+                  >
+                    {filter}
+                  </Tag>
+                );
+              })}
+            </Flex>
+          ) : null}
+
           <Flex
             vertical={isMobile}
             gap={16}
@@ -319,6 +324,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                 (c: any) =>
                   !configFilters ||
                   !configFilters.length ||
+                  configFilters.length <= lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length ||
                   (c.type || getBhkType(c.config)) == selectedConfigFilter
               )
               .sort((a: any, b: any) => a.price - b.price)
@@ -339,16 +345,24 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                       <Flex vertical style={{ marginBottom: 8 }}>
                         <Typography.Text
                           style={{
-                            fontSize: FONT_SIZE.HEADING_4,
+                            fontSize: FONT_SIZE.HEADING_3,
                             color: COLORS.primaryColor,
                           }}
                         >
-                          {c.type} - {c.sizeBuiltup} sq.ft
+                          {c.type}
                         </Typography.Text>
+                        <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.PARA,
+                              color: COLORS.textColorMedium,
+                            }}
+                          >
+                            Builtup Area: {c.sizeBuiltup} sq.ft
+                          </Typography.Text>
                         {c.sizeCarpet ? (
                           <Typography.Text
                             style={{
-                              fontSize: FONT_SIZE.SUB_TEXT,
+                              fontSize: FONT_SIZE.PARA,
                               color: COLORS.textColorMedium,
                             }}
                           >
