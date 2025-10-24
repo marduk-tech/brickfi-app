@@ -33,7 +33,8 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
     let timelines: any[] = [];
     try {
       timelines.push({
-        name: lvnzyProject.meta.projectName,
+        name: lvnzyProject.originalProjectId.info.reraProjectId.projectDetails
+          .projectName,
         timeline: lvnzyProject.meta.projectTimelines.sort((a: any, b: any) =>
           moment(a.startDate, "DD-MM-YYYY").diff(
             moment(b.startDate, "DD-MM-YYYY")
