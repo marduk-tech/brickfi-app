@@ -158,7 +158,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
               )}
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_3,
+                  fontSize: FONT_SIZE.HEADING_4,
                   color: COLORS.textColorDark,
                   marginTop: 4,
                   marginLeft: 2,
@@ -186,7 +186,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                 ></DynamicReactIcon>
                 <Typography.Text
                   style={{
-                    fontSize: FONT_SIZE.HEADING_4,
+                    fontSize: FONT_SIZE.SUB_TEXT,
 
                     color: "white",
                   }}

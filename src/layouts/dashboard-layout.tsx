@@ -169,7 +169,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
             <Flex vertical>
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_1 * 1.35,
+                  fontSize: FONT_SIZE.HEADING_1,
                   fontWeight: 500,
                 }}
               >
