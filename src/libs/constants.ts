@@ -295,7 +295,7 @@ export const Brick360DataPoints = {
       note: "The amenities list here are as marketed by the developer. Final list should be reviewed before final agreement.",
       prompts: [
         "Outdoor amenities",
-        "Any kid specific amenities?",
+        "Kid specific amenities",
         "Most unique amenity",
       ],
     },
@@ -316,14 +316,13 @@ export const Brick360DataPoints = {
     schoolsOffices: {
       label: "Schools/Offices",
       prompts: [
-        "List international schools",
-        "Nearest tech park?",
+        "International schools",
         "Type of companies",
       ],
     },
     conveniences: {
       label: "Conveniences",
-      prompts: ["Dining options in walking distance?", "Nearest hospital?"],
+      prompts: ["Nearest dining", "Largest mall nearby"],
     },
     transport: {
       label: "Connectivity",
@@ -332,26 +331,24 @@ export const Brick360DataPoints = {
   developer: {
     experience: {
       label: "Experience",
-      prompts: ["All past projects", "Largest project"],
+      prompts: ["All past projects", "More about owners"],
     },
     timeCommitment: {
       label: "Time Committment",
-      prompts: ["Delayed projects", "Average delay"],
     },
     customerSatisfaction: {
       label: "Customer Satisfaction",
-      prompts: ["Describe few complaints", "Most common complaint"],
     },
   },
   financials: {
     pricePoint: {
       label: "Price Point",
-      prompts: ["Projects priced higher", "Is this price high or low?"],
+      prompts: ["Projects priced higher", "Price vs distance"],
       note: "The final price may vary as per negotitation and other charges applied (usually 10-15% extra)",
     },
     rentalIncome: {
       label: "Rental Income",
-      prompts: ["Highest rental nearby", "Rental price distribution"],
+      prompts: ["Highest rental nearby", "Rentals vs distance"],
     },
     growthPotential: { label: "Growth Potential" },
   },
@@ -526,7 +523,7 @@ export const DRIVER_CATEGORIES = {
         return (
           ["food"].includes(driver.driver) &&
           driver.tags &&
-          driver.tags.some((t) => ["popular brand", "fine dining"].includes(t))
+          driver.tags.some((t) => ["popular brand", "fine dining", "high rated"].includes(t))
         );
       }
       if (filter == "hospital") {

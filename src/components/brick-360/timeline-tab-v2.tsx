@@ -63,6 +63,17 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
       setTimelines(
         timelines.map((t, i) => {
           return {
+            dot: (
+              <div
+                style={{
+                  height: 20,
+                  width: 20,
+                  border: `2px solid ${COLORS.textColorDark}`,
+                  backgroundColor: COLORS.primaryColor,
+                  borderRadius: "50%",
+                }}
+              ></div>
+            ),
             children: (
               <Flex vertical>
                 <Typography.Text
@@ -82,6 +93,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                     style={{
                       fontSize: FONT_SIZE.HEADING_2,
                       lineHeight: "110%",
+                      width: "75%",
                     }}
                   >
                     {capitalize(t.name)}
@@ -91,7 +103,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                       style={{
                         color: COLORS.orangeIdentifier,
                         border: `1px solid ${COLORS.orangeIdentifier}`,
-                        padding: "2px 4px",
+                        padding: "1px 2px",
                         fontSize: FONT_SIZE.SUB_TEXT,
                         borderRadius: 4,
                       }}
@@ -142,7 +154,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
   }, [lvnzyProject]);
 
   return (
-    <Flex vertical style={{ padding: 16 }}>
+    <Flex vertical style={{ padding: "0 16px" }}>
       <Flex
         style={{
           width: "100",

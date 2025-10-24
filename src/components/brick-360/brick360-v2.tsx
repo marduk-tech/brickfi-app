@@ -230,7 +230,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
             <DynamicReactIcon
               iconName="BiSolidOffer"
               iconSet="bi"
-              size={20}
+              size={16}
               color={
                 selectedTabKey == tabKey
                   ? COLORS.primaryColor
@@ -344,7 +344,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
               children: <MediaTab lvnzyProject={lvnzyProject} />,
             },
           ],
-          ...(lvnzyProject?.property.layout.totalPhases > 1
+          ...(lvnzyProject?.property.layout.totalPhases > 0
             ? [
                 {
                   key: "timeline",
