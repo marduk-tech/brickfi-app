@@ -281,8 +281,10 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
             </Flex>
           ) : null}
 
-          {configFilters.length <
-          lvnzyProject?.originalProjectId.info.unitConfigWithPricing ? (
+          {configFilters &&
+          configFilters.length &&
+          configFilters.length <
+            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length - 2 ? (
             <Flex style={{ marginTop: 24 }}>
               {configFilters?.map((filter: string) => {
                 return (
@@ -324,7 +326,9 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                 (c: any) =>
                   !configFilters ||
                   !configFilters.length ||
-                  configFilters.length <= lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length ||
+                  configFilters.length >=
+                    (lvnzyProject?.originalProjectId.info.unitConfigWithPricing
+                      .length - 2) ||
                   (c.type || getBhkType(c.config)) == selectedConfigFilter
               )
               .sort((a: any, b: any) => a.price - b.price)
@@ -352,13 +356,13 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                           {c.type}
                         </Typography.Text>
                         <Typography.Text
-                            style={{
-                              fontSize: FONT_SIZE.PARA,
-                              color: COLORS.textColorMedium,
-                            }}
-                          >
-                            Builtup Area: {c.sizeBuiltup} sq.ft
-                          </Typography.Text>
+                          style={{
+                            fontSize: FONT_SIZE.PARA,
+                            color: COLORS.textColorMedium,
+                          }}
+                        >
+                          Builtup Area: {c.sizeBuiltup} sq.ft
+                        </Typography.Text>
                         {c.sizeCarpet ? (
                           <Typography.Text
                             style={{
