@@ -448,7 +448,7 @@ export const DRIVER_CATEGORIES = {
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "est-infra") {
         return (
-          ["industrial-hitech", "transit"].includes(
+          ["industrial-hitech", "transit", "micro-market"].includes(
             driver.driver
           ) &&
           (driver.status === "post-launch" || driver.status === "launched") &&
