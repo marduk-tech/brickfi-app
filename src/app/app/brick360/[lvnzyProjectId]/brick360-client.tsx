@@ -12,7 +12,8 @@ export default function Brick360Client({ slug }: { slug: string }) {
     setTimeout(() => {
       setFlickerWait(false);
     }, 500);
-  });
+  }, []);
+
   if (flickerWait) {
     return (
       <Flex style={{ marginTop: 200 }} align="center" justify="center">

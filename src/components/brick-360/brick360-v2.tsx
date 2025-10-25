@@ -136,7 +136,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
         setTourOpen(true);
       }, 2000);
     }
-  });
+  }, []);
 
   const [scoreParams, setScoreParams] = useState<any[]>([]);
   const [selectedTabKey, setSelectedTabKey] = useState<string>("brick360");
@@ -183,7 +183,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
       }, FAKE_TIMER_SECS);
       setFakeInterval(interval);
     }
-  });
+  }, []);
 
   // Setting main data points category
   useEffect(() => {
@@ -281,7 +281,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
 
       <Tabs
         tabBarGutter={40}
-        defaultActiveKey="brick-360"
+        defaultActiveKey="brick360"
         onChange={(activeKey: string) => {
           setSelectedTabKey(activeKey);
         }}
@@ -297,7 +297,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                 "tb",
                 "brick360"
               ),
-              children: (
+              children: selectedTabKey === "brick360" ? (
                 <Brick360Tab
                   lvnzyProject={lvnzyProject}
                   scoreParams={scoreParams}
@@ -316,7 +316,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                     );
                   }}
                 />
-              ),
+              ) : null,
             },
             {
               key: "units",
@@ -326,7 +326,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                 "ri",
                 "units"
               ),
-              children: <UnitsTab lvnzyProject={lvnzyProject} />,
+              children: selectedTabKey === "units" ? <UnitsTab lvnzyProject={lvnzyProject} /> : null,
             },
             {
               key: "map",
@@ -336,12 +336,12 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                 "lia",
                 "map"
               ),
-              children: <MapTab lvnzyProject={lvnzyProject} />,
+              children: selectedTabKey === "map" ? <MapTab lvnzyProject={lvnzyProject} /> : null,
             },
             {
               key: "media",
               label: renderTabHeader("Media", "PiImagesDuotone", "pi", "media"),
-              children: <MediaTab lvnzyProject={lvnzyProject} />,
+              children: selectedTabKey === "media" ? <MediaTab lvnzyProject={lvnzyProject} /> : null,
             },
           ],
           ...(lvnzyProject?.property.layout.totalPhases > 0
@@ -354,7 +354,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                     "lu",
                     "timeline"
                   ),
-                  children: <TimelineTabV2 lvnzyProject={lvnzyProject} />,
+                  children: selectedTabKey === "timeline" ? <TimelineTabV2 lvnzyProject={lvnzyProject} /> : null,
                 },
               ]
             : []),

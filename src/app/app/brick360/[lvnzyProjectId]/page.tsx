@@ -186,7 +186,7 @@ export default async function Brick360Page({ params }: PageProps) {
   const { lvnzyProjectId: slug } = await params;
   const queryClient = getQueryClient();
 
-  await queryClient.prefetchQuery(await getLvnzyProjectBySlug(slug, false));
+  await queryClient.prefetchQuery(getLvnzyProjectBySlugQuery(slug));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

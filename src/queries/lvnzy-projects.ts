@@ -1,6 +1,6 @@
 import { baseApiUrl } from "@/libs/constants";
-import { LvnzyProject } from "@/types/LvnzyProject";
 import { CustomError } from "@/libs/error-handler";
+import { LvnzyProject } from "@/types/LvnzyProject";
 
 // Get project by ObjectId (for internal operations)
 export const getLvnzyProjectById = async (id: string, throwError = true) => {
@@ -32,13 +32,19 @@ export const getLvnzyProjectById = async (id: string, throwError = true) => {
 };
 
 // Get project by slug (for public pages)
-export const getLvnzyProjectBySlug = async (slug: string, throwError = true) => {
-  const res = await fetch(`${baseApiUrl}lvnzy-projects/slug/${slug.toLowerCase()}`, {
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+export const getLvnzyProjectBySlug = async (
+  slug: string,
+  throwError = true
+) => {
+  const res = await fetch(
+    `${baseApiUrl}lvnzy-projects/slug/${slug.toLowerCase()}`,
+    {
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
 
   if (throwError && res.status === 404) {
     throw new CustomError({
@@ -66,6 +72,8 @@ export const getLvnzyProjectByIdQuery = (id: string) => {
     queryKey: ["lvnzy-project", id],
     queryFn: () => getLvnzyProjectById(id),
     throwOnError: true,
+    staleTime: 60000,
+    gcTime: 300000,
   };
 };
 
@@ -75,5 +83,7 @@ export const getLvnzyProjectBySlugQuery = (slug: string) => {
     queryKey: ["lvnzy-project-slug", slug],
     queryFn: () => getLvnzyProjectBySlug(slug),
     throwOnError: true,
+    staleTime: 60000,
+    gcTime: 300000,
   };
 };

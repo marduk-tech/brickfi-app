@@ -1,7 +1,7 @@
 "use client";
 
 import { Flex, Tooltip, Typography } from "antd";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useRef, useState } from "react";
 import { useDevice } from "../hooks/use-device";
 import { useWindowDimensions } from "../hooks/use-browser-safe";
@@ -38,7 +38,6 @@ export function UserProjects({
     expandChat: () => void;
   } | null>(null);
 
-  const router = useRouter();
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
   const { isMobile } = useDevice();
 
@@ -75,19 +74,21 @@ export function UserProjects({
       itemInfo.originalProjectId?.info?.financialPlan
     );
     return (
-      <Flex
-        style={{
-          marginBottom: 8,
-          cursor: "pointer",
-          backgroundColor: "white",
-          width: isMobile
-            ? "100%"
-            : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
-        }}
-        onClick={() => {
-          router.push(`/app/brick360/${itemInfo.slug || itemInfo._id}`);
-        }}
+      <Link
+        href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
+        prefetch={true}
+        style={{ textDecoration: "none", color: "inherit" }}
       >
+        <Flex
+          style={{
+            marginBottom: 8,
+            cursor: "pointer",
+            backgroundColor: "white",
+            width: isMobile
+              ? "100%"
+              : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
+          }}
+        >
         <Flex vertical style={{ width: "100%" }}>
           <div
             style={{
@@ -211,6 +212,7 @@ export function UserProjects({
           </Flex>
         </Flex>
       </Flex>
+      </Link>
     );
   };
 

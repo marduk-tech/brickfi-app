@@ -1,6 +1,7 @@
 // useFetchProjects.ts
 
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { queryKeys } from "../libs/constants";
 import { LvnzyProject } from "../types/LvnzyProject";
@@ -19,6 +20,8 @@ export const useFetchLvnzyProjectById = (id: string) => {
     },
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 };
 
@@ -39,17 +42,23 @@ export const useFetchLvnzyProjectsByIds = (ids: string) => {
 };
 
 export const useFetchLvnzyProjectBySlug = (slug: string) => {
-  const isId = /^[a-f\d]{24}$/i.test(slug);
+  const isId = useMemo(() => /^[a-f\d]{24}$/i.test(slug), [slug]);
   return useQuery<LvnzyProject, Error>({
-    queryKey: isId ? [queryKeys.getLvnzyProjectById, slug]: [queryKeys.getLvnzyProjectById, "slug", slug] ,
+    queryKey: isId
+      ? [queryKeys.getLvnzyProjectById, slug]
+      : [queryKeys.getLvnzyProjectById, "slug", slug],
     queryFn: async () => {
-      const { data } = isId ? await axiosApiInstance.get(`/lvnzy-projects/${slug}`): await axiosApiInstance.get(
-        `/lvnzy-projects/slug/${slug.toLowerCase()}`
-      );
+      const { data } = isId
+        ? await axiosApiInstance.get(`/lvnzy-projects/${slug}`)
+        : await axiosApiInstance.get(
+            `/lvnzy-projects/slug/${slug.toLowerCase()}`
+          );
       return data as LvnzyProject;
     },
     refetchOnWindowFocus: false,
     refetchOnMount: false,
+    staleTime: 60000,
+    gcTime: 300000,
   });
 };
 
