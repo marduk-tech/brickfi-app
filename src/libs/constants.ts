@@ -309,19 +309,16 @@ export const Brick360DataPoints = {
       ],
     },
     surroundings: { label: "Surroundings" },
-    landProfile: { label: "Land Profile",   prompts: [
-        "All land parcels",
-        "Land Owners",
-      ], },
+    landProfile: {
+      label: "Land Profile",
+      prompts: ["All land parcels", "Land Owners"],
+    },
     designAndBuildQuality: { label: "Design/Build Quality" },
   },
   areaConnectivity: {
     schoolsOffices: {
       label: "Schools/Offices",
-      prompts: [
-        "International schools",
-        "Type of companies",
-      ],
+      prompts: ["International schools", "Type of companies"],
     },
     conveniences: {
       label: "Conveniences",
@@ -451,20 +448,18 @@ export const DRIVER_CATEGORIES = {
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "est-infra") {
         return (
-          ["industrial-general", "industrial-hitech", "transit"].includes(
+          ["industrial-hitech", "transit"].includes(
             driver.driver
           ) &&
           (driver.status === "post-launch" || driver.status === "launched") &&
-          (!driver.distance || driver.distance <= 15)
+          (!driver.distance || driver.distance <= 30)
         );
       }
       if (filter == "major-infra") {
         return (
-          ["highway", "industrial-general", "transit", "commercial"].includes(
-            driver.driver
-          ) &&
-          driver.status !== "post-launch" &&
-          (!driver.distance || driver.distance <= 10)
+          ((["highway", "transit", "commercial"].includes(driver.driver) &&
+            driver.status !== "post-launch" && (!driver.distance || driver.distance <= 15))  ||
+            (["industrial-general"].includes(driver.driver) && (!driver.distance || driver.distance <= 20)))
         );
       }
       if (filter == "upcoming-tech") {
@@ -526,7 +521,9 @@ export const DRIVER_CATEGORIES = {
         return (
           ["food"].includes(driver.driver) &&
           driver.tags &&
-          driver.tags.some((t) => ["popular brand", "fine dining", "highly rated"].includes(t))
+          driver.tags.some((t) =>
+            ["popular brand", "fine dining", "highly rated"].includes(t)
+          )
         );
       }
       if (filter == "hospital") {
