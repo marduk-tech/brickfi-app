@@ -5,7 +5,8 @@ import { GlossaryArticle } from "@/types/Marketing";
 // Get marketing data by type
 export const getMarketing = async (type: string, throwError = true) => {
   const res = await fetch(`${baseApiUrl}marketing?type=${type}`, {
-    cache: "no-store",
+    // Revalidate every hour for sitemap generation
+    next: { revalidate: 3600 },
   });
 
   if (throwError && res.status === 404) {

@@ -1,14 +1,12 @@
 "use client";
 
-import { Capacitor } from "@capacitor/core";
-import { StatusBar, Style } from "@capacitor/status-bar";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { App as AntApp, ConfigProvider } from "antd";
 import { useEffect } from "react";
 import { getQueryClient } from "../libs/query-client";
-import { antTheme } from "../theme/ant-theme";
 import { extractUtmParams, saveUtmToHistory } from "../libs/utm-utils";
+import { antTheme } from "../theme/ant-theme";
 import PosthogProvider from "./common/posthog-provider";
 
 interface ClientProvidersProps {
@@ -17,16 +15,52 @@ interface ClientProvidersProps {
 
 export function ClientProviders({ children }: ClientProvidersProps) {
   useEffect(() => {
-    if (Capacitor.isNativePlatform()) {
-      StatusBar.setOverlaysWebView({ overlay: false });
-      StatusBar.setStyle({ style: Style.Default });
+    const utmParams = extractUtmParams();
+    if (utmParams) {
+      saveUtmToHistory(utmParams);
     }
   }, []);
 
   useEffect(() => {
-    const utmParams = extractUtmParams();
-    if (utmParams) {
-      saveUtmToHistory(utmParams);
+    if (
+      typeof window !== "undefined" &&
+      "serviceWorker" in navigator &&
+      process.env.NEXT_PUBLIC_DISABLE_SW !== "true"
+    ) {
+      const isDev = process.env.NODE_ENV === "development";
+
+      navigator.serviceWorker
+        .register("/service-worker.js")
+        .then((registration) => {
+          if (isDev) {
+            console.log(
+              "🔧 [DEV MODE] Service Worker registered:",
+              registration.scope
+            );
+            console.log(
+              "💡 PWA features are active in development mode for testing"
+            );
+          } else {
+            console.log("✅ Service Worker registered:", registration.scope);
+          }
+
+          registration.addEventListener("updatefound", () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener("statechange", () => {
+                if (
+                  newWorker.state === "installed" &&
+                  navigator.serviceWorker.controller
+                ) {
+                  console.log("🔄 New service worker available");
+                }
+              });
+            }
+          });
+        })
+        .catch((error) => {
+          console.error("❌ Service Worker registration failed:", error);
+        });
     }
   }, []);
 

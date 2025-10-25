@@ -99,7 +99,8 @@ export const getAllDevelopers = async (params?: {
   }`;
 
   const res = await fetch(url, {
-    cache: "no-store",
+    // Revalidate every hour for sitemap generation
+    next: { revalidate: 3600 },
   });
 
   if (!res.ok) {

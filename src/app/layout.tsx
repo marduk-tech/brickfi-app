@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { ClientProviders } from "../components/client-providers";
-import AntdRegistry from "../components/antd-registry";
-import "../theme/globals.scss";
 import PosthogProvider from "@/components/common/posthog-provider";
+import type { Metadata } from "next";
 import Script from "next/script";
+import AntdRegistry from "../components/antd-registry";
+import { ClientProviders } from "../components/client-providers";
+import "../theme/globals.scss";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://brickfi.in"),
+  // metadataBase: new URL("https://brickfi.in"),
   title: {
     default: "Brickfi | The Smartest Way to Buy your Next Property",
     template: "%s | Brickfi",
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  manifest: "/manifest.webmanifest",
+  manifest: "/manifest.json",
   alternates: {
     canonical: "https://brickfi.in/",
   },
@@ -82,6 +82,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, viewport-fit=cover"
+        />
+        <meta name="theme-color" content="#2E3E4E" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-title" content="Brickfi" />
+        <link rel="apple-touch-icon" href="/images/logos/apple-icon-180.png" />
+
         <Script
           strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=G-Q2HFD85Y22"
@@ -143,7 +157,7 @@ fbq('track', 'PageView');
           <img
             height="1"
             width="1"
-            style={{ display: "none", visibility: "hidden"  }}
+            style={{ display: "none", visibility: "hidden" }}
             src="https://www.facebook.com/tr?id=787676156936614&ev=PageView&noscript=1"
           />
         </noscript>

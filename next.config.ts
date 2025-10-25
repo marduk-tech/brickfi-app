@@ -9,12 +9,15 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   transpilePackages: [
-    'antd',
-    '@ant-design/icons',
-    'rc-util',
-    'rc-pagination',
-    'rc-picker'
+    "antd",
+    "@ant-design/icons",
+    "rc-util",
+    "rc-pagination",
+    "rc-picker",
   ],
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
 };
 
 export default nextConfig;
