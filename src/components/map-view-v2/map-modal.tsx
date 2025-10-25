@@ -48,10 +48,10 @@ export const MapModal = ({ isOpen, onClose, content }: MapModalProps) => {
             {content.tags.map((t, index) => (
               <Tag
                 key={index}
+                color={t.color}
                 style={{
                   margin: 0,
                   fontSize: FONT_SIZE.SUB_TEXT,
-                  borderColor: COLORS.textColorDark,
                   padding: "0 4px",
                 }}
               >

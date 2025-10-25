@@ -52,7 +52,7 @@ export const driverStatusLabel = (status: string) => {
   } else if (status == PLACE_TIMELINE.CONSTRUCTION) {
     return "Under Construction";
   } else if (status == PLACE_TIMELINE.LAUNCHED) {
-    return "Ready for Operation";
+    return "Recently Launched";
   } else {
     return "Operational";
   }
