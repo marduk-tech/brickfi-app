@@ -56,7 +56,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
       <Flex
         style={{
           position: "relative",
-          height: height - 350,
+          height: height - 250,
           paddingBottom: 40,
         }}
         vertical
