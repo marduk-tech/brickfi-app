@@ -6,7 +6,7 @@ import { ClientProviders } from "../components/client-providers";
 import "../theme/globals.scss";
 
 export const metadata: Metadata = {
-  // metadataBase: new URL("https://brickfi.in"),
+  metadataBase: new URL("https://brickfi.in"),
   title: {
     default: "Brickfi | The Smartest Way to Buy your Next Property",
     template: "%s | Brickfi",
