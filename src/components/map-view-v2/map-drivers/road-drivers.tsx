@@ -3,11 +3,12 @@ import * as turf from "@turf/turf";
 import L from "leaflet";
 import { Marker, Polyline, useMap } from "react-leaflet";
 import { DRIVER_CATEGORIES, PLACE_TIMELINE } from "../../../libs/constants";
-import { driverStatusLabel } from "../../../libs/lvnzy-helper";
-import { COLORS } from "../../../theme/style-constants";
+import { capitalize, driverStatusLabel } from "../../../libs/lvnzy-helper";
+import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 import { RoadDriverPlace } from "../types";
 import { processRoadFeatures } from "../utils";
+import { Flex, Tag, Typography } from "antd";
 
 interface RoadDriversProps {
   bounds: L.LatLngBounds;
@@ -72,18 +73,50 @@ export const RoadDriversComponent = ({
             PLACE_TIMELINE.PARTIAL_LAUNCH,
           ].includes(driver.status as PLACE_TIMELINE);
 
-          const handleRoadDriverClick = () => {
+          const handleRoadDriverClick = (feature?: any) => {
             setModalContent({
-              title: driver.name,
+              title: (
+                <Flex vertical>
+                  <Typography.Text
+                    style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
+                  >
+                    {driver.name}
+                  </Typography.Text>
+                  <Flex
+                    style={{
+                    }}
+                  >
+                    <Tag
+                      style={{
+                        fontSize: FONT_SIZE.HEADING_4,
+                      }}
+                    >
+                      {capitalize(
+                        feature.properties && feature.properties.name
+                          ? feature.properties.name
+                          : ""
+                      )}
+                    </Tag>
+                  </Flex>
+                </Flex>
+              ),
               content: driver.details?.description || "",
               tags: [
                 {
-                  label: "Road",
+                  label: "Highway",
                   color: COLORS.primaryColor,
                 },
                 {
-                  label: driverStatusLabel(driver.status),
-                  color: isDashed ? "warning" : "success",
+                  label: driverStatusLabel(
+                    feature.properties.status || driver.status
+                  ),
+                  color:
+                    isDashed ||
+                    (feature.properties &&
+                      feature.properties.status &&
+                      feature.properties.status == "construction")
+                      ? "warning"
+                      : "success",
                 },
               ],
             });
@@ -122,14 +155,16 @@ export const RoadDriversComponent = ({
 
               return (
                 <React.Fragment key={`road-line-${driver._id}-${lineIndex}`}>
-                  {map.getZoom() > 13.5
+                  {map.getZoom() > 11.5
                     ? points.map((p, pointIndex) => (
                         <Marker
                           key={`road-${driver._id}-${lineIndex}-${pointIndex}`}
                           position={[p![1], p![0]]}
                           icon={roadIcon}
                           eventHandlers={{
-                            click: handleRoadDriverClick,
+                            click: () => {
+                              handleRoadDriverClick(feature);
+                            },
                           }}
                         />
                       ))
