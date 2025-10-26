@@ -1,7 +1,7 @@
+import { Flex, Typography } from "antd";
 import L from "leaflet";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import { Typography, Flex } from "antd";
 import { PLACE_TIMELINE } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { IDriverPlace } from "../../types/Project";
@@ -45,60 +45,75 @@ export async function getIcon(
   } catch (error) {
     console.error(`Error loading icon ${iconName} from ${iconSet}`, error);
   }
-  
+
   const iconMarkup = renderToString(
-    React.createElement("div", {
-      style: {
-        backgroundColor: style?.iconBgColor || "white",
-        borderRadius: style?.containerWidth
-          ? style.containerWidth / 10
-          : text
-          ? "24px"
-          : "50%",
-        padding: text ? 2 : 0,
-        height: text ? "auto" : (style?.iconSize || 20) * 1.4,
-        width: style?.containerWidth
-          ? style.containerWidth
-          : text
-          ? 80
-          : (style?.iconSize || 20) * 1.4,
-        display: "flex",
-        alignItems: "center",
-        borderColor: style?.borderColor
-          ? style.borderColor
-          : isUnderConstruction
-          ? COLORS.yellowIdentifier
-          : COLORS.borderColorDark,
-        borderStyle: isUnderConstruction ? "dashed" : "solid",
-        justifyContent: "center",
-        animation: toBounce ? "bounceAnimation 1s infinite" : "none",
-        boxShadow: "0 0 6px rgba(0,0,0,0.3)",
-        textWrap: "nowrap",
-      }
-    }, [
-      IconComp && React.createElement(IconComp, {
-        key: "icon",
-        size: style?.iconSize || 14,
-        color: style?.iconColor
-          ? style.iconColor
-          : isUnderConstruction
-          ? COLORS.yellowIdentifier
-          : COLORS.textColorDark
-      }),
-      text ? React.createElement(Flex, {
-        key: "text-container",
-        style: { marginLeft: 2 }
-      }, React.createElement(Typography.Text, {
-        key: "text",
+    React.createElement(
+      "div",
+      {
         style: {
-          fontSize: FONT_SIZE.SUB_TEXT,
-          fontWeight: 500,
-          color: style?.iconColor || COLORS.textColorDark,
-        }
-      }, text)) : null
-    ].filter(Boolean))
+          backgroundColor: style?.iconBgColor || "white",
+          borderRadius: style?.containerWidth
+            ? style.containerWidth / 10
+            : text
+            ? "24px"
+            : "50%",
+          padding: text ? 2 : 0,
+          height: text ? "auto" : (style?.iconSize || 20) * 1.4,
+          width: style?.containerWidth
+            ? style.containerWidth
+            : text
+            ? 80
+            : (style?.iconSize || 20) * 1.4,
+          display: "flex",
+          alignItems: "center",
+          borderColor: style?.borderColor
+            ? style.borderColor
+            : isUnderConstruction
+            ? COLORS.yellowIdentifier
+            : COLORS.borderColorDark,
+          borderStyle: isUnderConstruction ? "dashed" : "solid",
+          justifyContent: "center",
+          animation: toBounce ? "bounceAnimation 1s infinite" : "none",
+          boxShadow: "0 0 6px rgba(0,0,0,0.3)",
+          textWrap: "nowrap",
+        },
+      },
+      [
+        IconComp &&
+          React.createElement(IconComp, {
+            key: "icon",
+            size: style?.iconSize || 14,
+            color: style?.iconColor
+              ? style.iconColor
+              : isUnderConstruction
+              ? COLORS.yellowIdentifier
+              : COLORS.textColorDark,
+          }),
+        text
+          ? React.createElement(
+              Flex,
+              {
+                key: "text-container",
+                style: { marginLeft: 2 },
+              },
+              React.createElement(
+                Typography.Text,
+                {
+                  key: "text",
+                  style: {
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontWeight: 500,
+                    color: style?.iconColor || COLORS.textColorDark,
+                  },
+                },
+                text
+              )
+            )
+          : null,
+      ].filter(Boolean)
+    )
   );
-  
+
   const leafletIcon = L.divIcon({
     html: iconMarkup,
     className: "",
@@ -140,16 +155,33 @@ export const processRoadFeatures = (features: GeoJSONFeature[]) => {
 export const processDriversToPolygons = (
   data: any[],
   filterByDriverTypes = true,
-  selectedDriverFilter?: string
+  selectedDriverFilter?: string,
+  filterFunc?: (driver: IDriverPlace) => boolean
 ) => {
-  const polygons =  data
+  const polygons = data
     .filter((driver) => {
       const hasGeojson = driver.details?.osm?.geojson;
-      const matchesType =
-        !filterByDriverTypes ||
-        !selectedDriverFilter ||
-        selectedDriverFilter === driver.driver;
-      return hasGeojson && matchesType;
+
+      if (!hasGeojson) {
+        return false;
+      }
+
+      // no filering needed show all polygons
+      if (!filterByDriverTypes) {
+        return true;
+      }
+
+      // filtering required but no filter set yet hide all polygons
+      if (!selectedDriverFilter) {
+        return false;
+      }
+
+      // custom filter function if provided (custom filters like "tech-hubs")
+      const matchesType = filterFunc
+        ? filterFunc(driver)
+        : selectedDriverFilter === driver.driver;
+
+      return matchesType;
     })
     .map((driver) => {
       try {
@@ -177,5 +209,5 @@ export const processDriversToPolygons = (
     })
     .filter((p): p is NonNullable<typeof p> => p !== null);
 
-    return polygons;
+  return polygons;
 };

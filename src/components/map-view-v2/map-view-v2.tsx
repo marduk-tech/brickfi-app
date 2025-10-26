@@ -250,7 +250,8 @@ const MapViewV2Inner = ({
             const projectPolygons = processDriversToPolygons(
               primaryProjectBounds,
               false,
-              selectedDriverFilter
+              selectedDriverFilter,
+              isDriverMatchingFilter
             );
 
             // Render all components
@@ -368,7 +369,8 @@ const MapViewV2Inner = ({
                         polygons={processDriversToPolygons(
                           drivers || [],
                           true,
-                          selectedDriverFilter
+                          selectedDriverFilter,
+                          isDriverMatchingFilter
                         )}
                       />
                     )}
