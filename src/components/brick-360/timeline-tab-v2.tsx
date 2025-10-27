@@ -26,6 +26,22 @@ interface PhaseTimeline {
 interface TimelineTabProps {
   lvnzyProject: any;
 }
+function getFormattedDateString(dateStr: string) {
+  const mDate = moment(dateStr, "DD-MM-YYYY");
+  if (mDate.isValid()) {
+    return mDate.format("MMM YYYY");
+  }
+  return "Not Available";
+}
+
+function getMonthsDiff(dateStart: string, dateComp: string) {
+  const sDate = moment(dateStart, "DD-MM-YYYY");
+  const cDate = moment(dateComp, "DD-MM-YYYY");
+  if (sDate.isValid() && cDate.isValid()) {
+    return ` by ${cDate.diff(sDate, "months")} months`;
+  }
+  return "";
+}
 
 const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
   const [timelines, setTimelines] = useState<any[]>([]);
@@ -72,53 +88,56 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                   border: `2px solid ${COLORS.textColorDark}`,
                   backgroundColor: COLORS.primaryColor,
                   borderRadius: "50%",
+                  marginTop: -8
                 }}
               ></div>
             ),
             children: (
               <Flex vertical>
-                <Flex gap={8} align="center" style={{marginBottom: 4}}>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.PARA,
-                    lineHeight: "110%",
-                    textTransform: "uppercase",
-                    color: COLORS.primaryColor,
-                  }}
-                >
-                  {moment(t.timeline[0].startDate, "DD-MM-YYYY").format(
-                    "MMM YYYY"
-                  )}
-                </Typography.Text>
-                {t.timeline.length > 1 ? (
-                    <Flex>
-                    <Typography.Text
-                      style={{
-                        color: COLORS.orangeIdentifier,
-                        border: `1px solid ${COLORS.orangeIdentifier}`,
-                        padding: "1px 2px",
-                        fontSize: FONT_SIZE.SUB_TEXT,
-                        borderRadius: 4,
-                      }}
-                    >
-                      DELAYED
-                    </Typography.Text>
-                    </Flex>
-                  ) : null}
-                  </Flex>
-                <Flex align="center" gap={8}>
-                  <Flex>
+                <Flex gap={8} align="center" style={{ marginBottom: 4 }}>
                   <Typography.Text
                     style={{
-                      fontSize: FONT_SIZE.HEADING_2,
+                      fontSize: FONT_SIZE.PARA,
                       lineHeight: "110%",
-                      
+                      textTransform: "uppercase",
+                      color: COLORS.primaryColor,
                     }}
                   >
-                    {capitalize(t.name)}
+                    {moment(t.timeline[0].startDate, "DD-MM-YYYY").format(
+                      "MMM YYYY"
+                    )}
                   </Typography.Text>
+                  {t.timeline.length > 1 ? (
+                    <Flex>
+                      <Typography.Text
+                        style={{
+                          color: COLORS.orangeIdentifier,
+                          border: `1px solid ${COLORS.orangeIdentifier}`,
+                          padding: "1px 2px",
+                          fontSize: FONT_SIZE.SUB_TEXT,
+                          borderRadius: 4,
+                        }}
+                      >
+                        Delayed
+                        {getMonthsDiff(
+                          t.timeline[1].startDate,
+                          t.timeline[t.timeline.length - 1].completionDate
+                        )}
+                      </Typography.Text>
+                    </Flex>
+                  ) : null}
+                </Flex>
+                <Flex align="center" gap={8}>
+                  <Flex>
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.HEADING_2,
+                        lineHeight: "110%",
+                      }}
+                    >
+                      {capitalize(t.name)}
+                    </Typography.Text>
                   </Flex>
-                  
                 </Flex>
                 <Flex vertical>
                   {t.timeline.map((entry: any, index: number) => {
@@ -131,7 +150,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                             fontSize: FONT_SIZE.HEADING_4,
                           }}
                         >
-                          {index == 0 ? "Initial Timeline" : entry.name}:
+                          {index == 0 ? "Initial Timeline" : "Extension"}:
                         </Typography.Text>
                         <Typography.Text
                           style={{
@@ -139,13 +158,8 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                             fontSize: FONT_SIZE.HEADING_4,
                           }}
                         >
-                          {moment(entry.startDate, "DD-MM-YYYY").format(
-                            "MMM YYYY"
-                          )}{" "}
-                          -{" "}
-                          {moment(entry.completionDate, "DD-MM-YYYY").format(
-                            "MMM YYYY"
-                          )}
+                          {getFormattedDateString(entry.startDate)} -{" "}
+                          {getFormattedDateString(entry.completionDate)}
                         </Typography.Text>
                       </Flex>
                     );
