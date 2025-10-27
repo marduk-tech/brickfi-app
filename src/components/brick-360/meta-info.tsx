@@ -85,7 +85,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
             }}
           >
             {lvnzyProject?.originalProjectId?.info?.developerId?.name || "Developer"} · {capitalize(
-              lvnzyProject?.meta.projectUnitTypes.split(",")[0]
+              lvnzyProject?.meta.projectUnitTypes.split(",").join(" · ")
             )}
           </Typography.Text>
   
