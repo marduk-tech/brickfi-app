@@ -131,7 +131,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                             fontSize: FONT_SIZE.HEADING_4,
                           }}
                         >
-                          {index == 0 ? "Initial Timeline" : entry.name}:
+                          {index == 0 ? "Initial Timeline" : "Extension"}:
                         </Typography.Text>
                         <Typography.Text
                           style={{
