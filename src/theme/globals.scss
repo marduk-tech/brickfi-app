@@ -31,8 +31,7 @@ body {
   margin: 0;
   font-family: "DM Sans";
   padding: 0;
-  padding-top: constant(safe-area-inset-top);
-  padding-top: env(safe-area-inset-top);
+
   background-color: white;
   overflow-y: "scroll";
   scrollbar-width: none;
