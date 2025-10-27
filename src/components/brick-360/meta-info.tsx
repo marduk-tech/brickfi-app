@@ -84,18 +84,18 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
               color: COLORS.textColorMedium,
             }}
           >
-            {getMinMaxPrices(
-              lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
-                (c: any) => c.price
-              )
+            {lvnzyProject?.originalProjectId?.info?.developerId?.name || "Developer"} · {capitalize(
+              lvnzyProject?.meta.projectUnitTypes.split(",")[0]
             )}
           </Typography.Text>
   
         </Flex>
         <Flex align="center">
           {renderText(`
-            ${capitalize(
-              lvnzyProject?.meta.projectUnitTypes.split(",")[0]
+            ${getMinMaxPrices(
+              lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
+                (c: any) => c.price
+              )
             )} · ${
             lvnzyProject.meta.projectCorridors.sort(
               (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms

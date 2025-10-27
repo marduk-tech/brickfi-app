@@ -20,7 +20,7 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
             }}
             gap={8}
           >
-            <Typography.Text
+            {/* <Typography.Text
               style={{
                 margin: "0",
                 lineHeight: "100%",
@@ -30,7 +30,7 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
               }}
             >
               {lvnzyProject?.originalProjectId?.info?.developerId?.name || "Developer"}
-            </Typography.Text>
+            </Typography.Text> */}
             <Typography.Text
               style={{
                 margin: "0",
