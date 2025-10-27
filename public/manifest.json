@@ -3,7 +3,7 @@
   "short_name": "Brickfi",
   "start_url": "/",
   "scope": "/",
-  "display": "standalone",
+  "display": "fullscreen",
   "description": "The smartest way to buy real estate. Get comprehensive Brick360 reports around property, investment, builder and more for any property in Bangalore.",
   "lang": "en-IN",
   "dir": "ltr",
@@ -36,10 +36,6 @@
       "purpose": "maskable"
     }
   ],
-  "categories": [
-    "business",
-    "finance",
-    "lifestyle"
-  ],
+  "categories": ["business", "finance", "lifestyle"],
   "prefer_related_applications": false
 }
