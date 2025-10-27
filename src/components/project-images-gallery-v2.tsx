@@ -146,13 +146,13 @@ export const ProjectGalleryV2 = ({
         );
       });
 
-      if (mediaWithoutTags.length > 0 && result.length > 0) {
-        // Add untagged media to the first existing category
-        result[0][1] = [...result[0][1], ...mediaWithoutTags];
-      } else if (mediaWithoutTags.length > 0) {
-        // If no other categories exist, create a general category
-        result.push(["Media", mediaWithoutTags]);
-      }
+      // if (mediaWithoutTags.length > 0 && result.length > 0) {
+      //   // Add untagged media to the first existing category
+      //   result[0][1] = [...result[0][1], ...mediaWithoutTags];
+      // } else if (mediaWithoutTags.length > 0) {
+      //   // If no other categories exist, create a general category
+      //   result.push(["Media", mediaWithoutTags]);
+      // }
 
       return result;
     }
@@ -289,7 +289,7 @@ export const ProjectGalleryV2 = ({
                           <Image
                             src={item.image!.url}
                             alt={
-                              item.image!.caption || `${tag} image ${index + 1}`
+                              `${tag}-${item.image!.caption}` || `${tag} image ${index + 1}`
                             }
                             preview={{
                               mask: null,
