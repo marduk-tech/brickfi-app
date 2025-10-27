@@ -1,4 +1,5 @@
 import PosthogProvider from "@/components/common/posthog-provider";
+import CapacitorStatusBar from "@/components/common/capacitor-status-bar";
 import type { Metadata } from "next";
 import Script from "next/script";
 import AntdRegistry from "../components/antd-registry";
@@ -162,6 +163,7 @@ fbq('track', 'PageView');
           />
         </noscript>
 
+        <CapacitorStatusBar />
         <AntdRegistry>
           <ClientProviders>{children}</ClientProviders>
         </AntdRegistry>
