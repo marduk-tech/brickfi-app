@@ -159,7 +159,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                 categories = ["workplace", "schools"];
                 break;
               case "conveniences":
-                categories = ["conveniences", "commercial"];
+                categories = ["dining", "hospital", "commercial"];
                 break;
               case "transport":
                 categories = ["roads", "metro"];
