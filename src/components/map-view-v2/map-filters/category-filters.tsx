@@ -4,7 +4,6 @@ import { DRIVER_CATEGORIES } from "../../../libs/constants";
 import { capitalize } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
-import { useDevice } from "@/hooks/use-device";
 
 interface CategoryFiltersProps {
   categories?: string[];
@@ -21,9 +20,6 @@ export const CategoryFilters = ({
   hideAllFilters,
   showCategorySelection,
 }: CategoryFiltersProps) => {
-
-  const {isMobile} = useDevice();
-
   if (!showCategorySelection || hideAllFilters || !categories) {
     return null;
   }
@@ -38,8 +34,7 @@ export const CategoryFilters = ({
         top: 8,
         zIndex: 1000,
         left: 8,
-        width: "100%",
-        paddingRight: 125
+        width: "100%"
       }}
       gap={8}
     >

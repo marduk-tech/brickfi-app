@@ -1,5 +1,4 @@
 import PosthogProvider from "@/components/common/posthog-provider";
-
 import type { Metadata } from "next";
 import Script from "next/script";
 import AntdRegistry from "../components/antd-registry";
