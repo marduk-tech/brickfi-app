@@ -332,7 +332,7 @@ export const NewReportRequestFormV3 = () => {
                     style={{ fontSize: FONT_SIZE.HEADING_4, marginBottom: 24 }}
                   >
                     You can request report for upto {reportsLeft} projects. It
-                    will be shared within 24-48 hrs.
+                    will be shared within 2 business days.
                   </Typography.Text>
                 )}
 
@@ -495,8 +495,8 @@ export const NewReportRequestFormV3 = () => {
                 </Typography.Text>
                 <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
                   Our team including our swarm of AI agents are already
-                  processesing your request. <br></br>Please give us max 24-48
-                  hrs hours to get back to you with a detailed report.
+                  processesing your request. <br></br>Please give us max 2 business days
+                  to get back to you with a detailed factual BRICK360 Report.
                 </Typography.Text>
                 <Typography.Text
                   style={{
