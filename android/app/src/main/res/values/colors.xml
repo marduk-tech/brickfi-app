@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brickfi brand colors -->
+    <color name="colorPrimary">#2E3E4E</color>
+    <color name="colorPrimaryDark">#1F2A35</color>
+    <color name="colorAccent">#2E3E4E</color>
+</resources>

@@ -457,9 +457,11 @@ export const DRIVER_CATEGORIES = {
       }
       if (filter == "major-infra") {
         return (
-          ((["highway", "transit", "commercial"].includes(driver.driver) &&
-            driver.status !== "post-launch" && (!driver.distance || driver.distance <= 15))  ||
-            (["industrial-general"].includes(driver.driver) && (!driver.distance || driver.distance <= 20)))
+          (["highway", "transit", "commercial"].includes(driver.driver) &&
+            driver.status !== "post-launch" &&
+            (!driver.distance || driver.distance <= 15)) ||
+          (["industrial-general"].includes(driver.driver) &&
+            (!driver.distance || driver.distance <= 20))
         );
       }
       if (filter == "upcoming-tech") {
@@ -509,32 +511,58 @@ export const DRIVER_CATEGORIES = {
     },
   },
 
-  conveniences: {
-    icon: { name: "FaStore", set: "fa" },
-    drivers: ["food", "hospital"],
+  dining: {
+    icon: { name: "MdFoodBank", set: "md" },
+    drivers: ["food"],
     filters: [
       { key: "pop-dining", label: "Popular Dining" },
-      { key: "hospital", label: "Hospital" },
+      { key: "high-rated", label: "Highly Rated" },
+      { key: "cafe", label: "Cafes" },
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "pop-dining") {
         return (
-          ["food"].includes(driver.driver) &&
-          driver.tags &&
-          driver.tags.some((t) =>
-            ["popular brand", "fine dining", "highly rated"].includes(t)
-          )
+          driver.tags && driver.tags.some((t) => ["popular brand"].includes(t))
         );
       }
-      if (filter == "hospital") {
-        return driver.driver == "hospital";
-      }
-      if (filter == "other-dining") {
+
+      if (filter == "high-rated") {
         return (
-          ["food"].includes(driver.driver) &&
+          driver.tags &&
+          driver.tags.some((t) => ["fine dining", "highly rated"].includes(t))
+        );
+      }
+
+      if (filter == "cafe") {
+        return (
           driver.tags &&
           driver.tags.some((t) => ["highly rated"].includes(t)) &&
-          !driver.tags.some((t) => ["popular brand", "fine dining"].includes(t))
+          driver.tags.some((t) => ["cafe"].includes(t))
+        );
+      }
+
+      return false;
+    },
+  },
+
+  hospital: {
+    icon: { name: "FaRegHospital", set: "fa" },
+    drivers: ["hospital"],
+    filters: [
+      { label: "NABH accredited", key: "nabh" },
+      { label: "Medical Care", key: "medical" },
+    ],
+    onFilter: (filter: string, driver: IDriverPlace) => {
+      if (filter == "nabh") {
+        return (
+          driver.tags &&
+          driver.tags.some((t) => t.toLowerCase().indexOf("nabh") > -1)
+        );
+      }
+      if (filter == "medical") {
+        return (
+          !driver.tags ||
+          !driver.tags.some((t) => t.toLowerCase().indexOf("nabh") > -1)
         );
       }
       return false;
