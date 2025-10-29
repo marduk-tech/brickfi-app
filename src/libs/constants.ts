@@ -404,10 +404,10 @@ export const DRIVER_CATEGORIES = {
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "metro") {
-        return driver.name.toLowerCase().includes("metro");
+        return driver && driver.name && driver.name.toLowerCase().includes("metro");
       }
       if (filter == "kride") {
-        return driver.name.toLowerCase().includes("suburban");
+        return driver && driver.name && driver.name.toLowerCase().includes("suburban");
       }
       return false;
     },
