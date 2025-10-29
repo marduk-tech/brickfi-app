@@ -6,9 +6,11 @@ import DynamicReactIcon from "./dynamic-react-icon";
 type GradientBarProps = {
   value: number;
   showBadgeOnly?: boolean;
+  showSmileyOnly?: boolean;
+  smileySize?: number;
 };
 
-const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly }) => {
+const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmileyOnly, smileySize }) => {
   const interpolate = (start: number, end: number, factor: number): number => {
     return Math.round(start + (end - start) * factor);
   };
@@ -79,27 +81,34 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly }) => {
     );
   };
 
+  if (showSmileyOnly) {
+    return getSmileyIcon(value, smileySize || 18);
+  }
+
   if (showBadgeOnly) {
     return (
       <Flex
         style={{
           color: COLORS.textColorDark,
-          backgroundColor: "white",
+          backgroundColor: COLORS.bgColor,
           borderRadius: 6,
+          padding: "2px 4px",
+          border: `1px solid ${COLORS.borderColor}`
         }}
-        gap={2}
+        gap={4}
         align="center"
       >
-        <Typography.Text
+       
+        {getSmileyIcon(value, 18)}
+         <Typography.Text
           style={{
             fontWeight: 300,
-            fontSize: FONT_SIZE.HEADING_4,
+            fontSize: FONT_SIZE.PARA,
             color: COLORS.textColorDark,
           }}
         >
           {value ? Math.round(value * 5) / 100 : ""}
         </Typography.Text>
-        {getSmileyIcon(value, 18)}
       </Flex>
     );
   }

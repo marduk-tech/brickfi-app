@@ -60,8 +60,13 @@ export function UserProjects({
     let previewImage =
       imgs && imgs.length
         ? imgs.find((i: any) => i.isPreview) ||
-          imgs.find((i: any) => i.image && i.image.tags && i.image.tags.includes("exterior")) ||
-          imgs.find((i: any) => i.image && i.image.tags && !i.image.tags.includes("na"))
+          imgs.find(
+            (i: any) =>
+              i.image && i.image.tags && i.image.tags.includes("exterior")
+          ) ||
+          imgs.find(
+            (i: any) => i.image && i.image.tags && !i.image.tags.includes("na")
+          )
         : null;
     if (previewImage && previewImage.image) {
       previewImage = previewImage.image.url;
@@ -74,78 +79,78 @@ export function UserProjects({
       itemInfo.originalProjectId?.info?.financialPlan
     );
     return (
-      <Link
-        href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
-        prefetch={true}
-        style={{ textDecoration: "none", color: "inherit" }}
+      <Flex
+        style={{
+          marginBottom: 8,
+          cursor: "pointer",
+          backgroundColor: "white",
+          width: isMobile
+            ? "100%"
+            : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
+        }}
       >
-        <Flex
-          style={{
-            marginBottom: 8,
-            cursor: "pointer",
-            backgroundColor: "white",
-            width: isMobile
-              ? "100%"
-              : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
-          }}
+        <Link
+          href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
+          prefetch={false}
+          style={{ textDecoration: "none", color: "inherit", width: "100%" }}
         >
-        <Flex vertical style={{ width: "100%" }}>
-          <div
-            style={{
-              width: "100%",
-              height: isMobile ? 200 : 175,
-              borderRadius: 12,
-              backgroundImage: `url(${previewImage})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          ></div>
-          {/* <ProjectGallery
+          <Flex vertical style={{ width: "100%" }}>
+            <div
+              style={{
+                width: "100%",
+                height: isMobile ? 200 : 175,
+                borderRadius: 12,
+                backgroundImage: `url(${previewImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
+            ></div>
+            {/* <ProjectGallery
             media={itemInfo.originalProjectId.media}
           ></ProjectGallery> */}
 
-          <Tooltip title={itemInfo.meta.projectName}>
-            <Paragraph
-              style={{
-                fontSize: FONT_SIZE.HEADING_2,
-                width: "100%",
-                padding: "4px",
-                paddingBottom: 0,
-                marginBottom: 0,
-                fontWeight: 500,
-              }}
-              ellipsis={{
-                rows: 1,
-                expandable: false,
-                symbol: "..",
-              }}
-            >
-              {itemInfo.meta.projectName}
-            </Paragraph>
-          </Tooltip>
-          <Flex vertical style={{ marginTop: "auto", padding: "0 4px" }}>
-            <Paragraph
-              style={{
-                fontSize: FONT_SIZE.HEADING_4,
-                color: COLORS.textColorMedium,
-                marginBottom: 0,
-              }}
-              ellipsis={{
-                rows: 1,
-                expandable: false,
-                symbol: "..",
-              }}
-            >
-              {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹
-              {rupeeAmountFormat(
-                itemInfo?.originalProjectId.info.rate.minimumUnitCost
-              )}
-              -{itemInfo?.originalProjectId.info.rate.minimumUnitSize}sq.ft ·{" "}
-              {primaryCorridor}
-            </Paragraph>
+            <Tooltip title={itemInfo.meta.projectName}>
+              <Paragraph
+                style={{
+                  fontSize: FONT_SIZE.HEADING_2,
+                  width: "100%",
+                  padding: "4px",
+                  paddingBottom: 0,
+                  marginBottom: 0,
+                  fontWeight: 500,
+                }}
+                ellipsis={{
+                  rows: 1,
+                  expandable: false,
+                  symbol: "..",
+                }}
+              >
+                {itemInfo.meta.projectName}
+              </Paragraph>
+            </Tooltip>
+            <Flex vertical style={{ marginTop: "auto", padding: "0 4px" }}>
+              <Paragraph
+                style={{
+                  fontSize: FONT_SIZE.HEADING_4,
+                  color: COLORS.textColorMedium,
+                  marginBottom: 0,
+                }}
+                ellipsis={{
+                  rows: 1,
+                  expandable: false,
+                  symbol: "..",
+                }}
+              >
+                {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹
+                {rupeeAmountFormat(
+                  itemInfo?.originalProjectId.info.rate.minimumUnitCost
+                )}
+                -{itemInfo?.originalProjectId.info.rate.minimumUnitSize}sq.ft ·{" "}
+                {primaryCorridor}
+              </Paragraph>
 
-            {pmtPlan ? (
+              {/* {pmtPlan ? (
               <Flex
                 style={{
                   width: "fit-content",
@@ -172,47 +177,52 @@ export function UserProjects({
               </Flex>
             ) : (
               <Typography.Text>&nbsp;</Typography.Text>
-            )}
-            <Flex
-              style={{
-                paddingTop: 8,
-                borderTopColor: COLORS.borderColor,
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              {Object.keys(BRICK360_CATEGORY).map((item, index) => (
-                <Flex
-                  style={{
-                    borderColor: COLORS.borderColor,
-                    borderRadius: 8,
-                  }}
-                >
-                  <Flex vertical style={{ width: "100%" }} justify="flex-start">
-                    <Typography.Text
-                      style={{
-                        fontSize: isMobile
-                          ? FONT_SIZE.PARA
-                          : FONT_SIZE.SUB_TEXT,
-                        color: COLORS.textColorMedium,
-                      }}
+            )} */}
+              <Flex
+                style={{
+                  paddingTop: 8,
+                  borderTopColor: COLORS.borderColor,
+                  justifyContent: "space-between",
+                  width: "100%",
+                }}
+              >
+                {Object.keys(BRICK360_CATEGORY).map((item, index) => (
+                  <Flex
+                    style={{
+                      borderColor: COLORS.borderColor,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Flex
+                      vertical
+                      style={{ width: "100%" }}
+                      justify="flex-start"
                     >
-                      {(Brick360CategoryInfo as any)[item].title}
-                    </Typography.Text>
-                    <Flex>
-                      <GradientBar
-                        value={getCategoryScore(itemInfo.score?.[item])}
-                        showBadgeOnly={true}
-                      ></GradientBar>
+                      <Flex justify="center" align="center">
+                        <GradientBar
+                          value={getCategoryScore(itemInfo.score?.[item])}
+                          showBadgeOnly={true}
+                        ></GradientBar>
+                      </Flex>
+                      <Typography.Text
+                        style={{
+                          fontSize: isMobile
+                            ? FONT_SIZE.PARA
+                            : FONT_SIZE.SUB_TEXT,
+                          color: COLORS.textColorLight,
+                          textAlign: "center",
+                        }}
+                      >
+                        {(Brick360CategoryInfo as any)[item].title}
+                      </Typography.Text>
                     </Flex>
                   </Flex>
-                </Flex>
-              ))}
+                ))}
+              </Flex>
             </Flex>
           </Flex>
-        </Flex>
+        </Link>
       </Flex>
-      </Link>
     );
   };
 
@@ -308,7 +318,7 @@ export function UserProjects({
             width: "100%",
             flexWrap: "wrap",
             marginTop: 16,
-            padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
+            padding: isMobile ? `0 16px` : `0 ${HORIZONTAL_PADDING}px`,
           }}
           gap={32}
         >

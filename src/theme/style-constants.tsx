@@ -15,7 +15,7 @@ export const COLORS = {
   borderColorDark: "#666",
   textColorDark: "#2D3F4E",
   textColorMedium: "#777",
-  textColorLight: "#bbb",
+  textColorLight: "#aaa",
   textColorVeryLight: "#e1e1e1",
   bgColorBlue: "#e7f6ff",
 
@@ -43,7 +43,7 @@ export const FONT_SIZE = {
 };
 
 export const MOBILE_MARGIN = 16;
-export const MAX_WIDTH = 1150;
+export const MAX_WIDTH = 1200;
 export const HORIZONTAL_PADDING =
   safeWindow.innerWidth() > MAX_WIDTH
     ? (safeWindow.innerWidth() - MAX_WIDTH) / 2
