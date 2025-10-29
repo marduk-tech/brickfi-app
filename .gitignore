@@ -39,3 +39,26 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Capacitor - Android (build artifacts and local config only)
+android/local.properties
+android/.gradle/
+android/.idea/
+android/build/
+android/.transforms/
+android/app/build/
+android/*.iml
+android/app/*.iml
+android/app/src/main/assets/capacitor.config.json
+android/capacitor-cordova-android-plugins/build/
+
+# Capacitor - iOS (build artifacts and local config only)
+ios/App/build/
+ios/App/Pods/
+ios/App/Podfile.lock
+ios/App/public/
+ios/App/App/public/
+ios/**/*.xcworkspace/xcuserdata/
+ios/**/*.xcodeproj/xcuserdata/
+ios/.DS_Store
+*.xcuserstate
