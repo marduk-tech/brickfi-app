@@ -1,0 +1,11 @@
+{
+	"appId": "in.brickfi.app.staging",
+	"appName": "Brickfi",
+	"webDir": "out",
+	"server": {
+		"url": "https://app-staging.brickfi.in",
+		"cleartext": false
+	},
+	"android": {},
+	"packageClassList": []
+}
