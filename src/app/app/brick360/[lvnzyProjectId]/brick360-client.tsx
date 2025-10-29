@@ -11,7 +11,7 @@ export default function Brick360Client({ slug }: { slug: string }) {
   useEffect(() => {
     setTimeout(() => {
       setFlickerWait(false);
-    }, 500);
+    }, 300);
   }, []);
 
   if (flickerWait) {
