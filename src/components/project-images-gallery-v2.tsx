@@ -193,12 +193,14 @@ export const ProjectGalleryV2 = ({
             }}
             style={{
               textTransform: "capitalize",
-              border: `1px solid ${
+              border: `2px solid ${
                 selectedTag === tag ? COLORS.primaryColor : COLORS.borderColor
               }`,
               marginRight: 0,
               padding: "4px 12px",
               borderRadius: 16,
+              fontWeight: 500,
+              fontSize: FONT_SIZE.HEADING_4,
               backgroundColor:
                 selectedTag === tag ? COLORS.primaryColor : "white",
               color: selectedTag === tag ? "white" : COLORS.textColorMedium,
