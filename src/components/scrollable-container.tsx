@@ -12,8 +12,7 @@ export function ScrollableContainer({
       style={{
         flex: 1,
         overflowY: "auto",
-        paddingRight: 8,
-        paddingTop: 8,
+        padding: "8px 4px",
         scrollbarWidth: "none",
         height: height - 250,
       }}
