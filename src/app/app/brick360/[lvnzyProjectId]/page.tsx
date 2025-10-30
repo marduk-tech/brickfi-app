@@ -184,6 +184,7 @@ export const metadata: Metadata = {
 
 export default async function Brick360Page({ params }: PageProps) {
   const { lvnzyProjectId: slug } = await params;
+  //TODO: This particular hydration boundary code is causing delay when loading the page, which is also resulting page load fail sometimes.
   // const queryClient = getQueryClient();
 
   // await queryClient.prefetchQuery(getLvnzyProjectBySlugQuery(slug));
