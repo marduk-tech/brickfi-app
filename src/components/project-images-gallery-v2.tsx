@@ -9,8 +9,8 @@ const TAGS_ORDER = [
   "exterior",
   "layout",
   "amenities",
-  "floorplan",
   "house",
+  "floorplan",
   "construction",
 ];
 export const ProjectGalleryV2 = ({
@@ -73,18 +73,20 @@ export const ProjectGalleryV2 = ({
         (item.video.youtubeUrl || item.video.bunnyLibraryId) &&
         (!item.video.tags || !item.video.tags.includes("na"))
     );
-    const imageMedia = media.filter(
-      (item) =>
-        item.type === "image" &&
-        item.image &&
-        (!item.image.tags ||
-          !item.image.tags.length ||
-          !item.image.tags.find((t) => !TAGS_ORDER.includes(t)))
-    ).sort((a: any, b: any) => {
-      const seqA = TAGS_ORDER.indexOf(a.image.tags[0]);
-      const seqB = TAGS_ORDER.indexOf(b.image.tags[0]);
-      return seqA - seqB
-    });
+    const imageMedia = media
+      .filter(
+        (item) =>
+          item.type === "image" &&
+          item.image &&
+          (!item.image.tags ||
+            !item.image.tags.length ||
+            !item.image.tags.find((t) => !TAGS_ORDER.includes(t)))
+      )
+      .sort((a: any, b: any) => {
+        const seqA = TAGS_ORDER.indexOf(a.image.tags[0]);
+        const seqB = TAGS_ORDER.indexOf(b.image.tags[0]);
+        return seqA - seqB;
+      });
     const allMedia = [...videoMedia, ...imageMedia];
     const result: Record<string, IMedia[]> = {};
 
@@ -173,6 +175,7 @@ export const ProjectGalleryV2 = ({
 
   return (
     <Flex vertical gap={16}>
+      {/* Tag Filters */}
       <Flex
         style={{
           width: "100%",
@@ -213,105 +216,85 @@ export const ProjectGalleryV2 = ({
 
       {filteredImages.length > 0 ? (
         <Flex vertical gap={32} style={{ paddingBottom: 80 }}>
-          {filteredImages
-            .sort(([aTag, aImages], [bTag, bImages]) => {
-              if (selectedImageId) {
-                const aHasSelected = aImages.some(
-                  (img) => img._id === selectedImageId
-                );
-                const bHasSelected = bImages.some(
-                  (img) => img._id === selectedImageId
-                );
-                if (aHasSelected && !bHasSelected) return -1;
-                if (!aHasSelected && bHasSelected) return 1;
-              }
+          {filteredImages.map(([tag, images]) => (
+            <Flex key={tag} vertical>
+              <Typography.Text
+                style={{
+                  margin: 0,
+                  fontSize: FONT_SIZE.HEADING_2,
+                  textTransform: "capitalize",
+                }}
+              >
+                {tag}
+              </Typography.Text>
 
-              // Prioritize videos sections
-              const aHasVideos = aImages.some((item) => item.type === "video");
-              const bHasVideos = bImages.some((item) => item.type === "video");
-              if (aHasVideos && !bHasVideos) return -1;
-              if (!aHasVideos && bHasVideos) return 1;
-
-              return aTag.localeCompare(bTag);
-            })
-            .map(([tag, images]) => (
-              <Flex key={tag} vertical>
-                <Typography.Text
-                  style={{
-                    margin: 0,
-                    fontSize: FONT_SIZE.HEADING_2,
-                    textTransform: "capitalize",
-                  }}
-                >
-                  {tag}
-                </Typography.Text>
-
-                <div className="gallery-grid">
-                  {images.map((item, index) => {
-                    const isFirstInSection = index === 0;
-                    return (
-                      <div
-                        key={`${tag}-${item._id}`}
-                        className={`gallery-item ${
-                          isFirstInSection ? "gallery-item-large" : ""
-                        }`}
-                      >
-                        {item.type === "video" ? (
-                          item.video?.isYoutube ? (
-                            <iframe
-                              src={item.video.youtubeUrl?.replace(
-                                "watch?v=",
-                                "embed/"
-                              )}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                border: "1px solid",
-                                borderColor: COLORS.borderColorMedium,
-                                borderRadius: "8px",
-                              }}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          ) : (
-                            <iframe
-                              src={`https://iframe.mediadelivery.net/embed/${item.video?.bunnyLibraryId}/${item.video?.bunnyVideoId}?autoplay=false&loop=false&muted=false&preload=true&responsive=true`}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                border: "1px solid",
-                                borderColor: COLORS.borderColorMedium,
-                                borderRadius: "8px",
-                              }}
-                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                              allowFullScreen
-                            />
-                          )
-                        ) : (
-                          <Image
-                            src={item.image!.url}
-                            alt={
-                              `${tag}-${item.image!.caption}` || `${tag} image ${index + 1}`
-                            }
-                            preview={{
-                              mask: null,
-                            }}
+              <div className="gallery-grid">
+                {images.map((item, index) => {
+                  const isFirstInSection = index === 0;
+                  return (
+                    <div
+                      key={`${tag}-${item._id}`}
+                      className={`gallery-item ${
+                        isFirstInSection ? "gallery-item-large" : ""
+                      }`}
+                    >
+                      {item.type === "video" ? (
+                        item.video?.isYoutube ? (
+                          <iframe
+                            src={item.video.youtubeUrl?.replace(
+                              "watch?v=",
+                              "embed/"
+                            )}
                             style={{
                               width: "100%",
                               height: "100%",
-                              objectFit: "cover",
-                              objectPosition: "center",
                               border: "1px solid",
                               borderColor: COLORS.borderColorMedium,
+                              borderRadius: "8px",
                             }}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
                           />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </Flex>
-            ))}
+                        ) : (
+                          <iframe
+                            src={`https://iframe.mediadelivery.net/embed/${item.video?.bunnyLibraryId}/${item.video?.bunnyVideoId}?autoplay=false&loop=false&muted=false&preload=true&responsive=true`}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: "1px solid",
+                              borderColor: COLORS.borderColorMedium,
+                              borderRadius: "8px",
+                            }}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          />
+                        )
+                      ) : (
+                        <Image
+                          src={item.image!.url}
+                          alt={
+                            `${tag}-${item.image!.caption}` ||
+                            `${tag} image ${index + 1}`
+                          }
+                          preview={{
+                            mask: null,
+                          }}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                            objectPosition: "center",
+                            border: "1px solid",
+                            borderColor: COLORS.borderColorMedium,
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </Flex>
+          ))}
         </Flex>
       ) : (
         <Typography.Text>
