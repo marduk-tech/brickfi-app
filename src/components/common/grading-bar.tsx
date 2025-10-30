@@ -21,9 +21,9 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
     // Define color stops
     const colors = [
       { stop: 0, color: [255, 76, 5] }, // Red-Orange
-      { stop: 25, color: [255, 149, 107] }, // Orange-Yellow
-      { stop: 50, color: [248, 237, 140] }, // Yellow Greenish
-      { stop: 75, color: [144, 198, 124] }, // Greenish
+      { stop: 40, color: [251, 151, 12] }, // Orange-Yellow
+      { stop: 65, color: [209, 223, 1] }, // Yellow Greenish
+      { stop: 85, color: [81, 191, 41] }, // Greenish
       { stop: 100, color: [50, 142, 110] }, // Dark Green
     ];
 
@@ -53,17 +53,17 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
       color = getGradientColor(value);
     size = size || 22;
 
-    if (value >= 80) {
-      iconName = "FaRegLaugh";
+    if (value >= 85) {
+      iconName = "FaRegGrinStars";
       iconSet = "fa";
       size = size * 0.8;
-    } else if (value < 80 && value >= 65) {
+    } else if (value < 85 && value >= 77) {
       iconName = "PiSmileyBold";
       iconSet = "pi";
-    } else if (value < 65 && value >= 40) {
+    } else if (value < 77 && value >= 60) {
       iconName = "PiSmileyMehBold";
       iconSet = "pi";
-    } else if (value < 40 && value > 0) {
+    } else if (value < 60 && value > 0) {
       iconName = "PiSmileySadBold";
       iconSet = "pi";
     } else {
