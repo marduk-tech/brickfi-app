@@ -37,7 +37,7 @@
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
+  gap: 32px;
   width: 100%;
   margin-bottom: 16px;
 }
@@ -45,7 +45,7 @@
 .gallery-item {
   position: relative;
   overflow: hidden;
-  border-radius: 8px;
+  border-radius: 12px;
   min-height: 150px;
   background-color: #f0f0f0;
 }
@@ -88,7 +88,7 @@
 
 /* Separator between tag sections */
 .ant-typography + .gallery-grid {
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 /* Mobile styles */
