@@ -237,7 +237,7 @@ export const ProjectGalleryV2 = ({
                 <Typography.Text
                   style={{
                     margin: 0,
-                    fontSize: FONT_SIZE.HEADING_3,
+                    fontSize: FONT_SIZE.HEADING_2,
                     textTransform: "capitalize",
                   }}
                 >
@@ -297,7 +297,8 @@ export const ProjectGalleryV2 = ({
                             style={{
                               width: "100%",
                               height: "100%",
-                              objectFit: "contain",
+                              objectFit: "cover",
+                              objectPosition: "center",
                               border: "1px solid",
                               borderColor: COLORS.borderColorMedium,
                             }}
