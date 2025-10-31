@@ -1,16 +1,20 @@
 import { useEffect, useState } from "react";
-import { Polygon, useMap } from "react-leaflet";
+import { Polygon, Popup, useMap } from "react-leaflet";
 import { COLORS } from "../../theme/style-constants";
+
+export interface PolygonData {
+  id: string;
+  driverId?: string;
+  sectionIndex?: number;
+  positions: [number, number][];
+  name: string;
+  description: string;
+}
 
 export const MapPolygons = ({
   polygons,
 }: {
-  polygons: Array<{
-    id: string;
-    positions: [number, number][];
-    name: string;
-    description: string;
-  }>;
+  polygons: PolygonData[];
 }) => {
   const map = useMap();
   const [visiblePolygons, setVisiblePolygons] = useState<typeof polygons>([]);
@@ -70,7 +74,23 @@ export const MapPolygons = ({
                 ? COLORS.textColorDark
                 : COLORS.redIdentifier,
           }}
-        />
+        >
+          <Popup>
+            <div style={{ maxWidth: "200px" }}>
+              <strong>{poly.name}</strong>
+              {poly.sectionIndex !== undefined && (
+                <div style={{ fontSize: "12px", marginTop: "4px" }}>
+                  Section {poly.sectionIndex + 1}
+                </div>
+              )}
+              {poly.description && (
+                <div style={{ fontSize: "12px", marginTop: "4px" }}>
+                  {poly.description}
+                </div>
+              )}
+            </div>
+          </Popup>
+        </Polygon>
       ))}
     </>
   );

@@ -151,6 +151,7 @@ export const processRoadFeatures = (features: GeoJSONFeature[]) => {
 
 /**
  * Process driver data into polygon format
+ * Supports both Polygon and MultiPolygon geometries
  */
 export const processDriversToPolygons = (
   data: any[],
@@ -183,28 +184,48 @@ export const processDriversToPolygons = (
 
       return matchesType;
     })
-    .map((driver) => {
+    .flatMap((driver) => {
       try {
         const geojson =
           typeof driver.details.osm.geojson === "string"
             ? JSON.parse(driver.details.osm.geojson)
             : driver.details.osm.geojson;
 
-        if (!geojson || geojson.type !== "Polygon") {
-          return null;
+        if (!geojson || !["Polygon", "MultiPolygon"].includes(geojson.type)) {
+          return [];
         }
 
-        return {
-          id: driver._id,
-          positions: geojson.coordinates[0].map(
-            ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
-          ),
-          name: driver.name,
-          description: driver.details?.description || "",
-        };
+        // multiPolygon flatten into multiple polygon objects
+        if (geojson.type === "MultiPolygon") {
+          return geojson.coordinates.map(
+            (polygonCoords: [number, number][][], index: number) => ({
+              id: `${driver._id}-section-${index}`,
+              driverId: driver._id,
+              sectionIndex: index,
+              positions: polygonCoords[0].map(
+                ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
+              ),
+              name: driver.name,
+              description: driver.details?.description || "",
+            })
+          );
+        }
+
+        // single Polygon
+        return [
+          {
+            id: driver._id,
+            driverId: driver._id,
+            positions: geojson.coordinates[0].map(
+              ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
+            ),
+            name: driver.name,
+            description: driver.details?.description || "",
+          },
+        ];
       } catch (error) {
         console.error("Error processing polygon data:", error);
-        return null;
+        return [];
       }
     })
     .filter((p): p is NonNullable<typeof p> => p !== null);
