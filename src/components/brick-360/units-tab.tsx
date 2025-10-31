@@ -1,12 +1,12 @@
 import { Flex, Image, Modal, Tag, Typography } from "antd";
-import { fetchPmtPlan, rupeeAmountFormat } from "../../libs/lvnzy-helper";
-import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import { ScrollableContainer } from "../scrollable-container";
-import { useDevice } from "../../hooks/use-device";
 import { useEffect, useState } from "react";
-import DynamicReactIcon from "../common/dynamic-react-icon";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useDevice } from "../../hooks/use-device";
+import { fetchPmtPlan, rupeeAmountFormat } from "../../libs/lvnzy-helper";
+import { COLORS, FONT_SIZE } from "../../theme/style-constants";
+import DynamicReactIcon from "../common/dynamic-react-icon";
+import { ScrollableContainer } from "../scrollable-container";
 
 interface UnitsTabProps {
   lvnzyProject: any;
@@ -284,7 +284,8 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
           {configFilters &&
           configFilters.length &&
           configFilters.length <
-            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length - 2 ? (
+            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length -
+              2 ? (
             <Flex style={{ marginTop: 24 }}>
               {configFilters?.map((filter: string) => {
                 return (
@@ -321,105 +322,114 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
               scrollbarWidth: "none",
             }}
           >
-            {lvnzyProject?.originalProjectId.info.unitConfigWithPricing
-              .filter(
-                (c: any) =>
-                  !configFilters ||
-                  !configFilters.length ||
-                  configFilters.length >=
-                    (lvnzyProject?.originalProjectId.info.unitConfigWithPricing
-                      .length - 2) ||
-                  (c.type || getBhkType(c.config)) == selectedConfigFilter
-              )
-              .sort((a: any, b: any) => a.price - b.price)
-              .map((c: any, index: number) => {
-                return (
-                  <Flex
-                    key={`config-${index}`}
-                    vertical
-                    style={{
-                      marginTop: 16,
-                      padding: 8,
-                      paddingBottom: 16,
-                      borderRadius: 8,
-                      border: `2px solid ${COLORS.borderColor}`,
-                    }}
-                  >
-                    {c.sizeBuiltup ? (
-                      <Flex vertical style={{ marginBottom: 8 }}>
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.HEADING_3,
-                            color: COLORS.primaryColor,
-                          }}
-                        >
-                          {c.type}
-                        </Typography.Text>
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.PARA,
-                            color: COLORS.textColorMedium,
-                          }}
-                        >
-                          Builtup Area: {c.sizeBuiltup} sq.ft
-                        </Typography.Text>
-                        {c.sizeCarpet ? (
+            <Image.PreviewGroup preview={true}>
+              {lvnzyProject?.originalProjectId.info.unitConfigWithPricing
+                .filter(
+                  (c: any) =>
+                    !configFilters ||
+                    !configFilters.length ||
+                    configFilters.length >=
+                      lvnzyProject?.originalProjectId.info.unitConfigWithPricing
+                        .length -
+                        2 ||
+                    (c.type || getBhkType(c.config)) == selectedConfigFilter
+                )
+                .sort((a: any, b: any) => a.price - b.price)
+                .map((c: any, index: number) => {
+                  return (
+                    <Flex
+                      key={`config-${index}`}
+                      vertical
+                      style={{
+                        marginTop: 16,
+                        padding: 8,
+                        paddingBottom: 16,
+                        borderRadius: 8,
+                        border: `2px solid ${COLORS.borderColor}`,
+                      }}
+                    >
+                      {c.sizeBuiltup ? (
+                        <Flex vertical style={{ marginBottom: 8 }}>
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.HEADING_3,
+                              color: COLORS.primaryColor,
+                            }}
+                          >
+                            {c.type}
+                          </Typography.Text>
                           <Typography.Text
                             style={{
                               fontSize: FONT_SIZE.PARA,
                               color: COLORS.textColorMedium,
                             }}
                           >
-                            Carpet Area: {c.sizeCarpet} sq.ft
+                            Builtup Area: {c.sizeBuiltup} sq.ft
                           </Typography.Text>
-                        ) : null}
-                      </Flex>
-                    ) : (
-                      <Flex>
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.HEADING_4,
-                            textTransform: "uppercase",
-                            color: COLORS.primaryColor,
-                          }}
-                        >
-                          {c.config}
-                        </Typography.Text>
-                      </Flex>
-                    )}
-
-                    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2 }}>
-                      ₹{rupeeAmountFormat(c.price)}
-                    </Typography.Text>
-                    {c.floorplans &&
-                    c.floorplans.filter((f: string) => !!f).length > 0 ? (
-                      <Flex
-                        style={{
-                          overflowX: "auto",
-                          marginTop: 16,
-                          scrollbarWidth: "none",
-                        }}
-                        gap={32}
-                      >
-                        {c.floorplans.map((fp: any, i: number) => {
-                          console.log(fp);
-
-                          return (
-                            <Image
-                              key={`fp-${i}`}
-                              src={fp}
+                          {c.sizeCarpet ? (
+                            <Typography.Text
                               style={{
-                                height: 125,
-                                width: "auto",
+                                fontSize: FONT_SIZE.PARA,
+                                color: COLORS.textColorMedium,
                               }}
-                            />
-                          );
-                        })}
-                      </Flex>
-                    ) : null}
-                  </Flex>
-                );
-              })}
+                            >
+                              Carpet Area: {c.sizeCarpet} sq.ft
+                            </Typography.Text>
+                          ) : null}
+                        </Flex>
+                      ) : (
+                        <Flex>
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.HEADING_4,
+                              textTransform: "uppercase",
+                              color: COLORS.primaryColor,
+                            }}
+                          >
+                            {c.config}
+                          </Typography.Text>
+                        </Flex>
+                      )}
+
+                      <Typography.Text
+                        style={{ fontSize: FONT_SIZE.HEADING_2 }}
+                      >
+                        ₹{rupeeAmountFormat(c.price)}
+                      </Typography.Text>
+                      {c.floorplans &&
+                      c.floorplans.filter((f: string) => !!f).length > 0 ? (
+                        <Flex
+                          style={{
+                            overflowX: "auto",
+                            marginTop: 16,
+                            scrollbarWidth: "none",
+                          }}
+                          gap={32}
+                        >
+                          {c.floorplans.map((fp: any, i: number) => {
+                            console.log(fp);
+
+                            return (
+                              <Image
+                                key={`fp-${i}`}
+                                src={fp}
+                                alt={`Floorplan ${i + 1}`}
+                                preview={{
+                                  mask: null,
+                                }}
+                                style={{
+                                  height: 125,
+                                  width: "auto",
+                                }}
+                              />
+                            );
+                          })}
+                        </Flex>
+                      ) : null}
+                    </Flex>
+                  );
+                })}
+            </Image.PreviewGroup>
           </Flex>
         </Flex>
       </Flex>

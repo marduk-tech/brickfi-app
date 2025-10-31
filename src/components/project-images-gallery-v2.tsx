@@ -215,87 +215,89 @@ export const ProjectGalleryV2 = ({
       </Flex>
 
       {filteredImages.length > 0 ? (
-        <Flex vertical gap={32} style={{ paddingBottom: 80 }}>
-          {filteredImages.map(([tag, images]) => (
-            <Flex key={tag} vertical>
-              <Typography.Text
-                style={{
-                  margin: 0,
-                  fontSize: FONT_SIZE.HEADING_2,
-                  textTransform: "capitalize",
-                }}
-              >
-                {tag}
-              </Typography.Text>
+        <Image.PreviewGroup preview={true}>
+          <Flex vertical gap={32} style={{ paddingBottom: 80 }}>
+            {filteredImages.map(([tag, images]) => (
+              <Flex key={tag} vertical>
+                <Typography.Text
+                  style={{
+                    margin: 0,
+                    fontSize: FONT_SIZE.HEADING_2,
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {tag}
+                </Typography.Text>
 
-              <div className="gallery-grid">
-                {images.map((item, index) => {
-                  const isFirstInSection = index === 0;
-                  return (
-                    <div
-                      key={`${tag}-${item._id}`}
-                      className={`gallery-item ${
-                        isFirstInSection ? "gallery-item-large" : ""
-                      }`}
-                    >
-                      {item.type === "video" ? (
-                        item.video?.isYoutube ? (
-                          <iframe
-                            src={item.video.youtubeUrl?.replace(
-                              "watch?v=",
-                              "embed/"
-                            )}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              border: "1px solid",
-                              borderColor: COLORS.borderColorMedium,
-                              borderRadius: "8px",
-                            }}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          />
+                <div className="gallery-grid">
+                  {images.map((item, index) => {
+                    const isFirstInSection = index === 0;
+                    return (
+                      <div
+                        key={`${tag}-${item._id}`}
+                        className={`gallery-item ${
+                          isFirstInSection ? "gallery-item-large" : ""
+                        }`}
+                      >
+                        {item.type === "video" ? (
+                          item.video?.isYoutube ? (
+                            <iframe
+                              src={item.video.youtubeUrl?.replace(
+                                "watch?v=",
+                                "embed/"
+                              )}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "1px solid",
+                                borderColor: COLORS.borderColorMedium,
+                                borderRadius: "8px",
+                              }}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : (
+                            <iframe
+                              src={`https://iframe.mediadelivery.net/embed/${item.video?.bunnyLibraryId}/${item.video?.bunnyVideoId}?autoplay=false&loop=false&muted=false&preload=true&responsive=true`}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                border: "1px solid",
+                                borderColor: COLORS.borderColorMedium,
+                                borderRadius: "8px",
+                              }}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          )
                         ) : (
-                          <iframe
-                            src={`https://iframe.mediadelivery.net/embed/${item.video?.bunnyLibraryId}/${item.video?.bunnyVideoId}?autoplay=false&loop=false&muted=false&preload=true&responsive=true`}
+                          <Image
+                            src={item.image!.url}
+                            alt={
+                              `${tag}-${item.image!.caption}` ||
+                              `${tag} image ${index + 1}`
+                            }
+                            preview={{
+                              mask: null,
+                            }}
                             style={{
                               width: "100%",
                               height: "100%",
+                              objectFit: "cover",
+                              objectPosition: "center",
                               border: "1px solid",
                               borderColor: COLORS.borderColorMedium,
-                              borderRadius: "8px",
                             }}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
                           />
-                        )
-                      ) : (
-                        <Image
-                          src={item.image!.url}
-                          alt={
-                            `${tag}-${item.image!.caption}` ||
-                            `${tag} image ${index + 1}`
-                          }
-                          preview={{
-                            mask: null,
-                          }}
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            objectFit: "cover",
-                            objectPosition: "center",
-                            border: "1px solid",
-                            borderColor: COLORS.borderColorMedium,
-                          }}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </Flex>
-          ))}
-        </Flex>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </Flex>
+            ))}
+          </Flex>
+        </Image.PreviewGroup>
       ) : (
         <Typography.Text>
           No media available for the selected tag.
