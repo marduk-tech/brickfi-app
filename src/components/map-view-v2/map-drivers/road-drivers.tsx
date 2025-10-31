@@ -140,10 +140,6 @@ export const RoadDriversComponent = ({
               const numPoints =
                 totalLength >= 4 ? Math.floor(totalLength / 4) : 0;
 
-              if (!numPoints) {
-                return null;
-              }
-
               const points = [];
               for (let i = 0; i < numPoints; i++) {
                 const distance = (i * totalLength) / numPoints;
