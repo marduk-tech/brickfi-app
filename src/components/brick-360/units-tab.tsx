@@ -284,9 +284,8 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
           {configFilters &&
           configFilters.length &&
           configFilters.length <
-            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length -
-              2 ? (
-            <Flex style={{ marginTop: 24 }}>
+            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length - 2 ? (
+            <Flex style={{ marginTop: 24, width: "100%", overflowX: "scroll", whiteSpace:"nowrap", scrollbarWidth: "none" }}>
               {configFilters?.map((filter: string) => {
                 return (
                   <Tag
