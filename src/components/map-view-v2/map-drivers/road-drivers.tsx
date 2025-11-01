@@ -82,10 +82,7 @@ export const RoadDriversComponent = ({
                   >
                     {driver.name}
                   </Typography.Text>
-                  <Flex
-                    style={{
-                    }}
-                  >
+                  <Flex style={{}}>
                     <Tag
                       style={{
                         fontSize: FONT_SIZE.HEADING_4,
@@ -123,6 +120,7 @@ export const RoadDriversComponent = ({
             setInfoModalOpen(true);
           };
 
+          let totalMarkers = 0;
           const RoadLine = processedFeatures
             .filter((feature) => {
               return feature.coordinates.some(([lng, lat]) =>
@@ -138,7 +136,12 @@ export const RoadDriversComponent = ({
               const totalLength = turf.length(line, { units: "kilometers" });
 
               const numPoints =
-                totalLength >= 4 ? Math.floor(totalLength / 4) : 0;
+                totalLength >= 4
+                  ? Math.floor(totalLength / 4)
+                  : lineIndex == processedFeatures.length - 1 && !totalMarkers
+                  ? 1
+                  : 0;
+              totalMarkers += numPoints;
 
               const points = [];
               for (let i = 0; i < numPoints; i++) {
