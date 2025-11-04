@@ -284,8 +284,17 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
           {configFilters &&
           configFilters.length &&
           configFilters.length <
-            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length - 2 ? (
-            <Flex style={{ marginTop: 24, width: "100%", overflowX: "scroll", whiteSpace:"nowrap", scrollbarWidth: "none" }}>
+            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length -
+              2 ? (
+            <Flex
+              style={{
+                marginTop: 24,
+                width: "100%",
+                overflowX: "scroll",
+                whiteSpace: "nowrap",
+                scrollbarWidth: "none",
+              }}
+            >
               {configFilters?.map((filter: string) => {
                 return (
                   <Tag
@@ -342,9 +351,16 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                       style={{
                         marginTop: 16,
                         padding: 8,
-                        paddingBottom: 16,
+                        paddingBottom: isMobile ? 24: 0,
+                                                paddingRight: isMobile ? 0: 24,
+
                         borderRadius: 8,
-                        border: `2px solid ${COLORS.borderColor}`,
+                        borderRight: isMobile
+                          ? "none"
+                          : `2px solid ${COLORS.borderColor}`,
+                        borderBottom: isMobile
+                          ? `2px solid ${COLORS.borderColor}`
+                          : "none",
                       }}
                     >
                       {c.sizeBuiltup ? (
@@ -402,8 +418,9 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                             overflowX: "auto",
                             marginTop: 16,
                             scrollbarWidth: "none",
+                            maxWidth: isMobile ? "100%": 300
                           }}
-                          gap={32}
+                          gap={24}
                         >
                           {c.floorplans.map((fp: any, i: number) => {
                             console.log(fp);
@@ -419,6 +436,8 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                                 style={{
                                   height: 125,
                                   width: "auto",
+                                  border: `2px solid ${COLORS.borderColorMedium}`,
+                                  borderRadius: 8
                                 }}
                               />
                             );
