@@ -354,7 +354,6 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                         paddingBottom: isMobile ? 24: 0,
                                                 paddingRight: isMobile ? 0: 24,
 
-                        borderRadius: 8,
                         borderRight: isMobile
                           ? "none"
                           : `2px solid ${COLORS.borderColor}`,
