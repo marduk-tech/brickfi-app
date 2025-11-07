@@ -37,8 +37,15 @@ function getFormattedDateString(dateStr: string) {
 function getMonthsDiff(dateStart: string, dateComp: string) {
   const sDate = moment(dateStart, "DD-MM-YYYY");
   const cDate = moment(dateComp, "DD-MM-YYYY");
+  let months = cDate.diff(sDate, "months");
+  let yrs;
+  if (months >= 12) {
+    yrs = Math.floor(months/12);
+    months = months - yrs * 12;
+  }
+  let txtDelay = yrs ? (`${yrs} yrs${months ? `, ${months} months`: ''}`) : `${months} months`;
   if (sDate.isValid() && cDate.isValid()) {
-    return ` by ${cDate.diff(sDate, "months")} months`;
+    return ` by ${txtDelay}`;
   }
   return "";
 }
@@ -71,8 +78,8 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
       });
 
       timelines = timelines.sort((a: any, b: any) => {
-        const diff = moment(b.timeline[0].startDate, "DD-MM-YYYY").diff(
-          moment(a.timeline[0].startDate, "DD-MM-YYYY")
+        const diff = moment(a.timeline[0].completionDate, "DD-MM-YYYY").diff(
+          moment(b.timeline[0].completionDate, "DD-MM-YYYY")
         );
         return diff;
       });
@@ -103,7 +110,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                       color: COLORS.primaryColor,
                     }}
                   >
-                    {moment(t.timeline[0].startDate, "DD-MM-YYYY").format(
+                    {moment(t.timeline[t.timeline.length - 1].completionDate, "DD-MM-YYYY").format(
                       "MMM YYYY"
                     )}
                   </Typography.Text>
@@ -120,8 +127,10 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                       >
                         Delayed
                         {getMonthsDiff(
-                          t.timeline[1].startDate,
+                          t.timeline[0].completionDate,
                           t.timeline[t.timeline.length - 1].completionDate
+                          
+                          
                         )}
                       </Typography.Text>
                     </Flex>
@@ -197,8 +206,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
           }}
           color="processing"
         >
-          The timeline shows different phases of the same project as per RERA
-          records.
+          The timeline shows different phases of the same project as per RERA in chronological order.
         </Tag>
       </Flex>
       <Timeline items={timelines}></Timeline>

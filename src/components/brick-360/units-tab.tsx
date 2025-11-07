@@ -33,7 +33,7 @@ const getTotalFloors = (lvnzyProject: any) => {
     if (minFloors == maxFloors) {
       totalFloors = `${minFloors}`;
     } else {
-      totalFloors = `${minFloors} - ${maxFloors}`;
+      totalFloors = `${minFloors}-${maxFloors}`;
     }
     return (
       <Typography.Text
@@ -234,8 +234,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
             ·
             {getMinMaxSize(
               lvnzyProject?.originalProjectId.info.unitConfigWithPricing
-            )}{" "}
-            ·
+            )}
             {lvnzyProject?.originalProjectId.info.unitConfigWithPricing &&
             lvnzyProject!.meta.projectConfigurations.unitsBreakup
               ? getTotalFloors(lvnzyProject)
