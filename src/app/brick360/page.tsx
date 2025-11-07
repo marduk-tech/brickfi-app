@@ -1,13 +1,33 @@
 import ReportLanding from "@/custom-pages/landing/report-landing";
+import { SEO_CONTENT } from "@/libs/constants";
 import type { Metadata } from "next";
 
-
-const META_DESCR = "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";
-const META_TITLE = "Brickfi | Get a 360 Report Card for any property in Bangalore";
+const META_DESCR =
+  "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";
+const META_TITLE =
+  "Brickfi | Get a 360 Report Card for any property in Bangalore";
 export const metadata: Metadata = {
   title: META_TITLE,
-  description:
-    META_DESCR,
+  description: META_DESCR,
+  other: {
+    "application/ld+json": JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      url: "https://www.brickfi.in/brick360",
+      name: META_TITLE,
+      description: META_DESCR,
+      publisher: {
+        "@type": "Organization",
+        name: SEO_CONTENT.companyName,
+        url: SEO_CONTENT.companyUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: SEO_CONTENT.companyLogo,
+        },
+      },
+      inLanguage: "en-IN",
+    }),
+  },
   keywords: [
     "real estate",
     "property",
@@ -30,8 +50,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: META_TITLE,
-    description:
-      META_DESCR,
+    description: META_DESCR,
     url: "https://brickfi.in",
     siteName: "Brickfi",
     images: [
@@ -48,8 +67,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: META_TITLE,
-    description:
-      META_DESCR,
+    description: META_DESCR,
     images: ["/images/brick360-preview.png"],
   },
   robots: {

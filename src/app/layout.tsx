@@ -4,6 +4,7 @@ import Script from "next/script";
 import AntdRegistry from "../components/antd-registry";
 import { ClientProviders } from "../components/client-providers";
 import "../theme/globals.scss";
+import { SEO_CONTENT } from "@/libs/constants";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://brickfi.in"),
@@ -74,6 +75,43 @@ export const metadata: Metadata = {
   },
 };
 
+const RootSEOSchema = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      name: SEO_CONTENT.companyName,
+      url: SEO_CONTENT.companyUrl,
+      logo: SEO_CONTENT.companyLogo,
+      sameAs: [
+        "https://www.linkedin.com/company/brickfi",
+        "https://www.instagram.com/brickfi",
+      ],
+      description: SEO_CONTENT.companyDescription,
+      foundingDate: "2025",
+      location: {
+        "@type": "Place",
+        address: {
+          "@type": "PostalAddress",
+          addressCountry: "IN",
+        },
+      },
+    },
+    {
+      "@type": "SoftwareApplication",
+      name: "BrickFi Platform",
+      url: SEO_CONTENT.companyUrl,
+      applicationCategory: "RealEstateListing",
+      operatingSystem: "Web",
+      description: SEO_CONTENT.companyDescription,
+      creator: {
+        "@type": "Organization",
+        name: SEO_CONTENT.companyName,
+        url: SEO_CONTENT.companyUrl,
+      },
+    },
+  ],
+};
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -95,6 +133,10 @@ export default function RootLayout({
         />
         <meta name="apple-mobile-web-app-title" content="Brickfi" />
         <link rel="apple-touch-icon" href="/images/logos/apple-icon-180.png" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(RootSEOSchema) }}
+        />
 
         <Script
           strategy="afterInteractive"

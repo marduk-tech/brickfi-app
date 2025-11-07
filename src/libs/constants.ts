@@ -592,3 +592,11 @@ export const DRIVER_CATEGORIES = {
     drivers: [],
   },
 };
+
+
+export const SEO_CONTENT = {
+  companyName: "Brickfi",
+  companyUrl: "https://www.brickfi.in/",
+  companyLogo: "https://www.brickfi.in/images/brickfi-logo.png",
+  companyDescription: "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore."
+}
