@@ -350,8 +350,8 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                       style={{
                         marginTop: 16,
                         padding: 8,
-                        paddingBottom: isMobile ? 24: 0,
-                                                paddingRight: isMobile ? 0: 24,
+                        paddingBottom: isMobile ? 24 : 0,
+                        paddingRight: isMobile ? 0 : 24,
 
                         borderRight: isMobile
                           ? "none"
@@ -377,7 +377,12 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                               color: COLORS.textColorMedium,
                             }}
                           >
-                            Builtup Area: {c.sizeBuiltup} sq.ft
+                            {lvnzyProject?.originalProjectId.info.homeType.includes(
+                              "plot"
+                            ) && !c.type.toLowerCase().includes("bhk")
+                              ? "Plot "
+                              : "Builtup "}
+                            Area: {c.sizeBuiltup} sq.ft
                           </Typography.Text>
                           {c.sizeCarpet ? (
                             <Typography.Text
@@ -416,7 +421,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                             overflowX: "auto",
                             marginTop: 16,
                             scrollbarWidth: "none",
-                            maxWidth: isMobile ? "100%": 300
+                            maxWidth: isMobile ? "100%" : 300,
                           }}
                           gap={24}
                         >
@@ -433,9 +438,10 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                                 }}
                                 style={{
                                   height: 125,
+                                  minWidth:100,
                                   width: "auto",
                                   border: `2px solid ${COLORS.borderColorMedium}`,
-                                  borderRadius: 8
+                                  borderRadius: 8,
                                 }}
                               />
                             );
