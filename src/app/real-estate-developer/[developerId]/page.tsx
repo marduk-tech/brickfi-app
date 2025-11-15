@@ -8,6 +8,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import RealEstateDeveloperClient from "./real-estate-developer-client";
 import FourOFour from "@/custom-pages/landing/404";
+import { SEO_CONTENT } from "@/libs/constants";
 
 interface PageProps {
   params: Promise<{ developerId: string }>;
@@ -43,6 +44,42 @@ export async function generateMetadata({
         "property developer",
         "brickfi",
       ],
+      other: {
+        "application/ld+json": JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebPage",
+              url: "https://www.brickfi.in/real-estate-developer/aashish-developer-and-builders",
+              name: title,
+              description,
+              publisher: {
+                "@type": "Organization",
+                name: "BrickFi",
+                url: SEO_CONTENT.companyUrl,
+                logo: {
+                  "@type": "ImageObject",
+                  url: SEO_CONTENT.companyLogo,
+                },
+              },
+              inLanguage: "en-IN",
+            },
+            {
+              "@type": "FAQPage",
+              mainEntity: developer.info.faq.map((q: any) => {
+                return {
+                  "@type": "Question",
+                  name: q.question,
+                  acceptedAnswer: {
+                    "@type": "Answer",
+                    text: q.answer,
+                  },
+                }
+              }),
+            },
+          ],
+        }),
+      },
       openGraph: {
         title,
         description,

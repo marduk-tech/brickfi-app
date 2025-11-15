@@ -4,10 +4,18 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import GlossaryClient from "./glossary-client";
 import FourOFour from "@/custom-pages/landing/404";
+import { SEO_CONTENT } from "@/libs/constants";
+
+const META_DESCR =
+  "Comprehensive glossary of real estate terms, definitions, and terminology to help you understand property investment and home buying processes.";
+const META_TITLE = "Real Estate Glossary | Brickfi";
+const META_URL = "https://brickfi.in/glossary";
+
 
 export const metadata: Metadata = {
-  title: "Real Estate Glossary | Brickfi",
-  description: "Comprehensive glossary of real estate terms, definitions, and terminology to help you understand property investment and home buying processes.",
+  title: META_TITLE,
+  description:
+    META_DESCR,
   keywords: [
     "real estate glossary",
     "property terms",
@@ -16,19 +24,45 @@ export const metadata: Metadata = {
     "home buying terms",
     "brickfi",
   ],
+  other: {
+    "application/ld+json": JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      url: META_URL,
+      name: META_TITLE,
+      description: META_DESCR,
+      inLanguage: "en-IN",
+      publisher: {
+        "@type": "Organization",
+        name: SEO_CONTENT.companyName,
+        url: SEO_CONTENT.companyUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: SEO_CONTENT.companyLogo,
+        },
+      },
+      about: {
+        "@type": "Thing",
+        name: "Real Estate Terminology",
+        description:
+          "Definitions and explanations of key property, investment, and regulatory terms for homebuyers in India.",
+      },
+    }),
+  },
   openGraph: {
-    title: "Real Estate Glossary | Brickfi",
-    description: "Comprehensive glossary of real estate terms, definitions, and terminology to help you understand property investment and home buying processes.",
+    title: META_TITLE,
+    description:
+      META_DESCR,
     type: "website",
-    url: "https://brickfi.in/glossary",
+    url: META_URL,
   },
   twitter: {
     card: "summary",
-    title: "Real Estate Glossary | Brickfi",
-    description: "Comprehensive glossary of real estate terms, definitions, and terminology to help you understand property investment and home buying processes.",
+    title: META_TITLE,
+    description: META_DESCR,
   },
   alternates: {
-    canonical: "https://brickfi.in/glossary",
+    canonical: META_URL,
   },
 };
 
@@ -41,6 +75,5 @@ export default async function GlossaryPage() {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <GlossaryClient />
     </HydrationBoundary>
-   
   );
 }

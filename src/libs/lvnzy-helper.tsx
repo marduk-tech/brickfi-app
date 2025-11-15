@@ -107,6 +107,14 @@ export const fetchPmtPlan = (txt: any) => {
   return pmtPlan;
 };
 
+export const txtToId = (txt: string) => {
+  return txt
+    .toLowerCase()               // convert to lowercase
+    .replace(/[^a-z0-9\s]/g, '') // remove special characters
+    .trim()                      // remove leading/trailing spaces
+    .replace(/\s+/g, '_');       // replace spaces with underscore
+}
+
 export const renderCitations = (citations: any) => {
   if (!citations || !Array.isArray(citations)) {
     return [];

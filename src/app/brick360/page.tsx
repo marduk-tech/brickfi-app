@@ -1,5 +1,5 @@
 import ReportLanding from "@/custom-pages/landing/report-landing";
-import { SEO_CONTENT } from "@/libs/constants";
+import { FAQ_360, SEO_CONTENT } from "@/libs/constants";
 import type { Metadata } from "next";
 
 const META_DESCR =
@@ -16,6 +16,18 @@ export const metadata: Metadata = {
       url: "https://www.brickfi.in/brick360",
       name: META_TITLE,
       description: META_DESCR,
+      mainEntity: [
+        FAQ_360.map((q) => {
+          return {
+            "@type": "Question",
+            name: q.question,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: q.answer,
+            },
+          };
+        }),
+      ],
       publisher: {
         "@type": "Organization",
         name: SEO_CONTENT.companyName,

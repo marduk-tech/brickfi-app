@@ -600,3 +600,62 @@ export const SEO_CONTENT = {
   companyLogo: "https://www.brickfi.in/images/brickfi-logo.png",
   companyDescription: "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore."
 }
+
+export const FAQ_360 = [
+  {
+    question: "What is Brick360 Report?",
+    answer: `Brick360 provides a consolidated and comprehensive report about any
+          property in Bangalore covering information builder credibility,
+          location insights, property profile, price point evaluation and more.
+          We collect data over 200+ data points from sources like RERA, Open
+          City, BBMP, City info and then do an end to end analysis using AI to
+          create a report that enables you to analyse the property and make a
+          confident decision.`
+  },
+  {
+    question: "Is this report free ?",
+    answer: `You can request upto 3 Brick360 reports for FREE to do a thorough
+          analysis and make an informed decision. This service is completely
+          free.`
+  },
+  {
+    question: "Does the report compare multiple properties?",
+    answer: `You can download report for multiple properties and do a side by side
+          comparison across different data points.`
+  },
+  {
+    question: "How accurate is the data in the report?",
+    answer: `We have put a system in place to fetch data from verified government
+          and credible public sources. Besides, we also cross check as well as
+          manually check the data for accuracy.`
+  },
+  {
+    question: "What kind of issues can the report reveal?",
+    answer: `You can identify issues like high tension lines near the property,
+          upcoming metro stations, understand premiumess of the property, look
+          at timely delivery committment of the builder and much more.`
+  },
+  {
+    question: "Can this report tell me if the property will appreciate?",
+    answer: `It includes a “Growth Potential” analysis based on location trends,
+          upcoming infrastructure, and historical price patterns.`
+  },
+  {
+    question: "How is this different from a broker’s advice?",
+    answer: `Brokers are often incentivized to sell specific properties and heavily
+          market them. We do not have tie ups to specific properties and
+          prioritize 100% data-driven and unbiased insights.`
+  }, {
+    question: "How quickly can I get my property report?",
+    answer: `A Brick360 report can be generated in as little as an hour. In some
+          cases, it may take longer to gather all the necessary property
+          details, but the report will always be delivered within 24–48 hours.`
+  }, 
+  {
+      question: "What if I have a question with the report ?",
+      answer: `The report is interactive and has an AI assistant which lets you ask
+          unlimited questions for clarity and to generate more insights. You can
+          also reach out to the Brickfi team at hello@brickfi.in in case you
+          have any more specific questions.`
+  }
+]

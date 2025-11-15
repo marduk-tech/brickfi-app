@@ -1,14 +1,15 @@
 import BrickAssistLanding from "@/custom-pages/landing/brick-assist-landing";
+import { SEO_CONTENT } from "@/libs/constants";
 import { Metadata } from "next";
 
-
-
-const META_DESCR = "Consult with Brickfi to get an expert advice on your next home purchase. We provide unbiased, data backed and technology driven real estate advisory.";
+const META_DESCR =
+  "Consult with Brickfi to get an expert advice on your next home purchase. We provide unbiased, data backed and technology driven real estate advisory.";
 const META_TITLE = "Brickfi | Unbiased & Data-Backed Home Buying Advise.";
+const META_URL = "https://brickfi.in/brickassist";
+
 export const metadata: Metadata = {
   title: META_TITLE,
-  description:
-  META_DESCR,
+  description: META_DESCR,
   keywords: [
     "real estate",
     "property",
@@ -19,21 +20,39 @@ export const metadata: Metadata = {
     "home buying",
     "property analysis",
   ],
+  other: {
+    "application/ld+json": JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      url: META_URL,
+      name: META_TITLE,
+      description: META_DESCR,
+      publisher: {
+        "@type": "Organization",
+        name: SEO_CONTENT.companyName,
+        url: SEO_CONTENT.companyUrl,
+        logo: {
+          "@type": "ImageObject",
+          url: SEO_CONTENT.companyLogo,
+        },
+      },
+      inLanguage: "en-IN",
+    }),
+  },
   authors: [{ name: "Brickfi" }],
   creator: "Brickfi",
   publisher: "Brickfi",
   formatDetection: {
     telephone: false,
   },
-  metadataBase: new URL("https://brickfi.in"),
+  metadataBase: new URL(META_URL),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: META_TITLE,
-    description:
-      META_DESCR,
-    url: "https://brickfi.in",
+    description: META_DESCR,
+    url: META_URL,
     siteName: "Brickfi",
     images: [
       {
@@ -49,8 +68,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: META_TITLE,
-    description:
-      META_DESCR,
+    description: META_DESCR,
     images: ["/images/brickassist-preview.png"],
   },
   robots: {

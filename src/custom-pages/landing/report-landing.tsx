@@ -4,13 +4,14 @@ import { Button, Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 import { useDevice } from "../../hooks/use-device";
 import { safeWindow } from "../../libs/browser-utils";
-import { LandingConstants } from "../../libs/constants";
+import { FAQ_360, LandingConstants } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import LandingHeader from "./header";
 import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import { Loader } from "@/components/common/loader";
+import { txtToId } from "@/libs/lvnzy-helper";
 
 export default function ReportLanding() {
   const { isMobile } = useDevice();
@@ -43,130 +44,40 @@ export default function ReportLanding() {
     color: "black",
     padding: "8px 0",
   };
-  const faqs: CollapseProps["items"] = [
-    {
-      key: "diff-q",
-      label: getFaqHeading("What is Brick360 Report? "),
+
+  const faqs: CollapseProps["items"] = FAQ_360.map((q) => {
+    return {
       style: faqPanelStyle,
+      key: txtToId(q.question),
+      label: getFaqHeading(q.question),
       children: getFaqText(
         <>
-          Brick360 provides a consolidated and comprehensive report about any
-          property in Bangalore covering information builder credibility,
-          location insights, property profile, price point evaluation and more.
-          We collect data over 200+ data points from sources like RERA, Open
-          City, BBMP, City info and then do an end to end analysis using AI to
-          create a report that enables you to analyse the property and make a
-          confident decision.
+          {q.answer}
+          {q.question == "Is this report free ?" ? (
+            <>
+              <br></br>
+              <br></br>
+              <a
+                href={LandingConstants.genReportFormLink}
+                style={{
+                  fontSize: "100%",
+                  color: COLORS.primaryColor,
+                  textTransform: "uppercase",
+                  padding: 8,
+                  border: `2px solid ${COLORS.primaryColor}`,
+                  borderRadius: 8
+                }}
+              >
+                Generate Free Report
+              </a>
+              <br></br>
+            </>
+          ) : null}
         </>
       ),
-    },
-    {
-      key: "paid-q",
-      label: getFaqHeading("Is this report free ?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          <br></br>
-          You can request upto 3 Brick360 reports for FREE to do a thorough
-          analysis and make an informed decision. This service is completely
-          free.
-          <br></br>
-          <a
-            href={LandingConstants.genReportFormLink}
-            style={{ fontSize: "90%", color: COLORS.primaryColor }}
-          >
-            Generate Free Report
-          </a>
-          <br></br>
-        </>
-      ),
-    },
-    {
-      key: "does-report-compare-properties",
-      label: getFaqHeading("Does the report compare multiple properties?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          You can download report for multiple properties and do a side by side
-          comparison across different data points.
-        </>
-      ),
-    },
-    {
-      key: "how-accurate-is-data",
-      label: getFaqHeading("How accurate is the data in the report?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          We have put a system in place to fetch data from verified government
-          and credible public sources. Besides, we also cross check as well as
-          manually check the data for accuracy.
-        </>
-      ),
-    },
-    {
-      key: "what-issues-revealed",
-      label: getFaqHeading("What kind of issues can the report reveal?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          You can identify issues like high tension lines near the property,
-          upcoming metro stations, understand premiumess of the property, look
-          at timely delivery committment of the builder and much more.
-        </>
-      ),
-    },
-    {
-      key: "will-property-appreciate",
-      label: getFaqHeading(
-        "Can this report tell me if the property will appreciate?"
-      ),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          It includes a “Growth Potential” analysis based on location trends,
-          upcoming infrastructure, and historical price patterns.
-        </>
-      ),
-    },
-    {
-      key: "different-from-broker",
-      label: getFaqHeading("How is this different from a broker’s advice?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          Brokers are often incentivized to sell specific properties and heavily
-          market them. We do not have tie ups to specific properties and
-          prioritize 100% data-driven and unbiased insights.
-        </>
-      ),
-    },
-    {
-      key: "how-quickly-report",
-      label: getFaqHeading("How quickly can I get my property report?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          A Brick360 report can be generated in as little as an hour. In some
-          cases, it may take longer to gather all the necessary property
-          details, but the report will always be delivered within 24–48 hours.
-        </>
-      ),
-    },
-    {
-      key: "ask-questions-after-report",
-      label: getFaqHeading("What if I have a question with the report ?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        <>
-          The report is interactive and has an AI assistant which lets you ask
-          unlimited questions for clarity and to generate more insights. You can
-          also reach out to the Brickfi team at hello@brickfi.in in case you
-          have any more specific questions.
-        </>
-      ),
-    },
-  ];
+    };
+  });
+  
 
   useState(false);
   useEffect(() => {
