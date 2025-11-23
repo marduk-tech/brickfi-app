@@ -36,7 +36,7 @@
 
 .gallery-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 32px;
   width: 100%;
   margin-bottom: 16px;
@@ -51,7 +51,7 @@
 }
 
 .gallery-item-large {
-  grid-column: span 2;
+  grid-column: span 3;
   grid-row: span 2;
   min-height: 300px;
 }
