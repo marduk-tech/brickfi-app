@@ -51,9 +51,9 @@
 }
 
 .gallery-item-large {
-  grid-column: span 3;
-  grid-row: span 2;
-  min-height: 300px;
+  grid-column: span 1;
+  grid-row: span 1;
+  min-height: 150px;
 }
 
 .gallery-image {
