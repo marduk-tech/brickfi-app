@@ -216,7 +216,7 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
                     {loginStatus === "OTP_SENT" && (
                       <>
                         <Form.Item
-                          label="OTP"
+                          label=""
                           name="otp"
                           rules={[
                             {
@@ -232,7 +232,7 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
                               width: "100%",
                               fontSize: FONT_SIZE.HEADING_3,
                             }}
-                            placeholder="Enter the OTP"
+                            placeholder="Enter the OTP sent to your mobile"
                             maxLength={6}
                             disabled={loginMutation.isPending}
                           />

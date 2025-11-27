@@ -41,22 +41,72 @@ export function UserProjects({
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
   const { isMobile } = useDevice();
 
-  const filteredProjects = lvnzyProjects.filter(
-    (p: any) =>
-      !selectedCorridor ||
-      selectedCorridor == "all" ||
-      p.meta.projectCorridors.split(",").includes(selectedCorridor)
-  );
+  const filteredProjects =
+    user &&
+    user.requestedReports &&
+    user.requestedReports.filter((p) => !p.lvnzyProjectId)
+      ? [
+          ...user.requestedReports.filter((p) => !p.lvnzyProjectId),
+          ...lvnzyProjects.filter(
+            (p: any) =>
+              !selectedCorridor ||
+              selectedCorridor == "all" ||
+              p.meta.projectCorridors.split(",").includes(selectedCorridor)
+          ),
+        ]
+      : lvnzyProjects.filter(
+          (p: any) =>
+            !selectedCorridor ||
+            selectedCorridor == "all" ||
+            p.meta.projectCorridors.split(",").includes(selectedCorridor)
+        );
 
   const renderLvnzyProject = (itemInfo: any) => {
+    if (itemInfo.reraNumber) {
+      return (
+        <Flex
+          style={{
+            marginBottom: 8,
+            cursor: "pointer",
+            backgroundColor: "white",
+            minHeight: 130,
+            border: `1px solid ${COLORS.borderColor}`,
+            borderRadius: 8,
+            width: isMobile
+              ? "100%"
+              : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
+          }}
+          vertical
+        >
+             <div
+              style={{
+                width: "100%",
+                height: isMobile ? 200 : 175,
+                borderRadius: 12,
+                backgroundImage: `url(images/placeholder-pending-report.png)`,
+                backgroundSize: "auto 90%",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+              }}
+            ></div>
+            <Flex vertical style={{ padding: "8px 16px"}}>
+          <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, color: COLORS.textColorLight }}>
+            {itemInfo.projectName}
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorLight }}>
+            Report Pending
+          </Typography.Text>
+          </Flex>
+        </Flex>
+      );
+    }
     const oneLinerBreakup = itemInfo.meta.oneLiner
       ? itemInfo.meta.oneLiner.split(" · ")
       : [];
 
-    const imgs =
-      itemInfo?.originalProjectId?.media
-        ? itemInfo.originalProjectId.media.filter((m: any) => m.type == "image")
-        : [];
+    const imgs = itemInfo?.originalProjectId?.media
+      ? itemInfo.originalProjectId.media.filter((m: any) => m.type == "image")
+      : [];
     let previewImage =
       imgs && imgs.length
         ? imgs.find((i: any) => i.isPreview) ||
@@ -72,11 +122,13 @@ export function UserProjects({
       previewImage = previewImage.image.url;
     }
 
-    const primaryCorridor = Array.isArray(itemInfo.meta.projectCorridors) && itemInfo.meta.projectCorridors.length
-      ? itemInfo.meta.projectCorridors.sort(
-          (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms
-        )[0]?.corridorName || "Unknown"
-      : "Unknown";
+    const primaryCorridor =
+      Array.isArray(itemInfo.meta.projectCorridors) &&
+      itemInfo.meta.projectCorridors.length
+        ? itemInfo.meta.projectCorridors.sort(
+            (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms
+          )[0]?.corridorName || "Unknown"
+        : "Unknown";
     const pmtPlan = fetchPmtPlan(
       itemInfo.originalProjectId?.info?.financialPlan
     );
@@ -148,8 +200,8 @@ export function UserProjects({
                 {rupeeAmountFormat(
                   itemInfo?.originalProjectId?.info?.rate?.minimumUnitCost || 0
                 )}
-                -{itemInfo?.originalProjectId?.info?.rate?.minimumUnitSize || 0}sq.ft ·{" "}
-                {primaryCorridor}
+                -{itemInfo?.originalProjectId?.info?.rate?.minimumUnitSize || 0}
+                sq.ft · {primaryCorridor}
               </Paragraph>
 
               {/* {pmtPlan ? (
@@ -326,7 +378,11 @@ export function UserProjects({
         >
           {filteredProjects
             .sort((a: any, b: any) =>
-              a.meta.projectName > b.meta.projectName ? 1 : -1
+              a.meta && b.meta
+                ? a.meta.projectName > b.meta.projectName
+                  ? 1
+                  : -1
+                : 0
             )
             .map((p: any) => renderLvnzyProject(p))}
         </Flex>

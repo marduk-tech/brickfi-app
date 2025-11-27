@@ -68,6 +68,56 @@ export const NewReportRequestForm = () => {
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
+  function getInstantReportTag() {
+    return (
+      <Flex
+        style={{
+          padding: 2,
+          borderRadius: 4,
+        }}
+        align="center"
+      >
+        <Tag color="blue">
+          <Flex align="center">
+            <DynamicReactIcon
+              iconName="GiElectric"
+              iconSet="gi"
+              size={12}
+            ></DynamicReactIcon>
+            <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+              Instant Report Available
+            </Typography.Text>
+          </Flex>
+        </Tag>
+      </Flex>
+    );
+  }
+
+  function getRequestReportTag() {
+    return (
+      <Flex
+        style={{
+          padding: 2,
+          borderRadius: 4,
+        }}
+        align="center"
+      >
+        <Tag>
+          <Flex align="center">
+            <DynamicReactIcon
+              iconName="LuCircleFadingArrowUp"
+              iconSet="lu"
+              size={12}
+            ></DynamicReactIcon>
+            <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, marginLeft: 4 }}>
+              Request to Generate Report
+            </Typography.Text>
+          </Flex>
+        </Tag>
+      </Flex>
+    );
+  }
+
   useEffect(() => {
     if (projects && projects.length) {
       const projectOptions: any[] = (projects || [])
@@ -78,21 +128,25 @@ export const NewReportRequestForm = () => {
           projectA.lvnzyProjectId && projectB.lvnzyProjectId
             ? 0
             : projectA.lvnzyProjectId
-              ? -1
-              : 1
+            ? -1
+            : 1
         )
         .map((project) => ({
           value: project.projectName,
           label: (
-            <span
-              style={{
-                color: project.lvnzyProjectId
-                  ? COLORS.textColorDark
-                  : COLORS.textColorMedium,
-              }}
-            >
-              {capitalize(project.projectName)}
-            </span>
+            <Flex vertical>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_2,
+                  color: project.lvnzyProjectId
+                    ? COLORS.textColorDark
+                    : COLORS.textColorMedium,
+                }}
+              >
+                {capitalize(project.projectName)}
+              </Typography.Text>
+              {project.lvnzyProjectId ? getInstantReportTag() : getRequestReportTag()}
+            </Flex>
           ),
           project,
         }));
@@ -281,10 +335,10 @@ export const NewReportRequestForm = () => {
               marginBottom: 16,
             }}
           >
-            Wohoo! Your request is submitted to queue.
+            Request submitted.
           </Typography.Text>
           <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
-            We will get back to you with a detailed report once available.
+            Your request is important to us. However, we are constrained by our bandwidth and continously working to prepare detailed projects across Bangalore. 
           </Typography.Text>
           <Typography.Text
             style={{
@@ -293,7 +347,7 @@ export const NewReportRequestForm = () => {
               marginTop: 16,
             }}
           >
-            We will notify you via email and message once its ready.
+            Once your requested report is available, we will notify you via email and message.
           </Typography.Text>
         </>
       );
@@ -313,11 +367,11 @@ export const NewReportRequestForm = () => {
             marginBottom: 16,
           }}
         >
-          Wohoo! Your Brick360 Report is ready and available.
+          Wohoo! Your Brick360 Report is ready & available.
         </Typography.Text>
         <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
           Click below to login to your account and see the reports. For other
-          projects - {notReadyNames}; your request is submitted to queue. We
+          projects - <span style={{color: COLORS.primaryColor}}>{notReadyNames}</span>; your request is submitted to queue. We
           will get back to you with a detailed report once available.
         </Typography.Text>
         <Button
@@ -339,10 +393,10 @@ export const NewReportRequestForm = () => {
           style={{
             width: "100%",
             textWrap: "wrap",
-            backgroundColor: COLORS.bgColorBlue,
+            backgroundColor: "rgba(255, 128, 128, 0.1)",
+            border: `0.1px solid ${COLORS.redIdentifier}`,
             padding: "8px 8px",
             borderRadius: 8,
-            border: 0,
             margin: 0,
           }}
         >
@@ -363,14 +417,14 @@ export const NewReportRequestForm = () => {
                 style={{
                   fontSize: FONT_SIZE.HEADING_4,
                   lineHeight: "110%",
-                  color: COLORS.textColorMedium,
+                  color: COLORS.textColorDark,
                   display: "flex",
                 }}
               >
                 {" "}
                 {userLimitReached
                   ? "Oops! Looks like this mobile has already requested max number of free reports."
-                  : "You can generate report for upto 2 projects for free."}
+                  : "You can request report for upto 2 projects for free."}
               </Typography.Text>
             </Flex>
             {userLimitReached ? (
@@ -383,7 +437,7 @@ export const NewReportRequestForm = () => {
                 }}
               >
                 {" "}
-                Looking for more ? Schedule a callback with us.
+                Need more reports ? Schedule a callback with us.
               </Link>
             ) : null}
           </Flex>
@@ -514,7 +568,7 @@ export const NewReportRequestForm = () => {
                   onChange={setSearchValue}
                   onSelect={handleSelectProject}
                   filterOption={(inputValue, option) =>
-                    option!.label
+                    option!.value
                       .toLowerCase()
                       .includes(inputValue.toLowerCase())
                   }
@@ -558,15 +612,19 @@ export const NewReportRequestForm = () => {
                           borderColor: COLORS.borderColor,
                         }}
                       >
-                        <Paragraph
-                          style={{
-                            fontSize: FONT_SIZE.HEADING_2,
-                            marginBottom: 8,
-                          }}
-                          ellipsis={{ rows: 2 }}
-                        >
-                          {capitalize(p.projectName)}
-                        </Paragraph>
+                        <Flex vertical style={{paddingBottom: 16}}>
+                          <Paragraph
+                            style={{
+                              fontSize: FONT_SIZE.HEADING_2,
+                              marginBottom: 2,
+                            }}
+                            ellipsis={{ rows: 2 }}
+                          >
+                            {capitalize(p.projectName)}
+                          </Paragraph>
+                          {p.lvnzyProjectId ? getInstantReportTag(): getRequestReportTag()}
+                          
+                        </Flex>
                         <Flex
                           style={{ marginLeft: "auto" }}
                           onClick={() => handleRemoveProject(p.projectName)}
@@ -586,11 +644,10 @@ export const NewReportRequestForm = () => {
             )}
             {step === 2 && (
               <>
-                <Typography.Text style={{ marginBottom: 16 }}>
-                  {!isMobileVerified
-                    ? "Verify your mobile number to receive the report"
-                    : "Share contact details"}
-                  .
+                <Typography.Text
+                  style={{ marginBottom: 16, color: COLORS.textColorLight }}
+                >
+                  Share contact details to receive the report
                 </Typography.Text>
                 <Form
                   form={form}
@@ -598,45 +655,45 @@ export const NewReportRequestForm = () => {
                   onFinish={onFinish}
                   style={{ width: "100%", maxWidth: 500 }}
                 >
-                  {isMobileVerified && (
-                    <Form.Item
-                      name="name"
-                      label="Full Name"
-                      rules={[
-                        { required: true, message: "Please enter your name" },
-                      ]}
-                    >
-                      <Input />
-                    </Form.Item>
-                  )}
+                  <Form.Item
+                    name="name"
+                    label="Full Name"
+                    rules={[
+                      { required: true, message: "Please enter your name" },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
 
-                  {isMobileVerified && (
-                    <Form.Item
-                      name="email"
-                      label="Email Address"
-                      rules={[
-                        { required: true, message: "Please enter your email" },
-                        {
-                          type: "email",
-                          message: "Please enter a valid email",
-                        },
-                      ]}
-                    >
-                      <Input />
-                    </Form.Item>
-                  )}
+                  <Form.Item
+                    name="email"
+                    label="Email Address"
+                    rules={[
+                      { required: true, message: "Please enter your email" },
+                      {
+                        type: "email",
+                        message: "Please enter a valid email",
+                      },
+                    ]}
+                  >
+                    <Input />
+                  </Form.Item>
+                  <Typography.Text>Your Mobile Number</Typography.Text>
                   {isMobileVerified ? (
-                    <Flex align="center" gap={8}>
-                      <Typography.Text
-                        style={{ fontSize: FONT_SIZE.HEADING_2 }}
-                      >
-                        +{verifiedUser?.countryCode} {verifiedUser?.mobile}
-                      </Typography.Text>
-                      <DynamicReactIcon
-                        iconName="MdVerifiedUser"
-                        iconSet="md"
-                        color={COLORS.primaryColor}
-                      ></DynamicReactIcon>
+                    <Flex vertical>
+                      <Flex align="center" gap={8}>
+                        <Typography.Text
+                          style={{ fontSize: FONT_SIZE.HEADING_2 }}
+                        >
+                          +{verifiedUser?.countryCode} {verifiedUser?.mobile}
+                        </Typography.Text>
+                        <DynamicReactIcon
+                          iconName="MdVerifiedUser"
+                          iconSet="md"
+                          color={COLORS.primaryColor}
+                        ></DynamicReactIcon>
+                        <Button type="link">Edit</Button>
+                      </Flex>
                     </Flex>
                   ) : (
                     <LoginForm
@@ -656,9 +713,9 @@ export const NewReportRequestForm = () => {
               </Flex>
             )}
           </Flex>
-          { }
+          {}
           {(step !== 3 && maxReportsRequested) ||
-            (step == 1 && selectedProjects.length >= MAX_FREE_REPORTS)
+          (step == 1 && selectedProjects.length >= MAX_FREE_REPORTS)
             ? renderMaxReportsMsg(maxReportsRequested)
             : null}
           {step !== 3 && errorMsg ? errorMsg : null}
@@ -666,18 +723,18 @@ export const NewReportRequestForm = () => {
             <Flex style={{ marginTop: 16 }} gap={16}>
               {step === 1
                 ? [
-                  <Button
-                    key="next"
-                    type="primary"
-                    onClick={handleNext}
-                    disabled={selectedProjects.length === 0}
-                    loading={createUser.isPending && !!user}
-                  >
-                    {user ? "Submit" : "Next"}
-                  </Button>,
-                ]
+                    <Button
+                      key="next"
+                      type="primary"
+                      onClick={handleNext}
+                      disabled={selectedProjects.length === 0}
+                      loading={createUser.isPending && !!user}
+                    >
+                      {user ? "Submit" : "Next"}
+                    </Button>,
+                  ]
                 : step == 2
-                  ? [
+                ? [
                     <Button key="back" onClick={() => setStep(1)}>
                       Back
                     </Button>,
@@ -691,17 +748,7 @@ export const NewReportRequestForm = () => {
                       Submit
                     </Button>,
                   ]
-                  : [
-                    <Button
-                      style={{ width: 200 }}
-                      key="home"
-                      onClick={() => {
-                        safeWindow.location.replace("/");
-                      }}
-                    >
-                      Take me Home
-                    </Button>,
-                  ]}
+                : null}
             </Flex>
           )}
         </Flex>
