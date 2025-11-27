@@ -1,5 +1,6 @@
 "use client";
 
+import LandingFooter from "@/custom-pages/landing/footer";
 import {
   Alert,
   AutoComplete,
@@ -15,26 +16,26 @@ import {
 } from "antd";
 import Link from "antd/es/typography/Link";
 import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
+import LandingHeader from "../../custom-pages/landing/header";
 import { useDevice } from "../../hooks/use-device";
 import {
-  ReraProject,
-  useReraProjectSearch,
-} from "../../hooks/use-rera-project-search";
+  MarketingProject as ReraProject,
+  useMarketingProjectSearch as useReraProjectSearch,
+} from "../../hooks/use-marketing-project-search";
 import { useUser } from "../../hooks/use-user";
 import {
   useCreateUserMutation,
   useSendUserMailMutation,
 } from "../../hooks/user-hooks";
-import { LandingConstants, queryKeys } from "../../libs/constants";
 import { safeWindow } from "../../libs/browser-utils";
+import { LandingConstants, queryKeys } from "../../libs/constants";
 import { capitalize } from "../../libs/lvnzy-helper";
 import { queryClient } from "../../libs/query-client";
-import LandingHeader from "../../custom-pages/landing/header";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import DynamicReactIcon from "./dynamic-react-icon";
-import LandingFooter from "@/custom-pages/landing/footer";
 import { LoginForm } from "../login-forms";
+import DynamicReactIcon from "./dynamic-react-icon";
 import { Loader } from "./loader";
 const { Paragraph } = Typography;
 
@@ -57,6 +58,7 @@ export const NewReportRequestForm = () => {
   const [isMobileVerified, setIsMobileVerified] = useState(false);
 
   const [flickerWait, setFlickerWait] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     setTimeout(() => {
@@ -70,18 +72,28 @@ export const NewReportRequestForm = () => {
     if (projects && projects.length) {
       const projectOptions: any[] = (projects || [])
         .filter(
-          (p) => !selectedProjects.some((s) => s.projectId === p.projectId)
+          (p) => !selectedProjects.some((s) => s.projectName === p.projectName)
         )
         .sort((projectA, projectB) =>
-          projectA.readyScore && projectB.readyScore
+          projectA.lvnzyProjectId && projectB.lvnzyProjectId
             ? 0
-            : projectA.readyScore
-            ? -1
-            : 1
+            : projectA.lvnzyProjectId
+              ? -1
+              : 1
         )
         .map((project) => ({
-          value: `${project.projectId}-${project.projectName}`,
-          label: capitalize(project.projectName),
+          value: project.projectName,
+          label: (
+            <span
+              style={{
+                color: project.lvnzyProjectId
+                  ? COLORS.textColorDark
+                  : COLORS.textColorMedium,
+              }}
+            >
+              {capitalize(project.projectName)}
+            </span>
+          ),
           project,
         }));
       setProjectOptions(projectOptions);
@@ -91,7 +103,7 @@ export const NewReportRequestForm = () => {
   const handleSelectProject = (_: any, option: any) => {
     const newProject = option.project;
     const alreadySelected = selectedProjects.some(
-      (p) => p.projectId === newProject.projectId
+      (p) => p.projectName === newProject.projectName
     );
 
     if (alreadySelected) {
@@ -108,9 +120,9 @@ export const NewReportRequestForm = () => {
       );
     }
   };
-  const handleRemoveProject = (projectId: string) => {
+  const handleRemoveProject = (projectName: string) => {
     setSelectedProjects(
-      selectedProjects.filter((p) => p.projectId !== projectId)
+      selectedProjects.filter((p) => p.projectName !== projectName)
     );
   };
 
@@ -129,7 +141,8 @@ export const NewReportRequestForm = () => {
   const processReportRequest = async (formValues?: any) => {
     const requestedReports = selectedProjects.map((p) => ({
       projectName: p.projectName,
-      reraId: p.projectId,
+      ...(p.reraNumber && { reraNumber: p.reraNumber }),
+      ...(p.lvnzyProjectId && { lvnzyProjectId: p.lvnzyProjectId }),
     }));
     try {
       let responseUser;
@@ -164,6 +177,7 @@ export const NewReportRequestForm = () => {
         if (responseUser.requestedReports) {
           setStep(3);
         }
+
         await sendMail.mutateAsync({
           userId: responseUser._id,
           emailType: "report-request",
@@ -171,6 +185,24 @@ export const NewReportRequestForm = () => {
             requestedReports,
           },
         });
+
+        // send "Report Ready" email
+        const readyProjects = selectedProjects.filter((p) => p.lvnzyProjectId);
+
+        if (readyProjects.length > 0) {
+          const readyProjectNames = readyProjects
+            .map((p) => capitalize(p.projectName))
+            .join(", ");
+
+          await sendMail.mutateAsync({
+            userId: responseUser._id,
+            emailType: "report-ready",
+            params: {
+              projectNames: readyProjectNames,
+              seeReportLink: "https://brickfi.in/app",
+            },
+          });
+        }
       }
 
       await queryClient.invalidateQueries({ queryKey: [queryKeys.user] });
@@ -198,6 +230,106 @@ export const NewReportRequestForm = () => {
 
   const onFinish = async (values: any) => {
     await processReportRequest(values);
+  };
+
+  const categorizeProjects = () => {
+    const ready = selectedProjects.filter((p) => p.lvnzyProjectId);
+    const notReady = selectedProjects.filter((p) => !p.lvnzyProjectId);
+    return { ready, notReady };
+  };
+
+  const renderSuccessMessage = () => {
+    const { ready, notReady } = categorizeProjects();
+
+    // all projects ready
+    if (ready.length === selectedProjects.length) {
+      return (
+        <>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_1,
+              lineHeight: "120%",
+              marginBottom: 16,
+            }}
+          >
+            Wohoo! Your Brick360 Report is ready and available.
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
+            Click below to login to your account and see the reports.
+          </Typography.Text>
+
+          <Button
+            type="primary"
+            size="large"
+            style={{ marginTop: 24 }}
+            onClick={() => router.push("/app")}
+          >
+            View My Reports
+          </Button>
+        </>
+      );
+    }
+
+    // no projects ready
+    if (notReady.length === selectedProjects.length) {
+      return (
+        <>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_1,
+              lineHeight: "120%",
+              marginBottom: 16,
+            }}
+          >
+            Wohoo! Your request is submitted to queue.
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
+            We will get back to you with a detailed report once available.
+          </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_4,
+              fontWeight: "bold",
+              marginTop: 16,
+            }}
+          >
+            We will notify you via email and message once its ready.
+          </Typography.Text>
+        </>
+      );
+    }
+
+    // mixed some ready, some not ready
+    const notReadyNames = notReady
+      .map((p) => capitalize(p.projectName))
+      .join(", ");
+
+    return (
+      <>
+        <Typography.Text
+          style={{
+            fontSize: FONT_SIZE.HEADING_1,
+            lineHeight: "120%",
+            marginBottom: 16,
+          }}
+        >
+          Wohoo! Your Brick360 Report is ready and available.
+        </Typography.Text>
+        <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
+          Click below to login to your account and see the reports. For other
+          projects - {notReadyNames}; your request is submitted to queue. We
+          will get back to you with a detailed report once available.
+        </Typography.Text>
+        <Button
+          type="primary"
+          size="large"
+          style={{ marginTop: 24 }}
+          onClick={() => (window.location.href = "https://www.brickfi.in/app")}
+        >
+          View My Reports
+        </Button>
+      </>
+    );
   };
 
   const renderMaxReportsMsg = (userLimitReached?: boolean) => {
@@ -415,7 +547,7 @@ export const NewReportRequestForm = () => {
 
                 <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
                   {selectedProjects.map((p, index) => (
-                    <Col key={p.projectId} style={{ width: "100%" }}>
+                    <Col key={p.projectName} style={{ width: "100%" }}>
                       <Flex
                         style={{
                           width: "100%",
@@ -437,7 +569,7 @@ export const NewReportRequestForm = () => {
                         </Paragraph>
                         <Flex
                           style={{ marginLeft: "auto" }}
-                          onClick={() => handleRemoveProject(p.projectId)}
+                          onClick={() => handleRemoveProject(p.projectName)}
                         >
                           <DynamicReactIcon
                             iconName="IoMdCloseCircle"
@@ -498,7 +630,7 @@ export const NewReportRequestForm = () => {
                       <Typography.Text
                         style={{ fontSize: FONT_SIZE.HEADING_2 }}
                       >
-                        +{verifiedUser?.countryCode}{" "}{verifiedUser?.mobile}
+                        +{verifiedUser?.countryCode} {verifiedUser?.mobile}
                       </Typography.Text>
                       <DynamicReactIcon
                         iconName="MdVerifiedUser"
@@ -520,35 +652,13 @@ export const NewReportRequestForm = () => {
 
             {step == 3 && (
               <Flex vertical style={{ padding: "32px 0" }}>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_1,
-                    lineHeight: "120%",
-                    marginBottom: 16,
-                  }}
-                >
-                  Wohoo! Your request is submitted.
-                </Typography.Text>
-                <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
-                  Our team including our swarm of AI agents are already
-                  processesing your request. <br></br>Please give us max 2 business days
-                  to get back to you with a detailed factual report.
-                </Typography.Text>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_4,
-                    fontWeight: "bold",
-                    marginTop: 16,
-                  }}
-                >
-                  We will notify you via email and message once its ready.
-                </Typography.Text>
+                {renderSuccessMessage()}
               </Flex>
             )}
           </Flex>
-          {}
+          { }
           {(step !== 3 && maxReportsRequested) ||
-          (step == 1 && selectedProjects.length >= MAX_FREE_REPORTS)
+            (step == 1 && selectedProjects.length >= MAX_FREE_REPORTS)
             ? renderMaxReportsMsg(maxReportsRequested)
             : null}
           {step !== 3 && errorMsg ? errorMsg : null}
@@ -556,18 +666,18 @@ export const NewReportRequestForm = () => {
             <Flex style={{ marginTop: 16 }} gap={16}>
               {step === 1
                 ? [
-                    <Button
-                      key="next"
-                      type="primary"
-                      onClick={handleNext}
-                      disabled={selectedProjects.length === 0 }
-                      loading={createUser.isPending && !!user}
-                    >
-                      {user ? "Submit" : "Next"}
-                    </Button>,
-                  ]
+                  <Button
+                    key="next"
+                    type="primary"
+                    onClick={handleNext}
+                    disabled={selectedProjects.length === 0}
+                    loading={createUser.isPending && !!user}
+                  >
+                    {user ? "Submit" : "Next"}
+                  </Button>,
+                ]
                 : step == 2
-                ? [
+                  ? [
                     <Button key="back" onClick={() => setStep(1)}>
                       Back
                     </Button>,
@@ -581,7 +691,7 @@ export const NewReportRequestForm = () => {
                       Submit
                     </Button>,
                   ]
-                : [
+                  : [
                     <Button
                       style={{ width: 200 }}
                       key="home"

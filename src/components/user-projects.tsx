@@ -54,7 +54,7 @@ export function UserProjects({
       : [];
 
     const imgs =
-      itemInfo && itemInfo.originalProjectId && itemInfo.originalProjectId.media
+      itemInfo?.originalProjectId?.media
         ? itemInfo.originalProjectId.media.filter((m: any) => m.type == "image")
         : [];
     let previewImage =
@@ -72,9 +72,11 @@ export function UserProjects({
       previewImage = previewImage.image.url;
     }
 
-    const primaryCorridor = itemInfo.meta.projectCorridors.sort(
-      (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms
-    )[0].corridorName;
+    const primaryCorridor = Array.isArray(itemInfo.meta.projectCorridors) && itemInfo.meta.projectCorridors.length
+      ? itemInfo.meta.projectCorridors.sort(
+          (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms
+        )[0]?.corridorName || "Unknown"
+      : "Unknown";
     const pmtPlan = fetchPmtPlan(
       itemInfo.originalProjectId?.info?.financialPlan
     );
@@ -144,9 +146,9 @@ export function UserProjects({
               >
                 {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹
                 {rupeeAmountFormat(
-                  itemInfo?.originalProjectId.info.rate.minimumUnitCost
+                  itemInfo?.originalProjectId?.info?.rate?.minimumUnitCost || 0
                 )}
-                -{itemInfo?.originalProjectId.info.rate.minimumUnitSize}sq.ft ·{" "}
+                -{itemInfo?.originalProjectId?.info?.rate?.minimumUnitSize || 0}sq.ft ·{" "}
                 {primaryCorridor}
               </Paragraph>
 

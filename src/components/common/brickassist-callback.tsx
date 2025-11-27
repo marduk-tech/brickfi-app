@@ -86,12 +86,7 @@ export function BrickAssistCallback({
   };
 
   return (
-    <Modal
-      open={isOpen}
-      closable={true}
-      onCancel={handleClose}
-      footer={null}
-    >
+    <Modal open={isOpen} closable={true} onCancel={handleClose} footer={null}>
       <Flex gap={8} vertical style={{ paddingTop: 24, paddingBottom: 16 }}>
         {alreadyRequested ? (
           <Flex vertical>

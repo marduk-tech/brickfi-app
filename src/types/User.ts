@@ -31,7 +31,9 @@ export interface User {
   profile: Profile;
   requestedReports?: {
     projectName: string;
-    reraId: string;
+    reraId?: string;
+    reraNumber?: string;
+    lvnzyProjectId?: string;
   }[];
   metrics?: {
     utm?: UtmEntry[];
