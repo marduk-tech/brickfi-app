@@ -21,7 +21,10 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     logout.mutate();
-    router.push("/app");
+    // router.push("/app");
+    // router.refresh();
+    window.open(`${window.location.origin}/app`,"_blank");
+
     setIsLogoutModalVisible(false);
   };
 

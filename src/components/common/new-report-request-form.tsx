@@ -109,7 +109,9 @@ export const NewReportRequestForm = () => {
               iconSet="lu"
               size={12}
             ></DynamicReactIcon>
-            <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, marginLeft: 4 }}>
+            <Typography.Text
+              style={{ fontSize: FONT_SIZE.SUB_TEXT, marginLeft: 4 }}
+            >
               Request to Generate Report
             </Typography.Text>
           </Flex>
@@ -145,7 +147,9 @@ export const NewReportRequestForm = () => {
               >
                 {capitalize(project.projectName)}
               </Typography.Text>
-              {project.lvnzyProjectId ? getInstantReportTag() : getRequestReportTag()}
+              {project.lvnzyProjectId
+                ? getInstantReportTag()
+                : getRequestReportTag()}
             </Flex>
           ),
           project,
@@ -316,7 +320,9 @@ export const NewReportRequestForm = () => {
             type="primary"
             size="large"
             style={{ marginTop: 24 }}
-            onClick={() => router.push("/app")}
+            onClick={() => {
+              window.open(`${window.location.origin}/app`,"_blank");
+            }}
           >
             View My Reports
           </Button>
@@ -338,7 +344,9 @@ export const NewReportRequestForm = () => {
             Request submitted.
           </Typography.Text>
           <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
-            Your request is important to us. However, we are constrained by our bandwidth and continously working to prepare detailed projects across Bangalore. 
+            Your request is important to us. However, we are constrained by our
+            bandwidth and continously working to prepare detailed projects
+            across Bangalore.
           </Typography.Text>
           <Typography.Text
             style={{
@@ -347,7 +355,8 @@ export const NewReportRequestForm = () => {
               marginTop: 16,
             }}
           >
-            Once your requested report is available, we will notify you via email and message.
+            Once your requested report is available, we will notify you via
+            email and message.
           </Typography.Text>
         </>
       );
@@ -371,8 +380,10 @@ export const NewReportRequestForm = () => {
         </Typography.Text>
         <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
           Click below to login to your account and see the reports. For other
-          projects - <span style={{color: COLORS.primaryColor}}>{notReadyNames}</span>; your request is submitted to queue. We
-          will get back to you with a detailed report once available.
+          projects -{" "}
+          <span style={{ color: COLORS.primaryColor }}>{notReadyNames}</span>;
+          your request is submitted to queue. We will get back to you with a
+          detailed report once available.
         </Typography.Text>
         <Button
           type="primary"
@@ -612,7 +623,7 @@ export const NewReportRequestForm = () => {
                           borderColor: COLORS.borderColor,
                         }}
                       >
-                        <Flex vertical style={{paddingBottom: 16}}>
+                        <Flex vertical style={{ paddingBottom: 16 }}>
                           <Paragraph
                             style={{
                               fontSize: FONT_SIZE.HEADING_2,
@@ -622,8 +633,9 @@ export const NewReportRequestForm = () => {
                           >
                             {capitalize(p.projectName)}
                           </Paragraph>
-                          {p.lvnzyProjectId ? getInstantReportTag(): getRequestReportTag()}
-                          
+                          {p.lvnzyProjectId
+                            ? getInstantReportTag()
+                            : getRequestReportTag()}
                         </Flex>
                         <Flex
                           style={{ marginLeft: "auto" }}

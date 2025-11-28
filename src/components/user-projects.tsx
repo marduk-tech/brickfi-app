@@ -2,7 +2,7 @@
 
 import { Flex, Tooltip, Typography } from "antd";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDevice } from "../hooks/use-device";
 import { useWindowDimensions } from "../hooks/use-browser-safe";
 import { useUser } from "../hooks/use-user";
@@ -40,6 +40,7 @@ export function UserProjects({
 
   const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
   const { isMobile } = useDevice();
+  const refreshRun = useRef(false);
 
   const filteredProjects =
     user &&
@@ -78,24 +79,34 @@ export function UserProjects({
           }}
           vertical
         >
-             <div
+          <div
+            style={{
+              width: "100%",
+              height: isMobile ? 200 : 175,
+              borderRadius: 12,
+              backgroundImage: `url(images/placeholder-pending-report.png)`,
+              backgroundSize: "auto 90%",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          ></div>
+          <Flex vertical style={{ padding: "8px 16px" }}>
+            <Typography.Text
               style={{
-                width: "100%",
-                height: isMobile ? 200 : 175,
-                borderRadius: 12,
-                backgroundImage: `url(images/placeholder-pending-report.png)`,
-                backgroundSize: "auto 90%",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
+                fontSize: FONT_SIZE.HEADING_2,
+                color: COLORS.textColorLight,
               }}
-            ></div>
-            <Flex vertical style={{ padding: "8px 16px"}}>
-          <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, color: COLORS.textColorLight }}>
-            {itemInfo.projectName}
-          </Typography.Text>
-          <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorLight }}>
-            Report Pending
-          </Typography.Text>
+            >
+              {itemInfo.projectName}
+            </Typography.Text>
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_4,
+                color: COLORS.textColorLight,
+              }}
+            >
+              Report Pending
+            </Typography.Text>
           </Flex>
         </Flex>
       );
