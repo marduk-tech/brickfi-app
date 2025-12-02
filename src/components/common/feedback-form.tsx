@@ -129,30 +129,22 @@ export const FeedbackForm = () => {
       <Flex
         vertical={isMobile}
         style={{
-          paddingTop: isMobile ? 72 : 100,
+          paddingTop: 72,
           minHeight: "calc(100vh - 100px)",
         }}
+        align="center"
       >
         {isMobile ? null : renderBanner()}
         <Flex
           style={{
             width: `calc(${isMobile ? "100%" : "50%"} - 32px)`,
-            padding: 16,
+            padding: "16px 8px",
             height: "100%",
             maxWidth: 600,
             marginTop: 0,
           }}
           vertical
         >
-          <Typography.Text
-            style={{
-              fontSize: FONT_SIZE.HEADING_3,
-              color: COLORS.primaryColor,
-            }}
-          >
-            FEEDBACK
-          </Typography.Text>
-
           <Flex
             vertical
             style={{
@@ -169,7 +161,7 @@ export const FeedbackForm = () => {
                 <Typography.Text
                   style={{
                     fontSize: FONT_SIZE.HEADING_1,
-                    lineHeight: "120%",
+                    lineHeight: "100%",
                     marginBottom: 24,
                   }}
                 >
@@ -197,7 +189,7 @@ export const FeedbackForm = () => {
                         />
                       ) : (
                         <TextArea
-                          rows={4}
+                          rows={3}
                           value={item.answer}
                           onChange={(e) =>
                             handleFeedbackChange(index, e.target.value)
