@@ -321,7 +321,7 @@ export const NewReportRequestForm = () => {
             size="large"
             style={{ marginTop: 24 }}
             onClick={() => {
-              window.open(`${window.location.origin}/app`,"_blank");
+              window.open(`${window.location.origin}/app`, "_blank");
             }}
           >
             View My Reports
@@ -366,6 +366,7 @@ export const NewReportRequestForm = () => {
     const notReadyNames = notReady
       .map((p) => capitalize(p.projectName))
       .join(", ");
+    const readyNames = ready.map((p) => capitalize(p.projectName)).join(", ");
 
     return (
       <>
@@ -376,15 +377,20 @@ export const NewReportRequestForm = () => {
             marginBottom: 16,
           }}
         >
-          Wohoo! Your Brick360 Report is ready & available.
+          Wohoo! Your Brick360 Report is ready for selected projects.
         </Typography.Text>
         <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
-          Click below to login to your account and see the reports. For other
-          projects -{" "}
-          <span style={{ color: COLORS.primaryColor }}>{notReadyNames}</span>;
-          your request is submitted to queue. We will get back to you with a
-          detailed report once available.
+          Click below to login to your account and see report for{" "}
+          <span style={{ color: COLORS.primaryColor }}>{readyNames}</span>.
         </Typography.Text>
+        <Typography.Text
+          style={{ fontSize: FONT_SIZE.HEADING_4, marginTop: 8 }}
+        >
+          For other projects - <b>{notReadyNames}</b>, your request is submitted
+          to queue. We are continously working to prepare detailed projects
+          across Bangalore and will get back to you once the report is available.
+        </Typography.Text>
+
         <Button
           type="primary"
           size="large"
