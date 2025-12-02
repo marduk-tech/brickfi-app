@@ -585,16 +585,16 @@ export const NewReportRequestForm = () => {
                   style={{
                     fontSize: FONT_SIZE.HEADING_1,
                     lineHeight: "120%",
+                    color: COLORS.textColorDark
                   }}
                 >
-                  Search for a Project in Bangalore.
+                  Search for a Project
                 </Typography.Text>
                 {reportsLeft > 0 && (
                   <Typography.Text
-                    style={{ fontSize: FONT_SIZE.HEADING_4, marginBottom: 24 }}
+                    style={{ fontSize: FONT_SIZE.HEADING_4, marginBottom: 24, color: COLORS.textColorMedium }}
                   >
-                    You can request report for upto {reportsLeft} projects. It
-                    will be shared within 2 business days.
+                    Request report for any RERA registered project in Bangalore.
                   </Typography.Text>
                 )}
 
