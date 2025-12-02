@@ -159,6 +159,10 @@ export const NewReportRequestForm = () => {
   }, [projects]);
 
   const handleSelectProject = (_: any, option: any) => {
+    if (!reportsLeft || selectedProjects.length >= MAX_FREE_REPORTS) {
+      setSearchValue("");
+      return;
+    }
     const newProject = option.project;
     const alreadySelected = selectedProjects.some(
       (p) => p.projectName === newProject.projectName
@@ -388,7 +392,8 @@ export const NewReportRequestForm = () => {
         >
           For other projects - <b>{notReadyNames}</b>, your request is submitted
           to queue. We are continously working to prepare detailed projects
-          across Bangalore and will get back to you once the report is available.
+          across Bangalore and will get back to you once the report is
+          available.
         </Typography.Text>
 
         <Button
@@ -594,11 +599,7 @@ export const NewReportRequestForm = () => {
                       ? "Loading projects, please wait.."
                       : "Search project name..."
                   }
-                  disabled={
-                    !reportsLeft ||
-                    selectedProjects.length >= MAX_FREE_REPORTS ||
-                    reraProjectNamesLoading
-                  }
+                  disabled={reraProjectNamesLoading}
                 >
                   <Input.Search loading={reraProjectNamesLoading} />
                 </AutoComplete>
