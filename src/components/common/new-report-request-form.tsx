@@ -51,7 +51,7 @@ export const NewReportRequestForm = () => {
   const { user } = useUser();
   const { isMobile } = useDevice();
   const [reportsLeft, setReportsLeft] = useState<number>(MAX_FREE_REPORTS);
-  const [maxReportsRequested, setMaxReportsRequested] = useState(false);
+  const [userReportLimitReached, setUserReportLimitReached] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [projectOptions, setProjectOptions] = useState<any[]>([]);
   const [verifiedUser, setVerifiedUser] = useState<any>(null);
@@ -159,7 +159,11 @@ export const NewReportRequestForm = () => {
   }, [projects]);
 
   const handleSelectProject = (_: any, option: any) => {
-    if (!reportsLeft || selectedProjects.length >= MAX_FREE_REPORTS) {
+    if (
+      userReportLimitReached ||
+      !reportsLeft ||
+      selectedProjects.length == 2
+    ) {
       setSearchValue("");
       return;
     }
@@ -173,19 +177,17 @@ export const NewReportRequestForm = () => {
       return;
     }
 
-    if (selectedProjects.length < MAX_FREE_REPORTS) {
-      setSelectedProjects([...selectedProjects, newProject]);
-      setSearchValue("");
-    } else {
-      message.warning(
-        `You can select a maximum of ${MAX_FREE_REPORTS} projects.`
-      );
-    }
+    const selProjects = [...selectedProjects, newProject];
+    setSelectedProjects(selProjects);
+    setReportsLeft(reportsLeft - 1);
+    setSearchValue("");
   };
   const handleRemoveProject = (projectName: string) => {
-    setSelectedProjects(
-      selectedProjects.filter((p) => p.projectName !== projectName)
+    const selProjects = selectedProjects.filter(
+      (p) => p.projectName !== projectName
     );
+    setSelectedProjects(selProjects);
+    setReportsLeft(reportsLeft + 1);
   };
 
   const handleNext = async () => {
@@ -276,9 +278,10 @@ export const NewReportRequestForm = () => {
       if (
         axiosError.response &&
         axiosError.response.data &&
-        (axiosError.response as any).data.maxReportsRequested
+        (axiosError.response as any).data.userReportLimitReached
       ) {
-        setMaxReportsRequested(true);
+        setUserReportLimitReached(true);
+        setReportsLeft((axiosError.response as any).data.reportsLeft);
       } else {
         setErrorMsg(
           <Alert
@@ -445,8 +448,20 @@ export const NewReportRequestForm = () => {
               >
                 {" "}
                 {userLimitReached
-                  ? "Oops! Looks like this mobile has already requested max number of free reports."
-                  : "You can request report for upto 2 projects for free."}
+                  ? `Oops! Looks like this mobile has already requested max number of free reports. ${
+                      reportsLeft
+                        ? "You can only request " +
+                          reportsLeft +
+                          " more report(s). Please remove or update requested projects."
+                        : ""
+                    }`
+                  : user?.requestedReports && user?.requestedReports.length
+                  ? `You have already requested ${
+                      user.requestedReports.length
+                    } report(s). You can request ${
+                      Math.max(2, 2 - user.requestedReports.length)
+                    } more.`
+                  : `You can request report for upto 2 projects for free.`}
               </Typography.Text>
             </Flex>
             {userLimitReached ? (
@@ -498,10 +513,15 @@ export const NewReportRequestForm = () => {
     );
   };
   useEffect(() => {
-    if (user && user.requestedReports) {
-      setReportsLeft(MAX_FREE_REPORTS - user.requestedReports.length);
-      if (MAX_FREE_REPORTS - user.requestedReports.length <= 0) {
-        setMaxReportsRequested(true);
+    if (user) {
+      const isAdminOrMember =
+        user.role && ["admin", "member"].includes(user.role);
+      const repLeft =
+        (isAdminOrMember ? 100 : MAX_FREE_REPORTS) -
+        (user.requestedReports ? user.requestedReports.length : 0);
+      setReportsLeft(repLeft);
+      if (repLeft <= 0) {
+        setUserReportLimitReached(true);
       }
     }
   }, [user]);
@@ -733,12 +753,12 @@ export const NewReportRequestForm = () => {
             )}
           </Flex>
           {}
-          {(step !== 3 && maxReportsRequested) ||
-          (step == 1 && selectedProjects.length >= MAX_FREE_REPORTS)
-            ? renderMaxReportsMsg(maxReportsRequested)
+          {(step !== 3 && userReportLimitReached) ||
+          (step == 1 && selectedProjects.length >= Math.min(2, reportsLeft))
+            ? renderMaxReportsMsg(userReportLimitReached)
             : null}
           {step !== 3 && errorMsg ? errorMsg : null}
-          {reportsLeft > 0 && (
+          {!userReportLimitReached && (
             <Flex style={{ marginTop: 16 }} gap={16}>
               {step === 1
                 ? [
@@ -761,7 +781,7 @@ export const NewReportRequestForm = () => {
                       key="submit"
                       type="primary"
                       loading={createUser.isPending}
-                      disabled={!isMobileVerified || maxReportsRequested}
+                      disabled={!isMobileVerified || userReportLimitReached}
                       onClick={() => form.submit()}
                     >
                       Submit
