@@ -19,7 +19,6 @@ import {
 } from "../theme/style-constants";
 import { NavLink } from "../types/Common";
 
-
 const { Header, Content } = Layout;
 
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
@@ -231,30 +230,58 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   style={{ height: 16, width: "auto", marginLeft: 4 }}
                 ></img>
               </Flex>
-
-              <Flex style={{ marginLeft: "auto", cursor: "pointer" }}>
-                <img
-                  src="/images/brickfi-assist.png"
-                  onClick={() => {
-                    if (LandingConstants.brickAssistLink.startsWith("http")) {
-                      safeWindow.location.assign(
-                        LandingConstants.brickAssistLink
-                      );
-                    } else {
-                      router.push(LandingConstants.brickAssistLink);
-                    }
-                  }}
-                  style={{ height: 32, width: "auto", marginRight: 8 }}
-                ></img>
+              <Flex style={{ marginLeft: "auto" }} align="center">
+                <Link href="/feedback" target="_blank">
                 <Flex
-                  onClick={() => {
-                    setSidebarOpen(true);
+                  style={{
+                    border: `1px solid ${COLORS.textColorDark}`,
+                    padding: "0 4px",
+                    borderRadius: 8,
+                    marginRight: 16,
+                    height: 24
                   }}
+                  align="center"
+                  gap={4}
                 >
-                  <DynamicReactIcon
-                    iconName="HiOutlineMenuAlt3"
-                    iconSet="hi"
-                  ></DynamicReactIcon>
+                  
+                  <DynamicReactIcon iconName="MdFeedback" iconSet="md" size={14} color={COLORS.textColorDark}></DynamicReactIcon>
+                  <Typography.Text
+                    style={{
+                      color: COLORS.textColorDark,
+                      lineHeight: "100%",
+                      fontSize: FONT_SIZE.SUB_TEXT,
+                    }}
+                  >
+                    Feedback
+                  </Typography.Text>
+                  
+                </Flex>
+                </Link>
+
+                <Flex style={{ cursor: "pointer" }}>
+                  <img
+                    src="/images/brickfi-assist.png"
+                    onClick={() => {
+                      if (LandingConstants.brickAssistLink.startsWith("http")) {
+                        safeWindow.location.assign(
+                          LandingConstants.brickAssistLink
+                        );
+                      } else {
+                        router.push(LandingConstants.brickAssistLink);
+                      }
+                    }}
+                    style={{ height: 32, width: "auto", marginRight: 8 }}
+                  ></img>
+                  <Flex
+                    onClick={() => {
+                      setSidebarOpen(true);
+                    }}
+                  >
+                    <DynamicReactIcon
+                      iconName="HiOutlineMenuAlt3"
+                      iconSet="hi"
+                    ></DynamicReactIcon>
+                  </Flex>
                 </Flex>
               </Flex>
             </Flex>

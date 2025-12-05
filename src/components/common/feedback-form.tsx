@@ -1,7 +1,16 @@
 "use client";
 
 import LandingFooter from "@/custom-pages/landing/footer";
-import { Alert, Button, Flex, Form, Input, Typography, message } from "antd";
+import {
+  Alert,
+  Button,
+  Flex,
+  Form,
+  Input,
+  Select,
+  Typography,
+  message,
+} from "antd";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import LandingHeader from "../../custom-pages/landing/header";
@@ -15,7 +24,26 @@ const { TextArea } = Input;
 interface FeedbackAnswer {
   question: string;
   answer: string;
+  key: string;
+  required: boolean;
 }
+const sourceOptions = [
+  { label: "Direct Email/Message", value: "Direct email or message" },
+  {
+    label: "Google Search/Other Search",
+    value: "Google Search/Other Search",
+  },
+  {
+    label: "AI Chatbot (GPT/Gemini/Perplexity)",
+    value: "AI Chatbot (GPT/Gemini/Perplexity)",
+  },
+  {
+    label: "Social Media (Insta/FB/LinkedIn)",
+    value: "Social Media (Insta/FB/LinkedIn)",
+  },
+  { label: "Through a friend", value: "Through a friend" },
+  { label: "Other", value: "Other" },
+];
 
 export const FeedbackForm = () => {
   const [form] = Form.useForm();
@@ -27,10 +55,30 @@ export const FeedbackForm = () => {
   const [errorMsg, setErrorMsg] = useState<string>("");
 
   const [feedbackAnswers, setFeedbackAnswers] = useState<FeedbackAnswer[]>([
-    { question: "How did you hear about Brickfi?", answer: "" },
-    { question: "What did you find helpful?", answer: "" },
-    { question: "What did you not find helpful?", answer: "" },
-    { question: "Any other feedback?", answer: "" },
+    {
+      question: "How did you hear about Brickfi?",
+      answer: "",
+      key: "source",
+      required: true,
+    },
+    {
+      question: "What did you find helpful in the report?",
+      answer: "",
+      key: "helpful",
+      required: true,
+    },
+    {
+      question: "What did you find missing/lacking in the report?",
+      answer: "",
+      key: "helpful",
+      required: false,
+    },
+    {
+      question: "Any other feedback?",
+      answer: "",
+      key: "helpful",
+      required: false,
+    },
   ]);
 
   const handleFeedbackChange = (index: number, value: string) => {
@@ -41,7 +89,7 @@ export const FeedbackForm = () => {
 
   const handleNext = async () => {
     const allFilled = feedbackAnswers.every(
-      (item) => item.answer.trim() !== ""
+      (item) => !item.required || item.answer !== ""
     );
 
     if (!allFilled) {
@@ -107,7 +155,7 @@ export const FeedbackForm = () => {
       >
         <div
           style={{
-            backgroundImage: `url(/images/landing/brick360-request-1.png)`,
+            backgroundImage: `url(/images/brickfi-feedback-plchlder.png)`,
             backgroundPosition: "center",
             backgroundSize: "cover",
             backgroundRepeat: "no-repeat",
@@ -148,7 +196,7 @@ export const FeedbackForm = () => {
           <Flex
             vertical
             style={{
-              padding: 16,
+              padding: "8px 16px",
               backgroundColor: COLORS.bgColor,
               marginTop: 8,
               border: "1px solid",
@@ -160,36 +208,69 @@ export const FeedbackForm = () => {
               <Flex vertical style={{ padding: "16px 0" }}>
                 <Typography.Text
                   style={{
-                    fontSize: FONT_SIZE.HEADING_1,
+                    fontSize: isMobile
+                      ? FONT_SIZE.HEADING_1 * 0.8
+                      : FONT_SIZE.HEADING_1,
                     lineHeight: "100%",
-                    marginBottom: 24,
+                    marginBottom: 4,
                   }}
                 >
                   We&apos;d love to hear from you!
                 </Typography.Text>
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.PARA,
+                    lineHeight: "130%",
+                    marginBottom: 16,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  We are continously looking to improve our product & services.
+                  Your feedback will be immensely helpful.
+                </Typography.Text>
 
                 <Flex vertical style={{ width: "100%", maxWidth: 500 }}>
                   {feedbackAnswers.map((item, index) => (
-                    <Flex key={index} vertical style={{ marginBottom: 16 }}>
+                    <Flex
+                      key={index}
+                      vertical
+                      style={{
+                        marginBottom:
+                          index == feedbackAnswers.length - 1 ? 0 : 16,
+                      }}
+                    >
                       <Typography.Text
                         style={{
-                          marginBottom: 8,
+                          marginBottom: 4,
                           fontWeight: 500,
                         }}
                       >
                         {item.question}
                       </Typography.Text>
-                      {index === 0 ? (
-                        <Input
-                          value={item.answer}
-                          onChange={(e) =>
-                            handleFeedbackChange(index, e.target.value)
-                          }
-                          placeholder="Your answer..."
-                        />
+                      {item.key === "source" ? (
+                        <Select
+                          placeholder="Select an option"
+                          style={{
+                            width: "100%",
+                            fontSize: FONT_SIZE.HEADING_3,
+                          }}
+                          allowClear
+                          onChange={(selection: string) => {
+                            handleFeedbackChange(index, selection);
+                          }}
+                        >
+                          {sourceOptions.map((option) => (
+                            <Select.Option
+                              key={option.value}
+                              value={option.value}
+                            >
+                              {option.label}
+                            </Select.Option>
+                          ))}
+                        </Select>
                       ) : (
                         <TextArea
-                          rows={3}
+                          rows={2}
                           value={item.answer}
                           onChange={(e) =>
                             handleFeedbackChange(index, e.target.value)
@@ -208,10 +289,19 @@ export const FeedbackForm = () => {
                 <Typography.Text
                   style={{
                     fontSize: FONT_SIZE.HEADING_2,
-                    marginBottom: 16,
                   }}
                 >
                   Please share your contact details
+                </Typography.Text>
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.PARA,
+                    marginBottom: 16,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  Just to make sure you are human. We would never spam or call
+                  you without your consent.
                 </Typography.Text>
                 <Form
                   form={form}
@@ -255,19 +345,26 @@ export const FeedbackForm = () => {
                 >
                   Thank you for submitting the feedback
                 </Typography.Text>
-                <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_4,
+                    color: COLORS.textColorMedium,
+                  }}
+                >
                   We appreciate your time and feedback. It helps us improve our
                   services.
                 </Typography.Text>
 
-                <Button
-                  type="primary"
-                  size="large"
-                  style={{ marginTop: 24 }}
-                  onClick={() => router.push("/")}
-                >
-                  Back to Home
-                </Button>
+                <Flex gap={8} align="center">
+                  <Button
+                    type="default"
+                    size="small"
+                    style={{ marginTop: 24 }}
+                    onClick={() => window.location.reload()}
+                  >
+                    Submit another response
+                  </Button>
+                </Flex>
               </Flex>
             )}
           </Flex>
@@ -283,6 +380,11 @@ export const FeedbackForm = () => {
                   type="primary"
                   onClick={handleNext}
                   loading={submitFeedback.isPending}
+                  disabled={
+                    !feedbackAnswers.every(
+                      (item) => !item.required || item.answer !== ""
+                    )
+                  }
                 >
                   {user ? "Submit" : "Next"}
                 </Button>
