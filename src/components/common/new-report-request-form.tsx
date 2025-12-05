@@ -412,6 +412,22 @@ export const NewReportRequestForm = () => {
   };
 
   const renderMaxReportsMsg = (userLimitReached?: boolean) => {
+    const msg = userLimitReached
+      ? `Oops! Looks like this mobile has already requested max number of free reports. ${
+          reportsLeft
+            ? "You can only request " +
+              reportsLeft +
+              " more report(s). Please remove or update requested projects."
+            : ""
+        }`
+      : user?.requestedReports && user?.requestedReports.length
+      ? `You have already requested ${user.requestedReports.length} report(s). You can request report for upto 2 projects for free.`
+      : selectedProjects.length == 2
+      ? `You can request report for upto 2 projects for free.`
+      : "";
+    if (!msg) {
+      return "";
+    }
     return (
       <Flex style={{ maxWidth: "100%", margin: "8px 0" }} vertical>
         <Tag
@@ -456,17 +472,16 @@ export const NewReportRequestForm = () => {
                         : ""
                     }`
                   : user?.requestedReports && user?.requestedReports.length
-                  ? `You have already requested ${
-                      user.requestedReports.length
-                    } report(s). You can request ${
-                      Math.max(2, 2 - user.requestedReports.length)
-                    } more.`
-                  : `You can request report for upto 2 projects for free.`}
+                  ? `You have already requested ${user.requestedReports.length} report(s). You can request report for upto 2 projects for free.`
+                  : selectedProjects.length == 2
+                  ? `You can request report for upto 2 projects for free.`
+                  : ""}
               </Typography.Text>
             </Flex>
-            {userLimitReached ? (
+            {userLimitReached || selectedProjects.length == 2 ? (
               <Link
                 href="/brickassist"
+                target="_blank"
                 style={{
                   fontSize: FONT_SIZE.HEADING_4,
                   marginTop: 16,
@@ -552,7 +567,7 @@ export const NewReportRequestForm = () => {
         <Flex
           style={{
             width: `calc(${isMobile ? "100%" : "50%"} - 32px)`,
-            padding: 16,
+            padding: "8px 16px",
             height: "100%",
             maxWidth: 600,
             marginTop: 0,
@@ -571,7 +586,7 @@ export const NewReportRequestForm = () => {
           <Flex
             vertical
             style={{
-              padding: 16,
+              padding: "0 16px",
               backgroundColor: COLORS.bgColor,
               marginTop: 8,
               border: "1px solid",
@@ -585,14 +600,18 @@ export const NewReportRequestForm = () => {
                   style={{
                     fontSize: FONT_SIZE.HEADING_1,
                     lineHeight: "120%",
-                    color: COLORS.textColorDark
+                    color: COLORS.textColorDark,
                   }}
                 >
                   Search for a Project
                 </Typography.Text>
                 {reportsLeft > 0 && (
                   <Typography.Text
-                    style={{ fontSize: FONT_SIZE.HEADING_4, marginBottom: 24, color: COLORS.textColorMedium }}
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_4,
+                      marginBottom: 24,
+                      color: COLORS.textColorMedium,
+                    }}
                   >
                     Request report for any RERA registered project in Bangalore.
                   </Typography.Text>

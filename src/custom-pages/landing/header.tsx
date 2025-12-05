@@ -1,6 +1,6 @@
 "use client";
 
-import { Dropdown, Flex } from "antd";
+import { Dropdown, Flex, Typography } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -59,6 +59,7 @@ const LandingHeader: React.FC<{
       >
         <img src={logo || "/images/brickfi-logo-white.png"} height="20"></img>
       </Flex>
+      
       <Flex
         style={{
           marginLeft: "auto",
