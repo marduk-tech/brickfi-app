@@ -1,4 +1,4 @@
-import { baseApiUrl } from "@/libs/constants";
+import { baseApiUrl, apiKey } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 import { LvnzyProject } from "@/types/LvnzyProject";
 
@@ -8,6 +8,7 @@ export const getLvnzyProjectById = async (id: string, throwError = true) => {
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
+      "x-api-key": apiKey || "",
     },
   });
 
@@ -42,6 +43,7 @@ export const getLvnzyProjectBySlug = async (
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
       },
     }
   );

@@ -1,6 +1,6 @@
 "use server";
 
-import { baseApiUrl } from "@/libs/constants";
+import { baseApiUrl, apiKey } from "@/libs/constants";
 import { cache } from "react";
 import { DeveloperActionResult, RealEstateDeveloper } from "./types";
 
@@ -11,6 +11,9 @@ export const getDeveloperData = cache(
         `${baseApiUrl}real-estate-developer/${developerId}`,
         {
           cache: "no-store",
+          headers: {
+            "x-api-key": apiKey || "",
+          },
         }
       );
 

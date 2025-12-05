@@ -1,10 +1,13 @@
-import { baseApiUrl } from "@/libs/constants";
+import { apiKey, baseApiUrl } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 
 // Get developer by ObjectId (for internal operations)
 export const getDeveloper = async (id: string, throwError = true) => {
   const res = await fetch(`${baseApiUrl}real-estate-developer/${id}`, {
     cache: "no-store",
+    headers: {
+      "x-api-key": apiKey || "",
+    },
   });
 
   if (throwError && res.status === 404) {
@@ -40,6 +43,9 @@ export const getDeveloperBySlug = async (slug: string, throwError = true) => {
     `${baseApiUrl}real-estate-developer/slug/${slug.toLowerCase()}`,
     {
       cache: "no-store",
+      headers: {
+        "x-api-key": apiKey || "",
+      },
     }
   );
 
@@ -101,6 +107,9 @@ export const getAllDevelopers = async (params?: {
   const res = await fetch(url, {
     // Revalidate every hour for sitemap generation
     next: { revalidate: 3600 },
+    headers: {
+      "x-api-key": apiKey || "",
+    },
   });
 
   if (!res.ok) {
