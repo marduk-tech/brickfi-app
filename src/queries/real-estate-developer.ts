@@ -1,4 +1,4 @@
-import { apiKey, baseApiUrl } from "@/libs/constants";
+import { apiKey, sitemapApiKey, baseApiUrl } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 
 // Get developer by ObjectId (for internal operations)
@@ -108,7 +108,7 @@ export const getAllDevelopers = async (params?: {
     // Revalidate every hour for sitemap generation
     next: { revalidate: 3600 },
     headers: {
-      "x-api-key": apiKey || "",
+      "x-api-key": sitemapApiKey || "",
     },
   });
 

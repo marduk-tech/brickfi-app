@@ -4,6 +4,7 @@ export const envMode = process.env.NEXT_PUBLIC_ENV;
 
 export const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 export const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+export const sitemapApiKey = process.env.SITEMAP_API_KEY;
 
 export const queryKeys = {
   projects: "projects",

@@ -1,4 +1,4 @@
-import { baseApiUrl, apiKey } from "@/libs/constants";
+import { baseApiUrl, apiKey, sitemapApiKey } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 import { GlossaryArticle } from "@/types/Marketing";
 
@@ -8,7 +8,7 @@ export const getMarketing = async (type: string, throwError = true) => {
     // Revalidate every hour for sitemap generation
     next: { revalidate: 3600 },
     headers: {
-      "x-api-key": apiKey || "",
+      "x-api-key": sitemapApiKey || "",
     },
   });
 
