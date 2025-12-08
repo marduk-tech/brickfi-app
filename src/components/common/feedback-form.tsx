@@ -7,7 +7,11 @@ import {
   Flex,
   Form,
   Input,
+  Radio,
+  RadioChangeEvent,
   Select,
+  Slider,
+  Tag,
   Typography,
   message,
 } from "antd";
@@ -48,6 +52,7 @@ const sourceOptions = [
 export const FeedbackForm = () => {
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
+  const [rating, setRating] = useState(7);
   const { user } = useUser();
   const { isMobile } = useDevice();
   const router = useRouter();
@@ -62,10 +67,17 @@ export const FeedbackForm = () => {
       required: true,
     },
     {
+      question:
+        "On a scale of 1 to 10, how would helpful would you rate the Brick360 report ?",
+      answer: "",
+      key: "rating",
+      required: true,
+    },
+    {
       question: "What did you find helpful in the report?",
       answer: "",
       key: "helpful",
-      required: true,
+      required: false,
     },
     {
       question: "What did you find missing/lacking in the report?",
@@ -268,6 +280,71 @@ export const FeedbackForm = () => {
                             </Select.Option>
                           ))}
                         </Select>
+                      ) : item.key == "rating" ? (
+                        <Radio.Group
+                          value={rating}
+                          optionType="button"
+                          size="small"
+                          onChange={({
+                            target: { value },
+                          }: RadioChangeEvent) => {
+                            console.log("radio3 checked", value);
+                            setRating(value);
+                            handleFeedbackChange(index, value);
+                          }}
+                          options={[
+                            {
+                              value: "1",
+                              label: "1",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "2",
+                              label: "2",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "3",
+                              label: "3",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "4",
+                              label: "4",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "5",
+                              label: "5",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "6",
+                              label: "6",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "7",
+                              label: "7",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "8",
+                              label: "8",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "9",
+                              label: "9",
+                              style: { padding: "0 12px" },
+                            },
+                            {
+                              value: "10",
+                              label: "10",
+                              style: { padding: "0 12px" },
+                            },
+                          ]}
+                        />
                       ) : (
                         <TextArea
                           rows={2}
