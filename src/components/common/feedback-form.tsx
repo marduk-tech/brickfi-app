@@ -77,6 +77,7 @@ export const FeedbackForm = () => {
       question: "What did you find helpful in the report?",
       answer: "",
       key: "helpful",
+      required: false,
     },
     {
       question: "What did you find missing/lacking in the report?",
