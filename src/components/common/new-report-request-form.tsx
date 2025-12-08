@@ -24,6 +24,7 @@ import {
   MarketingProject as ReraProject,
   useMarketingProjectSearch as useReraProjectSearch,
 } from "../../hooks/use-marketing-project-search";
+import { useMinisearch } from "../../hooks/use-minisearch";
 import { useUser } from "../../hooks/use-user";
 import {
   useCreateUserMutation,
@@ -53,6 +54,15 @@ export const NewReportRequestForm = () => {
   const [reportsLeft, setReportsLeft] = useState<number>(MAX_FREE_REPORTS);
   const [userReportLimitReached, setUserReportLimitReached] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
+
+  // minisearch for fuzzy search on project name and promoter name
+  const searchResults = useMinisearch(projects, debouncedSearchValue, {
+    fields: ["projectName", "promoterName"],
+    boost: { projectName: 2, promoterName: 1 },
+    fuzzy: 0.2,
+    prefix: true,
+  });
   const [projectOptions, setProjectOptions] = useState<any[]>([]);
   const [verifiedUser, setVerifiedUser] = useState<any>(null);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
@@ -64,7 +74,16 @@ export const NewReportRequestForm = () => {
     setTimeout(() => {
       setFlickerWait(false);
     }, 1000);
-  });
+  }, []);
+
+  // debounce search query to reduce expensive fuzzy search operations
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchValue(searchValue);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [searchValue]);
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
@@ -122,7 +141,11 @@ export const NewReportRequestForm = () => {
 
   useEffect(() => {
     if (projects && projects.length) {
-      const projectOptions: any[] = (projects || [])
+      const filteredProjects = debouncedSearchValue.trim()
+        ? searchResults
+        : projects;
+
+      const projectOptions: any[] = (filteredProjects || [])
         .filter(
           (p) => !selectedProjects.some((s) => s.projectName === p.projectName)
         )
@@ -147,6 +170,16 @@ export const NewReportRequestForm = () => {
               >
                 {capitalize(project.projectName)}
               </Typography.Text>
+              {project.promoterName && (
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorMedium,
+                  }}
+                >
+                  by {capitalize(project.promoterName)}
+                </Typography.Text>
+              )}
               {project.lvnzyProjectId
                 ? getInstantReportTag()
                 : getRequestReportTag()}
@@ -156,7 +189,7 @@ export const NewReportRequestForm = () => {
         }));
       setProjectOptions(projectOptions);
     }
-  }, [projects]);
+  }, [projects, debouncedSearchValue, selectedProjects]);
 
   const handleSelectProject = (_: any, option: any) => {
     if (
@@ -628,15 +661,11 @@ export const NewReportRequestForm = () => {
                   value={searchValue}
                   onChange={setSearchValue}
                   onSelect={handleSelectProject}
-                  filterOption={(inputValue, option) =>
-                    option!.value
-                      .toLowerCase()
-                      .includes(inputValue.toLowerCase())
-                  }
+                  filterOption={() => true}
                   placeholder={
                     reraProjectNamesLoading
                       ? "Loading projects, please wait.."
-                      : "Search project name..."
+                      : "Search project or developer name..."
                   }
                   disabled={reraProjectNamesLoading}
                 >
