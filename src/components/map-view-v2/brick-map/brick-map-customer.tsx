@@ -1,16 +1,12 @@
-import { Flex, Select, Typography } from "antd";
+import { Flex, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { useFetchAllLivindexPlaces } from "../../../hooks/use-livindex-places";
 import {
   DRIVER_CATEGORIES,
-  LivIndexDriversConfig,
 } from "../../../libs/constants";
-import { capitalize } from "../../../libs/lvnzy-helper";
 import { IDriverPlace } from "../../../types/Project";
 import { Loader } from "../../common/loader";
-import { getProjectTypeIcon } from "../../map-view/map-old/project-type-icon";
 import dynamic from "next/dynamic";
-import { useUser } from "@/hooks/use-user";
 import { useFetchProjects } from "@/hooks/use-project";
 const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 

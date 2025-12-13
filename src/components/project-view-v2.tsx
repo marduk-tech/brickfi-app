@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 import React, { useState } from "react";
 import { useDevice } from "../hooks/use-device";
 import { useFetchProjectById } from "../hooks/use-project";
-import { captureAnalyticsEvent, rupeeAmountFormat } from "../libs/lvnzy-helper";
+import { rupeeAmountFormat } from "../libs/lvnzy-helper";
 import { sortedMedia } from "../libs/utils";
 import "../theme/scroll-bar.css";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
@@ -86,8 +86,6 @@ const ProjectViewV2: React.FC<{
 
   const allMedia = [...sortedMediaArray, ...videoMedia];
   console.log("All Media:", allMedia);
-
-  captureAnalyticsEvent("app-projectpage-open", { projectId: projectData._id });
 
   return (
     <>

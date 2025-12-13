@@ -161,7 +161,7 @@ export default function RealEstateDeveloperClient({
             }}
           >
             Get a free Brick360 report for detailed builder credibility analysis
-            including time committment, customer satisfaction and more.
+            including time committment, customer complaints and more.
           </Typography.Text>
         </Flex>
       </Flex>
@@ -334,7 +334,7 @@ export default function RealEstateDeveloperClient({
           </Flex>
           <ReportCTABar
             msg="Get a free Brick360 report for detailed builder credibility analysis
-            including time committment, customer satisfaction and more."
+            including time committment, customer complaints and more."
           ></ReportCTABar>
           <h2
             style={{

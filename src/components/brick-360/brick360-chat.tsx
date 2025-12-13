@@ -25,12 +25,12 @@ import { useUser } from "../../hooks/use-user";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { axiosApiInstance } from "../../libs/axios-api-Instance";
 import {
+  apiKey,
   baseApiUrl,
   Brick360CategoryInfo,
   Brick360DataPoints,
   DRIVER_CATEGORIES,
 } from "../../libs/constants";
-import { captureAnalyticsEvent } from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "../../theme/style-constants";
 import { LvnzyProject } from "../../types/LvnzyProject";
 import { ISurroundingElement } from "../../types/Project";
@@ -39,6 +39,7 @@ import DynamicReactIcon from "../common/dynamic-react-icon";
 //
 import dynamic from "next/dynamic";
 import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
   ssr: false,
 });
@@ -341,6 +342,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
 
         setIsDrawerExpanded(true);
         captureAnalyticsEvent("question-asked", { question });
+
         setQueryStreaming(true);
 
         if (currentQuestion) {
@@ -376,7 +378,9 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             userId: user?._id,
             userProjects,
             lvnzyProjectId: lvnzyProject?._id,
-            dataPointCategory: dataPointSelected ? dataPointSelected.selectedDataPointCategory: "",
+            dataPointCategory: dataPointSelected
+              ? dataPointSelected.selectedDataPointCategory
+              : "",
           },
         });
 
@@ -627,7 +631,9 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
 
                     <MapViewV2
                       projectId={lvnzyProject?.originalProjectId?._id}
-                      corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
+                      corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
+                        (c: any) => c.corridorId
+                      )}
                       hideAllFilters={false}
                       surroundingElements={surroundingElements}
                       projectSqftPricing={Math.round(
@@ -847,13 +853,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             },
           }}
           closeIcon={
-            <Flex style={{marginTop: 8}}>
-            <DynamicReactIcon
-              iconName="IoCloseCircle"
-              iconSet="io5"
-              size={32}
-              color={COLORS.textColorMedium}
-            ></DynamicReactIcon>
+            <Flex style={{ marginTop: 8 }}>
+              <DynamicReactIcon
+                iconName="IoCloseCircle"
+                iconSet="io5"
+                size={32}
+                color={COLORS.textColorMedium}
+              ></DynamicReactIcon>
             </Flex>
           }
         >
@@ -867,7 +873,9 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             <MapViewV2
               projectId={lvnzyProject?.originalProjectId?._id}
               hideAllFilters={false}
-               corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
+              corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
+                (c: any) => c.corridorId
+              )}
               surroundingElements={surroundingElements}
               projectSqftPricing={Math.round(
                 lvnzyProject?.originalProjectId?.info.rate.minimumUnitCost /

@@ -178,8 +178,10 @@ const MapViewV2Inner = ({
       style={{
         width: "100%",
         height: "100%",
+        overflowX: "hidden",
         overflowY: "hidden",
         borderRadius: 8,
+        border: `0.4px solid ${COLORS.borderColorMedium}`,
         position: "relative",
         display: "flex",
         flexDirection: "column",

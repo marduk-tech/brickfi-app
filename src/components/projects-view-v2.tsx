@@ -1,7 +1,6 @@
 import { Flex } from "antd";
 import { useEffect, useState } from "react";
 import { ProjectCard } from "./common/project-card";
-import { captureAnalyticsEvent } from "../libs/lvnzy-helper";
 import { Project } from "../types/Project";
 
 const ProjectsViewV2: React.FC<{
@@ -19,7 +18,6 @@ const ProjectsViewV2: React.FC<{
     if (!projects) {
       return;
     }
-    captureAnalyticsEvent("app-homepage-open", {});
     const filtered = projects;
 
     setFilteredProjects(filtered);

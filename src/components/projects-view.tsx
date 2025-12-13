@@ -5,7 +5,6 @@ import { ProjectCard } from "./common/project-card";
 import { LocationAndPriceFilters } from "./location-price-filter";
 import { MapView } from "./map-view/map-old/map-view";
 import { useDevice } from "../hooks/use-device";
-import { captureAnalyticsEvent } from "../libs/lvnzy-helper";
 import { Project } from "../types/Project";
 import { FONT_SIZE } from "../theme/style-constants";
 
@@ -29,7 +28,6 @@ const ProjectsPage: React.FC<{
     if (!projects) {
       return;
     }
-    captureAnalyticsEvent("app-homepage-open", {});
 
     const filtered = projects;
 
@@ -163,9 +161,6 @@ const ProjectsPage: React.FC<{
                         setCategoryFilter(undefined);
                       } else {
                         setCategoryFilter(cat);
-                        captureAnalyticsEvent("click-homepage-category", {
-                          categoryName: cat,
-                        });
                       }
                     }}
                   >
