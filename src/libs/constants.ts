@@ -339,7 +339,7 @@ export const Brick360DataPoints = {
       label: "Time Committment",
     },
     customerSatisfaction: {
-      label: "Customer Satisfaction",
+      label: "Customer Complaints",
     },
   },
   financials: {
@@ -486,17 +486,15 @@ export const DRIVER_CATEGORIES = {
     icon: { name: "IoMdSchool", set: "io" },
     drivers: ["school", "university"],
     filters: [
-      { label: "CBSE", key: "cbse" },
-      { label: "ICSE", key: "icse" },
-      { label: "International", key: "international" },
+      { label: "Primary & Secondary", key: "k12" },
       { label: "Pre School", key: "pre-school" },
       { label: "University", key: "university" },
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
-      if (filter == "international") {
+      if (filter == "k12") {
         return (
-          driver.tags?.includes("ib") ||
-          driver.tags?.includes("cambridge-igcse")
+          !driver.tags?.includes("pre-school") &&
+          driver.driver !== "university"
         );
       }
       if (filter == "pre-school") {
@@ -505,12 +503,6 @@ export const DRIVER_CATEGORIES = {
           driver.distance &&
           driver.distance <= 5
         );
-      }
-      if (filter == "cbse") {
-        return driver.tags?.includes("cbse");
-      }
-      if (filter == "icse") {
-        return driver.tags?.includes("icse");
       }
       if (filter == "university") {
         return driver.driver === "university";
