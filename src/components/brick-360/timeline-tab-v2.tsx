@@ -58,6 +58,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
       timelines.push({
         name: lvnzyProject.originalProjectId.info.reraProjectId.projectDetails
           .projectName,
+          reraNumber: lvnzyProject.originalProjectId.info.reraProjectId.projectDetails.projectRegistrationNumber,
         timeline: lvnzyProject.meta.projectTimelines.sort((a: any, b: any) =>
           moment(a.startDate, "DD-MM-YYYY").diff(
             moment(b.startDate, "DD-MM-YYYY")
@@ -68,6 +69,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
       lvnzyProject.developer.reraOtherPhases.forEach((p: any) => {
         timelines.push({
           name: p.projectDetails.projectName,
+          reraNumber: p.projectDetails.projectRegistrationNumber,
           timeline: p.projectDetails.listOfRegistrationsExtensions.sort(
             (a: any, b: any) =>
               moment(a.startDate, "DD-MM-YYYY").diff(
@@ -136,8 +138,8 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                     </Flex>
                   ) : null}
                 </Flex>
-                <Flex align="center" gap={8}>
-                  <Flex>
+                <Flex align="center" gap={8} style={{marginBottom: 8}}>
+                  <Flex vertical gap={4}>
                     <Typography.Text
                       style={{
                         fontSize: FONT_SIZE.HEADING_2,
@@ -145,6 +147,16 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                       }}
                     >
                       {capitalize(t.name)}
+                    </Typography.Text>
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.SUB_TEXT,
+                        lineHeight: "110%",
+                        textTransform: "uppercase",
+                        color: COLORS.textColorLight
+                      }}
+                    >
+                      RERA: {capitalize(t.reraNumber)}
                     </Typography.Text>
                   </Flex>
                 </Flex>
