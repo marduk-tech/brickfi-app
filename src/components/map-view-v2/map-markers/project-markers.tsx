@@ -5,6 +5,7 @@ import { capitalize, getMinMaxPrices } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { MapModalContent } from "../map-modal";
 import { Flex, Tag, Typography } from "antd";
+import moment from "moment";
 
 interface ProjectMarkersProps {
   primaryProject?: any;
@@ -24,6 +25,13 @@ export const ProjectMarkers = ({
   setInfoModalOpen,
 }: ProjectMarkersProps) => {
   const markers: JSX.Element[] = [];
+
+  const getCompletionDate = (timeline: any[]) => {
+    const lastEntry = timeline[timeline.length - 1];
+    return `${moment(timeline[0].startDate, "DD-MM-YYYY").format(
+      "ll"
+    )} - ${moment(lastEntry.completionDate, "DD-MM-YYYY").format("ll")}`;
+  };
 
   // Wait for icon to be loaded and verify coordinates
   if (!currentProjectMarkerIcon) {
@@ -104,12 +112,17 @@ export const ProjectMarkers = ({
                     </Flex>
                   ),
                   content: (
-                    <Flex vertical gap={2}>
+                    <Flex vertical gap={0}>
+                        <Typography.Text>
+                          {getCompletionDate(
+                            project.info.reraProjectId.projectDetails
+                              .listOfRegistrationsExtensions
+                          )}
+                        </Typography.Text>
                       <Flex style={{ marginBottom: 16 }}>
                         {project.info.homeType.map((t: string) => (
                           <Typography.Text
                             style={{
-                              marginLeft: 4,
                               fontSize: FONT_SIZE.HEADING_4,
                             }}
                           >
@@ -142,9 +155,10 @@ export const ProjectMarkers = ({
                               ₹
                               {Math.round(
                                 (project.info.rate.minimumUnitCost /
-                                  (project.info.rate.minimumUnitSize * 1000) * 10)
-                              )/10}k{" "}
-                               per sq.ft
+                                  (project.info.rate.minimumUnitSize * 1000)) *
+                                  10
+                              ) / 10}
+                              k per sq.ft
                             </Typography.Text>
                           </Flex>
                         ) : null}
