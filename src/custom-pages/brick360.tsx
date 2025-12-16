@@ -21,7 +21,7 @@ import GradientBar from "../components/common/grading-bar";
 import { Loader } from "../components/common/loader";
 import RatingBar from "../components/common/rating-bar";
 import dynamic from "next/dynamic";
-const MapViewV2 = dynamic(() => import("../components/map-view/map-view-v2"), { ssr: false });
+const MapViewV2 = dynamic(() => import("../components/map-view-v2/map-view-v2"), { ssr: false });
 
 import ProjectGallery from "../components/project-gallery";
 import { useDevice } from "../hooks/use-device";
