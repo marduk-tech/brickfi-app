@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import DynamicReactIcon from "./common/dynamic-react-icon";
 import { ProjectCard } from "./common/project-card";
 import { LocationAndPriceFilters } from "./location-price-filter";
-import { MapView } from "./map-view/map-old/map-view";
 import { useDevice } from "../hooks/use-device";
 import { Project } from "../types/Project";
 import { FONT_SIZE } from "../theme/style-constants";
@@ -237,13 +236,13 @@ const ProjectsPage: React.FC<{
 
           {toggleMapView ? (
             <Row>
-              <MapView
+              {/* <MapView
                 projects={filteredProjects}
                 drivers={drivers}
                 onProjectClick={(projectId: string) => {
                   projectClick(projectId);
                 }}
-              />
+              /> */}
             </Row>
           ) : (
             <Flex
