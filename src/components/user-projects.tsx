@@ -111,10 +111,6 @@ export function UserProjects({
         </Flex>
       );
     }
-    const oneLinerBreakup = itemInfo.meta.oneLiner
-      ? itemInfo.meta.oneLiner.split(" · ")
-      : [];
-
     const imgs = itemInfo?.originalProjectId?.media
       ? itemInfo.originalProjectId.media.filter((m: any) => m.type == "image")
       : [];
