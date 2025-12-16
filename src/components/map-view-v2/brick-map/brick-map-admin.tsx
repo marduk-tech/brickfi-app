@@ -14,7 +14,6 @@ import { capitalize } from "../../../libs/lvnzy-helper";
 import { COLORS } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 import { Loader } from "../../common/loader";
-import { getProjectTypeIcon } from "../../map-view/map-old/project-type-icon";
 import dynamic from "next/dynamic";
 const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
@@ -166,10 +165,10 @@ export function BrickMapAdmin() {
                 value: (ProjectHomeType as any)[k],
                 label: (
                   <Flex gap={4}>
-                    {getProjectTypeIcon(
+                    {/* {getProjectTypeIcon(
                       (ProjectHomeType as any)[k],
                       COLORS.primaryColor
-                    )}
+                    )} */}
                     <Typography.Text>
                       {capitalize((ProjectHomeType as any)[k])}
                     </Typography.Text>
