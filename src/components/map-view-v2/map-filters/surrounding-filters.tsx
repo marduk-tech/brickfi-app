@@ -1,7 +1,7 @@
-import React from "react";
 import { Flex, Tag, Typography } from "antd";
+import React from "react";
 import { SurroundingElementLabels } from "../../../libs/constants";
-import { capitalize } from "../../../libs/lvnzy-helper";
+import { capitalize, captureAnalyticsEvent } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { ISurroundingElement } from "../../../types/Project";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
@@ -12,6 +12,7 @@ interface SurroundingFiltersProps {
   selectedSurroundingElementType?: string;
   setSelectedSurroundingElementType: (type: string) => void;
   currentSelectedCategory: string;
+  projectName?: string;
 }
 
 export const SurroundingFilters = ({
@@ -20,6 +21,7 @@ export const SurroundingFilters = ({
   selectedSurroundingElementType,
   setSelectedSurroundingElementType,
   currentSelectedCategory,
+  projectName,
 }: SurroundingFiltersProps) => {
   const renderSurroundingElementTypes = (k: string) => {
     if (!(SurroundingElementLabels as any)[k]) {
@@ -44,6 +46,10 @@ export const SurroundingFilters = ({
           cursor: "pointer",
         }}
         onClick={() => {
+          captureAnalyticsEvent("click-map-filter", {
+            filter: k,
+            projectName: projectName || "",
+          });
           setSelectedSurroundingElementType(k);
         }}
       >

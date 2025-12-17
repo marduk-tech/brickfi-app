@@ -1,13 +1,17 @@
 import { Alert, Flex, List, Typography } from "antd";
+import { forwardRef, ReactNode, useState } from "react";
 import { BRICK360_CATEGORY, Brick360DataPoints } from "../../libs/constants";
-import { capitalize, getCategoryScore } from "../../libs/lvnzy-helper";
+import {
+  capitalize,
+  captureAnalyticsEvent,
+  getCategoryScore,
+} from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
+import DynamicReactIcon from "../common/dynamic-react-icon";
 import GradientBar from "../common/grading-bar";
 import RatingBar from "../common/rating-bar";
 import { ScrollableContainer } from "../scrollable-container";
 import { SnapshotModal } from "./snapshot-modal";
-import { forwardRef, ReactNode, useState } from "react";
-import DynamicReactIcon from "../common/dynamic-react-icon";
 const { Paragraph } = Typography;
 
 interface Brick360TabProps {
@@ -30,15 +34,22 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
       function reasoningStmt(isDialog: boolean) {
         return (
           <Flex vertical>
-            <Flex align="flex-start" gap={4} style={{marginBottom: 8}}>
-              {isDialog ? null : <DynamicReactIcon
-                size={isPro ? 20 : 24}
-                iconName={isPro ? "FaRegLaugh" : "PiSmileySadBold"}
-                iconSet={isPro ? "fa" : "pi"}
-                color={isPro ? COLORS.primaryColor : COLORS.redIdentifier}
-              ></DynamicReactIcon> }
+            <Flex align="flex-start" gap={4} style={{ marginBottom: 8 }}>
+              {isDialog ? null : (
+                <DynamicReactIcon
+                  size={isPro ? 20 : 24}
+                  iconName={isPro ? "FaRegLaugh" : "PiSmileySadBold"}
+                  iconSet={isPro ? "fa" : "pi"}
+                  color={isPro ? COLORS.primaryColor : COLORS.redIdentifier}
+                ></DynamicReactIcon>
+              )}
               <Typography.Text
-                style={{ fontWeight: 500, fontSize: FONT_SIZE.HEADING_2, lineHeight: "110%", marginTop: isDialog? 24: 0 }}
+                style={{
+                  fontWeight: 500,
+                  fontSize: FONT_SIZE.HEADING_2,
+                  lineHeight: "110%",
+                  marginTop: isDialog ? 24 : 0,
+                }}
               >
                 {title}
               </Typography.Text>
@@ -58,7 +69,7 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                 marginTop: !isDialog ? 0 : 16,
                 width: !isDialog ? 275 : "100%",
                 color: COLORS.textColorMedium,
-                
+
                 textWrap: "wrap",
               }}
             ></div>
@@ -78,6 +89,10 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
             borderStyle: "solid",
           }}
           onClick={() => {
+            captureAnalyticsEvent("summary-expand", {
+              summaryTitle: isPro ? "pros" : "cons",
+              projectName: lvnzyProject?.meta.projectName,
+            });
             setQuickSnapshotDialogOpen(true);
             setQuickSnapshotDialogContent(reasoningStmt(true));
           }}
@@ -205,7 +220,14 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                                   : "1px solid",
                               borderBottomColor: COLORS.borderColor,
                             }}
-                            onClick={() => onDataPointClick(sc, item)}
+                            onClick={() => {
+                              captureAnalyticsEvent("expand-datapoint", {
+                                pillar: sc.key,
+                                dataPoint: (item as any)[0],
+                                projectName: lvnzyProject?.meta.projectName,
+                              });
+                              onDataPointClick(sc, item);
+                            }}
                           >
                             <Flex align="center" style={{ width: "100%" }}>
                               <Flex

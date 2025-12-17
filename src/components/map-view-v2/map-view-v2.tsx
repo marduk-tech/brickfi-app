@@ -194,6 +194,7 @@ const MapViewV2Inner = ({
         setSelectedCategory={setSelectedCategory}
         hideAllFilters={hideAllFilters}
         showCategorySelection={showCategorySelection}
+        projectName={primaryProject?.info?.name}
       />
 
       {/* Driver Filters */}
@@ -207,6 +208,7 @@ const MapViewV2Inner = ({
         categories={categories}
         hideAllFilters={hideAllFilters}
         showDriverFilters={showDriverFilters}
+        projectName={primaryProject?.info?.name}
       />
 
       {/* Surrounding Elements Filters */}
@@ -216,6 +218,7 @@ const MapViewV2Inner = ({
         selectedSurroundingElementType={selectedSurroundingElementType}
         setSelectedSurroundingElementType={setSelectedSurroundingElementType}
         currentSelectedCategory={currentSelectedCategory}
+        projectName={primaryProject?.info?.name}
       />
 
       {/* Map container */}

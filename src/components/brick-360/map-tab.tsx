@@ -67,7 +67,10 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             onClick={() => {
               setIsMapFullScreen(true);
             }}
-          ></MapExpandBtn>
+            pillar=""
+            dataPoint=""
+            projectName={lvnzyProject?.meta.projectName}
+          />
         )}
 
         {!isMapFullScreen && (

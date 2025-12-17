@@ -1,12 +1,12 @@
-import React from "react";
 import { Flex, Tag, Typography } from "antd";
+import React from "react";
+import { useDevice } from "../../../hooks/use-device";
 import {
   DRIVER_CATEGORIES,
   LivIndexDriversConfig,
 } from "../../../libs/constants";
-import { capitalize } from "../../../libs/lvnzy-helper";
+import { capitalize, captureAnalyticsEvent } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
-import { useDevice } from "../../../hooks/use-device";
 import { IDriverPlace } from "../../../types/Project";
 
 interface DriverFiltersProps {
@@ -19,6 +19,7 @@ interface DriverFiltersProps {
   categories?: string[];
   hideAllFilters?: boolean;
   showDriverFilters: boolean;
+  projectName?: string;
 }
 
 export const DriverFilters = ({
@@ -31,6 +32,7 @@ export const DriverFilters = ({
   categories,
   hideAllFilters,
   showDriverFilters,
+  projectName,
 }: DriverFiltersProps) => {
   const { isMobile } = useDevice();
 
@@ -53,9 +55,12 @@ export const DriverFilters = ({
             color: isSelected ? "white" : "initial",
             marginLeft: 0,
             cursor: "pointer",
-            
           }}
           onClick={() => {
+            captureAnalyticsEvent("click-map-filter", {
+              filter: filterItem.key,
+              projectName: projectName || "",
+            });
             setSelectedDriverFilter(filterItem.key);
           }}
         >
@@ -95,6 +100,10 @@ export const DriverFilters = ({
           cursor: "pointer",
         }}
         onClick={() => {
+          captureAnalyticsEvent("click-map-filter", {
+            filter: k,
+            projectName: projectName || "",
+          });
           setSelectedDriverFilter(k);
         }}
       >
@@ -157,10 +166,10 @@ export const DriverFilters = ({
 
             // For driver type strings, filter by currently selected category
             const categoryDrivers =
-              (DRIVER_CATEGORIES as any)[currentSelectedCategory]?.drivers || [];
+              (DRIVER_CATEGORIES as any)[currentSelectedCategory]?.drivers ||
+              [];
             return (
-              Array.isArray(categoryDrivers) &&
-              categoryDrivers.includes(d)
+              Array.isArray(categoryDrivers) && categoryDrivers.includes(d)
             );
           })
           .map((filterItem: any) => {

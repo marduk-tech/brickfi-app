@@ -1,16 +1,22 @@
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Button, Flex } from "antd";
 
 interface MapExpandBtnProps {
-    topPos?: number;
+  topPos?: number;
   onClick: () => void;
+  pillar?: string;
+  dataPoint?: string;
+  projectName?: string;
 }
 
-
 export const MapExpandBtn = ({
-    topPos,
+  topPos,
   onClick,
+  pillar,
+  dataPoint,
+  projectName,
 }: MapExpandBtnProps) => {
   return (
     <Flex
@@ -40,10 +46,14 @@ export const MapExpandBtn = ({
           color: "white",
           fontSize: FONT_SIZE.SUB_TEXT,
           height: 24,
-          padding: "12px 8px"
+          padding: "12px 8px",
         }}
         onClick={() => {
-          onClick();
+          captureAnalyticsEvent("expand-map", {
+            pillar: pillar || "",
+            dataPoint: dataPoint || "",
+            projectName: projectName || "",
+          });
         }}
       >
         Expand

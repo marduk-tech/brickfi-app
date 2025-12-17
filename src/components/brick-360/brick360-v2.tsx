@@ -3,36 +3,37 @@
 import { Flex, Tabs, Tour, TourProps, Typography } from "antd";
 import { useParams } from "next/navigation";
 import { ReactNode, useEffect, useRef, useState } from "react";
-import DynamicReactIcon from "../common/dynamic-react-icon";
 import {
   useFetchLvnzyProjectById,
   useFetchLvnzyProjectBySlug,
 } from "../../hooks/use-lvnzy-project";
+import DynamicReactIcon from "../common/dynamic-react-icon";
 
-import { Brick360Tab } from "./brick-360-tab";
-import { ConfigurationsModal } from "./configurations-modal";
-import { FakeProgress } from "./fake-progress";
-import { MapTab } from "./map-tab";
-import { MediaTab } from "./media-tab";
-import { PricePointModal } from "./price-point-modal";
-import { ProjectHeader } from "./project-header";
-import { UnitsTab } from "./units-tab";
+import { useWindowDimensions } from "@/hooks/use-browser-safe";
+import { useDevice } from "@/hooks/use-device";
 import {
   BRICK360_CATEGORY,
   Brick360CategoryInfo,
   Brick360DataPoints,
   LocalStorageKeys,
 } from "../../libs/constants";
+import { captureAnalyticsEvent } from "../../libs/lvnzy-helper";
 import {
   COLORS,
   FONT_SIZE,
   HORIZONTAL_PADDING,
 } from "../../theme/style-constants";
+import { Brick360Tab } from "./brick-360-tab";
 import Brick360Chat from "./brick360-chat";
-import { useDevice } from "@/hooks/use-device";
-import { useWindowDimensions } from "@/hooks/use-browser-safe";
+import { ConfigurationsModal } from "./configurations-modal";
+import { FakeProgress } from "./fake-progress";
+import { MapTab } from "./map-tab";
+import { MediaTab } from "./media-tab";
+import { PricePointModal } from "./price-point-modal";
+import { ProjectHeader } from "./project-header";
 import TimelineTab from "./timeline-tab";
 import TimelineTabV2 from "./timeline-tab-v2";
+import { UnitsTab } from "./units-tab";
 
 const FAKE_TIMER_SECS = 500;
 
@@ -283,6 +284,9 @@ export function Brick360v2({ slug }: Brick360v2Props) {
         tabBarGutter={40}
         defaultActiveKey="brick360"
         onChange={(activeKey: string) => {
+          captureAnalyticsEvent("tab-navigate", {
+            tabName: activeKey,
+          });
           setSelectedTabKey(activeKey);
         }}
         tabBarStyle={{}}
@@ -297,26 +301,27 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                 "tb",
                 "brick360"
               ),
-              children: selectedTabKey === "brick360" ? (
-                <Brick360Tab
-                  lvnzyProject={lvnzyProject}
-                  scoreParams={scoreParams}
-                  ref={scoreParamTourRef}
-                  onDataPointClick={(sc, item) => {
-                    brick360ChatRef.current?.expandChat();
-                    setSelectedDataPointCategory(sc.key);
-                    setSelectedDataPointSubCategory((item as any)[0]);
-                    setSelectedDataPoint((item as any)[1]);
-                    setSelectedDataPointTitle(
-                      `${sc.title} > ${
-                        (Brick360DataPoints as any)[sc.key][(item as any)[0]][
-                          "label"
-                        ]
-                      }`
-                    );
-                  }}
-                />
-              ) : null,
+              children:
+                selectedTabKey === "brick360" ? (
+                  <Brick360Tab
+                    lvnzyProject={lvnzyProject}
+                    scoreParams={scoreParams}
+                    ref={scoreParamTourRef}
+                    onDataPointClick={(sc, item) => {
+                      brick360ChatRef.current?.expandChat();
+                      setSelectedDataPointCategory(sc.key);
+                      setSelectedDataPointSubCategory((item as any)[0]);
+                      setSelectedDataPoint((item as any)[1]);
+                      setSelectedDataPointTitle(
+                        `${sc.title} > ${
+                          (Brick360DataPoints as any)[sc.key][(item as any)[0]][
+                            "label"
+                          ]
+                        }`
+                      );
+                    }}
+                  />
+                ) : null,
             },
             {
               key: "units",
@@ -326,7 +331,10 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                 "ri",
                 "units"
               ),
-              children: selectedTabKey === "units" ? <UnitsTab lvnzyProject={lvnzyProject} /> : null,
+              children:
+                selectedTabKey === "units" ? (
+                  <UnitsTab lvnzyProject={lvnzyProject} />
+                ) : null,
             },
             {
               key: "map",
@@ -336,12 +344,18 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                 "lia",
                 "map"
               ),
-              children: selectedTabKey === "map" ? <MapTab lvnzyProject={lvnzyProject} /> : null,
+              children:
+                selectedTabKey === "map" ? (
+                  <MapTab lvnzyProject={lvnzyProject} />
+                ) : null,
             },
             {
               key: "media",
               label: renderTabHeader("Media", "PiImagesDuotone", "pi", "media"),
-              children: selectedTabKey === "media" ? <MediaTab lvnzyProject={lvnzyProject} /> : null,
+              children:
+                selectedTabKey === "media" ? (
+                  <MediaTab lvnzyProject={lvnzyProject} />
+                ) : null,
             },
           ],
           ...(lvnzyProject?.property.layout.totalPhases > 0
@@ -354,7 +368,10 @@ export function Brick360v2({ slug }: Brick360v2Props) {
                     "lu",
                     "timeline"
                   ),
-                  children: selectedTabKey === "timeline" ? <TimelineTabV2 lvnzyProject={lvnzyProject} /> : null,
+                  children:
+                    selectedTabKey === "timeline" ? (
+                      <TimelineTabV2 lvnzyProject={lvnzyProject} />
+                    ) : null,
                 },
               ]
             : []),

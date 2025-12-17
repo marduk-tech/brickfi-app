@@ -20,9 +20,9 @@ import {
   useState,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { useDevice } from "../../hooks/use-device";
 import { useUser } from "../../hooks/use-user";
-import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { axiosApiInstance } from "../../libs/axios-api-Instance";
 import {
   apiKey,
@@ -37,9 +37,9 @@ import { ISurroundingElement } from "../../types/Project";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 
 //
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import dynamic from "next/dynamic";
 import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
   ssr: false,
 });
@@ -341,7 +341,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         }
 
         setIsDrawerExpanded(true);
-        captureAnalyticsEvent("question-asked", { question });
+
+        captureAnalyticsEvent("question-asked", {
+          question,
+          pillar: dataPointSelected?.selectedDataPointCategory || "",
+          dataPoint: dataPointSelected?.selectedDataPointSubCategory || "",
+          projectName: lvnzyProject?.meta.projectName || "",
+        });
 
         setQueryStreaming(true);
 
@@ -627,7 +633,12 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                         setIsDrawerExpanded(false);
                         setIsMapFullScreen(true);
                       }}
-                    ></MapExpandBtn>
+                      pillar={dataPointSelected?.selectedDataPointCategory}
+                      dataPoint={
+                        dataPointSelected?.selectedDataPointSubCategory
+                      }
+                      projectName={lvnzyProject?.meta.projectName}
+                    />
 
                     <MapViewV2
                       projectId={lvnzyProject?.originalProjectId?._id}

@@ -1,10 +1,10 @@
-import React from "react";
+import { useDevice } from "@/hooks/use-device";
 import { Flex, Typography } from "antd";
+import React from "react";
 import { DRIVER_CATEGORIES } from "../../../libs/constants";
-import { capitalize } from "../../../libs/lvnzy-helper";
+import { capitalize, captureAnalyticsEvent } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
-import { useDevice } from "@/hooks/use-device";
 
 interface CategoryFiltersProps {
   categories?: string[];
@@ -12,6 +12,7 @@ interface CategoryFiltersProps {
   setSelectedCategory: (category: string) => void;
   hideAllFilters?: boolean;
   showCategorySelection: boolean;
+  projectName?: string;
 }
 
 export const CategoryFilters = ({
@@ -20,9 +21,9 @@ export const CategoryFilters = ({
   setSelectedCategory,
   hideAllFilters,
   showCategorySelection,
+  projectName,
 }: CategoryFiltersProps) => {
-
-  const {isMobile} = useDevice();
+  const { isMobile } = useDevice();
 
   if (!showCategorySelection || hideAllFilters || !categories) {
     return null;
@@ -39,14 +40,20 @@ export const CategoryFilters = ({
         zIndex: 1000,
         left: 8,
         width: "100%",
-        paddingRight: 125
+        paddingRight: 125,
       }}
       gap={8}
     >
       {categories.map((category) => (
         <Flex
           key={category}
-          onClick={() => setSelectedCategory(category)}
+          onClick={() => {
+            captureAnalyticsEvent("click-map-filter", {
+              filter: category,
+              projectName: projectName || "",
+            });
+            setSelectedCategory(category);
+          }}
           align="center"
           gap={4}
           style={{
@@ -76,10 +83,8 @@ export const CategoryFilters = ({
           <Typography.Text
             style={{
               color:
-                selectedCategory === category
-                  ? "white"
-                  : COLORS.textColorDark,
-                  fontSize: FONT_SIZE.SUB_TEXT
+                selectedCategory === category ? "white" : COLORS.textColorDark,
+              fontSize: FONT_SIZE.SUB_TEXT,
             }}
           >
             {capitalize(category)}
