@@ -286,6 +286,8 @@ export function Brick360v2({ slug }: Brick360v2Props) {
         onChange={(activeKey: string) => {
           captureAnalyticsEvent("tab-navigate", {
             tabName: activeKey,
+            projectName: lvnzyProject?.meta.projectName,
+            projectId: lvnzyProject?._id
           });
           setSelectedTabKey(activeKey);
         }}

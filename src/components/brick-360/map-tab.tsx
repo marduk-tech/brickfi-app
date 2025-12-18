@@ -70,6 +70,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             pillar=""
             dataPoint=""
             projectName={lvnzyProject?.meta.projectName}
+            projectId={lvnzyProject?._id}
           />
         )}
 
@@ -78,6 +79,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             fullSize={false}
             projectId={lvnzyProject?.originalProjectId._id}
             drivers={drivers}
+            lvnzyProjectId={lvnzyProject._id}
             corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
             surroundingElements={surroundingElements}
             categories={allCategories}
@@ -123,6 +125,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             <MapViewV2
               projectId={lvnzyProject?.originalProjectId._id}
               drivers={drivers}
+              lvnzyProjectId={lvnzyProject._id}
               corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
               surroundingElements={surroundingElements}
               fullSize={true}

@@ -105,7 +105,7 @@ export const ProjectMarkers = ({
                       ) : null}
 
                       <Typography.Text
-                        style={{ fontSize: FONT_SIZE.HEADING_1 }}
+                        style={{ fontSize: FONT_SIZE.HEADING_1*.9, lineHeight: "100%", marginBottom: 8 }}
                       >
                         {project.info.name}
                       </Typography.Text>
@@ -113,7 +113,7 @@ export const ProjectMarkers = ({
                   ),
                   content: (
                     <Flex vertical gap={0}>
-                        <Typography.Text>
+                        <Typography.Text style={{fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium}}>
                           {getCompletionDate(
                             project.info.reraProjectId.projectDetails
                               .listOfRegistrationsExtensions
@@ -124,6 +124,8 @@ export const ProjectMarkers = ({
                           <Typography.Text
                             style={{
                               fontSize: FONT_SIZE.HEADING_4,
+                              color: COLORS.textColorMedium,
+                              marginRight: 3
                             }}
                           >
                             {capitalize(t)} ·{" "}
@@ -136,6 +138,7 @@ export const ProjectMarkers = ({
                               style={{
                                 fontSize: FONT_SIZE.HEADING_4,
                                 marginLeft: 2,
+                                color: COLORS.textColorMedium
                               }}
                             >
                               {getMinMaxPrices(
@@ -150,6 +153,7 @@ export const ProjectMarkers = ({
                               style={{
                                 fontSize: FONT_SIZE.HEADING_4,
                                 marginLeft: 2,
+                                color: COLORS.textColorMedium
                               }}
                             >
                               ₹

@@ -347,6 +347,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
           pillar: dataPointSelected?.selectedDataPointCategory || "",
           dataPoint: dataPointSelected?.selectedDataPointSubCategory || "",
           projectName: lvnzyProject?.meta.projectName || "",
+          projectId: lvnzyProject?._id
         });
 
         setQueryStreaming(true);
@@ -641,6 +642,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                     />
 
                     <MapViewV2
+                      lvnzyProjectId={lvnzyProject?._id || ""}
                       projectId={lvnzyProject?.originalProjectId?._id}
                       corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
                         (c: any) => c.corridorId
@@ -883,6 +885,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
           >
             <MapViewV2
               projectId={lvnzyProject?.originalProjectId?._id}
+              lvnzyProjectId={lvnzyProject?._id || ""}
               hideAllFilters={false}
               corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
                 (c: any) => c.corridorId

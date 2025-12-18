@@ -20,6 +20,7 @@ interface DriverFiltersProps {
   hideAllFilters?: boolean;
   showDriverFilters: boolean;
   projectName?: string;
+  projectId?: string;
 }
 
 export const DriverFilters = ({
@@ -33,6 +34,7 @@ export const DriverFilters = ({
   hideAllFilters,
   showDriverFilters,
   projectName,
+  projectId
 }: DriverFiltersProps) => {
   const { isMobile } = useDevice();
 
@@ -60,6 +62,7 @@ export const DriverFilters = ({
             captureAnalyticsEvent("click-map-filter", {
               filter: filterItem.key,
               projectName: projectName || "",
+              projectId: projectId || ""
             });
             setSelectedDriverFilter(filterItem.key);
           }}

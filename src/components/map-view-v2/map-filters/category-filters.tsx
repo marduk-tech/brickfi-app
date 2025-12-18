@@ -13,6 +13,7 @@ interface CategoryFiltersProps {
   hideAllFilters?: boolean;
   showCategorySelection: boolean;
   projectName?: string;
+  projectId?: string;
 }
 
 export const CategoryFilters = ({
@@ -22,6 +23,7 @@ export const CategoryFilters = ({
   hideAllFilters,
   showCategorySelection,
   projectName,
+  projectId
 }: CategoryFiltersProps) => {
   const { isMobile } = useDevice();
 
@@ -51,6 +53,7 @@ export const CategoryFilters = ({
             captureAnalyticsEvent("click-map-filter", {
               filter: category,
               projectName: projectName || "",
+              projectId: projectId || ""
             });
             setSelectedCategory(category);
           }}
