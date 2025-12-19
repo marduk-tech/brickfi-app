@@ -72,7 +72,7 @@ const getTileUrl = (style: MapStyleType): string => {
 };
 
 interface MapViewV2Props {
-  lvnzyProjectId: string;
+  lvnzyProjectId?: string;
   drivers?: any[];
   projectId?: string;
   projects?: any[];

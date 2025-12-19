@@ -228,7 +228,6 @@ export function BrickMapAdmin() {
               }))}
               projects={filteredProjects}
               projectId={selectedProjectId || undefined}
-              lvnzyProjectId={""}
               fullSize={false}
               showLocalities={true}
             />

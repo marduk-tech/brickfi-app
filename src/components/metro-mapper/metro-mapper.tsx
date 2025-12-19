@@ -378,7 +378,6 @@ export function MetroMapper() {
             fullSize={true}
             showLocalities={false}
             showCorridors={false}
-            lvnzyProjectId=""
           />
         </Flex>
       </Modal>
