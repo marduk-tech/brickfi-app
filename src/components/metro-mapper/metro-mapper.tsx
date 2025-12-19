@@ -340,6 +340,7 @@ export function MetroMapper() {
             onMapReady={setMapInstance}
             showCorridors={false}
             minMapZoom={10}
+            lvnzyProjectId=""
           />
         </Flex>
 
@@ -377,6 +378,7 @@ export function MetroMapper() {
             fullSize={true}
             showLocalities={false}
             showCorridors={false}
+            lvnzyProjectId=""
           />
         </Flex>
       </Modal>
