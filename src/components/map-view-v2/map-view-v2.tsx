@@ -72,6 +72,7 @@ const getTileUrl = (style: MapStyleType): string => {
 };
 
 interface MapViewV2Props {
+  lvnzyProjectId?: string;
   drivers?: any[];
   projectId?: string;
   projects?: any[];
@@ -95,6 +96,7 @@ interface MapViewV2Props {
 
 const MapViewV2Inner = ({
   drivers,
+  lvnzyProjectId,
   projectId,
   projects,
   fullSize,
@@ -195,6 +197,7 @@ const MapViewV2Inner = ({
         hideAllFilters={hideAllFilters}
         showCategorySelection={showCategorySelection}
         projectName={primaryProject?.info?.name}
+        projectId={lvnzyProjectId}
       />
 
       {/* Driver Filters */}
@@ -209,6 +212,7 @@ const MapViewV2Inner = ({
         hideAllFilters={hideAllFilters}
         showDriverFilters={showDriverFilters}
         projectName={primaryProject?.info?.name}
+        projectId={lvnzyProjectId}
       />
 
       {/* Surrounding Elements Filters */}
@@ -219,6 +223,7 @@ const MapViewV2Inner = ({
         setSelectedSurroundingElementType={setSelectedSurroundingElementType}
         currentSelectedCategory={currentSelectedCategory}
         projectName={primaryProject?.info?.name}
+        projectId={lvnzyProjectId}
       />
 
       {/* Map container */}

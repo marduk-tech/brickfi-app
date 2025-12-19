@@ -170,9 +170,8 @@ const BrickfiHome: React.FC = () => {
                   color: COLORS.textColorLight,
                 }}
               >
-                There are no projects added to your account. Please request a
-                report by clicking button below or shoot an email at
-                support@brickfi.in for help.
+                Please wait & refresh this page if you just requested a report. <br/><br/>If it still doesn't work, please request for support 
+                by shooting an email at support@brickfi.in or  <a href="https://api.whatsapp.com/send?phone=919901623170">click here</a> to send a direct message.
               </Typography.Text>
               <Button
                 style={{ marginTop: 48, fontSize: FONT_SIZE.HEADING_2 }}

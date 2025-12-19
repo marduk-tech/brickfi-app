@@ -9,6 +9,7 @@ interface MapExpandBtnProps {
   pillar?: string;
   dataPoint?: string;
   projectName?: string;
+  projectId?: string;
 }
 
 export const MapExpandBtn = ({
@@ -17,6 +18,7 @@ export const MapExpandBtn = ({
   pillar,
   dataPoint,
   projectName,
+  projectId
 }: MapExpandBtnProps) => {
   return (
     <Flex
@@ -53,6 +55,7 @@ export const MapExpandBtn = ({
             pillar: pillar || "",
             dataPoint: dataPoint || "",
             projectName: projectName || "",
+            projectId: projectId || ""
           });
         }}
       >

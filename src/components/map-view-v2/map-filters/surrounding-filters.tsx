@@ -13,6 +13,7 @@ interface SurroundingFiltersProps {
   setSelectedSurroundingElementType: (type: string) => void;
   currentSelectedCategory: string;
   projectName?: string;
+  projectId?: string;
 }
 
 export const SurroundingFilters = ({
@@ -22,6 +23,7 @@ export const SurroundingFilters = ({
   setSelectedSurroundingElementType,
   currentSelectedCategory,
   projectName,
+  projectId
 }: SurroundingFiltersProps) => {
   const renderSurroundingElementTypes = (k: string) => {
     if (!(SurroundingElementLabels as any)[k]) {
@@ -49,6 +51,7 @@ export const SurroundingFilters = ({
           captureAnalyticsEvent("click-map-filter", {
             filter: k,
             projectName: projectName || "",
+            projectId: projectId || ""
           });
           setSelectedSurroundingElementType(k);
         }}

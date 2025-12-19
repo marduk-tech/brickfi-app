@@ -89,12 +89,14 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
             borderStyle: "solid",
           }}
           onClick={() => {
-            captureAnalyticsEvent("summary-expand", {
-              summaryTitle: isPro ? "pros" : "cons",
-              projectName: lvnzyProject?.meta.projectName,
-            });
             setQuickSnapshotDialogOpen(true);
             setQuickSnapshotDialogContent(reasoningStmt(true));
+            captureAnalyticsEvent("summary-expand", {
+              summaryType: isPro ? "pros" : "cons",
+              summaryTitle: title,
+              projectName: lvnzyProject?.meta.projectName,
+              projectId: lvnzyProject._id
+            });
           }}
           gap={4}
           vertical
@@ -221,12 +223,13 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                               borderBottomColor: COLORS.borderColor,
                             }}
                             onClick={() => {
+                              onDataPointClick(sc, item);
                               captureAnalyticsEvent("expand-datapoint", {
                                 pillar: sc.key,
                                 dataPoint: (item as any)[0],
                                 projectName: lvnzyProject?.meta.projectName,
+                                projectId: lvnzyProject._id
                               });
-                              onDataPointClick(sc, item);
                             }}
                           >
                             <Flex align="center" style={{ width: "100%" }}>

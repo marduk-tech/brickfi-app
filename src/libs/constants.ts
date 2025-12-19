@@ -388,7 +388,7 @@ export const LandingConstants = {
   reportLink: "/brick360",
   genReportFormLink: "/requestreport",
   appLink: "/app",
-  sampleReport: "/app/brick360/67e6534e1336dda74a5f0502",
+  sampleReport: "/app/brick360/nambiar-district-25-832",
   brick360Descr:
     "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.",
 };
