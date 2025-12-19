@@ -162,6 +162,7 @@ export function BrickMapCustomer({
               fullSize={false}
               showLocalities={false}
               minMapZoom={11}
+              lvnzyProjectId={""}
               categories={Object.keys(DRIVER_CATEGORIES).filter(
                 (k) =>
                   !excludeMapCategories || !excludeMapCategories.includes(k)
