@@ -51,9 +51,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
       // close login modal when user is successfully authenticated
       setLoginModalOpen(false);
 
-      if (!user.profile.email || !user.profile.name) {
-        setShowUserDetailsForm(true);
-      }
+      // if (!user.profile.email || !user.profile.name) {
+      //   setShowUserDetailsForm(true);
+      // }
     }
   }, [user]);
 
