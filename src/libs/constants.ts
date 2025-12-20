@@ -382,7 +382,7 @@ export const SurroundingElementLabels = {
 export const LandingConstants = {
   brickAssistLink: "/brickassist",
   aboutUsLink: "/aboutus",
-  instaLink: "https://www.instagram.com/brickfi.in/",
+  instaLink: "https://www.instagram.com/brickfi.online/",
   twitterLink: "https://x.com/brickfi_in",
   blogLink: "https://blog.brickfi.in/",
   reportLink: "/brick360",
