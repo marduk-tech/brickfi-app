@@ -61,6 +61,10 @@ export function Brick360v2({ slug }: Brick360v2Props) {
     if (!lvnzyProject) {
       return;
     }
+    captureAnalyticsEvent("report-view", {
+      projectName: lvnzyProject?.meta.projectName,
+      projectId: lvnzyProject?._id,
+    });
     const tempTourSteps: TourProps["steps"] = [];
     tempTourSteps?.push({
       title: (
@@ -287,7 +291,7 @@ export function Brick360v2({ slug }: Brick360v2Props) {
           captureAnalyticsEvent("tab-navigate", {
             tabName: activeKey,
             projectName: lvnzyProject?.meta.projectName,
-            projectId: lvnzyProject?._id
+            projectId: lvnzyProject?._id,
           });
           setSelectedTabKey(activeKey);
         }}

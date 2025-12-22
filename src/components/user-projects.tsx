@@ -9,6 +9,7 @@ import { useUser } from "../hooks/use-user";
 import { BRICK360_CATEGORY, Brick360CategoryInfo } from "../libs/constants";
 import {
   capitalize,
+  captureAnalyticsEvent,
   fetchPmtPlan,
   getCategoryScore,
   rupeeAmountFormat,
@@ -42,6 +43,11 @@ export function UserProjects({
   const { isMobile } = useDevice();
   const refreshRun = useRef(false);
 
+  useEffect(() => {
+    if (user && user.mobile) {
+      captureAnalyticsEvent("account-view", {});
+    }
+  }, [user]);
   const filteredProjects =
     user &&
     user.requestedReports &&
