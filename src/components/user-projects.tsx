@@ -39,37 +39,15 @@ export function UserProjects({
     expandChat: () => void;
   } | null>(null);
 
-  const [selectedCorridor, setSelectedCorridor] = useState<string>("all");
   const { isMobile } = useDevice();
-  const refreshRun = useRef(false);
 
   useEffect(() => {
     if (user && user.mobile) {
       captureAnalyticsEvent("account-view", {});
     }
   }, [user]);
-  const filteredProjects =
-    user &&
-    user.requestedReports &&
-    user.requestedReports.filter((p) => !p.lvnzyProjectId)
-      ? [
-          ...user.requestedReports.filter((p) => !p.lvnzyProjectId),
-          ...lvnzyProjects.filter(
-            (p: any) =>
-              !selectedCorridor ||
-              selectedCorridor == "all" ||
-              p.meta.projectCorridors.split(",").includes(selectedCorridor)
-          ),
-        ]
-      : lvnzyProjects.filter(
-          (p: any) =>
-            !selectedCorridor ||
-            selectedCorridor == "all" ||
-            p.meta.projectCorridors.split(",").includes(selectedCorridor)
-        );
-
   const renderLvnzyProject = (itemInfo: any) => {
-    if (itemInfo.reraNumber) {
+    if (itemInfo.reraNumber || itemInfo.reraId) {
       return (
         <Flex
           style={{
@@ -389,7 +367,7 @@ export function UserProjects({
           }}
           gap={32}
         >
-          {filteredProjects
+          {lvnzyProjects
             .sort((a: any, b: any) =>
               a.meta && b.meta
                 ? a.meta.projectName > b.meta.projectName
