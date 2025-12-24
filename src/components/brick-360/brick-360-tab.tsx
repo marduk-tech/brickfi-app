@@ -6,6 +6,7 @@ import {
   captureAnalyticsEvent,
   getCategoryScore,
 } from "../../libs/lvnzy-helper";
+import { parseProConHtml } from "../../libs/html-utils";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import GradientBar from "../common/grading-bar";
@@ -28,8 +29,7 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
       useState<ReactNode>("");
 
     function renderSummaryPoint(pt: string, isPro: boolean) {
-      const match = pt.match(/<b>(.*?)<\/b>/);
-      const title = match ? match[1] : null;
+      const { title, content } = parseProConHtml(pt);
 
       function reasoningStmt(isDialog: boolean) {
         return (
@@ -54,25 +54,29 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                 {title}
               </Typography.Text>
             </Flex>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `${pt.replace(`<b>${title}</b><br>`, "")} ${
-                  !isDialog ? '<span class="read-more">Read more</span>' : ""
-                }`,
-              }}
-              className={`reasoning ${!isDialog ? "truncated" : ""} ${
-                isPro ? "" : "con"
-              }`}
-              style={{
-                fontSize: !isDialog ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
-                margin: 0,
-                marginTop: !isDialog ? 0 : 16,
-                width: !isDialog ? 275 : "100%",
-                color: COLORS.textColorMedium,
+            {content && (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `${content} ${
+                    !isDialog ? '<span class="read-more">Read more</span>' : ""
+                  }`,
+                }}
+                className={`reasoning ${!isDialog ? "truncated" : ""} ${
+                  isPro ? "" : "con"
+                }`}
+                style={{
+                  fontSize: !isDialog
+                    ? FONT_SIZE.HEADING_4
+                    : FONT_SIZE.HEADING_3,
+                  margin: 0,
+                  marginTop: !isDialog ? 0 : 16,
+                  width: !isDialog ? 275 : "100%",
+                  color: COLORS.textColorMedium,
 
-                textWrap: "wrap",
-              }}
-            ></div>
+                  textWrap: "wrap",
+                }}
+              ></div>
+            )}
           </Flex>
         );
       }
@@ -95,7 +99,7 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
               summaryType: isPro ? "pros" : "cons",
               summaryTitle: title,
               projectName: lvnzyProject?.meta.projectName,
-              projectId: lvnzyProject._id
+              projectId: lvnzyProject._id,
             });
           }}
           gap={4}

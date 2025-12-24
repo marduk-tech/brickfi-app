@@ -1,6 +1,7 @@
 import { Alert, Flex, List, Typography } from "antd";
 import { BRICK360_CATEGORY, Brick360DataPoints } from "../../libs/constants";
 import { capitalize, getCategoryScore } from "../../libs/lvnzy-helper";
+import { parseProConHtml } from "../../libs/html-utils";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import GradientBar from "../common/grading-bar";
 import RatingBar from "../common/rating-bar";
@@ -33,8 +34,7 @@ export const Brick360Details = forwardRef<any, Brick360TabProps>(
       }, [scoreParams])
 
     function renderSummaryPoint(pt: string, isPro: boolean) {
-      const match = pt.match(/<b>(.*?)<\/b>/);
-      const title = match ? match[1] : null;
+      const { title, content } = parseProConHtml(pt);
 
       function reasoningStmt(truncate: boolean) {
         return (
@@ -52,24 +52,28 @@ export const Brick360Details = forwardRef<any, Brick360TabProps>(
                 {title}
               </Typography.Text>
             </Flex>
-            <div
-              dangerouslySetInnerHTML={{
-                __html: `${pt.replace(`<b>${title}</b><br>`, "")} ${
-                  truncate ? '<span class="read-more">Read more</span>' : ""
-                }`,
-              }}
-              className={`reasoning ${truncate ? "truncated" : ""} ${
-                isPro ? "" : "con"
-              }`}
-              style={{
-                fontSize: truncate ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
-                margin: 0,
-                marginTop: truncate ? 0 : 16,
-                width: truncate ? 275 : "100%",
-                color: COLORS.textColorMedium,
-                textWrap: "wrap",
-              }}
-            ></div>
+            {content && (
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: `${content} ${
+                    truncate ? '<span class="read-more">Read more</span>' : ""
+                  }`,
+                }}
+                className={`reasoning ${truncate ? "truncated" : ""} ${
+                  isPro ? "" : "con"
+                }`}
+                style={{
+                  fontSize: truncate
+                    ? FONT_SIZE.HEADING_4
+                    : FONT_SIZE.HEADING_3,
+                  margin: 0,
+                  marginTop: truncate ? 0 : 16,
+                  width: truncate ? 275 : "100%",
+                  color: COLORS.textColorMedium,
+                  textWrap: "wrap",
+                }}
+              ></div>
+            )}
           </Flex>
         );
       }
