@@ -294,10 +294,12 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                         )}
                       />
                     ) : (
+                      <Flex style={{marginTop: 16}}>
                       <Alert
-                        message="There are no other projects by the developer in the state of Karnataka yet. Please make sure to check track record in other states.   "
+                        message="Due to the absence of a meaningful track record of RERA-registered projects, a rating cannot be provided for this developer. "
                         type="warning"
                       />
+                      </Flex>
                     )}
                   </Flex>
                 );
