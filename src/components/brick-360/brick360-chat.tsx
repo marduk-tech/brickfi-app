@@ -678,49 +678,71 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                     />
                   </Flex>
                 ) : null}
-                {sources && sources.length ? (
-                  <Flex style={{ marginTop: 16 }}>
-                    <Flex style={{marginRight:4}}>
-                    <DynamicReactIcon
-                      color={COLORS.textColorDark}
-                      size={24}
-                      iconName="MdVerifiedUser"
-                      iconSet="md"
-                    ></DynamicReactIcon>
+                <Flex
+                  vertical
+                  style={{
+                    border: `2px solid ${COLORS.bgColorBlue}`,
+                    padding: '0 8px',
+                    margin: "16px 0 8px 0",
+                    borderRadius: 8,
+                    maxWidth: 800,
+                    backgroundColor: COLORS.bgColorLightBlue
+                  }}
+                >
+                  {sources && sources.length ? (
+                    <Flex style={{ marginTop: 8 }}>
+                      <Flex style={{ marginRight: 4 }}>
+                        <DynamicReactIcon
+                          color={COLORS.primaryColor}
+                          size={22}
+                          iconName="MdVerifiedUser"
+                          iconSet="md"
+                        ></DynamicReactIcon>
+                      </Flex>
+                      {sources.map((s) => (
+                        <Flex>
+                          <Tag
+                            onClick={() => {
+                              if (s.url) {
+                                window.open(s.url, "_blank");
+                              }
+                            }}
+                            style={{
+                              cursor: "pointer",
+                              fontWeight: 500,
+                              border: `0px`,
+                              borderRadius: 8,
+                              color: COLORS.textColorDark,
+                              fontSize: FONT_SIZE.PARA,
+                              backgroundColor: COLORS.bgColorBlue
+                            }}
+                          >
+                            {s.label}
+                          </Tag>
+                        </Flex>
+                      ))}
                     </Flex>
-                    {sources.map((s) => (
-                      <Tag onClick={()=> {
-                         window.open(s.url, "_blank");
-                      }} style={{border: `1px solid ${COLORS.textColorDark}`, fontWeight: 500, color: COLORS.textColorDark, fontSize: FONT_SIZE.PARA}}>{s.label}</Tag>
+                  ) : null}
 
-                    ))}
-                  </Flex>
-                ) : null}
-
-                {note ? (
-                  <Flex
-                    style={{
-                      width: "100",
-                      display: "inline",
-                      margin: "16px 0",
-                    }}
-                  >
-                    <Tag
+                    <Flex
                       style={{
-                        lineHeight: "120%",
-                        padding: "4px 8px",
-                        borderRadius: 8,
-                        color: COLORS.textColorDark,
-                        fontSize: FONT_SIZE.PARA,
                         width: "100",
-                        textWrap: "initial",
+                        display: "inline",
+                        margin: "8px 0",
                       }}
-                      color="warning"
                     >
-                      {note}
-                    </Tag>
-                  </Flex>
-                ) : null}
+                      <Typography.Text
+                        style={{
+                          color: COLORS.textColorMedium,
+                          fontSize: FONT_SIZE.PARA,
+                          width: "100",
+                          textWrap: "initial",
+                        }}
+                      >
+                        Brickfi always uses legit data sources for analysis. {note}
+                      </Typography.Text>
+                    </Flex>
+                </Flex>
                 {/* Data point selected content */}
                 {dataPointSelected && (
                   <Flex vertical style={{ paddingTop: 8 }}>

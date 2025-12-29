@@ -276,14 +276,14 @@ export const Brick360CategoryInfo: Record<
       { label: "Namma Metro", url: "https://www.bmrc.co.in/" },
       { label: "Suburban Rail", url: "https://kride.in/" },
     ],
-    note: "Also, refer growth potential for details about upcoming infra.",
+    note: "You can also refer to growth potential for details about upcoming infra.",
   },
   developer: {
     title: "Developer",
     iconName: "FaPeopleGroup",
     iconSet: "fa6",
-    sources: [{ url: "https://rera.karnataka.gov.in/", label: "RERA" }],
-    note: "Only projects registered under RERA Karnataka are taken up for complete analysis.",
+    sources: [{ url: "https://rera.karnataka.gov.in/", label: "RERA" }, { label: "Builder Website" }],
+    note: "Projects registered under RERA are considered for time committment & complaint analysis.",
   },
   property: {
     title: "Property",
@@ -291,6 +291,7 @@ export const Brick360CategoryInfo: Record<
     sources: [
       { url: "https://rera.karnataka.gov.in/", label: "RERA" },
       { label: "Open Street", url: "https://www.openstreetmap.org" },
+      { label: "Official Brochure"},
     ],
     iconSet: "md",
   },
@@ -301,6 +302,7 @@ export const Brick360CategoryInfo: Record<
     sources: [
       { label: "Open Street", url: "https://www.openstreetmap.org" },
       { url: "https://opencity.in/", label: "Open City" },
+      {label: "Live Listings" },
     ],
   },
 };
@@ -309,7 +311,7 @@ export const Brick360DataPoints = {
   property: {
     amenities: {
       label: "Amenities",
-      note: "The amenities list here are as marketed by the developer. Final list should be reviewed before final agreement.",
+      note: "The amenities list here are as marketed by the developer and should be reviewed in agreement.",
       prompts: [
         "Outdoor amenities",
         "Kid specific amenities",
@@ -318,7 +320,7 @@ export const Brick360DataPoints = {
     },
     density: {
       label: "Density",
-      note: "The numbers are as per the approved layout plan on RERA.",
+      note: "The numbers below are as per the approved layout plan on RERA.",
       prompts: [
         "Total units?",
         "Breakup units by size/bhk",
@@ -328,6 +330,7 @@ export const Brick360DataPoints = {
     surroundings: { label: "Surroundings" },
     landProfile: {
       label: "Land Profile",
+      note: "Survey numbers are analysed as per details posted on RERA.",
       prompts: ["All land parcels", "Land Owners"],
     },
     designAndBuildQuality: { label: "Design/Build Quality" },

@@ -18,6 +18,7 @@ export const COLORS = {
   textColorLight: "#aaa",
   textColorVeryLight: "#e1e1e1",
   bgColorBlue: "#e7f6ff",
+  bgColorLightBlue: "#f9fdff",
 
   LANDING: {
     BLUISH: "#0c4a6d",
