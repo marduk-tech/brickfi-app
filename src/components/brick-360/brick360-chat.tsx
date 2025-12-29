@@ -74,6 +74,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
     const [dataPointSelected, setDataPointSelected] = useState<any>();
     const [followUpPrompts, setFollowupPrompts] = useState<string[]>();
     const [note, setNote] = useState<string>();
+    const [sources, setSources] = useState<any[]>();
 
     const [mapDrivers, setMapDrivers] = useState<any[]>([]);
     const [surroundingElements, setSurroundingElements] =
@@ -141,6 +142,11 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             dataPointSelected.selectedDataPointCategory
           ][dataPointSelected.selectedDataPointSubCategory]["note"];
         setNote(noteForDataPt);
+        setSources(
+          (Brick360CategoryInfo as any)[
+            dataPointSelected.selectedDataPointCategory
+          ].sources || []
+        );
 
         setFollowupPrompts(prompts);
         let surrElements;
@@ -347,7 +353,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
           pillar: dataPointSelected?.selectedDataPointCategory || "",
           dataPoint: dataPointSelected?.selectedDataPointSubCategory || "",
           projectName: lvnzyProject?.meta.projectName || "",
-          projectId: lvnzyProject?._id
+          projectId: lvnzyProject?._id,
         });
 
         setQueryStreaming(true);
@@ -670,6 +676,24 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                       minMapZoom={11}
                       initialZoom={11}
                     />
+                  </Flex>
+                ) : null}
+                {sources && sources.length ? (
+                  <Flex style={{ marginTop: 16 }}>
+                    <Flex style={{marginRight:4}}>
+                    <DynamicReactIcon
+                      color={COLORS.textColorDark}
+                      size={24}
+                      iconName="MdVerifiedUser"
+                      iconSet="md"
+                    ></DynamicReactIcon>
+                    </Flex>
+                    {sources.map((s) => (
+                      <Tag onClick={()=> {
+                         window.open(s.url, "_blank");
+                      }} style={{border: `1px solid ${COLORS.textColorDark}`, fontWeight: 500, color: COLORS.textColorDark, fontSize: FONT_SIZE.PARA}}>{s.label}</Tag>
+
+                    ))}
                   </Flex>
                 ) : null}
 

@@ -55,11 +55,12 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
   useEffect(() => {
     let timelines: any[] = [];
     try {
+      const projectCurrentPhaseTimeline = lvnzyProject.originalProjectId.info.reraProjectId.projectDetails.listOfRegistrationsExtensions ? lvnzyProject.originalProjectId.info.reraProjectId.projectDetails.listOfRegistrationsExtensions : [];
       timelines.push({
         name: lvnzyProject.originalProjectId.info.reraProjectId.projectDetails
           .projectName,
           reraNumber: lvnzyProject.originalProjectId.info.reraProjectId.projectDetails.projectRegistrationNumber,
-        timeline: lvnzyProject.meta.projectTimelines.sort((a: any, b: any) =>
+        timeline: projectCurrentPhaseTimeline.sort((a: any, b: any) =>
           moment(a.startDate, "DD-MM-YYYY").diff(
             moment(b.startDate, "DD-MM-YYYY")
           )

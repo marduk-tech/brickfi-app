@@ -264,29 +264,44 @@ export const Brick360CategoryInfo: Record<
     iconSet: string;
     disabled?: boolean;
     note?: string;
+    sources?: any[];
   }
 > = {
   areaConnectivity: {
     title: "Location",
     iconName: "BiMapPin",
     iconSet: "bi",
-    note: "Most of the data here explains the location profile in its current form. Refer growth potential for more details about upcoming infra.",
+    sources: [
+      { label: "Open Street", url: "https://www.openstreetmap.org" },
+      { label: "Namma Metro", url: "https://www.bmrc.co.in/" },
+      { label: "Suburban Rail", url: "https://kride.in/" },
+    ],
+    note: "Also, refer growth potential for details about upcoming infra.",
   },
   developer: {
     title: "Developer",
     iconName: "FaPeopleGroup",
     iconSet: "fa6",
+    sources: [{ url: "https://rera.karnataka.gov.in/", label: "RERA" }],
     note: "Only projects registered under RERA Karnataka are taken up for complete analysis.",
   },
   property: {
     title: "Property",
     iconName: "MdOutlineMapsHomeWork",
+    sources: [
+      { url: "https://rera.karnataka.gov.in/", label: "RERA" },
+      { label: "Open Street", url: "https://www.openstreetmap.org" },
+    ],
     iconSet: "md",
   },
   financials: {
     title: "Financials",
     iconName: "TbPigMoney",
     iconSet: "tb",
+    sources: [
+      { label: "Open Street", url: "https://www.openstreetmap.org" },
+      { url: "https://opencity.in/", label: "Open City" },
+    ],
   },
 };
 
@@ -333,7 +348,7 @@ export const Brick360DataPoints = {
   developer: {
     experience: {
       label: "Experience",
-      prompts: ["All past projects", "More about owners"],
+      prompts: ["All RERA projects", "More about owners"],
     },
     timeCommitment: {
       label: "Time Committment",
@@ -493,8 +508,7 @@ export const DRIVER_CATEGORIES = {
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "k12") {
         return (
-          !driver.tags?.includes("pre-school") &&
-          driver.driver !== "university"
+          !driver.tags?.includes("pre-school") && driver.driver !== "university"
         );
       }
       if (filter == "pre-school") {

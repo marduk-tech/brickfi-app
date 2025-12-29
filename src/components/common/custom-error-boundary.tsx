@@ -3,6 +3,8 @@ import { AxiosError } from "axios";
 import { ErrorBoundary } from "react-error-boundary";
 import { safeWindow } from "../../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
+import { useEffect } from "react";
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 
 export function CustomErrorBoundary({
   children,
@@ -19,6 +21,12 @@ export function CustomErrorBoundary({
 export function ErrorBoundaryFallback({ error }: { error: AxiosError<any> }) {
   const errorMessage =
     error.response?.data.message || error.message || "Something went wrong";
+    
+    useEffect(() => {
+      captureAnalyticsEvent('error-fallback', {
+        message: errorMessage
+      })
+    }, [])
 
   return (
     <Flex align="center" justify="center" style={{ width: "100%" }}>
