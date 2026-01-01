@@ -30,8 +30,12 @@ import {
   useCreateUserMutation,
   useSendUserMailMutation,
 } from "../../hooks/user-hooks";
-import { safeWindow } from "../../libs/browser-utils";
-import { LandingConstants, queryKeys } from "../../libs/constants";
+import { safeStorage, safeWindow } from "../../libs/browser-utils";
+import {
+  LandingConstants,
+  LocalStorageKeys,
+  queryKeys,
+} from "../../libs/constants";
 import { capitalize } from "../../libs/lvnzy-helper";
 import { queryClient } from "../../libs/query-client";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -39,6 +43,7 @@ import { LoginForm } from "../login-forms";
 import DynamicReactIcon from "./dynamic-react-icon";
 import { Loader } from "./loader";
 const { Paragraph } = Typography;
+
 
 const MAX_FREE_REPORTS = parseInt(process.env.NEXT_MAX_FREE_REPORTS || "2");
 export const NewReportRequestForm = () => {
@@ -55,6 +60,7 @@ export const NewReportRequestForm = () => {
   const [userReportLimitReached, setUserReportLimitReached] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
+
 
   // minisearch for fuzzy search on project name and promoter name
   const searchResults = useMinisearch(projects, debouncedSearchValue, {
@@ -274,6 +280,10 @@ export const NewReportRequestForm = () => {
         if (responseUser.requestedReports) {
           setStep(3);
         }
+        safeStorage.setItem(
+          LocalStorageKeys.user,
+          JSON.stringify(responseUser)
+        );
 
         await sendMail.mutateAsync({
           userId: responseUser._id,
@@ -361,7 +371,7 @@ export const NewReportRequestForm = () => {
             size="large"
             style={{ marginTop: 24 }}
             onClick={() => {
-              window.open(`${window.location.origin}/app`, "_blank");
+              router.replace("/app");
             }}
           >
             View My Reports
@@ -436,7 +446,9 @@ export const NewReportRequestForm = () => {
           type="primary"
           size="large"
           style={{ marginTop: 24 }}
-          onClick={() => (window.location.href = "https://www.brickfi.in/app")}
+          onClick={() => {
+            router.replace("/app");
+          }}
         >
           View My Reports
         </Button>
@@ -695,7 +707,6 @@ export const NewReportRequestForm = () => {
                             index == selectedProjects.length - 1
                               ? "none"
                               : `1px solid ${COLORS.borderColor}`,
-                          borderColor: COLORS.borderColor,
                         }}
                       >
                         <Flex vertical style={{ paddingBottom: 16 }}>
