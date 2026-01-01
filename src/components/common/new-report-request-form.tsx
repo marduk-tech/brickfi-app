@@ -371,7 +371,8 @@ export const NewReportRequestForm = () => {
             size="large"
             style={{ marginTop: 24 }}
             onClick={() => {
-              router.replace("/app");
+              // router.replace("/app");
+              window.open(`${window.location.origin}/app`, "_blank");
             }}
           >
             View My Reports
@@ -447,7 +448,8 @@ export const NewReportRequestForm = () => {
           size="large"
           style={{ marginTop: 24 }}
           onClick={() => {
-            router.replace("/app");
+            // router.replace("/app");
+            window.open(`${window.location.origin}/app`, "_blank");
           }}
         >
           View My Reports
