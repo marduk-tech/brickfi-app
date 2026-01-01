@@ -95,6 +95,7 @@ const BrickfiHome: React.FC = () => {
             setLvnzyProjects(collection.projects);
           }
         } else {
+          
           if (
             !user.savedLvnzyProjects ||
             user.savedLvnzyProjects.length === 0
@@ -143,6 +144,7 @@ const BrickfiHome: React.FC = () => {
           {lvnzyProjects && lvnzyProjects.length ? (
             <UserProjects lvnzyProjects={lvnzyProjects} />
           ) : (
+
             <Flex
               vertical
               style={{ margin: 16, marginTop: 100 }}
@@ -161,7 +163,7 @@ const BrickfiHome: React.FC = () => {
                   marginTop: 24,
                 }}
               >
-                No Projects Found
+                No Reports Found
               </Typography.Text>
               <Typography.Text
                 style={{
@@ -170,17 +172,30 @@ const BrickfiHome: React.FC = () => {
                   color: COLORS.textColorLight,
                 }}
               >
-                Please wait & refresh this page if you just requested a report. <br/><br/>If it still doesn't work, please request for support 
-                by shooting an email at support@brickfi.in or  <a href="https://api.whatsapp.com/send?phone=919901623170">click here</a> to send a direct message.
+                Click reload below if you recently requested reports
               </Typography.Text>
+              
               <Button
                 style={{ marginTop: 48, fontSize: FONT_SIZE.HEADING_2 }}
+                onClick={() => {
+                  window.location.reload();
+                }}
+              >
+                Reload Page 
+              </Button>
+              <Button
+              type="link"
+                style={{ marginTop: 24, fontSize: FONT_SIZE.HEADING_3, color: COLORS.textColorDark, textDecoration: "underline" }}
                 onClick={() => {
                   safeWindow.location.assign(LandingConstants.genReportFormLink);
                 }}
               >
-                Request New Report
+                Request a new Brick360 Report
               </Button>
+
+              <Flex style={{position: "absolute", bottom: 100, padding: 16, }}>
+                <Typography.Text > <br/><br/> <a style={{color:COLORS.textColorMedium}} href="https://api.whatsapp.com/send?phone=919901623170">Need help ?</a></Typography.Text>
+              </Flex>
             </Flex>
           )}
         </>
