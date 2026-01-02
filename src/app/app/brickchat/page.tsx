@@ -8,6 +8,7 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Button, Flex, Form, Input, Spin, Typography, message } from "antd";
 import { useState } from "react";
 import { BiSend } from "react-icons/bi";
+import { AdminGuard } from "@/components/auth/admin-guard";
 
 interface ProjectResult {
   projectId: string;
@@ -63,119 +64,121 @@ export default function BrickChatPage() {
   };
 
   return (
-    <Flex
-      vertical
-      style={{
-        padding: 24,
-        maxWidth: 1200,
-        margin: "0 auto",
-        width: "100%",
-        minHeight: "80vh",
-      }}
-    >
-      {/* Page Title */}
-      <Typography.Title level={2} style={{ marginBottom: 24 }}>
-        Project Search
-      </Typography.Title>
-      <Typography.Paragraph
-        style={{ marginBottom: 32, fontSize: FONT_SIZE.PARA }}
+    <AdminGuard>
+      <Flex
+        vertical
+        style={{
+          padding: 24,
+          maxWidth: 1200,
+          margin: "0 auto",
+          width: "100%",
+          minHeight: "80vh",
+        }}
       >
-        Search for projects using natural language. Try: &quot;apartments near
-        Whitefield&quot;, &quot;3 BHK near Outer Ring Road&quot;, or
-        &quot;projects with swimming pool&quot;
-      </Typography.Paragraph>
+        {/* Page Title */}
+        <Typography.Title level={2} style={{ marginBottom: 24 }}>
+          Project Search
+        </Typography.Title>
+        <Typography.Paragraph
+          style={{ marginBottom: 32, fontSize: FONT_SIZE.PARA }}
+        >
+          Search for projects using natural language. Try: &quot;apartments
+          near Whitefield&quot;, &quot;3 BHK near Outer Ring Road&quot;, or
+          &quot;projects with swimming pool&quot;
+        </Typography.Paragraph>
 
-      {/* Chat History Display */}
-      <Flex vertical gap={24} style={{ marginBottom: 24, flex: 1 }}>
-        {chatHistory.map((msg, idx) => (
-          <Flex key={idx} vertical gap={12}>
-            {/* Question Display */}
-            <Flex
-              style={{
-                backgroundColor: COLORS.textColorDark,
-                padding: "12px 16px",
-                borderRadius: 8,
-              }}
-            >
-              <Typography.Text
+        {/* Chat History Display */}
+        <Flex vertical gap={24} style={{ marginBottom: 24, flex: 1 }}>
+          {chatHistory.map((msg, idx) => (
+            <Flex key={idx} vertical gap={12}>
+              {/* Question Display */}
+              <Flex
                 style={{
-                  color: "white",
-                  fontSize: FONT_SIZE.HEADING_3,
+                  backgroundColor: COLORS.textColorDark,
+                  padding: "12px 16px",
+                  borderRadius: 8,
                 }}
               >
-                {msg.question}
-              </Typography.Text>
-            </Flex>
+                <Typography.Text
+                  style={{
+                    color: "white",
+                    fontSize: FONT_SIZE.HEADING_3,
+                  }}
+                >
+                  {msg.question}
+                </Typography.Text>
+              </Flex>
 
-            {/* Answer Display */}
-            <Flex vertical gap={8} style={{ marginTop: 8 }}>
-              <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
-                Found {msg.results.length} matching project
-                {msg.results.length !== 1 ? "s" : ""}:
-              </Typography.Text>
-              <BrickChatResults results={msg.results} />
+              {/* Answer Display */}
+              <Flex vertical gap={8} style={{ marginTop: 8 }}>
+                <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
+                  Found {msg.results.length} matching project
+                  {msg.results.length !== 1 ? "s" : ""}:
+                </Typography.Text>
+                <BrickChatResults results={msg.results} />
+              </Flex>
             </Flex>
-          </Flex>
-        ))}
+          ))}
 
-        {/* Current Question Loading State */}
-        {currentQuestion && loading && (
-          <Flex vertical gap={12}>
-            <Flex
-              style={{
-                backgroundColor: COLORS.textColorDark,
-                padding: "12px 16px",
-                borderRadius: 8,
-              }}
-            >
-              <Typography.Text
+          {/* Current Question Loading State */}
+          {currentQuestion && loading && (
+            <Flex vertical gap={12}>
+              <Flex
                 style={{
-                  color: "white",
-                  fontSize: FONT_SIZE.HEADING_3,
+                  backgroundColor: COLORS.textColorDark,
+                  padding: "12px 16px",
+                  borderRadius: 8,
                 }}
               >
-                {currentQuestion}
-              </Typography.Text>
+                <Typography.Text
+                  style={{
+                    color: "white",
+                    fontSize: FONT_SIZE.HEADING_3,
+                  }}
+                >
+                  {currentQuestion}
+                </Typography.Text>
+              </Flex>
+              <Flex align="center" gap={12} style={{ marginTop: 8 }}>
+                <Spin size="small" />
+                <Typography.Text type="secondary">
+                  Searching for projects...
+                </Typography.Text>
+              </Flex>
             </Flex>
-            <Flex align="center" gap={12} style={{ marginTop: 8 }}>
-              <Spin size="small" />
-              <Typography.Text type="secondary">
-                Searching for projects...
-              </Typography.Text>
-            </Flex>
-          </Flex>
-        )}
+          )}
+        </Flex>
+
+        {/* Search Input */}
+        <Form form={form} onFinish={handleSearch} style={{ marginTop: 24 }}>
+          <Form.Item name="question" style={{ marginBottom: 0 }}>
+            <Input
+              placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
+              size="large"
+              disabled={loading}
+              suffix={
+                <Button
+                  type="text"
+                  htmlType="submit"
+                  icon={<BiSend size={20} />}
+                  disabled={loading}
+                  style={{ color: COLORS.primaryColor }}
+                />
+              }
+              style={{
+                boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                height: 50,
+                backgroundColor: "white",
+                border: "1px solid",
+                borderColor: COLORS.borderColorMedium,
+                borderRadius: 16,
+                fontSize: FONT_SIZE.HEADING_4,
+              }}
+              onPressEnter={() => form.submit()}
+            />
+          </Form.Item>
+        </Form>
       </Flex>
-
-      {/* Search Input */}
-      <Form form={form} onFinish={handleSearch} style={{ marginTop: 24 }}>
-        <Form.Item name="question" style={{ marginBottom: 0 }}>
-          <Input
-            placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
-            size="large"
-            disabled={loading}
-            suffix={
-              <Button
-                type="text"
-                htmlType="submit"
-                icon={<BiSend size={20} />}
-                disabled={loading}
-                style={{ color: COLORS.primaryColor }}
-              />
-            }
-            style={{
-              boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-              height: 50,
-              backgroundColor: "white",
-              border: "1px solid",
-              borderColor: COLORS.borderColorMedium,
-              borderRadius: 16,
-              fontSize: FONT_SIZE.HEADING_4,
-            }}
-            onPressEnter={() => form.submit()}
-          />
-        </Form.Item>
-      </Form>
-    </Flex>
+    </AdminGuard>
   );
 }
