@@ -72,7 +72,7 @@ export const rupeeAmountFormat = (amt: string | number) => {
 export const captureAnalyticsEvent = (event: string, props: any) => {
   if (env == "production") {
     try {
-      console.warn("captured posthog event: ", event);
+      console.log("captured posthog event: ", event);
       posthog.capture(`bkfi-${event}`, props || {});
     } catch (err: any) {
       console.warn("error while capturing posthog event: ", err);
