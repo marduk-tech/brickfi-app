@@ -4,6 +4,7 @@ import { BrickMapCustomer } from "@/components/map-view-v2/brick-map/brick-map-c
 import { BrickMapAdmin } from "../../../components/map-view-v2/brick-map/brick-map-admin";
 import { useUser } from "@/hooks/use-user";
 import { useEffect, useState } from "react";
+import { AdminGuard } from "@/components/auth/admin-guard";
 
 export default function BrickMap() {
   const { user } = useUser();
@@ -14,5 +15,9 @@ export default function BrickMap() {
       setProjectIds(user.savedProjects);
     }
     }, [user]);
-  return <BrickMapCustomer projectIds={projectIds} />;
+  return (
+    <AdminGuard>
+      <BrickMapCustomer projectIds={projectIds} />
+    </AdminGuard>
+  );
 }
