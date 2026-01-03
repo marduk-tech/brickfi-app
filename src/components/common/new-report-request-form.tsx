@@ -280,10 +280,6 @@ export const NewReportRequestForm = () => {
         if (responseUser.requestedReports) {
           setStep(3);
         }
-        safeStorage.setItem(
-          LocalStorageKeys.user,
-          JSON.stringify(responseUser)
-        );
 
         await sendMail.mutateAsync({
           userId: responseUser._id,
@@ -371,7 +367,6 @@ export const NewReportRequestForm = () => {
             size="large"
             style={{ marginTop: 24 }}
             onClick={() => {
-              // router.replace("/app");
               window.open(`${window.location.origin}/app`, "_blank");
             }}
           >
@@ -448,7 +443,6 @@ export const NewReportRequestForm = () => {
           size="large"
           style={{ marginTop: 24 }}
           onClick={() => {
-            // router.replace("/app");
             window.open(`${window.location.origin}/app`, "_blank");
           }}
         >

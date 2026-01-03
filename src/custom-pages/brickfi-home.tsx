@@ -15,6 +15,7 @@ import { LandingConstants } from "../libs/constants";
 import { safeWindow } from "../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 import { Brick360v3 } from "@/components/brick-360/brick360-v3";
+import Link from "next/link";
 
 interface SavedLvnzyProject {
   _id: string;
@@ -23,11 +24,14 @@ interface SavedLvnzyProject {
 }
 
 const BrickfiHome: React.FC = () => {
-  const { user, isLoading: userLoading } = useUser();
-  const { lvnzyProjectId, collectionId } = useParams<{ lvnzyProjectId: string, collectionId: string }>()!;
+  const { user, isLoading: userLoading, refetch: refetchUser } = useUser();
+  const { lvnzyProjectId, collectionId } = useParams<{
+    lvnzyProjectId: string;
+    collectionId: string;
+  }>()!;
 
   const [lvnzyProjects, setLvnzyProjects] = useState<any[]>([]);
-  const [projectsLoading, setProjectsLoadng] = useState(true);
+  const [projectsLoading, setProjectsLoading] = useState(true);
 
   const isAdmin = user?.role === "admin";
   const { data: allLvnzyProjects, isLoading: adminProjectsLoading } =
@@ -38,7 +42,7 @@ const BrickfiHome: React.FC = () => {
       ids,
     });
     setLvnzyProjects(data);
-    setProjectsLoadng(false);
+    setProjectsLoading(false);
   };
   useEffect(() => {
     if (collectionId == "inv-friendly") {
@@ -58,14 +62,14 @@ const BrickfiHome: React.FC = () => {
 
   useEffect(() => {
     if (lvnzyProjectId) {
-      setProjectsLoadng(false);
+      setProjectsLoading(false);
       return;
     }
     if (userLoading) {
       return;
     }
     if (!user) {
-      setProjectsLoadng(false);
+      setProjectsLoading(false);
       return;
     }
 
@@ -83,7 +87,7 @@ const BrickfiHome: React.FC = () => {
         if (allLvnzyProjects) {
           setLvnzyProjects(allLvnzyProjects);
         }
-        setProjectsLoadng(false);
+        setProjectsLoading(false);
       } else {
         // Existing logic for regular users
         if (collectionId) {
@@ -94,24 +98,39 @@ const BrickfiHome: React.FC = () => {
           if (collection && collection.projects) {
             setLvnzyProjects(collection.projects);
           }
+          setProjectsLoading(false);
         } else {
-          
           if (
             !user.savedLvnzyProjects ||
             user.savedLvnzyProjects.length === 0
           ) {
             setLvnzyProjects([]);
+            setTimeout(() => {
+              refetchUser();
+              setTimeout(() => {
+                if (projectsLoading) {
+                  setProjectsLoading(false);
+                }
+              }, 300);
+            }, 4000);
+
+            setProjectsLoading(true);
           } else {
             setLvnzyProjects(user.savedLvnzyProjects[0].projects);
+            setProjectsLoading(false);
           }
         }
-        setProjectsLoadng(false);
       }
     }
   }, [collectionId, user, allLvnzyProjects]);
 
   if (userLoading || projectsLoading || (isAdmin && adminProjectsLoading)) {
-    return <Loader></Loader>;
+    return (
+      <Flex vertical align="center" style={{ marginTop: 72 }}>
+        <Loader size="default"></Loader>
+        <Typography.Text>Fetching Reports. Please wait ..</Typography.Text>
+      </Flex>
+    );
   }
 
   const handleProjectSelect = (
@@ -144,7 +163,6 @@ const BrickfiHome: React.FC = () => {
           {lvnzyProjects && lvnzyProjects.length ? (
             <UserProjects lvnzyProjects={lvnzyProjects} />
           ) : (
-
             <Flex
               vertical
               style={{ margin: 16, marginTop: 100 }}
@@ -167,40 +185,53 @@ const BrickfiHome: React.FC = () => {
               </Typography.Text>
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_4,
+                  fontSize: FONT_SIZE.PARA,
                   textAlign: "center",
-                  color: COLORS.textColorLight,
+                  color: COLORS.textColorDark,
                 }}
               >
                 Click reload below if you recently requested reports
               </Typography.Text>
-              
+
               <Button
-                style={{ marginTop: 48, fontSize: FONT_SIZE.HEADING_2 }}
+                style={{ marginTop: 48, fontSize: FONT_SIZE.HEADING_3,padding: "0 16px" }}
                 onClick={() => {
                   window.location.reload();
                 }}
+                size="small"
               >
-                Reload Page 
-              </Button>
-              <Button
-              type="link"
-                style={{ marginTop: 24, fontSize: FONT_SIZE.HEADING_3, color: COLORS.textColorDark, textDecoration: "underline" }}
-                onClick={() => {
-                  safeWindow.location.assign(LandingConstants.genReportFormLink);
-                }}
-              >
-                Request a new Brick360 Report
+                Reload Page
               </Button>
 
-              <Flex style={{position: "absolute", bottom: 100, padding: 16, }}>
-                <Typography.Text > <br/><br/> <a style={{color:COLORS.textColorMedium}} href="https://api.whatsapp.com/send?phone=919901623170">Need help ?</a></Typography.Text>
+              <Flex gap={16} style={{ position: "absolute", bottom: 100, padding: 16 }}>
+                <Link
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_4,
+                    color: COLORS.textColorMedium,
+                  }}
+                  onClick={() => {
+                    safeWindow.location.assign(
+                      LandingConstants.genReportFormLink
+                    );
+                  }}
+                  href={LandingConstants.genReportFormLink}
+                >
+                  Request Brick360 Report
+                </Link>
+                <Link
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_4,
+                    color: COLORS.textColorMedium,
+                  }}
+                  href="https://api.whatsapp.com/send?phone=919901623170"
+                >
+                  Need help ?
+                </Link>
               </Flex>
             </Flex>
           )}
         </>
       )}
-      
     </Flex>
   );
 };
