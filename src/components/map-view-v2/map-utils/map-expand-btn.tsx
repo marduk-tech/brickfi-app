@@ -51,6 +51,7 @@ export const MapExpandBtn = ({
           padding: "12px 8px",
         }}
         onClick={() => {
+          onClick();
           captureAnalyticsEvent("expand-map", {
             pillar: pillar || "",
             dataPoint: dataPoint || "",
