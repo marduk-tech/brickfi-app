@@ -127,7 +127,7 @@ const BrickfiHome: React.FC = () => {
   if (userLoading || projectsLoading || (isAdmin && adminProjectsLoading)) {
     return (
       <Flex vertical align="center" style={{ marginTop: 72 }}>
-        <Loader size="default"></Loader>
+        <Loader></Loader>
         <Typography.Text>Fetching Reports. Please wait ..</Typography.Text>
       </Flex>
     );
