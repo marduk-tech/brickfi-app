@@ -16,8 +16,7 @@ import {
 } from "antd";
 import Link from "antd/es/typography/Link";
 import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
-import { ReactNode, useEffect, useState } from "react";
+import { memo, ReactNode, useEffect, useMemo, useState } from "react";
 import LandingHeader from "../../custom-pages/landing/header";
 import { useDevice } from "../../hooks/use-device";
 import {
@@ -30,12 +29,7 @@ import {
   useCreateUserMutation,
   useSendUserMailMutation,
 } from "../../hooks/user-hooks";
-import { safeStorage, safeWindow } from "../../libs/browser-utils";
-import {
-  LandingConstants,
-  LocalStorageKeys,
-  queryKeys,
-} from "../../libs/constants";
+import { LandingConstants, queryKeys } from "../../libs/constants";
 import { capitalize } from "../../libs/lvnzy-helper";
 import { queryClient } from "../../libs/query-client";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -44,8 +38,69 @@ import DynamicReactIcon from "./dynamic-react-icon";
 import { Loader } from "./loader";
 const { Paragraph } = Typography;
 
-
 const MAX_FREE_REPORTS = parseInt(process.env.NEXT_MAX_FREE_REPORTS || "2");
+
+const ProjectOption = memo(({ project }: { project: ReraProject }) => {
+  const getInstantReportTag = () => (
+    <Flex style={{ padding: 2, borderRadius: 4 }} align="center">
+      <Tag color="blue">
+        <Flex align="center">
+          <DynamicReactIcon iconName="GiElectric" iconSet="gi" size={12} />
+          <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+            Instant Report Available
+          </Typography.Text>
+        </Flex>
+      </Tag>
+    </Flex>
+  );
+
+  const getRequestReportTag = () => (
+    <Flex style={{ padding: 2, borderRadius: 4 }} align="center">
+      <Tag>
+        <Flex align="center">
+          <DynamicReactIcon
+            iconName="LuCircleFadingArrowUp"
+            iconSet="lu"
+            size={12}
+          />
+          <Typography.Text
+            style={{ fontSize: FONT_SIZE.SUB_TEXT, marginLeft: 4 }}
+          >
+            Request to Generate Report
+          </Typography.Text>
+        </Flex>
+      </Tag>
+    </Flex>
+  );
+
+  return (
+    <Flex vertical>
+      <Typography.Text
+        style={{
+          fontSize: FONT_SIZE.HEADING_2,
+          color: project.lvnzyProjectId
+            ? COLORS.textColorDark
+            : COLORS.textColorMedium,
+        }}
+      >
+        {capitalize(project.projectName)}
+      </Typography.Text>
+      {project.promoterName && (
+        <Typography.Text
+          style={{
+            fontSize: FONT_SIZE.SUB_TEXT,
+            color: COLORS.textColorMedium,
+          }}
+        >
+          by {capitalize(project.promoterName)}
+        </Typography.Text>
+      )}
+      {project.lvnzyProjectId ? getInstantReportTag() : getRequestReportTag()}
+    </Flex>
+  );
+});
+ProjectOption.displayName = "ProjectOption";
+
 export const NewReportRequestForm = () => {
   const [form] = Form.useForm();
   const [step, setStep] = useState(1);
@@ -61,7 +116,6 @@ export const NewReportRequestForm = () => {
   const [searchValue, setSearchValue] = useState("");
   const [debouncedSearchValue, setDebouncedSearchValue] = useState("");
 
-
   // minisearch for fuzzy search on project name and promoter name
   const searchResults = useMinisearch(projects, debouncedSearchValue, {
     fields: ["projectName", "promoterName"],
@@ -69,12 +123,10 @@ export const NewReportRequestForm = () => {
     fuzzy: 0.2,
     prefix: true,
   });
-  const [projectOptions, setProjectOptions] = useState<any[]>([]);
   const [verifiedUser, setVerifiedUser] = useState<any>(null);
   const [isMobileVerified, setIsMobileVerified] = useState(false);
 
   const [flickerWait, setFlickerWait] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     setTimeout(() => {
@@ -93,109 +145,35 @@ export const NewReportRequestForm = () => {
 
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
-  function getInstantReportTag() {
-    return (
-      <Flex
-        style={{
-          padding: 2,
-          borderRadius: 4,
-        }}
-        align="center"
-      >
-        <Tag color="blue">
-          <Flex align="center">
-            <DynamicReactIcon
-              iconName="GiElectric"
-              iconSet="gi"
-              size={12}
-            ></DynamicReactIcon>
-            <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
-              Instant Report Available
-            </Typography.Text>
-          </Flex>
-        </Tag>
-      </Flex>
-    );
-  }
+  const projectOptions = useMemo(() => {
+    if (!projects?.length) return [];
 
-  function getRequestReportTag() {
-    return (
-      <Flex
-        style={{
-          padding: 2,
-          borderRadius: 4,
-        }}
-        align="center"
-      >
-        <Tag>
-          <Flex align="center">
-            <DynamicReactIcon
-              iconName="LuCircleFadingArrowUp"
-              iconSet="lu"
-              size={12}
-            ></DynamicReactIcon>
-            <Typography.Text
-              style={{ fontSize: FONT_SIZE.SUB_TEXT, marginLeft: 4 }}
-            >
-              Request to Generate Report
-            </Typography.Text>
-          </Flex>
-        </Tag>
-      </Flex>
-    );
-  }
-
-  useEffect(() => {
-    if (projects && projects.length) {
-      const filteredProjects = debouncedSearchValue.trim()
-        ? searchResults
-        : projects;
-
-      const projectOptions: any[] = (filteredProjects || [])
-        .filter(
-          (p) => !selectedProjects.some((s) => s.projectName === p.projectName)
-        )
-        .sort((projectA, projectB) =>
-          projectA.lvnzyProjectId && projectB.lvnzyProjectId
-            ? 0
-            : projectA.lvnzyProjectId
-            ? -1
-            : 1
-        )
-        .map((project) => ({
-          value: project.projectName,
-          label: (
-            <Flex vertical>
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_2,
-                  color: project.lvnzyProjectId
-                    ? COLORS.textColorDark
-                    : COLORS.textColorMedium,
-                }}
-              >
-                {capitalize(project.projectName)}
-              </Typography.Text>
-              {project.promoterName && (
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
-                    color: COLORS.textColorMedium,
-                  }}
-                >
-                  by {capitalize(project.promoterName)}
-                </Typography.Text>
-              )}
-              {project.lvnzyProjectId
-                ? getInstantReportTag()
-                : getRequestReportTag()}
-            </Flex>
-          ),
-          project,
-        }));
-      setProjectOptions(projectOptions);
+    // Only show results when search has 2+ characters OR when no search (show all)
+    const searchQuery = debouncedSearchValue.trim();
+    if (searchQuery && searchQuery.length < 2) {
+      return [];
     }
-  }, [projects, debouncedSearchValue, selectedProjects]);
+
+    const filteredProjects = searchQuery ? searchResults : projects;
+
+    return (filteredProjects || [])
+      .filter(
+        (p) => !selectedProjects.some((s) => s.projectName === p.projectName)
+      )
+      .sort((projectA, projectB) =>
+        projectA.lvnzyProjectId && projectB.lvnzyProjectId
+          ? 0
+          : projectA.lvnzyProjectId
+          ? -1
+          : 1
+      )
+      .slice(0, 100)
+      .map((project) => ({
+        value: project.projectName,
+        label: <ProjectOption project={project} />,
+        project,
+      }));
+  }, [projects, debouncedSearchValue, selectedProjects, searchResults]);
 
   const handleSelectProject = (_: any, option: any) => {
     if (
@@ -676,6 +654,15 @@ export const NewReportRequestForm = () => {
                       : "Search project or developer name..."
                   }
                   disabled={reraProjectNamesLoading}
+                  listHeight={400}
+                  notFoundContent={
+                    debouncedSearchValue.trim() &&
+                    debouncedSearchValue.trim().length < 2
+                      ? "Type at least 2 characters to search"
+                      : projectOptions.length === 100
+                      ? "Showing first 100 results. Type more to refine your search."
+                      : "No results found"
+                  }
                 >
                   <Input.Search loading={reraProjectNamesLoading} />
                 </AutoComplete>
@@ -715,9 +702,29 @@ export const NewReportRequestForm = () => {
                           >
                             {capitalize(p.projectName)}
                           </Paragraph>
-                          {p.lvnzyProjectId
-                            ? getInstantReportTag()
-                            : getRequestReportTag()}
+                          {p.lvnzyProjectId ? (
+                            <Flex style={{ padding: 2, borderRadius: 4 }} align="center">
+                              <Tag color="blue">
+                                <Flex align="center">
+                                  <DynamicReactIcon iconName="GiElectric" iconSet="gi" size={12} />
+                                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+                                    Instant Report Available
+                                  </Typography.Text>
+                                </Flex>
+                              </Tag>
+                            </Flex>
+                          ) : (
+                            <Flex style={{ padding: 2, borderRadius: 4 }} align="center">
+                              <Tag>
+                                <Flex align="center">
+                                  <DynamicReactIcon iconName="LuCircleFadingArrowUp" iconSet="lu" size={12} />
+                                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, marginLeft: 4 }}>
+                                    Request to Generate Report
+                                  </Typography.Text>
+                                </Flex>
+                              </Tag>
+                            </Flex>
+                          )}
                         </Flex>
                         <Flex
                           style={{ marginLeft: "auto" }}
