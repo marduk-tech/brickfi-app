@@ -394,7 +394,16 @@ export const NewReportRequestForm = () => {
             }}
           >
             Once your requested report is available, we will notify you via
-            email and message.
+            email and message. You can also request a callback to expedite your report request.
+          </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_4,
+              fontWeight: "bold",
+              marginTop: 8,
+            }}
+          >
+            You can also request a <Link href="https://www.brickfi.in/brickassist">callback here</Link> to expedite your report request. 
           </Typography.Text>
         </>
       );
