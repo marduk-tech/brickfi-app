@@ -143,6 +143,20 @@ export const NewReportRequestForm = () => {
     return () => clearTimeout(timer);
   }, [searchValue]);
 
+  // scroll dropdown to top when search value changes
+  useEffect(() => {
+    if (debouncedSearchValue) {
+      setTimeout(() => {
+        const dropdown = document.querySelector(
+          ".ant-select-dropdown .rc-virtual-list-holder"
+        ) as HTMLElement;
+        if (dropdown) {
+          dropdown.scrollTop = 0;
+        }
+      }, 0);
+    }
+  }, [debouncedSearchValue]);
+
   const [errorMsg, setErrorMsg] = useState<ReactNode>();
 
   const projectOptions = useMemo(() => {
@@ -703,22 +717,43 @@ export const NewReportRequestForm = () => {
                             {capitalize(p.projectName)}
                           </Paragraph>
                           {p.lvnzyProjectId ? (
-                            <Flex style={{ padding: 2, borderRadius: 4 }} align="center">
+                            <Flex
+                              style={{ padding: 2, borderRadius: 4 }}
+                              align="center"
+                            >
                               <Tag color="blue">
                                 <Flex align="center">
-                                  <DynamicReactIcon iconName="GiElectric" iconSet="gi" size={12} />
-                                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+                                  <DynamicReactIcon
+                                    iconName="GiElectric"
+                                    iconSet="gi"
+                                    size={12}
+                                  />
+                                  <Typography.Text
+                                    style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                                  >
                                     Instant Report Available
                                   </Typography.Text>
                                 </Flex>
                               </Tag>
                             </Flex>
                           ) : (
-                            <Flex style={{ padding: 2, borderRadius: 4 }} align="center">
+                            <Flex
+                              style={{ padding: 2, borderRadius: 4 }}
+                              align="center"
+                            >
                               <Tag>
                                 <Flex align="center">
-                                  <DynamicReactIcon iconName="LuCircleFadingArrowUp" iconSet="lu" size={12} />
-                                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, marginLeft: 4 }}>
+                                  <DynamicReactIcon
+                                    iconName="LuCircleFadingArrowUp"
+                                    iconSet="lu"
+                                    size={12}
+                                  />
+                                  <Typography.Text
+                                    style={{
+                                      fontSize: FONT_SIZE.SUB_TEXT,
+                                      marginLeft: 4,
+                                    }}
+                                  >
                                     Request to Generate Report
                                   </Typography.Text>
                                 </Flex>
