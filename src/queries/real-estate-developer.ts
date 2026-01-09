@@ -44,7 +44,7 @@ export const getDeveloperBySlug = async (slug: string, throwError = true) => {
     {
       cache: "no-store",
       headers: {
-        "x-api-key": apiKey || "",
+        "x-api-key": sitemapApiKey || "",
       },
     }
   );
@@ -100,9 +100,8 @@ export const getAllDevelopers = async (params?: {
   if (params?.keyword) searchParams.append("keyword", params.keyword);
   if (params?.limit) searchParams.append("limit", params.limit.toString());
 
-  const url = `${baseApiUrl}real-estate-developer${
-    searchParams.toString() ? "?" + searchParams.toString() : ""
-  }`;
+  const url = `${baseApiUrl}real-estate-developer${searchParams.toString() ? "?" + searchParams.toString() : ""
+    }`;
 
   const res = await fetch(url, {
     // Revalidate every hour for sitemap generation

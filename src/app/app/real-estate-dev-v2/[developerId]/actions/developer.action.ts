@@ -1,9 +1,10 @@
 "use server";
 
-import { baseApiUrl, apiKey } from "@/libs/constants";
+import { baseApiUrl, sitemapApiKey } from "@/libs/constants";
 import { cache } from "react";
 import { DeveloperActionResult, RealEstateDeveloper } from "./types";
 
+// Server action for generateMetadata - uses sitemapApiKey since it runs on server
 export const getDeveloperData = cache(
   async (developerId: string): Promise<DeveloperActionResult> => {
     try {
@@ -12,7 +13,7 @@ export const getDeveloperData = cache(
         {
           cache: "no-store",
           headers: {
-            "x-api-key": apiKey || "",
+            "x-api-key": sitemapApiKey || "",
           },
         }
       );

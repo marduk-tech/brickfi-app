@@ -70,7 +70,7 @@ export const getGlossaryArticleBySlug = async (
   const res = await fetch(`${baseApiUrl}marketing/ghost-pages/${slug}`, {
     cache: "no-store",
     headers: {
-      "x-api-key": apiKey || "",
+      "x-api-key": sitemapApiKey || "",
     },
   });
 
