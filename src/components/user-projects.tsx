@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, Tooltip, Typography } from "antd";
+import { Button, Flex, Tooltip, Typography } from "antd";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useDevice } from "../hooks/use-device";
@@ -134,16 +134,12 @@ export function UserProjects({
             : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
         }}
       >
-        <Link
-          href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
-          prefetch={false}
-          style={{ textDecoration: "none", color: "inherit", width: "100%" }}
-        >
+        
           <Flex vertical style={{ width: "100%" }}>
             <div
               style={{
                 width: "100%",
-                height: isMobile ? 200 : 175,
+                height: isMobile ? 175 : 150,
                 borderRadius: 12,
                 backgroundImage: `url(${previewImage})`,
                 backgroundSize: "cover",
@@ -194,6 +190,7 @@ export function UserProjects({
                 -{itemInfo?.originalProjectId?.info?.rate?.minimumUnitSize || 0}
                 sq.ft · {primaryCorridor}
               </Paragraph>
+            
 
               {/* {pmtPlan ? (
               <Flex
@@ -264,9 +261,28 @@ export function UserProjects({
                   </Flex>
                 ))}
               </Flex>
+                <Flex style={{width: "100%", marginTop: 8}}>
+                <Link
+                  href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
+                  prefetch={false}
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    width: "100%",
+                    border: `1px solid ${COLORS.primaryColor}`,
+                    borderRadius: 8,
+                    textAlign: "center"
+                  }}
+                >
+                  <Typography.Text
+                    style={{ fontSize: FONT_SIZE.PARA, color: COLORS.primaryColor,  width: "100%" }}
+                  >
+                    View 360 Report
+                  </Typography.Text>
+                </Link>
+              </Flex>
             </Flex>
           </Flex>
-        </Link>
       </Flex>
     );
   };
