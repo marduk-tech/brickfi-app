@@ -346,12 +346,13 @@ export const Brick360DataPoints = {
     },
     transport: {
       label: "Connectivity",
+      prompts: ["Nearest metro", "Roads Nearby"],
     },
   },
   developer: {
     experience: {
       label: "Experience",
-      prompts: ["All RERA projects", "More about owners"],
+      prompts: ["All RERA projects", "More about management"],
     },
     timeCommitment: {
       label: "Time Committment",
@@ -370,7 +371,7 @@ export const Brick360DataPoints = {
       label: "Rental Income",
       prompts: ["Highest rental nearby", "Rentals vs distance"],
     },
-    growthPotential: { label: "Growth Potential" },
+    growthPotential: { label: "Growth Potential", prompts: ["Future Infra", "Current demand drivers"], },
   },
 };
 
