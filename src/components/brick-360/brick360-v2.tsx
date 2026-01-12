@@ -88,7 +88,19 @@ export function Brick360v2({ slug }: Brick360v2Props) {
           <Typography.Text
             style={{ width: 300, fontSize: FONT_SIZE.HEADING_2 }}
           >
-            Click here to see more details of this rating including map view.
+            Click{" "}
+            <span
+              style={{
+                backgroundColor: COLORS.bgColorMedium,
+                padding: "1px 4px",
+                fontSize: FONT_SIZE.PARA,
+                fontWeight: "bold",
+                marginTop: -2
+              }}
+            >
+              +
+            </span>{" "}
+            here to see more details of this rating including map view.
           </Typography.Text>
         </Flex>
       ),
@@ -137,9 +149,9 @@ export function Brick360v2({ slug }: Brick360v2Props) {
 
   useEffect(() => {
     if (localStorage.getItem(LocalStorageKeys.tour) !== "tour-done") {
-      setTimeout(() => {
-        setTourOpen(true);
-      }, 2000);
+    setTimeout(() => {
+      setTourOpen(true);
+    }, 2000);
     }
   }, []);
 

@@ -282,7 +282,10 @@ export const Brick360CategoryInfo: Record<
     title: "Developer",
     iconName: "FaPeopleGroup",
     iconSet: "fa6",
-    sources: [{ url: "https://rera.karnataka.gov.in/", label: "RERA" }, { label: "Builder Website" }],
+    sources: [
+      { url: "https://rera.karnataka.gov.in/", label: "RERA" },
+      { label: "Builder Website" },
+    ],
     note: "Projects registered under RERA are considered for time committment & complaint analysis.",
   },
   property: {
@@ -291,7 +294,7 @@ export const Brick360CategoryInfo: Record<
     sources: [
       { url: "https://rera.karnataka.gov.in/", label: "RERA" },
       { label: "Open Street", url: "https://www.openstreetmap.org" },
-      { label: "Official Brochure"},
+      { label: "Official Brochure" },
     ],
     iconSet: "md",
   },
@@ -302,7 +305,7 @@ export const Brick360CategoryInfo: Record<
     sources: [
       { label: "Open Street", url: "https://www.openstreetmap.org" },
       { url: "https://opencity.in/", label: "Open City" },
-      {label: "Live Listings" },
+      { label: "Live Listings" },
     ],
   },
 };
@@ -371,7 +374,10 @@ export const Brick360DataPoints = {
       label: "Rental Income",
       prompts: ["Highest rental nearby", "Rentals vs distance"],
     },
-    growthPotential: { label: "Growth Potential", prompts: ["Future Infra", "Current demand drivers"], },
+    growthPotential: {
+      label: "Growth Potential",
+      prompts: ["Future Infra", "Current demand drivers"],
+    },
   },
 };
 
@@ -666,9 +672,8 @@ export const FAQ_360 = [
   },
   {
     question: "How quickly can I get my property report?",
-    answer: `A Brick360 report can be generated in as little as an hour. In some
-          cases, it may take longer to gather all the necessary property
-          details, but the report will always be delivered within 24–48 hours.`,
+    answer: `For selected projects, you can get a Brick360 report instanly. For others, it may take longer to gather all the necessary property
+          details and you will receive a confirmation once the report is ready to view.`,
   },
   {
     question: "What if I have a question with the report ?",
