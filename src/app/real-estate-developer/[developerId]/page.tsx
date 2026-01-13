@@ -24,12 +24,12 @@ export async function generateMetadata({
 
     if (!developer) {
       return {
-        title: "Developer Not Found | Brickfi",
+        title: "Real Estate Developer Not Found | Brickfi",
         description: "The requested real estate developer could not be found.",
       };
     }
 
-    const title = `${developer.name} - Real Estate Developer | Brickfi`;
+    const title = `${developer.name} - Real Estate Developer`;
     const description =
       developer.info?.oneLiner ||
       `Learn about ${developer.name}, a real estate developer. View their projects, management details, and financial information on Brickfi.`;
@@ -97,7 +97,7 @@ export async function generateMetadata({
     };
   } catch (error) {
     return {
-      title: "Developer Not Found | Brickfi",
+      title: "Real Estate Developer Not Found | Brickfi",
       description: "The requested real estate developer could not be found.",
     };
   }

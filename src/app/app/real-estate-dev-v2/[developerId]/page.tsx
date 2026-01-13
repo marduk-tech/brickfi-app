@@ -20,11 +20,16 @@ export async function generateMetadata({
     };
   }
 
+    const descriptions = [
+      "View the Brickfi 360 Report to evaluate project performance, execution quality, and important checks before making a property investment.",
+      "Check the Brickfi 360 Report for insights into completed developments, delivery credibility, and details that support better property decisions.",
+       "See the Brickfi 360 Report to review project history, builder reputation, and essential factors buyers should know before investing.", 
+       "Explore the Brickfi 360 Report to learn about project delivery, track record, and what matters most when choosing a property."
+      ]
+      const description = descriptions[Math.round(Math.random()*4)-1];
   return {
-    title: `${result.data.name} - Real Estate Developer`,
-    description:
-      result.data.info?.oneLiner ||
-      `Learn more about ${result.data.name} and their projects.`,
+    title: `${result.data.name} - Real Estate Developer | Get a Brick360 Property Report with Brickfi`,
+    description
   };
 }
 

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://brickfi.in"),
   title: {
     default: "Brickfi | The Smartest Way to Buy your Next Property",
-    template: "%s | Brickfi",
+    template: "%s",
   },
   description:
     "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",

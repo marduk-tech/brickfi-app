@@ -6,7 +6,7 @@ export const getDeveloper = async (id: string, throwError = true) => {
   const res = await fetch(`${baseApiUrl}real-estate-developer/${id}`, {
     cache: "no-store",
     headers: {
-      "x-api-key": apiKey || "",
+      "x-api-key": sitemapApiKey || "",
     },
   });
 
