@@ -183,7 +183,7 @@ export function UserProjects({
                   symbol: "..",
                 }}
               >
-                {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹
+                {capitalize(itemInfo.meta.projectUnitTypes?.split(",")[0] || "Property")} · ₹
                 {rupeeAmountFormat(
                   itemInfo?.originalProjectId?.info?.rate?.minimumUnitCost || 0
                 )}
