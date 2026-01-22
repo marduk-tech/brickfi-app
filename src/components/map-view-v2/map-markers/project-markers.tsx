@@ -113,12 +113,13 @@ export const ProjectMarkers = ({
                   ),
                   content: (
                     <Flex vertical gap={0}>
-                        <Typography.Text style={{fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium}}>
+                      {project.info && project.info.reraProjectId ? <Typography.Text style={{fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium}}>
                           {getCompletionDate(
                             project.info.reraProjectId.projectDetails
                               .listOfRegistrationsExtensions
                           )}
-                        </Typography.Text>
+                        </Typography.Text>: null}
+                        
                       <Flex style={{ marginBottom: 16 }}>
                         {project.info.homeType.map((t: string) => (
                           <Typography.Text

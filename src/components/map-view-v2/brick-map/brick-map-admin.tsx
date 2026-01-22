@@ -230,6 +230,7 @@ export function BrickMapAdmin() {
               projectId={selectedProjectId || undefined}
               fullSize={false}
               showLocalities={true}
+              showCorridors={false}
             />
           </>
         </Flex>

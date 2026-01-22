@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Flex, Tooltip, Typography } from "antd";
+import { Button, Flex, Tag, Tooltip, Typography } from "antd";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useDevice } from "../hooks/use-device";
@@ -25,6 +25,7 @@ import GradientBar from "./common/grading-bar";
 import { Loader } from "./common/loader";
 import Brick360Chat from "./brick-360/brick360-chat";
 import { BrickMapCustomer } from "./map-view-v2/brick-map/brick-map-customer";
+import moment from "moment";
 const { Paragraph } = Typography;
 
 export function UserProjects({
@@ -57,9 +58,7 @@ export function UserProjects({
             minHeight: 130,
             border: `1px solid ${COLORS.borderColor}`,
             borderRadius: 8,
-            width: isMobile
-              ? "100%"
-              : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
+            width: isMobile ? "100%" : width - 50 * 2 - HORIZONTAL_PADDING * 2,
           }}
           vertical
         >
@@ -103,10 +102,10 @@ export function UserProjects({
         ? imgs.find((i: any) => i.isPreview) ||
           imgs.find(
             (i: any) =>
-              i.image && i.image.tags && i.image.tags.includes("exterior")
+              i.image && i.image.tags && i.image.tags.includes("exterior"),
           ) ||
           imgs.find(
-            (i: any) => i.image && i.image.tags && !i.image.tags.includes("na")
+            (i: any) => i.image && i.image.tags && !i.image.tags.includes("na"),
           )
         : null;
     if (previewImage && previewImage.image) {
@@ -117,11 +116,11 @@ export function UserProjects({
       Array.isArray(itemInfo.meta.projectCorridors) &&
       itemInfo.meta.projectCorridors.length
         ? itemInfo.meta.projectCorridors.sort(
-            (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms
+            (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms,
           )[0]?.corridorName || "Unknown"
         : "Unknown";
     const pmtPlan = fetchPmtPlan(
-      itemInfo.originalProjectId?.info?.financialPlan
+      itemInfo.originalProjectId?.info?.financialPlan,
     );
     return (
       <Flex
@@ -134,65 +133,94 @@ export function UserProjects({
             : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
         }}
       >
-        
-          <Flex vertical style={{ width: "100%" }}>
-            <div
-              style={{
-                width: "100%",
-                height: isMobile ? 175 : 150,
-                borderRadius: 12,
-                backgroundImage: `url(${previewImage})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-                backgroundRepeat: "no-repeat",
-              }}
-            ></div>
-            {/* <ProjectGallery
+        <Flex vertical style={{ width: "100%" }}>
+          <div
+            style={{
+              width: "100%",
+              height: isMobile ? 175 : 150,
+              borderRadius: 12,
+              backgroundImage: `url(${previewImage})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              position: "relative",
+            }}
+          >
+            <Flex style={{position: "absolute", bottom: 8, right: 0,}} gap={0}>
+              {itemInfo.meta.projectUnitTypes.split(",").map((u: string) => (
+                <Tag style={{  fontSize: FONT_SIZE.SUB_TEXT,padding: "0 2px" }}>
+                  {capitalize(u)}
+                </Tag>
+              ))}
+            </Flex>
+          </div>
+          {/* <ProjectGallery
             media={itemInfo.originalProjectId.media}
           ></ProjectGallery> */}
 
-            <Tooltip title={itemInfo.meta.projectName}>
-              <Paragraph
-                style={{
-                  fontSize: FONT_SIZE.HEADING_2,
-                  width: "100%",
-                  padding: "4px",
-                  paddingBottom: 0,
-                  marginBottom: 0,
-                  fontWeight: 500,
-                }}
-                ellipsis={{
-                  rows: 1,
-                  expandable: false,
-                  symbol: "..",
-                }}
-              >
-                {itemInfo.meta.projectName}
-              </Paragraph>
-            </Tooltip>
-            <Flex vertical style={{ marginTop: "auto", padding: "0 4px" }}>
-              <Paragraph
-                style={{
-                  fontSize: FONT_SIZE.HEADING_4,
-                  color: COLORS.textColorMedium,
-                  marginBottom: 0,
-                }}
-                ellipsis={{
-                  rows: 1,
-                  expandable: false,
-                  symbol: "..",
-                }}
-              >
-                {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹
-                {rupeeAmountFormat(
-                  itemInfo?.originalProjectId?.info?.rate?.minimumUnitCost || 0
-                )}
-                -{itemInfo?.originalProjectId?.info?.rate?.minimumUnitSize || 0}
-                sq.ft · {primaryCorridor}
-              </Paragraph>
-            
+          <Tooltip title={itemInfo.meta.projectName}>
+            <Paragraph
+              style={{
+                fontSize: FONT_SIZE.HEADING_2,
+                width: "100%",
+                padding: "4px",
+                paddingBottom: 0,
+                marginBottom: 0,
+                fontWeight: 500,
+              }}
+              ellipsis={{
+                rows: 1,
+                expandable: false,
+                symbol: "..",
+              }}
+            >
+              {itemInfo.meta.projectName}
+            </Paragraph>
+          </Tooltip>
+          <Flex vertical style={{ marginTop: "auto", padding: "0 4px" }}>
+            <Paragraph
+              style={{
+                fontSize: FONT_SIZE.PARA,
+                color: COLORS.textColorLight,
+                marginBottom: 0,
+              }}
+              ellipsis={{
+                rows: 1,
+                expandable: false,
+                symbol: "..",
+              }}
+            >
+              {/* {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹ */}
+              {primaryCorridor} ·{" "}
+              {moment(
+                itemInfo?.meta.projectTimelines[
+                  itemInfo?.meta.projectTimelines.length - 1
+                ].completionDate,
+                "DD-MM-YYYY",
+              ).format("MMM YYYY")}{" "}
+              · ₹
+              {rupeeAmountFormat(
+                itemInfo?.originalProjectId?.info?.rate?.minimumUnitCost || 0,
+              )}
+              -{itemInfo?.originalProjectId?.info?.rate?.minimumUnitSize || 0}
+              sq.ft
+            </Paragraph>
+            {/* <Paragraph
+              style={{
+                fontSize: FONT_SIZE.HEADING_4,
+                color: COLORS.textColorMedium,
+                marginBottom: 0,
+              }}
+              ellipsis={{
+                rows: 1,
+                expandable: false,
+                symbol: "..",
+              }}
+            >
+              
+            </Paragraph> */}
 
-              {/* {pmtPlan ? (
+            {/* {pmtPlan ? (
               <Flex
                 style={{
                   width: "fit-content",
@@ -220,69 +248,69 @@ export function UserProjects({
             ) : (
               <Typography.Text>&nbsp;</Typography.Text>
             )} */}
-              <Flex
-                style={{
-                  paddingTop: 8,
-                  borderTopColor: COLORS.borderColor,
-                  justifyContent: "space-between",
-                  width: "100%",
-                }}
-              >
-                {Object.keys(BRICK360_CATEGORY).map((item, index) => (
-                  <Flex
-                    style={{
-                      borderColor: COLORS.borderColor,
-                      borderRadius: 8,
-                    }}
-                  >
-                    <Flex
-                      vertical
-                      style={{ width: "100%" }}
-                      justify="flex-start"
-                    >
-                      <Flex justify="center" align="center">
-                        <GradientBar
-                          value={getCategoryScore(itemInfo.score?.[item])}
-                          showBadgeOnly={true}
-                        ></GradientBar>
-                      </Flex>
-                      <Typography.Text
-                        style={{
-                          fontSize: isMobile
-                            ? FONT_SIZE.PARA
-                            : FONT_SIZE.SUB_TEXT,
-                          color: COLORS.textColorLight,
-                          textAlign: "center",
-                        }}
-                      >
-                        {(Brick360CategoryInfo as any)[item].title}
-                      </Typography.Text>
-                    </Flex>
-                  </Flex>
-                ))}
-              </Flex>
-                <Flex style={{width: "100%", marginTop: 8}}>
-                <Link
-                  href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
-                  prefetch={false}
+            <Flex
+              style={{
+                paddingTop: 8,
+                borderTopColor: COLORS.borderColor,
+                justifyContent: "space-between",
+                width: "100%",
+              }}
+            >
+              {Object.keys(BRICK360_CATEGORY).map((item, index) => (
+                <Flex
                   style={{
-                    textDecoration: "none",
-                    color: "inherit",
-                    width: "100%",
-                    border: `1px solid ${COLORS.primaryColor}`,
+                    borderColor: COLORS.borderColor,
                     borderRadius: 8,
-                    textAlign: "center"
                   }}
                 >
-                  <Typography.Text
-                    style={{ fontSize: FONT_SIZE.PARA, color: COLORS.primaryColor,  width: "100%" }}
-                  >
-                    View 360 Report
-                  </Typography.Text>
-                </Link>
-              </Flex>
+                  <Flex vertical style={{ width: "100%" }} justify="flex-start">
+                    <Flex justify="center" align="center">
+                      <GradientBar
+                        value={getCategoryScore(itemInfo.score?.[item])}
+                        showBadgeOnly={true}
+                      ></GradientBar>
+                    </Flex>
+                    <Typography.Text
+                      style={{
+                        fontSize: isMobile
+                          ? FONT_SIZE.PARA
+                          : FONT_SIZE.SUB_TEXT,
+                        color: COLORS.textColorLight,
+                        textAlign: "center",
+                      }}
+                    >
+                      {(Brick360CategoryInfo as any)[item].title}
+                    </Typography.Text>
+                  </Flex>
+                </Flex>
+              ))}
+            </Flex>
+            <Flex style={{ width: "100%", marginTop: 8 }}>
+              <Link
+                href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
+                prefetch={false}
+                style={{
+                  textDecoration: "none",
+                  color: "inherit",
+                  width: "100%",
+                  border: `1px solid ${COLORS.primaryColor}`,
+                  borderRadius: 8,
+                  textAlign: "center",
+                }}
+              >
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.PARA,
+                    color: COLORS.primaryColor,
+                    width: "100%",
+                  }}
+                >
+                  View 360 Report
+                </Typography.Text>
+              </Link>
             </Flex>
           </Flex>
+        </Flex>
       </Flex>
     );
   };
@@ -317,6 +345,7 @@ export function UserProjects({
         style={{
           padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
           marginLeft: "auto",
+          marginRight: 25
         }}
       >
         <Flex
@@ -389,7 +418,7 @@ export function UserProjects({
                 ? a.meta.projectName > b.meta.projectName
                   ? 1
                   : -1
-                : 0
+                : 0,
             )
             .map((p: any) => renderLvnzyProject(p))}
         </Flex>
