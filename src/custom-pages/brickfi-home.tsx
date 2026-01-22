@@ -75,51 +75,40 @@ const BrickfiHome: React.FC = () => {
 
     if (collectionId === "inv-friendly") {
       fetchLvnzyProjectsByIds(
-        "67f0f60f3ef53b74b67d12f5,67e83fe1a06e471b3d14b6b5,687b4d291541e1a0ecb321ca,687b401e8a68a0900797180b,67f0046ca58ac2b37e530f2b,6870af1904ec49de98b9b1fa,680736af3ff1a71676450fbb,68073ba59f670b1afc3f03f4"
+        "67f0f60f3ef53b74b67d12f5,67e83fe1a06e471b3d14b6b5,687b4d291541e1a0ecb321ca,687b401e8a68a0900797180b,67f0046ca58ac2b37e530f2b,6870af1904ec49de98b9b1fa,680736af3ff1a71676450fbb,68073ba59f670b1afc3f03f4",
       );
     } else if (collectionId === "yellow-line") {
       fetchLvnzyProjectsByIds(
-        "6870af1904ec49de98b9b1fa,68930f117f715b3ee58ca9d5,6879e74423db3840fc951225"
+        "6870af1904ec49de98b9b1fa,68930f117f715b3ee58ca9d5,6879e74423db3840fc951225",
       );
     } else {
-      // Check if user is admin and show all projects
-      if (user.role === "admin") {
-        if (allLvnzyProjects) {
-          setLvnzyProjects(allLvnzyProjects);
-        }
-        setProjectsLoading(false);
-      } else {
-        // Existing logic for regular users
-        if (collectionId) {
+      // Existing logic for regular users
+      if (collectionId) {
+        if (!user.savedLvnzyProjects || user.savedLvnzyProjects.length === 0) {
+          setLvnzyProjects([]);
+          setTimeout(() => {
+            refetchUser();
+            setTimeout(() => {
+              if (projectsLoading) {
+                setProjectsLoading(false);
+              }
+            }, 300);
+          }, 4000);
+
+          setProjectsLoading(true);
+        } else {
           const collection =
             user.savedLvnzyProjects.find(
-              (c: SavedLvnzyProject) => c._id === collectionId
+              (c: SavedLvnzyProject) => c._id === collectionId,
             ) || null;
           if (collection && collection.projects) {
             setLvnzyProjects(collection.projects);
           }
           setProjectsLoading(false);
-        } else {
-          if (
-            !user.savedLvnzyProjects ||
-            user.savedLvnzyProjects.length === 0
-          ) {
-            setLvnzyProjects([]);
-            setTimeout(() => {
-              refetchUser();
-              setTimeout(() => {
-                if (projectsLoading) {
-                  setProjectsLoading(false);
-                }
-              }, 300);
-            }, 4000);
-
-            setProjectsLoading(true);
-          } else {
-            setLvnzyProjects(user.savedLvnzyProjects[0].projects);
-            setProjectsLoading(false);
-          }
         }
+      } else {
+        setLvnzyProjects(user.savedLvnzyProjects[0].projects);
+        setProjectsLoading(false);
       }
     }
   }, [collectionId, user, allLvnzyProjects]);
@@ -136,7 +125,7 @@ const BrickfiHome: React.FC = () => {
   const handleProjectSelect = (
     projectId: string,
     projectName: string,
-    lvnzyProjectId: string | null
+    lvnzyProjectId: string | null,
   ) => {
     // Handle project selection
     console.log("Selected project:", {
@@ -194,7 +183,11 @@ const BrickfiHome: React.FC = () => {
               </Typography.Text>
 
               <Button
-                style={{ marginTop: 48, fontSize: FONT_SIZE.HEADING_3,padding: "0 16px" }}
+                style={{
+                  marginTop: 48,
+                  fontSize: FONT_SIZE.HEADING_3,
+                  padding: "0 16px",
+                }}
                 onClick={() => {
                   window.location.reload();
                 }}
@@ -203,7 +196,10 @@ const BrickfiHome: React.FC = () => {
                 Reload Page
               </Button>
 
-              <Flex gap={16} style={{ position: "absolute", bottom: 100, padding: 16 }}>
+              <Flex
+                gap={16}
+                style={{ position: "absolute", bottom: 100, padding: 16 }}
+              >
                 <Link
                   style={{
                     fontSize: FONT_SIZE.HEADING_4,
@@ -211,7 +207,7 @@ const BrickfiHome: React.FC = () => {
                   }}
                   onClick={() => {
                     safeWindow.location.assign(
-                      LandingConstants.genReportFormLink
+                      LandingConstants.genReportFormLink,
                     );
                   }}
                   href={LandingConstants.genReportFormLink}
