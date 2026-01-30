@@ -2,7 +2,7 @@ import { Flex, Typography } from "antd";
 import L from "leaflet";
 import React from "react";
 import { renderToString } from "react-dom/server";
-import { PLACE_TIMELINE } from "../../libs/constants";
+import { DRIVER_CATEGORIES, PLACE_TIMELINE } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { IDriverPlace } from "../../types/Project";
 import { dynamicImportMap } from "../common/dynamic-react-icon";
@@ -23,7 +23,7 @@ export async function getIcon(
     iconSize?: number;
     borderColor?: string;
     containerWidth?: number;
-  }
+  },
 ) {
   let IconComp = null;
   if (!dynamicImportMap[iconSet]) {
@@ -55,22 +55,22 @@ export async function getIcon(
           borderRadius: style?.containerWidth
             ? style.containerWidth / 10
             : text
-            ? "24px"
-            : "50%",
+              ? "24px"
+              : "50%",
           padding: text ? 2 : 0,
           height: text ? "auto" : (style?.iconSize || 20) * 1.4,
           width: style?.containerWidth
             ? style.containerWidth
             : text
-            ? 80
-            : (style?.iconSize || 20) * 1.4,
+              ? 80
+              : (style?.iconSize || 20) * 1.4,
           display: "flex",
           alignItems: "center",
           borderColor: style?.borderColor
             ? style.borderColor
             : isUnderConstruction
-            ? COLORS.yellowIdentifier
-            : COLORS.borderColorDark,
+              ? COLORS.yellowIdentifier
+              : COLORS.borderColorDark,
           borderStyle: isUnderConstruction ? "dashed" : "solid",
           justifyContent: "center",
           animation: toBounce ? "bounceAnimation 1s infinite" : "none",
@@ -86,8 +86,8 @@ export async function getIcon(
             color: style?.iconColor
               ? style.iconColor
               : isUnderConstruction
-              ? COLORS.yellowIdentifier
-              : COLORS.textColorDark,
+                ? COLORS.yellowIdentifier
+                : COLORS.textColorDark,
           }),
         text
           ? React.createElement(
@@ -106,12 +106,12 @@ export async function getIcon(
                     color: style?.iconColor || COLORS.textColorDark,
                   },
                 },
-                text
-              )
+                text,
+              ),
             )
           : null,
-      ].filter(Boolean)
-    )
+      ].filter(Boolean),
+    ),
   );
 
   const leafletIcon = L.divIcon({
@@ -157,7 +157,8 @@ export const processDriversToPolygons = (
   data: any[],
   filterByDriverTypes = true,
   selectedDriverFilter?: string,
-  filterFunc?: (driver: IDriverPlace) => boolean
+  filterFunc?: (driver: IDriverPlace) => boolean,
+  category?: string,
 ) => {
   const polygons = data
     .filter((driver) => {
@@ -167,12 +168,21 @@ export const processDriversToPolygons = (
         return false;
       }
 
-      // no filering needed show all polygons
+      // no filtering needed show all polygons
       if (!filterByDriverTypes) {
         return true;
       }
 
-      // filtering required but no filter set yet hide all polygons
+      // if category is provided but no specific filter selected,
+      // show all drivers that belong to the category
+      if (!selectedDriverFilter && category) {
+        const categoryData = DRIVER_CATEGORIES[category];
+        if (categoryData && categoryData.drivers) {
+          return categoryData.drivers.includes(driver.driver);
+        }
+      }
+
+      // filtering required but no filter or category - hide all polygons
       if (!selectedDriverFilter) {
         return false;
       }
@@ -181,6 +191,17 @@ export const processDriversToPolygons = (
       const matchesType = filterFunc
         ? filterFunc(driver)
         : selectedDriverFilter === driver.driver;
+
+      // ensure driver belongs to the selected category
+      // prevnt drivers from other categories in the drivers array from showing
+      if (matchesType && category) {
+        const categoryData = DRIVER_CATEGORIES[category];
+        if (categoryData && categoryData.drivers) {
+          return categoryData.drivers.includes(driver.driver);
+        }
+        // If we can't verify category membership, reject by default
+        return false;
+      }
 
       return matchesType;
     })
@@ -203,11 +224,14 @@ export const processDriversToPolygons = (
               driverId: driver._id,
               sectionIndex: index,
               positions: polygonCoords[0].map(
-                ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
+                ([lng, lat]: [number, number]) =>
+                  [lat, lng] as [number, number],
               ),
               name: driver.name,
               description: driver.details?.description || "",
-            })
+              driverType: driver.driver,
+              category: category,
+            }),
           );
         }
 
@@ -217,10 +241,12 @@ export const processDriversToPolygons = (
             id: driver._id,
             driverId: driver._id,
             positions: geojson.coordinates[0].map(
-              ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
+              ([lng, lat]: [number, number]) => [lat, lng] as [number, number],
             ),
             name: driver.name,
             description: driver.details?.description || "",
+            driverType: driver.driver,
+            category: category,
           },
         ];
       } catch (error) {

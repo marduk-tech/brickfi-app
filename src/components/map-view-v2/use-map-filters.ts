@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { DRIVER_CATEGORIES } from "../../libs/constants";
 import { IDriverPlace, ISurroundingElement } from "../../types/Project";
 
@@ -28,14 +28,17 @@ export interface UseMapFiltersReturn extends FilterState {
 export const useMapFilters = (
   drivers?: IDriverPlace[],
   categories?: string[],
-  surroundingElements?: ISurroundingElement[]
+  surroundingElements?: ISurroundingElement[],
 ): UseMapFiltersReturn => {
   // Core filter states
   const [selectedDriverFilter, setSelectedDriverFilter] = useState<string>();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
-  const [selectedSurroundingElementType, setSelectedSurroundingElementType] = useState<string>();
+  const [selectedSurroundingElementType, setSelectedSurroundingElementType] =
+    useState<string>();
   const [driverFilters, setDriverFilters] = useState<any[]>([]);
-  const [uniqueSurroundingElements, setUniqueSurroundingElements] = useState<ISurroundingElement[]>([]);
+  const [uniqueSurroundingElements, setUniqueSurroundingElements] = useState<
+    ISurroundingElement[]
+  >([]);
 
   // Computed states
   const showCategorySelection = Boolean(categories && categories.length > 1);
@@ -51,64 +54,71 @@ export const useMapFilters = (
   }, [hasCategories, categories]);
 
   // Driver matching logic
-  const isDriverMatchingFilter = useCallback((driver: IDriverPlace): boolean => {
-    if (!selectedDriverFilter) return true;
+  const isDriverMatchingFilter = useCallback(
+    (driver: IDriverPlace): boolean => {
+      if (!selectedDriverFilter) return true;
 
-    // Check for custom filter
-    if (hasCategories) {
-      for (const category of categories!) {
+      // check filters for the CURRENT category, not all categories
+      if (hasCategories && selectedCategory) {
         const categoryData =
-          DRIVER_CATEGORIES[category as keyof typeof DRIVER_CATEGORIES];
+          DRIVER_CATEGORIES[selectedCategory as keyof typeof DRIVER_CATEGORIES];
+
+        // Check category membership FIRST - reject drivers from other categories
+        if (
+          categoryData?.drivers &&
+          !categoryData.drivers.includes(driver.driver)
+        ) {
+          return false;
+        }
+
         const customFilters = (categoryData as any)?.filters;
         const onFilterFunc = (categoryData as any)?.onFilter;
 
         if (customFilters && onFilterFunc) {
           // Check if selectedDriverFilter is a custom filter key
           const isCustomFilter = customFilters.some(
-            (filter: any) => filter.key === selectedDriverFilter
+            (filter: any) => filter.key === selectedDriverFilter,
           );
           if (isCustomFilter) {
-            const result = onFilterFunc(selectedDriverFilter, driver);
-            return result;
+            return onFilterFunc(selectedDriverFilter, driver);
           }
         }
       }
-    }
 
-    // Fallback to driver type matching
-    const result = selectedDriverFilter === driver.driver;
-    return result;
-  }, [selectedDriverFilter, hasCategories, categories]);
+      // Fallback to driver type matching
+      return selectedDriverFilter === driver.driver;
+    },
+    [selectedDriverFilter, hasCategories, selectedCategory],
+  );
 
   // Helper function to find valid filter that has matching drivers
-  const findValidFilter = useCallback((
-    filters: any[],
-    drivers: any[],
-    categoryData: any
-  ) => {
-    for (const filter of filters) {
-      if (
-        typeof filter === "object" &&
-        filter.key &&
-        categoryData?.onFilter
-      ) {
-        const hasMatchingDrivers = drivers.some((driver) =>
-          categoryData.onFilter(filter.key, driver)
-        );
-        if (hasMatchingDrivers) {
-          return filter.key;
-        }
-      } else if (typeof filter === "string") {
-        const hasMatchingDrivers = drivers.some(
-          (driver) => driver.driver === filter
-        );
-        if (hasMatchingDrivers) {
-          return filter;
+  const findValidFilter = useCallback(
+    (filters: any[], drivers: any[], categoryData: any) => {
+      for (const filter of filters) {
+        if (
+          typeof filter === "object" &&
+          filter.key &&
+          categoryData?.onFilter
+        ) {
+          const hasMatchingDrivers = drivers.some((driver) =>
+            categoryData.onFilter(filter.key, driver),
+          );
+          if (hasMatchingDrivers) {
+            return filter.key;
+          }
+        } else if (typeof filter === "string") {
+          const hasMatchingDrivers = drivers.some(
+            (driver) => driver.driver === filter,
+          );
+          if (hasMatchingDrivers) {
+            return filter;
+          }
         }
       }
-    }
-    return null;
-  }, []);
+      return null;
+    },
+    [],
+  );
 
   // Initialize default category
   useEffect(() => {
@@ -116,17 +126,19 @@ export const useMapFilters = (
     setSelectedCategory(defaultCategory);
   }, [getDefaultCategory]);
 
-  // Reset selected driver filter when category changes
-  useEffect(() => {
-    setSelectedDriverFilter(undefined);
-  }, [selectedCategory]);
-
   // Update category when categories prop changes
   useEffect(() => {
     if (hasCategories && categories!.length > 0) {
       setSelectedCategory(categories![0]);
     }
   }, [categories, hasCategories]);
+
+  // reset filter when category changes
+  useEffect(() => {
+    if (selectedCategory) {
+      setSelectedDriverFilter(undefined);
+    }
+  }, [selectedCategory]);
 
   // Update driver filters based on drivers and categories
   useEffect(() => {
@@ -146,13 +158,14 @@ export const useMapFilters = (
           const validFilter = findValidFilter(
             customFilters,
             drivers,
-            categoryData
+            categoryData,
           );
           setSelectedDriverFilter(validFilter || customFilters[0].key);
         } else {
           // Fallback to driver types for the selected category
           const driverTypes = (categoryData?.drivers || []).filter(
-            (driverType: string) => drivers.some((d) => d.driver === driverType)
+            (driverType: string) =>
+              drivers.some((d) => d.driver === driverType),
           );
           setDriverFilters(driverTypes);
 
@@ -163,7 +176,7 @@ export const useMapFilters = (
       } else {
         // use unique driver types - no categories provided
         const uniqueDriverTypes = Array.from(
-          new Set(drivers.map((d) => d.driver))
+          new Set(drivers.map((d) => d.driver)),
         );
         setDriverFilters(uniqueDriverTypes);
       }

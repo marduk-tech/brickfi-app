@@ -261,7 +261,8 @@ const MapViewV2Inner = ({
               primaryProjectBounds,
               false,
               selectedDriverFilter,
-              isDriverMatchingFilter
+              isDriverMatchingFilter,
+              selectedCategory
             );
 
             // Render all components
@@ -380,7 +381,8 @@ const MapViewV2Inner = ({
                           drivers || [],
                           true,
                           selectedDriverFilter,
-                          isDriverMatchingFilter
+                          isDriverMatchingFilter,
+                          selectedCategory
                         )}
                       />
                     )}

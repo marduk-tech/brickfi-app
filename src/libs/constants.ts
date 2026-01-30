@@ -418,7 +418,39 @@ export const LandingConstants = {
     "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.",
 };
 
-export const DRIVER_CATEGORIES = {
+export const CATEGORY_COLORS: Record<string, string> = {
+  schools: "#4A90E2",
+  workplace: "#FF8080",
+  metro: "#9B59B6",
+  roads: "#34495E",
+  "growth potential": "#27AE60",
+  dining: "#E67E22",
+  hospital: "#E74C3C",
+  commercial: "#F39C12",
+  surroundings: "#95A5A6",
+};
+
+export const DRIVER_TYPE_COLORS: Record<string, string> = {
+  school: "#4A90E2",
+  university: "#5DADE2",
+  "industrial-hitech": "#FF8080",
+  "industrial-general": "#E57373",
+  transit: "#9B59B6",
+  highway: "#34495E",
+  hospital: "#E74C3C",
+  food: "#E67E22",
+  commercial: "#F39C12",
+  "micro-market": "#FFA726",
+};
+
+interface DriverCategory {
+  icon: { name: string; set: string };
+  drivers: string[];
+  filters?: Array<{ label: string; key: string }>;
+  onFilter?: (filter: string, driver: IDriverPlace) => boolean;
+}
+
+export const DRIVER_CATEGORIES: Record<string, DriverCategory> = {
   roads: {
     drivers: ["highway"],
     icon: { name: "FaRoad", set: "fa" },
@@ -431,12 +463,12 @@ export const DRIVER_CATEGORIES = {
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "metro") {
-        return (
+        return !!(
           driver && driver.name && driver.name.toLowerCase().includes("metro")
         );
       }
       if (filter == "kride") {
-        return (
+        return !!(
           driver &&
           driver.name &&
           driver.name.toLowerCase().includes("suburban")
@@ -451,7 +483,7 @@ export const DRIVER_CATEGORIES = {
     drivers: ["industrial-hitech", "industrial-general"],
     filters: [
       { label: "Tech Hubs", key: "tech-hubs" },
-      { label: "Indutrial Zones", key: "ind-zones" },
+      { label: "Industrial Zones", key: "ind-zones" },
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "tech-hubs") {
@@ -522,7 +554,7 @@ export const DRIVER_CATEGORIES = {
         );
       }
       if (filter == "pre-school") {
-        return (
+        return !!(
           driver.tags?.includes("pre-school") &&
           driver.distance &&
           driver.distance <= 5
@@ -545,20 +577,20 @@ export const DRIVER_CATEGORIES = {
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "pop-dining") {
-        return (
+        return !!(
           driver.tags && driver.tags.some((t) => ["popular brand"].includes(t))
         );
       }
 
       if (filter == "high-rated") {
-        return (
+        return !!(
           driver.tags &&
           driver.tags.some((t) => ["fine dining", "highly rated"].includes(t))
         );
       }
 
       if (filter == "cafe") {
-        return (
+        return !!(
           driver.tags &&
           driver.tags.some((t) => ["highly rated"].includes(t)) &&
           driver.tags.some((t) => ["cafe"].includes(t))
@@ -578,7 +610,7 @@ export const DRIVER_CATEGORIES = {
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "nabh") {
-        return (
+        return !!(
           driver.tags &&
           driver.tags.some((t) => t.toLowerCase().indexOf("nabh") > -1)
         );

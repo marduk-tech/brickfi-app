@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Polygon, Popup, useMap } from "react-leaflet";
+import { CATEGORY_COLORS, DRIVER_TYPE_COLORS } from "../../libs/constants";
 import { COLORS } from "../../theme/style-constants";
 
 export interface PolygonData {
@@ -9,13 +10,30 @@ export interface PolygonData {
   positions: [number, number][];
   name: string;
   description: string;
+  driverType?: string;
+  category?: string;
 }
 
-export const MapPolygons = ({
-  polygons,
-}: {
-  polygons: PolygonData[];
-}) => {
+const getPolygonColor = (polygon: PolygonData): string => {
+  if (polygon.id === "primary-project") {
+    return COLORS.textColorDark;
+  }
+
+  // prioritize driver type color (more specific)
+  if (polygon.driverType && DRIVER_TYPE_COLORS[polygon.driverType]) {
+    return DRIVER_TYPE_COLORS[polygon.driverType];
+  }
+
+  // fall back to category color
+  if (polygon.category && CATEGORY_COLORS[polygon.category]) {
+    return CATEGORY_COLORS[polygon.category];
+  }
+
+  // default to red for backward compatibility
+  return COLORS.redIdentifier;
+};
+
+export const MapPolygons = ({ polygons }: { polygons: PolygonData[] }) => {
   const map = useMap();
   const [visiblePolygons, setVisiblePolygons] = useState<typeof polygons>([]);
 
@@ -27,8 +45,8 @@ export const MapPolygons = ({
     if (zoom >= 14 || polygons.some((p) => p.id === "primary-project")) {
       setVisiblePolygons(
         polygons.filter((polygon) =>
-          polygon.positions.some((pos) => bounds.contains(pos))
-        )
+          polygon.positions.some((pos) => bounds.contains(pos)),
+        ),
       );
     } else {
       setVisiblePolygons([]);
@@ -36,23 +54,28 @@ export const MapPolygons = ({
   };
 
   useEffect(() => {
+    // Clear polygons if input array is empty
     if (!polygons || !polygons.length) {
+      setVisiblePolygons([]);
       return;
     }
-    updateVisiblePolygons(); // Initial update
 
-    map.on("zoomend", () => {
-      console.log("here");
+    updateVisiblePolygons();
+
+    const handleZoomEnd = () => {
       updateVisiblePolygons();
-    });
-    map.on("moveend", () => {
-      console.log("here");
+    };
+
+    const handleMoveEnd = () => {
       updateVisiblePolygons();
-    });
+    };
+
+    map.on("zoomend", handleZoomEnd);
+    map.on("moveend", handleMoveEnd);
 
     return () => {
-      map.off("zoomend", updateVisiblePolygons);
-      map.off("moveend", updateVisiblePolygons);
+      map.off("zoomend", handleZoomEnd);
+      map.off("moveend", handleMoveEnd);
     };
   }, [map, polygons]);
 
@@ -63,16 +86,10 @@ export const MapPolygons = ({
           key={`polygon-${poly.id}`}
           positions={poly.positions}
           pathOptions={{
-            color:
-              poly.id === "primary-project"
-                ? COLORS.textColorDark
-                : COLORS.redIdentifier,
+            color: getPolygonColor(poly),
             weight: 3,
             fillOpacity: 0.4,
-            fillColor:
-              poly.id === "primary-project"
-                ? COLORS.textColorDark
-                : COLORS.redIdentifier,
+            fillColor: getPolygonColor(poly),
           }}
         >
           <Popup>
