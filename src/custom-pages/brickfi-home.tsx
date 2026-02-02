@@ -8,7 +8,6 @@ import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { Loader } from "../components/common/loader";
 import { RequestedProjectsList } from "../components/requested-projects-list";
 import { UserProjects } from "../components/user-projects";
-import { useFetchAllLvnzyProjects } from "../hooks/use-lvnzy-project";
 import { useUser } from "../hooks/use-user";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LandingConstants } from "../libs/constants";
@@ -32,10 +31,6 @@ const BrickfiHome: React.FC = () => {
 
   const [lvnzyProjects, setLvnzyProjects] = useState<any[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
-
-  const isAdmin = user?.role === "admin";
-  const { data: allLvnzyProjects, isLoading: adminProjectsLoading } =
-    useFetchAllLvnzyProjects(isAdmin);
 
   const fetchLvnzyProjectsByIds = async (ids: string) => {
     const { data } = await axiosApiInstance.post(`/lvnzy-projects/${ids}`, {
@@ -83,37 +78,26 @@ const BrickfiHome: React.FC = () => {
       );
     } else {
       // Existing logic for regular users
-      if (collectionId) {
-        if (!user.savedLvnzyProjects || user.savedLvnzyProjects.length === 0) {
-          setLvnzyProjects([]);
+      if (!user.savedLvnzyProjects || user.savedLvnzyProjects.length === 0) {
+        setLvnzyProjects([]);
+        setTimeout(() => {
+          refetchUser();
           setTimeout(() => {
-            refetchUser();
-            setTimeout(() => {
-              if (projectsLoading) {
-                setProjectsLoading(false);
-              }
-            }, 300);
-          }, 4000);
+            if (projectsLoading) {
+              setProjectsLoading(false);
+            }
+          }, 300);
+        }, 4000);
 
-          setProjectsLoading(true);
-        } else {
-          const collection =
-            user.savedLvnzyProjects.find(
-              (c: SavedLvnzyProject) => c._id === collectionId,
-            ) || null;
-          if (collection && collection.projects) {
-            setLvnzyProjects(collection.projects);
-          }
-          setProjectsLoading(false);
-        }
+        setProjectsLoading(true);
       } else {
         setLvnzyProjects(user.savedLvnzyProjects[0].projects);
         setProjectsLoading(false);
       }
     }
-  }, [collectionId, user, allLvnzyProjects]);
+  }, [collectionId, user]);
 
-  if (userLoading || projectsLoading || (isAdmin && adminProjectsLoading)) {
+  if (projectsLoading) {
     return (
       <Flex vertical align="center" style={{ marginTop: 72 }}>
         <Loader></Loader>
@@ -122,33 +106,12 @@ const BrickfiHome: React.FC = () => {
     );
   }
 
-  const handleProjectSelect = (
-    projectId: string,
-    projectName: string,
-    lvnzyProjectId: string | null,
-  ) => {
-    // Handle project selection
-    console.log("Selected project:", {
-      projectId,
-      projectName,
-      lvnzyProjectId,
-    });
-    // You can add navigation or other logic here
-  };
-
   return (
     <Flex vertical>
       {lvnzyProjectId ? (
         <Brick360v2 slug={lvnzyProjectId} />
       ) : (
         <>
-          {/* <Flex style={{ padding: "16px 16px 8px 16px" }}>
-            <ProjectSearch
-              onSelect={handleProjectSelect}
-              placeholder="Search for a project"
-            />
-          </Flex> */}
-          {/* {user && <RequestedProjectsList user={user} />} */}
           {lvnzyProjects && lvnzyProjects.length ? (
             <UserProjects lvnzyProjects={lvnzyProjects} />
           ) : (

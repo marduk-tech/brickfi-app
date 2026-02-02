@@ -5,25 +5,47 @@ import { safeStorage } from "../libs/browser-utils";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { User } from "../types/User";
 
-export function useUser() {
+const USER_EXPIRY_DURATION = 24 * 60 * 60 * 1000;
 
+export function useUser() {
   const getUser = async (): Promise<User> => {
     const userItem = safeStorage.getItem(LocalStorageKeys.user);
-    const user = userItem ? JSON.parse(userItem) : null;
+    let localUserData = userItem ? JSON.parse(userItem) : null;
 
-    if (!user) {
+    if (!localUserData) {
       throw new Error("User not found in local storage");
     }
 
-    // Refresh the user object in the background.
-    // TODO: This should be done using an expiry logic.
-    axiosApiInstance.get(`/auth/myinfo/${user._id}`, {}).then((data) => {
-      if (data && data.data && data.data.mobile) {
-        safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.data));
-      }
-    });
+    // Backwards compatibility
+    if (localUserData && localUserData.mobile) {
+      localUserData = { user: localUserData };
+      safeStorage.setItem(
+        LocalStorageKeys.user,
+        JSON.stringify(localUserData),
+      );
+    }
 
-    return user;
+    // Clear projects for user if the data has expired (1 day expiry)
+    if (
+      localUserData &&
+      (!localUserData.updated ||
+        new Date().getTime() - USER_EXPIRY_DURATION >
+          new Date(localUserData.updated).getTime())
+    ) {
+      localUserData.user.savedLvnzyProjects = [];
+    }
+    axiosApiInstance
+      .get(`/auth/myinfo/${localUserData.user._id}`, {})
+      .then((data) => {
+        if (data && data.data && data.data.mobile) {
+          safeStorage.setItem(
+            LocalStorageKeys.user,
+            JSON.stringify({ updated: `${new Date()}`, user: data.data }),
+          );
+        }
+      });
+
+    return localUserData.user;
   };
 
   const { data, isLoading, isError, error, refetch } = useQuery({
