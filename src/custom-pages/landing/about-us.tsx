@@ -65,7 +65,7 @@ export default function AboutUs() {
         scrollbarWidth: "none",
       }}
     >
-      <LandingHeader bgColor="white"></LandingHeader>
+      <LandingHeader bgColor="white" logo="/images/brickfi-logo.png"></LandingHeader>
       <SectionLeft
         sectionData={{
           heading: "Home Ownership for the New India",
@@ -79,7 +79,7 @@ export default function AboutUs() {
       <Flex
         vertical
         style={{
-          backgroundColor: "#fdf7f6",
+          backgroundColor: "rgba(255, 128, 128, 0.1)",
           padding: "80px 0",
           width: "100vw",
         }}
