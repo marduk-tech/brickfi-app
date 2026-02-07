@@ -1,13 +1,5 @@
-import { getQueryClient } from "@/libs/query-client";
-import {
-  getLvnzyProjectByIdQuery,
-  getLvnzyProjectBySlug,
-  getLvnzyProjectBySlugQuery,
-} from "@/queries/lvnzy-projects";
-import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import Brick360Client from "./brick360-client";
-import { useEffect, useMemo } from "react";
 
 interface PageProps {
   params: Promise<{ lvnzyProjectId: string }>;
