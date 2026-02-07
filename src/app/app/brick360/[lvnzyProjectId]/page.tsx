@@ -7,6 +7,7 @@ import {
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
 import Brick360Client from "./brick360-client";
+import { useEffect, useMemo } from "react";
 
 interface PageProps {
   params: Promise<{ lvnzyProjectId: string }>;
@@ -184,6 +185,7 @@ export const metadata: Metadata = {
 
 export default async function Brick360Page({ params }: PageProps) {
   const { lvnzyProjectId: slug } = await params;
+
   //TODO: This particular hydration boundary code is causing delay when loading the page, which is also resulting page load fail sometimes.
   // const queryClient = getQueryClient();
 

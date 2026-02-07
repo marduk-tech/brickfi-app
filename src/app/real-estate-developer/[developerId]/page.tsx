@@ -28,11 +28,19 @@ export async function generateMetadata({
         description: "The requested real estate developer could not be found.",
       };
     }
+    
+    const descriptions = [
+      "View the Brickfi 360 Report to evaluate project performance, execution quality, and important checks before making a property investment.",
+      "Check the Brickfi 360 Report for insights into completed developments, delivery credibility, and details that support better property decisions.",
+       "See the Brickfi 360 Report to review project history, builder reputation, and essential factors buyers should know before investing.", 
+       "Explore the Brickfi 360 Report to learn about project delivery, track record, and what matters most when choosing a property."
+      ]
+      const description = descriptions[Math.round(Math.random()*4)-1];
 
-    const title = `${developer.name} - Real Estate Developer`;
-    const description =
-      developer.info?.oneLiner ||
-      `Learn about ${developer.name}, a real estate developer. View their projects, management details, and financial information on Brickfi.`;
+    const title = `${developer.name} | Brickfi 360 Report for Smarter Property Decisions`;
+    // const description =
+    //   developer.info?.oneLiner ||
+    //   `Learn about ${developer.name}, a real estate developer. View their projects, management details, and financial information on Brickfi.`;
 
     return {
       title,
@@ -97,7 +105,7 @@ export async function generateMetadata({
     };
   } catch (error) {
     return {
-      title: "Real Estate Developer Not Found | Brickfi",
+      title: "Page Not Found",
       description: "The requested real estate developer could not be found.",
     };
   }

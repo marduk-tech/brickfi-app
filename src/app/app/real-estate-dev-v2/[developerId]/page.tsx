@@ -28,7 +28,7 @@ export async function generateMetadata({
       ]
       const description = descriptions[Math.round(Math.random()*4)-1];
   return {
-    title: `${result.data.name} - Real Estate Developer | Get a Brick360 Property Report with Brickfi`,
+    title: `${result.data.name} | Brickfi 360 Report for Smarter Property Decisions`,
     description
   };
 }
