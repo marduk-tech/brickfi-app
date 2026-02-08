@@ -92,7 +92,7 @@ export async function generateMetadata({
         title,
         description,
         type: "website",
-        url: `https://brickfi.in/real-estate-developer/${slug}`,
+        url: `https://www.brickfi.in/real-estate-developer/${slug}`,
       },
       twitter: {
         card: "summary",
@@ -100,7 +100,7 @@ export async function generateMetadata({
         description,
       },
       alternates: {
-        canonical: `https://brickfi.in/real-estate-developer/${slug}`,
+        canonical: `https://www.brickfi.in/real-estate-developer/${slug}`,
       },
     };
   } catch (error) {
