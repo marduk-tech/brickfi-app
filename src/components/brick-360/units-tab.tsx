@@ -394,6 +394,16 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                               Carpet Area: {c.sizeCarpet} sq.ft
                             </Typography.Text>
                           ) : null}
+                          {c.sizePlot ? (
+                            <Typography.Text
+                              style={{
+                                fontSize: FONT_SIZE.PARA,
+                                color: COLORS.textColorMedium,
+                              }}
+                            >
+                              Plot Area: {c.sizePlot} sq.ft
+                            </Typography.Text>
+                          ) : null}
                         </Flex>
                       ) : (
                         <Flex>
