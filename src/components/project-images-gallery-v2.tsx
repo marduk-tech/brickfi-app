@@ -209,7 +209,7 @@ export const ProjectGalleryV2 = ({
               color: selectedTag === tag ? "white" : COLORS.textColorMedium,
             }}
           >
-            {tag}
+            {tag == "layout" ? "Masterplan": tag}
           </Tag.CheckableTag>
         ))}
       </Flex>
