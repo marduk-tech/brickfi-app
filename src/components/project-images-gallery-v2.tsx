@@ -226,7 +226,7 @@ export const ProjectGalleryV2 = ({
                     textTransform: "capitalize",
                   }}
                 >
-                  {tag}
+                  {tag == "layout" ? "masterplan": tag}
                 </Typography.Text>
 
                 <div className="gallery-grid">

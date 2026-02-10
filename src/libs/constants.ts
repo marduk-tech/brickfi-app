@@ -322,7 +322,7 @@ export const Brick360DataPoints = {
       ],
     },
     density: {
-      label: "Density",
+      label: "Layout",
       note: "The numbers below are as per the approved layout plan on RERA.",
       prompts: [
         "Total units?",
