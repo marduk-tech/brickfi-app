@@ -8,7 +8,7 @@ export const getMarketing = async (type: string, throwError = true) => {
     // Revalidate every hour for sitemap generation
     next: { revalidate: 3600 },
     headers: {
-      "x-api-key": sitemapApiKey || "",
+      "x-api-key": sitemapApiKey || apiKey || "",
     },
   });
 
