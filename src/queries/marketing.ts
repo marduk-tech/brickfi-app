@@ -1,4 +1,4 @@
-import { baseApiUrl, apiKey, sitemapApiKey } from "@/libs/constants";
+import { apiKey, baseApiUrl, sitemapApiKey } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 import { GlossaryArticle } from "@/types/Marketing";
 
@@ -65,12 +65,12 @@ export const getGlossaryQuery = () => {
 
 export const getGlossaryArticleBySlug = async (
   slug: string,
-  throwError = true
+  throwError = true,
 ): Promise<GlossaryArticle> => {
   const res = await fetch(`${baseApiUrl}marketing/ghost-pages/${slug}`, {
     cache: "no-store",
     headers: {
-      "x-api-key": sitemapApiKey || "",
+      "x-api-key": sitemapApiKey || apiKey || "",
     },
   });
 
