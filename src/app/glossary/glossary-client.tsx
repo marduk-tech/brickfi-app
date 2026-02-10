@@ -280,7 +280,7 @@ export default function GlossaryClient() {
               fontSize: FONT_SIZE.HEADING_4,
               color: COLORS.textColorMedium,
               display: "block",
-              marginBottom: 32,
+              marginBottom: 16,
               lineHeight: 1.6,
             }}
           >
@@ -303,13 +303,13 @@ export default function GlossaryClient() {
 
           <Link href={"/"}>
             <Button
-              type="primary"
+              type="default"
               size="large"
               style={{
                 marginBottom: 32,
               }}
             >
-              Get started now →
+             Request a Brick360 Report
             </Button>
           </Link>
 
