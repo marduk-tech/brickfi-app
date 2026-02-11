@@ -45,7 +45,7 @@ export async function generateMetadata({
         title,
         description,
         type: "article",
-        url: `https://brickfi.in/glossary/${slug}`,
+        url: `https://www.brickfi.in/glossary/${slug}`,
         images: article.feature_image ? [article.feature_image] : [],
       },
       twitter: {
@@ -55,7 +55,7 @@ export async function generateMetadata({
         images: article.feature_image ? [article.feature_image] : [],
       },
       alternates: {
-        canonical: `https://brickfi.in/glossary/${slug}`,
+        canonical: `https://www.brickfi.in/glossary/${slug}`,
       },
     };
   } catch (error) {

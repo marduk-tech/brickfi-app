@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   formatDetection: {
     telephone: false,
   },
-  metadataBase: new URL("https://brickfi.in"),
+  metadataBase: new URL("https://www.brickfi.in"),
   alternates: {
     canonical: "/",
   },
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     title: META_TITLE,
     description:
       META_DESCR,
-    url: "https://brickfi.in",
+    url: "https://www.brickfi.in",
     siteName: "Brickfi",
     images: [
       {

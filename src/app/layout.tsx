@@ -7,7 +7,7 @@ import "../theme/globals.scss";
 import { SEO_CONTENT } from "@/libs/constants";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://brickfi.in"),
+  metadataBase: new URL("https://www.brickfi.in"),
   title: {
     default: "Brickfi | The Smartest Way to Buy your Next Property",
     template: "%s",
@@ -33,12 +33,12 @@ export const metadata: Metadata = {
   },
   manifest: "/manifest.json",
   alternates: {
-    canonical: "https://brickfi.in/",
+    canonical: "https://www.brickfi.in/",
   },
   openGraph: {
     type: "website",
     locale: "en_IN",
-    url: "https://brickfi.in",
+    url: "https://www.brickfi.in",
     siteName: "Brickfi",
     title: "The Smartest Way to Buy your Next Property",
     description:

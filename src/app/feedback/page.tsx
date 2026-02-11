@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     formatDetection: {
         telephone: false,
     },
-    metadataBase: new URL("https://brickfi.in"),
+    metadataBase: new URL("https://www.brickfi.in"),
     alternates: {
         canonical: "/feedback",
     },
     openGraph: {
         title: META_TITLE,
         description: META_DESCR,
-        url: "https://brickfi.in/feedback",
+        url: "https://www.brickfi.in/feedback",
         siteName: "Brickfi",
         locale: "en_IN",
         type: "website",

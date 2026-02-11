@@ -5,7 +5,7 @@ import { Metadata } from "next";
 const META_DESCR =
   "Consult with Brickfi to get an expert advice on your next home purchase. We provide unbiased, data backed and technology driven real estate advisory.";
 const META_TITLE = "Brickfi | Unbiased & Data-Backed Home Buying Advise.";
-const META_URL = "https://brickfi.in/brickassist";
+const META_URL = "https://www.brickfi.in/brickassist";
 
 export const metadata: Metadata = {
   title: META_TITLE,
