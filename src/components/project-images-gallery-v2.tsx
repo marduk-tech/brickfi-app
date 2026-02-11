@@ -93,12 +93,10 @@ export const ProjectGalleryV2 = ({
     allMedia.forEach((item) => {
       const tags = item.type === "image" ? item.image?.tags : item.video?.tags;
       if (tags && tags.length > 0) {
-        tags.forEach((tag) => {
-          if (!result[tag]) {
-            result[tag] = [];
+          if (!result[tags[0]]) {
+            result[tags[0]] = [];
           }
-          result[tag].push(item);
-        });
+          result[tags[0]].push(item);
       }
       // Media without tags will only appear when "all" is selected
       // They won't be grouped under any specific tag
