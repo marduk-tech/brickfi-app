@@ -8,13 +8,13 @@ function logSitemapGeneration(routes: MetadataRoute.Sitemap) {
     (r) =>
       (!r.url.includes("/real-estate-developer/") &&
         !r.url.includes("/glossary/")) ||
-      r.url.endsWith("/glossary")
+      r.url.endsWith("/glossary"),
   );
   const developerRoutes = routes.filter((r) =>
-    r.url.includes("/real-estate-developer/")
+    r.url.includes("/real-estate-developer/"),
   );
   const glossaryRoutes = routes.filter(
-    (r) => r.url.includes("/glossary/") && !r.url.endsWith("/glossary")
+    (r) => r.url.includes("/glossary/") && !r.url.endsWith("/glossary"),
   );
 
   // Log summary with visual formatting
@@ -34,19 +34,19 @@ function logSitemapGeneration(routes: MetadataRoute.Sitemap) {
   // Log each route with category and metadata
   staticRoutes.forEach((route) => {
     console.log(
-      `[STATIC] ${route.url} (priority: ${route.priority}, ${route.changeFrequency})`
+      `[STATIC] ${route.url} (priority: ${route.priority}, ${route.changeFrequency})`,
     );
   });
 
   developerRoutes.forEach((route) => {
     console.log(
-      `[DEVELOPER] ${route.url} (priority: ${route.priority}, ${route.changeFrequency})`
+      `[DEVELOPER] ${route.url} (priority: ${route.priority}, ${route.changeFrequency})`,
     );
   });
 
   glossaryRoutes.forEach((route) => {
     console.log(
-      `[GLOSSARY] ${route.url} (priority: ${route.priority}, ${route.changeFrequency})`
+      `[GLOSSARY] ${route.url} (priority: ${route.priority}, ${route.changeFrequency})`,
     );
   });
 
@@ -83,6 +83,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: `${baseUrl}/glossary`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/real-estate-developer`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,

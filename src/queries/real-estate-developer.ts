@@ -1,4 +1,4 @@
-import { apiKey, sitemapApiKey, baseApiUrl } from "@/libs/constants";
+import { apiKey, baseApiUrl, sitemapApiKey } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 
 // Get developer by ObjectId (for internal operations)
@@ -46,7 +46,7 @@ export const getDeveloperBySlug = async (slug: string, throwError = true) => {
       headers: {
         "x-api-key": sitemapApiKey || "",
       },
-    }
+    },
   );
 
   if (throwError && res.status === 404) {
@@ -91,6 +91,12 @@ export const isObjectId = (str: string): boolean => {
   return /^[0-9a-fA-F]{24}$/.test(str);
 };
 
+export const getAllDevelopersQuery = () => ({
+  queryKey: ["all-real-estate-developers"],
+  queryFn: () => getAllDevelopers(),
+  throwOnError: true,
+});
+
 // Get all developers with slug preference
 export const getAllDevelopers = async (params?: {
   keyword?: string;
@@ -100,14 +106,18 @@ export const getAllDevelopers = async (params?: {
   if (params?.keyword) searchParams.append("keyword", params.keyword);
   if (params?.limit) searchParams.append("limit", params.limit.toString());
 
-  const url = `${baseApiUrl}real-estate-developer${searchParams.toString() ? "?" + searchParams.toString() : ""
-    }`;
+  const url = `${baseApiUrl}real-estate-developer${
+    searchParams.toString() ? "?" + searchParams.toString() : ""
+  }`;
 
   const res = await fetch(url, {
-    // Revalidate every hour for sitemap generation
-    next: { revalidate: 3600 },
+    //disable caching response data is larger than 2mb. next.js refuses to store 2mb+ data in the data cache
+
+    cache: "no-store",
+    next: { revalidate: 0 },
+
     headers: {
-      "x-api-key": sitemapApiKey || "",
+      "x-api-key": sitemapApiKey || apiKey || "",
     },
   });
 
