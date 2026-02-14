@@ -224,6 +224,7 @@ interface ProjectsNearbyProps {
     projectName: string;
     sqftCost: number;
     projectLocation: { lat: number; lng: number };
+    projectType?: string;
   }[];
   projectsNearbyIcons: any[];
   projectSqftPricing?: number;
@@ -250,7 +251,7 @@ export const ProjectsNearbyMarkers = ({
         .filter(
           (p) =>
             Math.abs(p.sqftCost - projectSqftPricing) / projectSqftPricing <=
-            0.35
+            0.55
         )
         .map((project) => {
           if (!project.projectLocation?.lat || !project.projectLocation?.lng) {
@@ -281,8 +282,8 @@ export const ProjectsNearbyMarkers = ({
                     tags: [
                       {
                         label: `${capitalize(
-                          primaryProject
-                            ? primaryProject?.info?.homeType?.[0] || ""
+                          project
+                            ? project?.projectType || ""
                             : ""
                         )}`,
                         color: COLORS.primaryColor,
