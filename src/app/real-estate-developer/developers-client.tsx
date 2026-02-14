@@ -280,7 +280,7 @@ export default function DevelopersClient() {
 
           <Link href="/">
             <Button
-              type="default"
+              type="primary"
               size="large"
               style={{
                 marginBottom: 32,

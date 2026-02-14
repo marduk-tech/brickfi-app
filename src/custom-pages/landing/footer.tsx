@@ -30,8 +30,8 @@ export default function LandingFooter() {
         <Flex
           vertical
           style={{
-            width: isMobile ? "100%" : "80%",
-            textAlign: isMobile ? "center" : "left",
+            textAlign: "left",
+            width:"100%"
           }}
         >
           <Typography.Text
@@ -47,7 +47,7 @@ export default function LandingFooter() {
             style={{
               color: COLORS.textColorLight,
               fontSize: FONT_SIZE.PARA,
-              width: isMobile ? "100%" : "40%",
+              maxWidth: isMobile ? "100%" : 500
             }}
           >
             Brickfi is a real estate platform, committed to transparency and
@@ -55,11 +55,45 @@ export default function LandingFooter() {
             you make confident decisions.
           </Typography.Text>
         </Flex>
+        
+        <Flex gap={isMobile ? 32: 48} style={{marginTop: isMobile? 32: 0, width: isMobile ? "100%": "45%"}} align="flex-start" >
+           <Flex
+          vertical
+          style={{
+            textAlign: "left",
+          }}
+        >
+          <Link
+            href="https://www.brickfi.in/real-estate-developer"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
+          >
+           Real Esate Developers
+          </Link>
+          <Link
+            href="https://www.brickfi.in/glossary"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
+        >
+            Real Estate Glossary
+          </Link>
+          
+           <Link
+            href="https://blog.brickfi.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
+          >
+            Brickfi Blog
+          </Link>
+        </Flex>
 
         <Flex
           vertical
-          style={{ marginTop: isMobile ? 32 : 0 }}
-          align={isMobile ? "center" : "flex-start"}
+         
+          align="flex-start"
         >
           <Link
             href="/app"
@@ -86,21 +120,22 @@ export default function LandingFooter() {
             Help
           </Link>
         </Flex>
+        
+        
         <Flex
           vertical
           style={{
-            marginLeft: isMobile ? "0" : "auto",
-            marginTop: isMobile ? 24 : 0,
+            textAlign: "left"
           }}
-          align={isMobile ? "center" : "flex-start"}
+          align="flex-start"
         >
-          <Link
-            href="https://blog.brickfi.in"
+         <Link
+            href="https://www.linkedin.com/company/brickfi"
             target="_blank"
             rel="noopener noreferrer"
             style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
-            Blog
+            LinkedIn
           </Link>
           <Link
             href={LandingConstants.instaLink}
@@ -119,6 +154,7 @@ export default function LandingFooter() {
             X/Twitter
           </Link>
         </Flex>
+       </Flex>
       </Flex>
       <Typography.Text
         style={{
