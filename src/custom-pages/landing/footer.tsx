@@ -56,7 +56,7 @@ export default function LandingFooter() {
           </Typography.Text>
         </Flex>
         
-        <Flex gap={isMobile ? 32: 48} style={{marginTop: isMobile? 32: 0, width: isMobile ? "100%": "45%"}} align="flex-start" >
+        <Flex gap={isMobile ? 16: 48} style={{marginTop: isMobile? 32: 0, width: isMobile ? "100%": "45%"}} align="flex-start" >
            <Flex
           vertical
           style={{
