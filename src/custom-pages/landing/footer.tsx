@@ -24,7 +24,7 @@ export default function LandingFooter() {
         width={isMobile ? "80%" : "30%"}
       ></img>
       <Flex
-        style={{ width: isMobile ? "100%" : "85%", marginTop: 40 }}
+        style={{ width: isMobile ? "100%" : "95%", marginTop: 40 }}
         vertical={isMobile}
       >
         <Flex
