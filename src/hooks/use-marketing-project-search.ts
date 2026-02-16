@@ -6,6 +6,7 @@ export interface MarketingProject {
   reraNumber?: string;
   lvnzyProjectId?: string;
   promoterName?: string;
+  slug?: string;
 }
 
 export const useMarketingProjectSearch = () => {

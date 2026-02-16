@@ -1,38 +1,41 @@
 "use client";
 
-import { AdminGuard } from "@/components/auth/admin-guard";
-import { useFetchAllLvnzyProjects } from "@/hooks/use-lvnzy-project";
-import { LvnzyProject } from "@/types/LvnzyProject";
+import {
+  MarketingProject,
+  useMarketingProjectSearch,
+} from "@/hooks/use-marketing-project-search";
 import { COLORS } from "@/theme/style-constants";
-import { Input, Table, Typography, Flex } from "antd";
-import { ColumnsType } from "antd/es/table";
-import { useState, useMemo } from "react";
 import { SearchOutlined } from "@ant-design/icons";
+import { Flex, Input, Table, Typography } from "antd";
+import { ColumnsType } from "antd/es/table";
+import { useMemo, useState } from "react";
+import { AdminGuard } from "@/components/auth/admin-guard";
 
 export default function Brk360sClient() {
   const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(20);
 
-  const { data: projects, isLoading } = useFetchAllLvnzyProjects(true);
+  const { projects, isLoading } = useMarketingProjectSearch();
 
   const filteredProjects = useMemo(() => {
     if (!projects) return [];
     if (!searchText.trim()) return projects;
 
     return projects.filter((project) =>
-      project.meta?.projectName
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase())
+      project.projectName?.toLowerCase().includes(searchText.toLowerCase()),
     );
   }, [projects, searchText]);
 
-  const columns: ColumnsType<LvnzyProject> = [
+  const columns: ColumnsType<MarketingProject> = [
     {
       title: "Project Name",
-      dataIndex: ["meta", "projectName"],
+      dataIndex: "projectName",
       key: "projectName",
-      render: (name: string, record: LvnzyProject) => {
-        const url = `/app/brick360/${record.slug || record._id}`;
+      render: (name: string, record: MarketingProject) => {
+        if (!record.lvnzyProjectId) {
+          return <span>{name || "Unnamed Project"}</span>;
+        }
+        const url = `/app/brick360/${record.slug || record.lvnzyProjectId}`;
         return (
           <a
             href={url}
@@ -65,7 +68,7 @@ export default function Brk360sClient() {
         <Table
           dataSource={filteredProjects}
           columns={columns}
-          rowKey="_id"
+          rowKey={(record) => record.lvnzyProjectId || record.projectName}
           loading={isLoading}
           pagination={{
             pageSize,

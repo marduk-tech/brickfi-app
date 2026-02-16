@@ -1,5 +1,9 @@
+import { getLvnzyProjectById } from "@/queries/lvnzy-projects";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import Brick360Client from "./brick360-client";
+
+const OBJECT_ID_REGEX = /^[a-f\d]{24}$/i;
 
 interface PageProps {
   params: Promise<{ lvnzyProjectId: string }>;
@@ -111,12 +115,12 @@ interface PageProps {
 //   }
 // }
 
-const META_DESCR = "Brick360 Report covering property layout, financial assessment, builder credibility and more.";
+const META_DESCR =
+  "Brick360 Report covering property layout, financial assessment, builder credibility and more.";
 const META_TITLE = "Brick360 Report Card";
 export const metadata: Metadata = {
   title: META_TITLE,
-  description:
-    META_DESCR,
+  description: META_DESCR,
   keywords: [
     "real estate",
     "property",
@@ -139,8 +143,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: META_TITLE,
-    description:
-      META_DESCR,
+    description: META_DESCR,
     url: "https://brickfi.in",
     siteName: "Brickfi",
     images: [
@@ -157,8 +160,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: META_TITLE,
-    description:
-      META_DESCR,
+    description: META_DESCR,
     images: ["/images/brick360-preview.png"],
   },
   robots: {
@@ -174,18 +176,22 @@ export const metadata: Metadata = {
   },
 };
 
-
 export default async function Brick360Page({ params }: PageProps) {
   const { lvnzyProjectId: slug } = await params;
 
-  //TODO: This particular hydration boundary code is causing delay when loading the page, which is also resulting page load fail sometimes.
-  // const queryClient = getQueryClient();
+  // redirect ObjectId URLs to slug URLs
+  if (OBJECT_ID_REGEX.test(slug)) {
+    let projectSlug: string | undefined;
+    try {
+      const project = await getLvnzyProjectById(slug, false);
+      projectSlug = project?.slug;
+    } catch {
+      // fetch failed
+    }
+    if (projectSlug) {
+      redirect(`/app/brick360/${projectSlug}`);
+    }
+  }
 
-  // await queryClient.prefetchQuery(getLvnzyProjectBySlugQuery(slug));
-
-  return (
-    // <HydrationBoundary state={dehydrate(queryClient)}>
-      <Brick360Client slug={slug} />
-    // </HydrationBoundary>
-  );
+  return <Brick360Client slug={slug} />;
 }
