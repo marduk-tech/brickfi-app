@@ -18,10 +18,12 @@ export default function Brk360sClient() {
   const { projects, isLoading } = useMarketingProjectSearch();
 
   const filteredProjects = useMemo(() => {
-    if (!projects) return [];
-    if (!searchText.trim()) return projects;
 
-    return projects.filter((project) =>
+    const filteredProjects = projects.filter(p => !!p.lvnzyProjectId);
+    if (!filteredProjects) return [];
+    if (!searchText.trim()) return filteredProjects;
+
+    return filteredProjects.filter((project) =>
       project.projectName?.toLowerCase().includes(searchText.toLowerCase()),
     );
   }, [projects, searchText]);
