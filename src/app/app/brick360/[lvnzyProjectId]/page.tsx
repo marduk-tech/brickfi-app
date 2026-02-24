@@ -179,14 +179,26 @@ export const metadata: Metadata = {
 export default async function Brick360Page({ params }: PageProps) {
   const { lvnzyProjectId: slug } = await params;
 
+  console.log("[brick360 redirect]:", slug);
+
+  console.log(OBJECT_ID_REGEX.test(slug));
+
   // redirect ObjectId URLs to slug URLs
   if (OBJECT_ID_REGEX.test(slug)) {
     let projectSlug: string | undefined;
     try {
       const project = await getLvnzyProjectById(slug, false);
+      console.log(
+        "[brick360 redirect] project slug:",
+        project?.slug,
+        "for id:",
+        slug,
+      );
+      console.log(project);
+
       projectSlug = project?.slug;
-    } catch {
-      // fetch failed
+    } catch (e) {
+      console.error("[brick360 redirect] failed for id:", slug, e);
     }
     if (projectSlug) {
       redirect(`/app/brick360/${projectSlug}`);
