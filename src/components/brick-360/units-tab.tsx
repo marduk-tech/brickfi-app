@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useDevice } from "../../hooks/use-device";
-import { fetchPmtPlan, rupeeAmountFormat } from "../../libs/lvnzy-helper";
+import { fetchPmtPlan, rupeeAmountFormat, thsndFormat } from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import { ScrollableContainer } from "../scrollable-container";
@@ -146,7 +146,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
               {lvnzyProject?.meta.costingDetails && (
                 <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_1 }}>
                   ₹
-                  {rupeeAmountFormat(
+                  {thsndFormat(
                     `${Math.round(
                       lvnzyProject?.originalProjectId.info.rate
                         .minimumUnitCost /

@@ -7,12 +7,12 @@ import { COLORS, FONT_SIZE } from "../theme/style-constants";
 
 export const nestedPropertyAccessor = (
   record: any,
-  keys: string | string[]
+  keys: string | string[],
 ) => {
   if (Array.isArray(keys)) {
     return keys.reduce(
       (obj, key) => (obj && obj[key] !== undefined ? obj[key] : undefined),
-      record
+      record,
     );
   } else {
     return record[keys];
@@ -35,7 +35,9 @@ export const getMinMaxPrices = (prices: number[]) => {
     if (num > max) max = num;
   }
 
-  return max == min ? rupeeAmountFormat(min): `${rupeeAmountFormat(min)} - ${rupeeAmountFormat(max)}`;
+  return max == min
+    ? rupeeAmountFormat(min)
+    : `${rupeeAmountFormat(min)} - ${rupeeAmountFormat(max)}`;
 };
 export const capitalize = (input: string) => {
   if (!input) {
@@ -66,6 +68,16 @@ export const rupeeAmountFormat = (amt: string | number) => {
   const val = Math.abs(amtNum);
   if (val >= 10000000) return `${(amtNum / 10000000).toFixed(2)} Crs`;
   if (val >= 100000) return `${(amtNum / 100000).toFixed(2)} Lacs`;
+  return amtNum;
+};
+
+export const thsndFormat = (amt: string | number) => {
+  const amtNum = typeof amt == "string" ? parseInt(amt) : Math.round(amt);
+  if (!amtNum || isNaN(amtNum)) {
+    return amt;
+  }
+  const val = Math.abs(amtNum);
+  if (val >= 1000) return `${Math.floor(amtNum / 1000)},${amtNum % 1000}`;
   return amtNum;
 };
 
@@ -110,11 +122,11 @@ export const fetchPmtPlan = (txt: any) => {
 
 export const txtToId = (txt: string) => {
   return txt
-    .toLowerCase()               // convert to lowercase
-    .replace(/[^a-z0-9\s]/g, '') // remove special characters
-    .trim()                      // remove leading/trailing spaces
-    .replace(/\s+/g, '_');       // replace spaces with underscore
-}
+    .toLowerCase() // convert to lowercase
+    .replace(/[^a-z0-9\s]/g, "") // remove special characters
+    .trim() // remove leading/trailing spaces
+    .replace(/\s+/g, "_"); // replace spaces with underscore
+};
 
 export const renderCitations = (citations: any) => {
   if (!citations || !Array.isArray(citations)) {
@@ -125,7 +137,7 @@ export const renderCitations = (citations: any) => {
     .filter((c: any) => c.url.indexOf("wikipedia") == -1)
     .map((citation: any) => {
       const domain = citation.url.match(
-        /^(?:https?:\/\/)?(?:www\.)?([^/]+)/
+        /^(?:https?:\/\/)?(?:www\.)?([^/]+)/,
       )[1];
       return (
         <a
