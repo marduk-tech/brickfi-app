@@ -187,7 +187,7 @@ export default async function Brick360Page({ params }: PageProps) {
   if (OBJECT_ID_REGEX.test(slug)) {
     let projectSlug: string | undefined;
     try {
-      const project = await getLvnzyProjectById(slug, false);
+      const project = await getLvnzyProjectById(slug, false, true);
       console.log(
         "[brick360 redirect] project slug:",
         project?.slug,

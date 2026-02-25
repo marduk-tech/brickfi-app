@@ -1,31 +1,34 @@
-import { baseApiUrl, apiKey } from "@/libs/constants";
+import { apiKey, baseApiUrl, sitemapApiKey } from "@/libs/constants";
 import { CustomError } from "@/libs/error-handler";
 import { LvnzyProject } from "@/types/LvnzyProject";
 
 // Get project by ObjectId (for internal operations)
-export const getLvnzyProjectById = async (id: string, throwError = true) => {
+export const getLvnzyProjectById = async (
+  id: string,
+  throwError = true,
+  runOnServer = false,
+) => {
   const res = await fetch(`${baseApiUrl}lvnzy-projects/${id}`, {
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
-      "x-api-key": apiKey || "",
+      "x-api-key": (runOnServer ? sitemapApiKey : apiKey) || "",
     },
   });
 
-  if (throwError && res.status === 404) {
-    throw new CustomError({
-      status: 404,
-      title: "Project Not Found",
-      description: "The requested Brick360 project could not be found.",
-    });
-  }
-
-  if (throwError && !res.ok) {
-    throw new CustomError({
-      status: res.status,
-      title: "Something went wrong",
-      description: "An unexpected error occurred.",
-    });
+  if (!res.ok) {
+    if (throwError) {
+      throw new CustomError({
+        status: res.status,
+        title:
+          res.status === 404 ? "Project Not Found" : "Something went wrong",
+        description:
+          res.status === 404
+            ? "The requested Brick360 project could not be found."
+            : "An unexpected error occurred.",
+      });
+    }
+    return null;
   }
 
   const data = await res.json();
@@ -35,7 +38,7 @@ export const getLvnzyProjectById = async (id: string, throwError = true) => {
 // Get project by slug (for public pages)
 export const getLvnzyProjectBySlug = async (
   slug: string,
-  throwError = true
+  throwError = true,
 ) => {
   const res = await fetch(
     `${baseApiUrl}lvnzy-projects/slug/${slug.toLowerCase()}`,
@@ -45,23 +48,22 @@ export const getLvnzyProjectBySlug = async (
         "Content-Type": "application/json",
         "x-api-key": apiKey || "",
       },
-    }
+    },
   );
 
-  if (throwError && res.status === 404) {
-    throw new CustomError({
-      status: 404,
-      title: "Project Not Found",
-      description: "The requested Brick360 project could not be found.",
-    });
-  }
-
-  if (throwError && !res.ok) {
-    throw new CustomError({
-      status: res.status,
-      title: "Something went wrong",
-      description: "An unexpected error occurred.",
-    });
+  if (!res.ok) {
+    if (throwError) {
+      throw new CustomError({
+        status: res.status,
+        title:
+          res.status === 404 ? "Project Not Found" : "Something went wrong",
+        description:
+          res.status === 404
+            ? "The requested Brick360 project could not be found."
+            : "An unexpected error occurred.",
+      });
+    }
+    return null;
   }
 
   const data = await res.json();
