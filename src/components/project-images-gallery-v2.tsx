@@ -10,7 +10,7 @@ const TAGS_ORDER = [
   "layout",
   "amenities",
   "house",
-  // "floorplan",
+  "floorplan",
   "construction",
 ];
 export const ProjectGalleryV2 = ({
