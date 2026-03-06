@@ -21,7 +21,7 @@ interface SectionProps {
   mediaUrl?: string;
   mainImgAlign?: string;
   itemsAlignSectionLeft?: string;
-  sectionMaxWidth?: string;
+  sectionMaxWidth?: string | number;
   btn?: {
     link?: string;
     txt: string;
@@ -351,9 +351,10 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
       id={sectionData.id || `${Math.round(Math.random() * 1000)}`}
       vertical
       style={{
-        width: "100%",
+        width: sectionData.sectionMaxWidth || "100%",
         backgroundColor: sectionData.bgColor || "white",
         minHeight: "auto",
+        margin: "auto",
         padding: sectionData.verticalPadding
           ? `${sectionData.verticalPadding}px 0`
           : "72px 0",
