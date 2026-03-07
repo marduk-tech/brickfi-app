@@ -411,8 +411,6 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
               }
             }}
             style={{
-              alignSelf: "flex-start",
-              marginTop: 16,
               fontWeight: 800,
               fontSize: FONT_SIZE.HEADING_3,
             }}
