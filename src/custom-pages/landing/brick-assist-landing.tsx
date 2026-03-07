@@ -217,19 +217,39 @@ export default function BrickAssistLanding() {
 
   const renderProcessStep = (data: any) => {
     const padding = isMobile ? 8 : 16;
+    const sectionMaxWidth = 625;
     return (
       <Flex
         vertical
         style={{
-          width: isMobile ? `calc(100% - ${padding * 2}px)` : 600 - padding * 2,
+          width: isMobile ? `calc(100% - ${padding * 2}px)` : `calc(${sectionMaxWidth}px - ${padding * 2}px - 32px)`,
           padding: padding,
+          borderRadius: 16,
+          border: `2px solid ${COLORS.LANDING.MEDIUM_PINK}`,
+          backgroundColor: COLORS.LANDING.MEDIUM_PINK
         }}
       >
-        <Typography.Text
-          style={{ fontSize: FONT_SIZE.HEADING_1, lineHeight: "120%" }}
-        >
-          {data.heading}
-        </Typography.Text>
+        <Flex align="center" gap={8}>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_2,
+              borderRadius: "50%",
+              backgroundColor: COLORS.LANDING.BLUISH,
+              color: "white",
+              width: 32,
+              height: 32,
+              textAlign: "center",
+              lineHeight: "160%"
+            }}
+          >
+            {data.index}
+          </Typography.Text>
+          <Typography.Text
+            style={{ fontSize: FONT_SIZE.HEADING_1, lineHeight: "120%" }}
+          >
+            {data.heading}
+          </Typography.Text>
+        </Flex>
         <Typography.Text style={{}}>{data.subHeading}</Typography.Text>
         <img
           alt=""
@@ -253,7 +273,7 @@ export default function BrickAssistLanding() {
         paddingTop: 0,
         overflowX: "hidden",
         scrollbarWidth: "none",
-        backgroundColor: "#fdf7f6",
+        backgroundColor: COLORS.LANDING.LIGHT_PINK,
         backgroundRepeat: "no-repeat",
         width: "100%",
       }}
@@ -268,7 +288,7 @@ export default function BrickAssistLanding() {
         sectionData={{
           sectionMaxWidth: 900,
           heading: "Make Your Biggest Investment Decision on Data, Not FOMO",
-          bgColor: "#fdf7f6",
+          bgColor: COLORS.LANDING.LIGHT_PINK,
           verticalPadding: isMobile ? 24 : 200,
           primaryImageSize: isMobile ? "80%" : "90%",
           mainImgUrl: "/images/landing/brickassistv2/1.png",
@@ -381,57 +401,91 @@ export default function BrickAssistLanding() {
       <SectionCenter
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
+          sectionMaxWidth: 1250,
           heading: "The Brickfi Process",
           subHeading:
             " How Brickfi Ensures You Get The Best Deal In Your Dream Home",
+            centerSectionTextAlign: "left"
         }}
       ></SectionCenter>
       <Flex vertical>
-      <Flex
-        
-        style={{
-          margin: "16px auto",
-          maxWidth: 1000,
+        <Flex
+          vertical={isMobile}
+          style={{
+            margin: "16px 36px",
+          }}
+          justify="center"
+          gap={32}
+        >
+          {renderProcessStep({
+            index: 1,
+            heading: "True Discovery",
+            subHeading:
+              "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
+            imageUrl: "/images/landing/brickassistv2/3.png",
+          })}
+          {renderProcessStep({
+            index: 2,
+            heading: "Property Evaluation",
+            subHeading:
+              "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
+            imageUrl: "/images/landing/brickassistv2/3.png",
+          })}
+        </Flex>
+        <Flex
+          vertical={isMobile}
+          style={{
+            margin: "16px auto",
+          }}
+          gap={32}
+        >
+          {renderProcessStep({
+            index: 3,
+            heading: "Decision Making",
+            subHeading:
+              "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
+            imageUrl: "/images/landing/brickassistv2/3.png",
+          })}
+          {renderProcessStep({
+            index: 4,
+            heading: "Post Sales Support",
+            subHeading:
+              "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
+            imageUrl: "/images/landing/brickassistv2/3.png",
+          })}
+        </Flex>
+      </Flex>
+      <SectionLeft
+        sectionData={{
+          heading: "Built By People Who Understand Both Data & Real Estate",
+          bgColor: COLORS.LANDING.BLUISH,
+          verticalPadding: isMobile ? 24 : 100,
+          textColor: COLORS.LANDING.LIGHT_PINK,
+          subHeading: 
+              "After seeing friends and family struggle with biased broker recommendations and confusing property decisions, our founders (ex-Google engineer) realized: Real estate is the only major industry without organized, accessible data. That had to change. Brickfi Assist applies the same data infrastructure principles that power modern tech platforms to an industry desperately lacking them."
+          ,
         }}
-      >
-        {renderProcessStep({
-          heading: "True Discovery & Consultation",
-          subHeading:
-            "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-          imageUrl: "/images/landing/brickassistv2/3.png",
-        })}
-         {renderProcessStep({
-          heading: "True Discovery & Consultation",
-          subHeading:
-            "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-          imageUrl: "/images/landing/brickassistv2/3.png",
-        })}
-      </Flex>
-      <Flex
-        
-        style={{
-          margin: "16px auto",
-          maxWidth: 1000,
+      ></SectionLeft>
+       <SectionCenter
+        sectionData={{
+          bgColor: COLORS.LANDING.BLUISH,
+          heading: "",
+          subHeading: "",
+          primaryImageSize: isMobile ? "100%" : "80%",
+          mainImgUrl: isMobile
+            ? "/images/landing/slide-9-v2-mob.png"
+            : "/images/landing/slide-9-v2.png",
+          mainImgAltText: "Testimonials from Brickfi Customers",
+          imageContainerWidth: 50,
+          verticalPadding: 100,
         }}
-      >
-        {renderProcessStep({
-          heading: "True Discovery & Consultation",
-          subHeading:
-            "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-          imageUrl: "/images/landing/brickassistv2/3.png",
-        })}
-         {renderProcessStep({
-          heading: "True Discovery & Consultation",
-          subHeading:
-            "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-          imageUrl: "/images/landing/brickassistv2/3.png",
-        })}
-      </Flex>
-      </Flex>
+      ></SectionCenter>
+
+
       <SectionCenter
         sectionData={{
           heading: "FAQ",
-          bgColor: "#fdf7f6",
+          bgColor: COLORS.LANDING.LIGHT_PINK,
           verticalPadding: isMobile ? 24 : 100,
           subHeading: (
             <Flex>

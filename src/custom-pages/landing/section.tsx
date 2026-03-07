@@ -28,6 +28,7 @@ interface SectionProps {
     btnAction?: any;
   };
   imageContainerWidth?: number;
+  centerSectionTextAlign?: string;
 }
 const styles = {
   h1: {
@@ -365,7 +366,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
         vertical
         style={{
           width: isMobile ? "calc(100% - 32px)" : "100%",
-          textAlign: isMobile ? "left" : "center",
+          textAlign: isMobile ? "left" : sectionData.centerSectionTextAlign as any || "center",
           marginLeft: isMobile ? 16 : 0,
         }}
         align="center"
