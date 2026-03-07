@@ -448,7 +448,7 @@ export default function BrickAssistLanding() {
       <SectionCenter
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          sectionMaxWidth: 1250,
+          sectionMaxWidth: isMobile ? "100%": 1250,
           heading: "The Brickfi Process",
           subHeading:
             " How Brickfi Ensures You Get The Best Deal In Your Dream Home",
@@ -482,7 +482,7 @@ export default function BrickAssistLanding() {
         <Flex
           vertical={isMobile}
           style={{
-            margin: "16px auto",
+            margin: "16px 36px",
           }}
           gap={32}
         >
