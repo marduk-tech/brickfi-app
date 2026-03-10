@@ -109,7 +109,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
             <h1
               style={{
                 ...styles.h1,
-                fontSize: isMobile ? 36 : 48,
+                fontSize: isMobile ? 40 : 54,
                 color: sectionData.textColor || COLORS.textColorDark,
               }}
             >
@@ -286,7 +286,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
             <h1
               style={{
                 ...styles.h1,
-                fontSize: isMobile ? 50 : 60,
+                fontSize: isMobile ? 42 : 48,
                 color: sectionData.textColor || COLORS.textColorDark,
               }}
             >
