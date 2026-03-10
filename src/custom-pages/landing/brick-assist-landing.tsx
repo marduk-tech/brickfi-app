@@ -260,10 +260,11 @@ export default function BrickAssistLanding() {
         vertical={isMobile || !data.fullWidth}
         style={{
           width: isMobile
-            ? `calc(100% - ${padding * 2}px)`
+            ? `calc(100% - ${padding * 2}px - 16px)`
             : `calc(${sectionMaxWidth * (data.fullWidth ? 2 : 1)}px - ${padding * 2}px - 32px)`,
           padding: `${padding}px`,
           borderRadius: 16,
+          marginLeft: isMobile ? 8: 0,
           border: `1px solid #0e5882`,
           backgroundColor: "#0d4f74",
         }}
@@ -274,7 +275,7 @@ export default function BrickAssistLanding() {
           vertical
           style={{ width: data.fullWidth && !isMobile ? "50%" : "100%" }}
         >
-          <Flex gap={8} vertical>
+          <Flex gap={8} vertical style={{width: "100%"}}>
             <Typography.Text
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.2,
@@ -483,7 +484,7 @@ export default function BrickAssistLanding() {
             "Brickfi Gives You the Upper Hand In Your Homebuying Journey ",
           subHeading: (
             <Typography.Text
-              style={{ fontSize: FONT_SIZE.HEADING_2, marginTop: 8 }}
+              style={{ fontSize: FONT_SIZE.HEADING_2, margin: "16px 0" }}
             >
               Brickfi presents the new way to find your dream home. No hype, No
               manipulation, No pushing inventory. Only legitimate data and hard
@@ -513,7 +514,7 @@ export default function BrickAssistLanding() {
             textColor: COLORS.LANDING.LIGHT_PINK,
           }}
         ></SectionCenter>
-        <Flex vertical>
+        <Flex vertical style={{ width: isMobile ? "100%" : 1250}}>
           <Flex
             vertical={isMobile}
             style={{
@@ -540,7 +541,7 @@ export default function BrickAssistLanding() {
           <Flex
             vertical={isMobile}
             style={{
-              margin: "16px 36px",
+              margin: isMobile ? "16px 0": "16px 36px",
             }}
             justify="center"
             gap={32}
@@ -566,7 +567,7 @@ export default function BrickAssistLanding() {
           mainImgUrl: "/images/landing/brickassistv2/5.png",
           imageContainerWidth: 55,
           subHeading:
-            "After seeing friends and family struggle with biased broker recommendations and confusing property decisions, our founders (ex-Google engineer) realized: Real estate is the only major industry without organized, accessible data. That had to change. Brickfi Assist applies the same data infrastructure principles that power modern tech platforms to an industry desperately lacking them.",
+            <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, margin: isMobile ? "16px 0": 0}}>After seeing friends and family struggle with biased broker recommendations and confusing property decisions, our founders (ex-Google engineer) realized: Real estate is the only major industry without organized, accessible data. That had to change. Brickfi Assist applies the same data infrastructure principles that power modern tech platforms to an industry desperately lacking them.</Typography.Text>,
         }}
       ></SectionLeft>
       <SectionCenter
