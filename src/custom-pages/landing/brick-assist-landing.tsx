@@ -514,14 +514,14 @@ export default function BrickAssistLanding() {
             textColor: COLORS.LANDING.LIGHT_PINK,
           }}
         ></SectionCenter>
-        <Flex vertical style={{ width: isMobile ? "100%" : 1250}}>
+        <Flex vertical style={{ width: isMobile ? "100%" : 1250, margin: "auto"}}>
           <Flex
             vertical={isMobile}
             style={{
               margin: "16px 0",
             }}
             justify="center"
-            gap={48}
+            gap={36}
           >
             {renderProcessStep({
               index: 1,
@@ -541,10 +541,9 @@ export default function BrickAssistLanding() {
           <Flex
             vertical={isMobile}
             style={{
-              margin: isMobile ? "16px 0": "16px 36px",
+              margin: "16px 0",
             }}
             justify="center"
-            gap={32}
           >
             {renderProcessStep({
               index: 3,
