@@ -168,18 +168,17 @@ export const NewReportRequestForm = () => {
       return [];
     }
 
-    const filteredProjects = searchQuery ? searchResults : projects;
-
-    return (filteredProjects || [])
-      .filter(
-        (p) => !selectedProjects.some((s) => s.projectName === p.projectName)
-      )
-      .sort((projectA, projectB) =>
+    const filteredProjects = searchQuery ? searchResults : projects.sort((projectA, projectB) =>
         projectA.lvnzyProjectId && projectB.lvnzyProjectId
           ? 0
           : projectA.lvnzyProjectId
           ? -1
           : 1
+      );
+
+    return (filteredProjects || [])
+      .filter(
+        (p) => !selectedProjects.some((s) => s.projectName === p.projectName)
       )
       .slice(0, 100)
       .map((project) => ({
