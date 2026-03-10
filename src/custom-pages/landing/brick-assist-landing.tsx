@@ -349,7 +349,7 @@ export default function BrickAssistLanding() {
 
       <SectionCenter
         sectionData={{
-          sectionMaxWidth: isMobile ? "100%" : 900,
+          sectionMaxWidth: isMobile ? "100%" : 1000,
           heading: "Make Your Biggest Investment Decision on Data, Not FOMO",
           bgColor: COLORS.LANDING.LIGHT_PINK,
           verticalPadding: isMobile ? 100 : 200,

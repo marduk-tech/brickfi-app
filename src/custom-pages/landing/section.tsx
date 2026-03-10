@@ -157,7 +157,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
         <Flex
           style={{
             width: isMobile
-              ? "calc(100% - 32px)"
+              ? "calc(100% - 16px)"
               : `calc(${
                   100 - (sectionData.imageContainerWidth || 40)
                 }% - 64px)`,
@@ -166,7 +166,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
               : sectionData.fullHeight
               ? "100vh"
               : "auto",
-            padding: isMobile ? "0 16px" : "0 32px",
+            padding: isMobile ? "0 8px" : "0 32px",
           }}
           align="center"
           justify="center"
@@ -421,8 +421,8 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
       </Flex>
       <Flex
         style={{
-          width: isMobile ? "calc(100% - 32px)" : "100%",
-          padding: isMobile ? "0 16px" : "0",
+          width: isMobile ? "calc(100% - 8px)" : "100%",
+          padding: isMobile ? "0 4px" : "0",
         }}
         align="center"
         justify={isMobile ? "center" : "flex-start"}
