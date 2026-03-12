@@ -68,8 +68,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
             <Card
               hoverable
               style={{
-                width: 280,
-                minWidth: 280,
+                width: 200,
                 borderRadius: 12,
                 overflow: "hidden",
                 border: `1px solid ${COLORS.borderColor}`,
@@ -78,7 +77,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
               cover={
                 <div
                   style={{
-                    height: 180,
+                    height: 125,
                     width: "100%",
                     backgroundColor: COLORS.bgColor,
                     position: "relative",
