@@ -1,14 +1,7 @@
 "use client";
 
 import { CaretRightOutlined } from "@ant-design/icons";
-import {
-  Button,
-  Collapse,
-  CollapseProps,
-  Divider,
-  Flex,
-  Typography,
-} from "antd";
+import { Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useState } from "react";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
 import { useDevice } from "../../hooks/use-device";
@@ -17,8 +10,6 @@ import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import LandingHeader from "./header";
 import { SectionCenter, SectionLeft, SectionRight } from "./section";
 import LandingFooter from "./footer";
-import { safeWindow } from "@/libs/browser-utils";
-import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 export default function BrickAssistLanding() {
   const { isMobile } = useDevice();
@@ -26,34 +17,6 @@ export default function BrickAssistLanding() {
 
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
-
-  const getCTA = () => {
-    return (
-      <Button
-        type="primary"
-        onClick={() => {
-          safeWindow.location.href = "/requestreport";
-        }}
-        style={{
-          alignSelf: "flex-start",
-          marginTop: 16,
-          marginBottom: isMobile ? 32 : 0,
-          fontSize: FONT_SIZE.HEADING_2,
-          letterSpacing: -0.5,
-          textTransform: "uppercase",
-        }}
-      >
-        <Flex align="center" gap={8}>
-          <DynamicReactIcon
-            color="white"
-            iconName="RiChatAiFill"
-            iconSet="ri"
-          ></DynamicReactIcon>
-          <Typography.Text style={{color: "white", fontSize: FONT_SIZE.HEADING_2, fontWeight: 500}}>Book a Free Call</Typography.Text>
-        </Flex>
-      </Button>
-    );
-  };
 
   const getFaqHeading = (text: string) => {
     return (
@@ -81,10 +44,10 @@ export default function BrickAssistLanding() {
   };
   const faqPanelStyle = {
     marginBottom: 24,
-    background: COLORS.LANDING.BLUISH,
+    background: COLORS.textColorDark,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
-    color: COLORS.LANDING.LIGHT_PINK,
+    color: "white",
     border: "none",
   };
   const faqs: CollapseProps["items"] = [
@@ -116,7 +79,7 @@ export default function BrickAssistLanding() {
           partners/advisors which is separate from the final cost quoted to the
           buyer. That means, the buyer does not have to accomodate any part of
           their cost when it comes to commissions.
-        </>,
+        </>
       ),
     },
     {
@@ -247,84 +210,10 @@ export default function BrickAssistLanding() {
           For example, if you are looking for a home with more greenery nearby,
           we can shortlist projects based on surroundings. If you are primary
           purpose is investment, we can find projects near upcoming tech parks.
-        </>,
+        </>
       ),
     },
   ];
-
-  const renderProcessStep = (data: any) => {
-    const padding = isMobile ? 8 : 16;
-    const sectionMaxWidth = 625;
-    return (
-      <Flex
-        vertical={isMobile || !data.fullWidth}
-        style={{
-          width: isMobile
-            ? `calc(100% - ${padding * 2}px - 16px)`
-            : `calc(${sectionMaxWidth * (data.fullWidth ? 2 : 1)}px - ${padding * 2}px - 32px)`,
-          padding: `${padding}px`,
-          borderRadius: 16,
-          marginLeft: isMobile ? 8: 0,
-          border: `1px solid #0e5882`,
-          backgroundColor: "#0d4f74",
-        }}
-        align="center"
-        justify="center"
-      >
-        <Flex
-          vertical
-          style={{ width: data.fullWidth && !isMobile ? "50%" : "100%" }}
-        >
-          <Flex gap={8} vertical style={{width: "100%"}}>
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_1 * 1.2,
-                fontWeight: 500,
-                borderRadius: "50%",
-                backgroundColor: COLORS.LANDING.LIGHT_PINK,
-                color: COLORS.LANDING.BLUISH,
-                width: 56,
-                height: 56,
-                textAlign: "center",
-              }}
-            >
-              {data.index}
-            </Typography.Text>
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_1,
-                color: COLORS.LANDING.LIGHT_PINK,
-                lineHeight: "120%",
-                fontWeight: 500,
-                marginTop: 8,
-                textTransform: "uppercase",
-              }}
-            >
-              {data.heading}
-            </Typography.Text>
-          </Flex>
-          <Typography.Text
-            style={{
-              fontSize: FONT_SIZE.HEADING_2 * 0.9,
-              marginTop: 8,
-              color: COLORS.LANDING.LIGHT_PINK,
-              lineHeight: "130%",
-            }}
-          >
-            {data.subHeading}
-          </Typography.Text>
-        </Flex>
-        <img
-          alt=""
-          src={data.imageUrl}
-          style={{
-            width: isMobile ? "100%" : data.fullWidth ? "40%" : "85%",
-            marginTop: data.fullWidth && !isMobile ? 0 : 32,
-          }}
-        />
-      </Flex>
-    );
-  };
 
   return (
     <Flex
@@ -336,261 +225,89 @@ export default function BrickAssistLanding() {
         paddingTop: 0,
         overflowX: "hidden",
         scrollbarWidth: "none",
-        backgroundColor: COLORS.LANDING.LIGHT_PINK,
+        backgroundColor: "#fdf7f6",
         backgroundRepeat: "no-repeat",
         width: "100%",
       }}
     >
       <LandingHeader
-        bgColor={COLORS.LANDING.LIGHT_PINK}
-        color={COLORS.textColorDark}
-        logo="/images/brickfi-logo.png"
+        bgColor={COLORS.textColorDark}
+        color={"white"}
+        logo="/images/brickfi-logo-white.png"
       ></LandingHeader>
-
-      <SectionCenter
+      <SectionRight
         sectionData={{
-          sectionMaxWidth: isMobile ? "100%" : 1000,
-          heading: "Make Your Biggest Investment Decision on Data, Not FOMO",
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 100 : 200,
-          primaryImageSize: isMobile ? "100%" : "100%",
-          mainImgUrl: isMobile
-            ? "/images/landing/brickassistv2/1-mob.png"
-            : "/images/landing/brickassistv2/1.png",
-          centerSectionTextAlign: "left",
-          // btn: {
-          //   link: "",
-          //   txt: "Schedule Callback",
-          //   btnAction: () => {
-          //     setRequestCallbackDialogOpen(true);
-          //   },
-          // },
-          subHeading: (
+          heading: (
             <Flex vertical>
-              <Typography.Text
+              <img
+                style={{ width: 150 }}
+                src="/images/brickfi-assist-white.png"
+                alt="Brickfi Assist"
+              />
+              <h1
                 style={{
-                  fontSize: FONT_SIZE.HEADING_2,
-                  marginTop: 16,
-                  marginBottom: 8,
+                  lineHeight: "100%",
+                  width: "100%",
+                  margin: 0,
+                  fontSize: isMobile ? 50 : 60,
+                  color: "white",
                 }}
               >
-                Brickfi is a real estate advisory that works for you the buyer.
-                Get data backed research & guided decision making to power your
-                home search and buying experience.
-              </Typography.Text>
-              {getCTA()}
+                Buyer First, Unbiased & Data Backed.
+              </h1>
             </Flex>
           ),
-        }}
-      ></SectionCenter>
-      <SectionCenter
-        sectionData={{
-          fullHeight: true,
-          bgColor: COLORS.LANDING.BLUISH,
-          textColor: "white",
-          mainImgUrl: isMobile
-            ? "/images/landing/brickassistv2/4-mob.png"
-            : "/images/landing/brickassistv2/4.png",
-          primaryImageSize: isMobile ? "80%" : "65%",
           mainImgAltText:
-            "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
+            "Brickfi Assist | Expert property advice with Brickfi",
+          subHeading:
+            "Consult with Brickfi to get an expert advice on your next home purchase. We provide unbiased, data backed and technology driven real estate advisory.",
+          primaryImageSize: isMobile ? "75%" : "80%",
+          bgColor: COLORS.textColorDark,
+          textColor: "white",
+          mainImgAlign: "center",
+          mainImgUrl: "/images/landing/brick-assist-landing-3.png",
+          btn: {
+            link: "",
+            txt: "Schedule Callback",
+            btnAction: () => {
+              setRequestCallbackDialogOpen(true);
+            },
+          },
+          imageContainerWidth: 50,
           verticalPadding: 100,
         }}
-      ></SectionCenter>
-      <SectionCenter
-        sectionData={{
-          bgColor: COLORS.LANDING.BLUISH,
-          heading: "",
-
-          subHeading: (
-            <Flex vertical style={{ paddingBottom: 100 }}>
-              <Typography.Text
-                style={{
-                  textTransform: "uppercase",
-                  color: COLORS.primaryColor,
-                  textAlign: "left",
-                  fontSize: FONT_SIZE.HEADING_2,
-                }}
-              >
-                A NOTE FROM OUR FOUNDER
-              </Typography.Text>
-              <Typography.Text
-                style={{
-                  marginTop: 16,
-                  fontSize: FONT_SIZE.HEADING_1 * 0.8,
-                  maxWidth: 1000,
-                  color: "white",
-                  textAlign: "left",
-                  paddingBottom: 24,
-                }}
-              >
-                Buying real estate in India can feel like stepping into the{" "}
-                <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
-                  Wild Wild West
-                </span>{" "}
-                — everyone claiming they’ve found gold. 🌄
-                <br></br>
-                <br></br>
-                You’re rushed with “last few units” warnings and
-                <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
-                  {" "}
-                  fear-of-missing-out
-                </span>{" "}
-                tactics. 😱
-                <br></br>
-                <br></br>
-                The{" "}
-                <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
-                  best-fit
-                </span>{" "}
-                properties rarely show up, because the match making and curation
-                is never really happening at a deeper level.🫣
-                <br></br>
-                <br></br>
-                You sign{" "}
-                <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
-                  stacks of papers
-                </span>{" "}
-                believing verbal assurances. And once the deal is done, the
-                cowboys ride off — leaving you alone to navigate the builder’s
-                maze. 😭
-                <br></br>
-                <br></br>
-                We started Brickfi to change this. Using{" "}
-                <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
-                  technology
-                </span>{" "}
-                and by being
-                <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
-                  {" "}
-                  radically transparent
-                </span>
-                , we aim to bring the much needed clarity and confidence in this
-                industry. 😇
-              </Typography.Text>
-              {getCTA()}
-            </Flex>
-          ),
-          mainImgAltText: "Brickfi Assist - End to End Property Consultation",
-          primaryImageSize: "100%",
-          imageContainerWidth: 50,
-          verticalPadding: isMobile ? 32 : 32,
-        }}
-      ></SectionCenter>
+      ></SectionRight>
       <SectionLeft
         sectionData={{
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          heading:
-            "Brickfi Gives You the Upper Hand In Your Homebuying Journey ",
+          heading: "We are there with you, every step of the way.",
           subHeading: (
             <Typography.Text
-              style={{ fontSize: FONT_SIZE.HEADING_2, margin: "16px 0" }}
+              style={{
+                marginTop: 16,
+                fontSize: FONT_SIZE.HEADING_2,
+                color: "white",
+              }}
             >
-              Brickfi presents the new way to find your dream home. No hype, No
-              manipulation, No pushing inventory. Only legitimate data and hard
-              facts to ensure your interests are protected
+              We provide end to end services, pre and post purchase with our
+              data backed research to help you make confident decisions.
             </Typography.Text>
           ),
           mainImgAltText: "Brickfi Assist - End to End Property Consultation",
-          mainImgUrl: "/images/landing/brickassistv2/2.png",
-          primaryImageSize: isMobile ? "100%" : "80%",
+          primaryImageSize: "100%",
+          mainImgUrl: "/images/landing/brick-assist-landing-2.png",
           imageContainerWidth: 50,
-          verticalPadding: 180,
+          bgColor: COLORS.textColorDark,
+          textColor: "white",
+          verticalPadding: isMobile ? 32 : 32,
         }}
       ></SectionLeft>
-
-      <Flex
-        vertical
-        style={{ backgroundColor: COLORS.LANDING.BLUISH, padding: "64px 0" }}
-      >
-        <SectionCenter
-          sectionData={{
-            bgColor: COLORS.LANDING.BLUISH,
-            sectionMaxWidth: isMobile ? "100%" : 1250,
-            heading: "How does Brickfi Ensure Your Best Interest ?",
-            subHeading: "",
-            centerSectionTextAlign: "left",
-            verticalPadding: 16,
-            textColor: COLORS.LANDING.LIGHT_PINK,
-          }}
-        ></SectionCenter>
-        <Flex vertical style={{ width: isMobile ? "100%" : 1250, margin: "auto"}}>
-          <Flex
-            vertical={isMobile}
-            style={{
-              margin: "16px 0",
-            }}
-            justify="center"
-            gap={36}
-          >
-            {renderProcessStep({
-              index: 1,
-              heading: "True Discovery",
-              subHeading:
-                "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-              imageUrl: "/images/landing/brickassistv2/3-1.png",
-            })}
-            {renderProcessStep({
-              index: 2,
-              heading: "Property Evaluation",
-              subHeading:
-                "A detailed 360 report for every shortlisted project helps you evaluate and compare multiple properties. The report compiles legit data around builder, property, location and financials so that you can make an informed and confident decision. Learn more about Brick360 Report.",
-              imageUrl: "/images/landing/brickassistv2/3-2.png",
-            })}
-          </Flex>
-          <Flex
-            vertical={isMobile}
-            style={{
-              margin: "16px 0",
-            }}
-            justify="center"
-          >
-            {renderProcessStep({
-              index: 3,
-              heading: "Pre & Post Purchase Support",
-              subHeading:
-                "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-              imageUrl: "/images/landing/brickassistv2/3-3.png",
-              fullWidth: true,
-            })}
-          </Flex>
-        </Flex>
-      </Flex>
-      <SectionLeft
-        sectionData={{
-          heading: "Built By People Who Understand Both Data & Real Estate",
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          sectionMaxWidth: isMobile ? "100%" : "90%",
-          verticalPadding: isMobile ? 24 : 100,
-          textColor: COLORS.LANDING.BLUISH,
-          mainImgUrl: "/images/landing/brickassistv2/5.png",
-          imageContainerWidth: 55,
-          subHeading:
-            <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, margin: isMobile ? "16px 0": 0}}>After seeing friends and family struggle with biased broker recommendations and confusing property decisions, our founders (ex-Google engineer) realized: Real estate is the only major industry without organized, accessible data. That had to change. Brickfi Assist applies the same data infrastructure principles that power modern tech platforms to an industry desperately lacking them.</Typography.Text>,
-        }}
-      ></SectionLeft>
-      <SectionCenter
-        sectionData={{
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          heading: "",
-          subHeading: "",
-          primaryImageSize: isMobile ? "100%" : "80%",
-          mainImgUrl: isMobile
-            ? "/images/landing/brickassistv2/6-mob.png"
-            : "/images/landing/brickassistv2/6.png",
-          mainImgAltText: "Testimonials from Brickfi Customers",
-          imageContainerWidth: 50,
-          verticalPadding: 100,
-        }}
-      ></SectionCenter>
-
       <SectionCenter
         sectionData={{
           heading: "FAQ",
-          bgColor: COLORS.LANDING.LIGHT_PINK,
+          bgColor: "#fdf7f6",
           verticalPadding: isMobile ? 24 : 100,
           subHeading: (
-            <Flex style={{ marginTop: 64 }}>
+            <Flex>
               <Collapse
                 expandIcon={({ isActive }) => (
                   <CaretRightOutlined
@@ -610,7 +327,6 @@ export default function BrickAssistLanding() {
           ),
         }}
       ></SectionCenter>
-
       <LandingFooter></LandingFooter>
 
       <BrickAssistCallback
