@@ -5,7 +5,7 @@ import { useUser } from "@/hooks/use-user";
 import { axiosApiInstance } from "@/libs/axios-api-Instance";
 import { baseApiUrl } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Button, Flex, Form, Input, Spin, Typography, message } from "antd";
+import { Button, Flex, Form, Input, Spin, Tag, Typography, message } from "antd";
 import { useState } from "react";
 import { BiSend } from "react-icons/bi";
 import { AdminGuard } from "@/components/auth/admin-guard";
@@ -63,6 +63,21 @@ export default function BrickChatPage() {
     }
   };
 
+  function renderQuestion (q: string) {
+ return <Flex>
+                <Tag
+                  style={{
+                    color: "white",
+                    fontSize: FONT_SIZE.HEADING_3,
+                    backgroundColor: COLORS.textColorDark,
+                    borderRadius: 16,
+                    padding: "8px 16px"
+                  }}
+                >
+                  {q}
+                </Tag>
+                </Flex>
+  }
   return (
     <AdminGuard>
       <Flex
@@ -92,28 +107,13 @@ export default function BrickChatPage() {
           {chatHistory.map((msg, idx) => (
             <Flex key={idx} vertical gap={12}>
               {/* Question Display */}
-              <Flex
-                style={{
-                  backgroundColor: COLORS.textColorDark,
-                  padding: "12px 16px",
-                  borderRadius: 8,
-                }}
-              >
-                <Typography.Text
-                  style={{
-                    color: "white",
-                    fontSize: FONT_SIZE.HEADING_3,
-                  }}
-                >
-                  {msg.question}
-                </Typography.Text>
-              </Flex>
+             {renderQuestion(msg.question)}
 
               {/* Answer Display */}
               <Flex vertical gap={8} style={{ marginTop: 8 }}>
                 <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
                   Found {msg.results.length} matching project
-                  {msg.results.length !== 1 ? "s" : ""}:
+                  {msg.results.length !== 1 ? "s" : ""}
                 </Typography.Text>
                 <BrickChatResults results={msg.results} />
               </Flex>
@@ -123,22 +123,7 @@ export default function BrickChatPage() {
           {/* Current Question Loading State */}
           {currentQuestion && loading && (
             <Flex vertical gap={12}>
-              <Flex
-                style={{
-                  backgroundColor: COLORS.textColorDark,
-                  padding: "12px 16px",
-                  borderRadius: 8,
-                }}
-              >
-                <Typography.Text
-                  style={{
-                    color: "white",
-                    fontSize: FONT_SIZE.HEADING_3,
-                  }}
-                >
-                  {currentQuestion}
-                </Typography.Text>
-              </Flex>
+              {renderQuestion(currentQuestion)}
               <Flex align="center" gap={12} style={{ marginTop: 8 }}>
                 <Spin size="small" />
                 <Typography.Text type="secondary">

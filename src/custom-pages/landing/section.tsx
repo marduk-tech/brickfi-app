@@ -21,13 +21,14 @@ interface SectionProps {
   mediaUrl?: string;
   mainImgAlign?: string;
   itemsAlignSectionLeft?: string;
-  sectionMaxWidth?: string;
+  sectionMaxWidth?: string | number;
   btn?: {
     link?: string;
     txt: string;
     btnAction?: any;
   };
   imageContainerWidth?: number;
+  centerSectionTextAlign?: string;
 }
 const styles = {
   h1: {
@@ -108,7 +109,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
             <h1
               style={{
                 ...styles.h1,
-                fontSize: isMobile ? 36 : 48,
+                fontSize: isMobile ? 40 : 54,
                 color: sectionData.textColor || COLORS.textColorDark,
               }}
             >
@@ -156,7 +157,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
         <Flex
           style={{
             width: isMobile
-              ? "calc(100% - 32px)"
+              ? "calc(100% - 16px)"
               : `calc(${
                   100 - (sectionData.imageContainerWidth || 40)
                 }% - 64px)`,
@@ -165,7 +166,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
               : sectionData.fullHeight
               ? "100vh"
               : "auto",
-            padding: isMobile ? "0 16px" : "0 32px",
+            padding: isMobile ? "0 8px" : "0 32px",
           }}
           align="center"
           justify="center"
@@ -285,7 +286,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
             <h1
               style={{
                 ...styles.h1,
-                fontSize: isMobile ? 50 : 60,
+                fontSize: isMobile ? 42 : 48,
                 color: sectionData.textColor || COLORS.textColorDark,
               }}
             >
@@ -351,9 +352,10 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
       id={sectionData.id || `${Math.round(Math.random() * 1000)}`}
       vertical
       style={{
-        width: "100%",
+        width: sectionData.sectionMaxWidth || "100%",
         backgroundColor: sectionData.bgColor || "white",
         minHeight: "auto",
+        margin: "auto",
         padding: sectionData.verticalPadding
           ? `${sectionData.verticalPadding}px 0`
           : "72px 0",
@@ -364,7 +366,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
         vertical
         style={{
           width: isMobile ? "calc(100% - 32px)" : "100%",
-          textAlign: isMobile ? "left" : "center",
+          textAlign: isMobile ? "left" : sectionData.centerSectionTextAlign as any || "center",
           marginLeft: isMobile ? 16 : 0,
         }}
         align="center"
@@ -409,8 +411,6 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
               }
             }}
             style={{
-              alignSelf: "flex-start",
-              marginTop: 16,
               fontWeight: 800,
               fontSize: FONT_SIZE.HEADING_3,
             }}
@@ -421,8 +421,8 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
       </Flex>
       <Flex
         style={{
-          width: isMobile ? "calc(100% - 32px)" : "100%",
-          padding: isMobile ? "0 16px" : "0",
+          width: isMobile ? "calc(100% - 8px)" : "100%",
+          padding: isMobile ? "0 4px" : "0",
         }}
         align="center"
         justify={isMobile ? "center" : "flex-start"}
