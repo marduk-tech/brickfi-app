@@ -143,6 +143,17 @@ body {
     padding: 0 4px;
   }
 
+  a[href*="brickassist"] {
+    color: white;
+    text-decoration:  "none";
+    font-weight: 500;
+    background-color: #1890ff;
+    display: inline-block;
+    margin-top: 8;
+    padding: 4px 16px;
+    border-radius: 16px;
+  }
+
   .progress-text {
     color: #444;
     background-color: #eee;
