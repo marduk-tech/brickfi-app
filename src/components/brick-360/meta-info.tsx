@@ -1,10 +1,7 @@
 import { Flex, Typography } from "antd";
 import moment from "moment";
 import { forwardRef } from "react";
-import {
-  capitalize,
-  getMinMaxPrices,
-} from "../../libs/lvnzy-helper";
+import { capitalize, getMinMaxPrices } from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LvnzyProject } from "../../types/LvnzyProject";
 
@@ -27,9 +24,19 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     );
   };
 
-  // Latest RERA completion date across all phases
-  const allCompletionDates = (lvnzyProject?.developer?.reraOtherPhases || [])
-    .flatMap((p: any) => p.projectDetails?.listOfRegistrationsExtensions || [])
+  if (!lvnzyProject) return null;
+
+  // Latest RERA completion date prfer reraOtherPhases, fallback to meta.projectTimelines
+  const phasesExtensions = (
+    lvnzyProject?.developer?.reraOtherPhases || []
+  ).flatMap((p: any) => p.projectDetails?.listOfRegistrationsExtensions || []);
+
+  const extensions =
+    phasesExtensions.length > 0
+      ? phasesExtensions
+      : (lvnzyProject?.meta?.projectTimelines as any[]) || [];
+
+  const allCompletionDates = extensions
     .map((ext: any) => moment(ext.completionDate, "DD-MM-YYYY"))
     .filter((d: any) => d.isValid());
 
@@ -69,7 +76,6 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
                   a.approxDistanceInKms - b.approxDistanceInKms,
               )[0].corridorName
             }${latestCompletionDate ? ` · ${latestCompletionDate}` : ""}`)}
-
         </Flex>
       </Flex>
     </>
