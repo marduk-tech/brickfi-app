@@ -548,8 +548,8 @@ export default function BrickAssistLandingV2() {
           centerSectionTextAlign: "left",
           verticalPadding: 100,
           textColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: "/images/landing/brickassistv2/7.png",
-          primaryImageSize: "60%",
+          mainImgUrl: isMobile ? "/images/landing/brickassistv2/7-mob.png" : "/images/landing/brickassistv2/7.png",
+          primaryImageSize: isMobile ? "90%" :"60%",
         }}
       ></SectionCenter>
       <SectionLeft
