@@ -1,4 +1,3 @@
-
 import { BrickfiCallback } from "@/components/common/brickfi-callback";
 import { Metadata } from "next";
 
