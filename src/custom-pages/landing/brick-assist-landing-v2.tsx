@@ -49,7 +49,15 @@ export default function BrickAssistLandingV2() {
             iconName="RiChatAiFill"
             iconSet="ri"
           ></DynamicReactIcon>
-          <Typography.Text style={{color: "white", fontSize: FONT_SIZE.HEADING_2, fontWeight: 500}}>Book a Free Call</Typography.Text>
+          <Typography.Text
+            style={{
+              color: "white",
+              fontSize: FONT_SIZE.HEADING_2,
+              fontWeight: 500,
+            }}
+          >
+            Book a Free Call
+          </Typography.Text>
         </Flex>
       </Button>
     );
@@ -264,7 +272,7 @@ export default function BrickAssistLandingV2() {
             : `calc(${sectionMaxWidth * (data.fullWidth ? 2 : 1)}px - ${padding * 2}px - 32px)`,
           padding: `${padding}px`,
           borderRadius: 16,
-          marginLeft: isMobile ? 8: 0,
+          marginLeft: isMobile ? 8 : 0,
           border: `1px solid #0e5882`,
           backgroundColor: "#0d4f74",
         }}
@@ -275,7 +283,7 @@ export default function BrickAssistLandingV2() {
           vertical
           style={{ width: data.fullWidth && !isMobile ? "50%" : "100%" }}
         >
-          <Flex gap={8} vertical style={{width: "100%"}}>
+          <Flex gap={8} vertical style={{ width: "100%" }}>
             <Typography.Text
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.2,
@@ -350,7 +358,36 @@ export default function BrickAssistLandingV2() {
       <SectionCenter
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : 1000,
-          heading: "Make Your Biggest Investment Decision on Data, Not FOMO",
+          heading: (
+            <Flex vertical gap={8}>
+              <Flex align="center" gap={4}>
+                <img
+                  src="/images/landing/brickassistv2/logo.png"
+                  style={{ width: "auto", height: 28 }}
+                ></img>
+                <Typography.Text
+                  style={{
+                    fontSize: 28,
+                    color: COLORS.primaryColor,
+                    lineHeight: "100%",
+                    fontWeight: 500,
+                  }}
+                >
+                  BRICKFI ASSIST
+                </Typography.Text>
+              </Flex>
+              <Typography.Text
+                style={{
+                  fontSize: isMobile ? 40 : 54,
+                  color: COLORS.textColorDark,
+                  lineHeight: "100%",
+                  fontWeight: 800,
+                }}
+              >
+                Make Your Biggest Investment Decision on Data, Not FOMO
+              </Typography.Text>
+            </Flex>
+          ),
           bgColor: COLORS.LANDING.LIGHT_PINK,
           verticalPadding: isMobile ? 100 : 200,
           primaryImageSize: isMobile ? "100%" : "100%",
@@ -374,9 +411,9 @@ export default function BrickAssistLandingV2() {
                   marginBottom: 8,
                 }}
               >
-                Brickfi is a real estate advisory that works for you the buyer.
-                Get data backed research & guided decision making to power your
-                home search and buying experience.
+                Brickfi Assist is a real estate advisory that works for you the
+                buyer. Get data backed research & guided decision making to
+                power your home search and buying experience.
               </Typography.Text>
               {getCTA()}
             </Flex>
@@ -477,6 +514,44 @@ export default function BrickAssistLandingV2() {
           verticalPadding: isMobile ? 32 : 32,
         }}
       ></SectionCenter>
+      <SectionCenter
+        sectionData={{
+          bgColor: COLORS.LANDING.BLUISH,
+          sectionMaxWidth: "100%",
+          heading: (
+            <Flex vertical align="flex-start" style={{width: isMobile ? "100%": 1000}}>
+            <Typography.Text
+              style={{
+                fontSize: isMobile ? 40 : 54,
+                lineHeight: "100%",
+                fontWeight: 800,
+                color: COLORS.LANDING.LIGHT_PINK,
+                textAlign: "left"
+              }}
+            >
+              How does Brickfi Assist Work ?
+            </Typography.Text>
+            <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_2,
+                  lineHeight: "100%",
+                  maxWidth: 1000,
+                  color: COLORS.LANDING.LIGHT_PINK,
+                }}
+              >
+                Get end to end
+                guidance and a holistic pre and post purchase support.
+              </Typography.Text>
+            </Flex>
+          ),
+          subHeading: "",
+          centerSectionTextAlign: "left",
+          verticalPadding: 100,
+          textColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: "/images/landing/brickassistv2/7.png",
+          primaryImageSize: "60%",
+        }}
+      ></SectionCenter>
       <SectionLeft
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
@@ -499,22 +574,10 @@ export default function BrickAssistLandingV2() {
         }}
       ></SectionLeft>
 
-      <Flex
-        vertical
-        style={{ backgroundColor: COLORS.LANDING.BLUISH, padding: "64px 0" }}
-      >
-        <SectionCenter
-          sectionData={{
-            bgColor: COLORS.LANDING.BLUISH,
-            sectionMaxWidth: isMobile ? "100%" : 1250,
-            heading: "How does Brickfi Ensure Your Best Interest ?",
-            subHeading: "",
-            centerSectionTextAlign: "left",
-            verticalPadding: 16,
-            textColor: COLORS.LANDING.LIGHT_PINK,
-          }}
-        ></SectionCenter>
-        <Flex vertical style={{ width: isMobile ? "100%" : 1250, margin: "auto"}}>
+      {/* <Flex
+          vertical
+          style={{ width: isMobile ? "100%" : 1250, margin: "auto" }}
+        >
           <Flex
             vertical={isMobile}
             style={{
@@ -544,18 +607,24 @@ export default function BrickAssistLandingV2() {
               margin: "16px 0",
             }}
             justify="center"
+            gap={36}
           >
             {renderProcessStep({
               index: 3,
-              heading: "Pre & Post Purchase Support",
+              heading: "Pre Purchase Support",
+              subHeading: "End to end support including scheduling site visits, real time inventory availability, unit selection guidance, negotitations. We are there with you to he",
+              imageUrl: "/images/landing/brickassistv2/3-3.png",
+            })}
+            {renderProcessStep({
+              index: 4,
+              heading: "Post Purchase Support",
               subHeading:
                 "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
               imageUrl: "/images/landing/brickassistv2/3-3.png",
-              fullWidth: true,
             })}
           </Flex>
-        </Flex>
-      </Flex>
+        </Flex> */}
+
       <SectionLeft
         sectionData={{
           heading: "Built By People Who Understand Both Data & Real Estate",
@@ -565,8 +634,22 @@ export default function BrickAssistLandingV2() {
           textColor: COLORS.LANDING.BLUISH,
           mainImgUrl: "/images/landing/brickassistv2/5.png",
           imageContainerWidth: 55,
-          subHeading:
-            <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, margin: isMobile ? "16px 0": 0}}>After seeing friends and family struggle with biased broker recommendations and confusing property decisions, our founders (ex-Google engineer) realized: Real estate is the only major industry without organized, accessible data. That had to change. Brickfi Assist applies the same data infrastructure principles that power modern tech platforms to an industry desperately lacking them.</Typography.Text>,
+          subHeading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_3,
+                margin: isMobile ? "16px 0" : 0,
+              }}
+            >
+              After seeing friends and family struggle with biased broker
+              recommendations and confusing property decisions, our founders
+              (ex-Google engineer) realized: Real estate is the only major
+              industry without organized, accessible data. That had to change.
+              Brickfi Assist applies the same data infrastructure principles
+              that power modern tech platforms to an industry desperately
+              lacking them.
+            </Typography.Text>
+          ),
         }}
       ></SectionLeft>
       <SectionCenter
