@@ -82,7 +82,7 @@ export default function BrickAssistLandingV2() {
 
   const getFaqText = (text: string | ReactNode) => {
     return (
-      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}>
+      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}>
         {typeof text == "string" ? text : <>{text}</>}
       </p>
     );
@@ -134,13 +134,14 @@ export default function BrickAssistLandingV2() {
       children: (
         <Flex vertical gap={16}>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
             <p
               style={{
-                color: COLORS.redIdentifier,
+                color: COLORS.primaryColor,
                 margin: 0,
-                fontWeight: "bold",
+                lineHeight: "120%",
+                fontWeight: 500 
               }}
             >
               We DON&apos;T sell or market specific projects like other channel
@@ -150,14 +151,15 @@ export default function BrickAssistLandingV2() {
             projects across Bangalore.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
             {" "}
             <p
               style={{
-                color: COLORS.redIdentifier,
+                color: COLORS.primaryColor,
                 margin: 0,
-                fontWeight: "bold",
+                lineHeight: "120%",
+                fontWeight: 500 
               }}
             >
               We DON&apos;T provide superficial, biased marketing information.
@@ -165,7 +167,7 @@ export default function BrickAssistLandingV2() {
             Instead we refer verified sources of information and show both sides
             of the coin and go deep into understanding a particular project. Our
             system has been integrated with source like{" "}
-            <span style={{ color: COLORS.primaryColor, marginRight: 8 }}>
+            <span style={{ color: COLORS.textColorDark, marginRight: 8 }}>
               RERA, Open Street, Google Maps, Open City
             </span>
             including how reliable the builder is, the location, upcoming
@@ -173,14 +175,15 @@ export default function BrickAssistLandingV2() {
             understand the benefits as well as its shortcomings.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
             {" "}
             <p
               style={{
-                color: COLORS.redIdentifier,
+                color: COLORS.primaryColor,
                 margin: 0,
-                fontWeight: "bold",
+                lineHeight: "120%",
+                fontWeight: 500 
               }}
             >
               Our work DOESN&apos;T stop once you make a decision.
@@ -197,41 +200,46 @@ export default function BrickAssistLandingV2() {
       label: getFaqHeading("What all to expect during consultation?"),
       style: faqPanelStyle,
       children: (
-        <Flex vertical gap={16}>
+        <Flex vertical gap={32}>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>INTRO CALL</b>
+            <b>✔ INTRO CALL</b>
             <br></br>
             We initially do a intro call to discuss in detail your set of
-            requirements, provide overview of the Bangalore market in terms of
+            requirements, provide overview of the Bangalore landscape with different in terms of
             different micro markets
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>SHORTLISTING</b>
+            <b>✔ SHORTLISTING</b>
             <br></br>
             Based on your requirements, we shortlist/curate set of projects and
-            share detailed BRICK360 reports to help you understand each property
+            share <span style={{ color: COLORS.textColorDark }}>detailed Brick360 reports</span> to help you understand and evaluate each property
             in detail.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>VISITS</b>
+            <b>✔ DECISION MAKING</b>
             <br></br>
-            Once you have selected a few properties, we assist with you visits
-            as well as any other assistance related to pricing, timeline, etc
-            which can help you make an informed decision .
+            Once you have shortilisted properties, we will assist with you physical visits and provide detailed insights related to <span style={{ color: COLORS.textColorDark }}>physical inspection, pricing, timeline, unit
+            selection</span> which can help you make an informed decision. Based on
+            your final selection, we will also carry out strategic negotitation on your behalf, making sure you get the best deal.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>DEAL MAKING</b>
+            <b>✔ POST BUY ASSISTANCE</b>
             <br></br>
-            Based on your final selection, we do strategic negotitation
-            including pricing negotiation, unit selection and payment planning.
+            Once a deal is finalized we help with{" "}
+            <span style={{ color: COLORS.textColorDark }}>
+              legal oversight, builder communication, contractual review, and
+              title verification
+            </span>{" "}
+            of the property. This ensures you are free from any legal conflicts
+            and payments are secure as well as risk free.
           </Typography.Text>
         </Flex>
       ),
@@ -242,12 +250,12 @@ export default function BrickAssistLandingV2() {
       style: faqPanelStyle,
       children: getFaqText(
         <>
-          We have an in house database of over{" "}
-          <span style={{ color: COLORS.primaryColor }}>
-            2000 projects across Bengaluru
+          We have a database of over{" "}
+          <span style={{ color: COLORS.textColorDark }}>
+            2000 projects across Bangalore
           </span>{" "}
-          including data around{" "}
-          <span style={{ color: COLORS.primaryColor }}>
+          including data points around{" "}
+          <span style={{ color: COLORS.textColorDark }}>
             builder credibility, upcoming infra projects near a location,
             surroundings & more
           </span>{" "}
@@ -257,6 +265,22 @@ export default function BrickAssistLandingV2() {
           purpose is investment, we can find projects near upcoming tech parks.
         </>,
       ),
+    },
+    {
+      key: "6",
+      label: getFaqHeading(
+        "Do you help with property management including resale/rental ?",
+      ),
+      style: faqPanelStyle,
+      children: getFaqText(`
+          We do not directly provide services with resale or rental. However, we can help you get in touch with a partner who can assist you with the same.`),
+    },
+    {
+      key: "6",
+      label: getFaqHeading("Do you help with finding a rental property ?"),
+      style: faqPanelStyle,
+      children: getFaqText(`
+          As of now, we do NOT provide assistance with rentals.`),
     },
   ];
 
@@ -519,19 +543,23 @@ export default function BrickAssistLandingV2() {
           bgColor: COLORS.LANDING.BLUISH,
           sectionMaxWidth: "100%",
           heading: (
-            <Flex vertical align="flex-start" style={{width: isMobile ? "100%": 1000}}>
-            <Typography.Text
-              style={{
-                fontSize: isMobile ? 40 : 54,
-                lineHeight: "100%",
-                fontWeight: 800,
-                color: COLORS.LANDING.LIGHT_PINK,
-                textAlign: "left"
-              }}
+            <Flex
+              vertical
+              align="flex-start"
+              style={{ width: isMobile ? "100%" : 1000 }}
             >
-              How does Brickfi Assist Work ?
-            </Typography.Text>
-            <Typography.Text
+              <Typography.Text
+                style={{
+                  fontSize: isMobile ? 40 : 54,
+                  lineHeight: "100%",
+                  fontWeight: 800,
+                  color: COLORS.LANDING.LIGHT_PINK,
+                  textAlign: "left",
+                }}
+              >
+                How does Brickfi Assist Work ?
+              </Typography.Text>
+              <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_2,
                   lineHeight: "100%",
@@ -539,8 +567,8 @@ export default function BrickAssistLandingV2() {
                   color: COLORS.LANDING.LIGHT_PINK,
                 }}
               >
-                Get end to end
-                guidance and a holistic pre and post purchase support.
+                Get end to end guidance and a holistic pre and post purchase
+                support.
               </Typography.Text>
             </Flex>
           ),
@@ -548,8 +576,10 @@ export default function BrickAssistLandingV2() {
           centerSectionTextAlign: "left",
           verticalPadding: 100,
           textColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: isMobile ? "/images/landing/brickassistv2/7-mob.png" : "/images/landing/brickassistv2/7.png",
-          primaryImageSize: isMobile ? "90%" :"60%",
+          mainImgUrl: isMobile
+            ? "/images/landing/brickassistv2/7-mob.png"
+            : "/images/landing/brickassistv2/7.png",
+          primaryImageSize: isMobile ? "90%" : "60%",
         }}
       ></SectionCenter>
       <SectionLeft
@@ -570,7 +600,7 @@ export default function BrickAssistLandingV2() {
           mainImgUrl: "/images/landing/brickassistv2/2.png",
           primaryImageSize: isMobile ? "100%" : "80%",
           imageContainerWidth: 50,
-          verticalPadding: 180,
+          verticalPadding: isMobile ? 60: 180,
         }}
       ></SectionLeft>
 
@@ -663,7 +693,7 @@ export default function BrickAssistLandingV2() {
             : "/images/landing/brickassistv2/6.png",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
-          verticalPadding: 100,
+          verticalPadding: isMobile ? 32 : 100,
         }}
       ></SectionCenter>
 
@@ -671,9 +701,9 @@ export default function BrickAssistLandingV2() {
         sectionData={{
           heading: "FAQ",
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 24 : 100,
+          verticalPadding: isMobile ? 48 : 100,
           subHeading: (
-            <Flex style={{ marginTop: 64 }}>
+            <Flex style={{ marginTop: 32 }}>
               <Collapse
                 expandIcon={({ isActive }) => (
                   <CaretRightOutlined
