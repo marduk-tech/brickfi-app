@@ -6,7 +6,7 @@ export const getDeveloper = async (id: string, throwError = true) => {
   const res = await fetch(`${baseApiUrl}real-estate-developer/${id}`, {
     cache: "no-store",
     headers: {
-      "x-api-key": sitemapApiKey || "",
+      "x-api-key": sitemapApiKey || apiKey || "",
     },
   });
 
@@ -44,7 +44,7 @@ export const getDeveloperBySlug = async (slug: string, throwError = true) => {
     {
       cache: "no-store",
       headers: {
-        "x-api-key": sitemapApiKey || "",
+        "x-api-key": sitemapApiKey || apiKey || "",
       },
     },
   );
