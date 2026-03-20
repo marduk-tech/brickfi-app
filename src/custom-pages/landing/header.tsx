@@ -109,7 +109,7 @@ const LandingHeader: React.FC<{
                   color: color || COLORS.textColorLight,
                   fontSize: FONT_SIZE.PARA,
                   textDecoration: 'none',
-                  textShadow: "0.5px 0.5px 0 white"
+                  textShadow: color ? "0.5px 0.5px 0 white" : "none"
                 }}
               >
                 {item.label}

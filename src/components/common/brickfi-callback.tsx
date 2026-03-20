@@ -189,7 +189,7 @@ export function BrickfiCallback() {
             name: values.name,
             callbackCategory: values.assistance,
             sourceIntent: srcIntent || "",
-            preferredCallbackTime: `${values.day}, ${values.time}`,
+            preferredCallbackTime: `${values.day}, ${values.time.value}`,
           },
           countryCode: "91",
         },

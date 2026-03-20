@@ -437,6 +437,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
                 : "100%",
               maxWidth: 1100,
               margin: "auto",
+              marginTop: 32
             }}
           />
         ) : sectionData.mediaUrl ? (
