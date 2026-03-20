@@ -414,7 +414,7 @@ export default function BrickAssistLandingV2() {
           ),
           bgColor: COLORS.LANDING.LIGHT_PINK,
           verticalPadding: isMobile ? 100 : 200,
-          primaryImageSize: isMobile ? "100%" : "100%",
+          primaryImageSize: isMobile ? "100%" : "85%",
           mainImgUrl: isMobile
             ? "/images/landing/brickassistv2/1-mob.png"
             : "/images/landing/brickassistv2/1.png",
