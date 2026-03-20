@@ -206,7 +206,7 @@ export default function BrickAssistLandingV2() {
           >
             <b>✔ INTRO CALL</b>
             <br></br>
-            We initially do a intro call to discuss in detail your set of
+            We initially do an intro call to discuss in detail your set of
             requirements, provide overview of the Bangalore landscape with
             different in terms of different micro markets
           </Typography.Text>
@@ -267,12 +267,21 @@ export default function BrickAssistLandingV2() {
             builder credibility, upcoming infra projects near a location,
             surroundings & more
           </span>{" "}
-          . This helps us to narrow down the project based on your requirements.
-          For example, if you are looking for a home with more greenery nearby,
+          . This helps us to match-make projects based on your requirements.
+          For instance, if you are love a home with more greenery around,
           we can shortlist projects based on surroundings. If you are primary
-          purpose is investment, we can find projects near upcoming tech parks.
+          purpose is investment, we can find projects near upcoming infra or business centres.
         </>,
       ),
+    },
+     {
+      key: "6",
+      label: getFaqHeading(
+        "Do you provide legal services ?",
+      ),
+      style: faqPanelStyle,
+      children: getFaqText(`
+          We do offer legal services as part of our consultation including legal oversight, lawyer contractual review and title verification.`),
     },
     {
       key: "6",
