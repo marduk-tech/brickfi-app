@@ -141,7 +141,7 @@ export default function BrickAssistLandingV2() {
                 color: COLORS.primaryColor,
                 margin: 0,
                 lineHeight: "120%",
-                fontWeight: 500 
+                fontWeight: 500,
               }}
             >
               We DON&apos;T sell or market specific projects like other channel
@@ -159,7 +159,7 @@ export default function BrickAssistLandingV2() {
                 color: COLORS.primaryColor,
                 margin: 0,
                 lineHeight: "120%",
-                fontWeight: 500 
+                fontWeight: 500,
               }}
             >
               We DON&apos;T provide superficial, biased marketing information.
@@ -183,7 +183,7 @@ export default function BrickAssistLandingV2() {
                 color: COLORS.primaryColor,
                 margin: 0,
                 lineHeight: "120%",
-                fontWeight: 500 
+                fontWeight: 500,
               }}
             >
               Our work DOESN&apos;T stop once you make a decision.
@@ -207,8 +207,8 @@ export default function BrickAssistLandingV2() {
             <b>✔ INTRO CALL</b>
             <br></br>
             We initially do a intro call to discuss in detail your set of
-            requirements, provide overview of the Bangalore landscape with different in terms of
-            different micro markets
+            requirements, provide overview of the Bangalore landscape with
+            different in terms of different micro markets
           </Typography.Text>
           <Typography.Text
             style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
@@ -216,17 +216,25 @@ export default function BrickAssistLandingV2() {
             <b>✔ SHORTLISTING</b>
             <br></br>
             Based on your requirements, we shortlist/curate set of projects and
-            share <span style={{ color: COLORS.textColorDark }}>detailed Brick360 reports</span> to help you understand and evaluate each property
-            in detail.
+            share{" "}
+            <span style={{ color: COLORS.textColorDark }}>
+              detailed Brick360 reports
+            </span>{" "}
+            to help you understand and evaluate each property in detail.
           </Typography.Text>
           <Typography.Text
             style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
             <b>✔ DECISION MAKING</b>
             <br></br>
-            Once you have shortilisted properties, we will assist with you physical visits and provide detailed insights related to <span style={{ color: COLORS.textColorDark }}>physical inspection, pricing, timeline, unit
-            selection</span> which can help you make an informed decision. Based on
-            your final selection, we will also carry out strategic negotitation on your behalf, making sure you get the best deal.
+            Once you have shortilisted properties, we will assist with you
+            physical visits and provide detailed insights related to{" "}
+            <span style={{ color: COLORS.textColorDark }}>
+              physical inspection, pricing, timeline, unit selection
+            </span>{" "}
+            which can help you make an informed decision. Based on your final
+            selection, we will also carry out strategic negotitation on your
+            behalf, making sure you get the best deal.
           </Typography.Text>
           <Typography.Text
             style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
@@ -600,7 +608,7 @@ export default function BrickAssistLandingV2() {
           mainImgUrl: "/images/landing/brickassistv2/2.png",
           primaryImageSize: isMobile ? "100%" : "80%",
           imageContainerWidth: 50,
-          verticalPadding: isMobile ? 60: 180,
+          verticalPadding: isMobile ? 60 : 180,
         }}
       ></SectionLeft>
 
@@ -654,13 +662,33 @@ export default function BrickAssistLandingV2() {
             })}
           </Flex>
         </Flex> */}
-
+      <Flex align="center" justify="center">
+        <img
+          src="/images/landing/brickassistv2/divider.png"
+          width={isMobile ? "60%":400}
+          height="auto"
+        ></img>
+      </Flex>
+      <SectionCenter
+        sectionData={{
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          heading: "",
+          subHeading: "",
+          primaryImageSize: isMobile ? "100%" : "80%",
+          mainImgUrl: isMobile
+            ? "/images/landing/brickassistv2/6-mob.png"
+            : "/images/landing/brickassistv2/6.png",
+          mainImgAltText: "Testimonials from Brickfi Customers",
+          imageContainerWidth: 50,
+          verticalPadding: isMobile ? 32 : 100,
+        }}
+      ></SectionCenter>
       <SectionLeft
         sectionData={{
           heading: "Built By People Who Understand Both Data & Real Estate",
           bgColor: COLORS.LANDING.LIGHT_PINK,
           sectionMaxWidth: isMobile ? "100%" : "90%",
-          verticalPadding: isMobile ? 24 : 100,
+          verticalPadding: isMobile ? 48 : 100,
           textColor: COLORS.LANDING.BLUISH,
           mainImgUrl: "/images/landing/brickassistv2/5.png",
           imageContainerWidth: 55,
@@ -682,20 +710,7 @@ export default function BrickAssistLandingV2() {
           ),
         }}
       ></SectionLeft>
-      <SectionCenter
-        sectionData={{
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          heading: "",
-          subHeading: "",
-          primaryImageSize: isMobile ? "100%" : "80%",
-          mainImgUrl: isMobile
-            ? "/images/landing/brickassistv2/6-mob.png"
-            : "/images/landing/brickassistv2/6.png",
-          mainImgAltText: "Testimonials from Brickfi Customers",
-          imageContainerWidth: 50,
-          verticalPadding: isMobile ? 32 : 100,
-        }}
-      ></SectionCenter>
+      
 
       <SectionCenter
         sectionData={{
