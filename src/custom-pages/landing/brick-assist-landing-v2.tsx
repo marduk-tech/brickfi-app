@@ -696,11 +696,10 @@ export default function BrickAssistLandingV2() {
         sectionData={{
           heading: "Built By People Who Understand Both Data & Real Estate",
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          sectionMaxWidth: isMobile ? "100%" : "90%",
+          sectionMaxWidth: isMobile ? "100%" : "85%",
           verticalPadding: isMobile ? 48 : 100,
-          textColor: COLORS.LANDING.BLUISH,
           mainImgUrl: "/images/landing/brickassistv2/5.png",
-          imageContainerWidth: 55,
+          imageContainerWidth: 65,
           subHeading: (
             <Typography.Text
               style={{
@@ -709,12 +708,12 @@ export default function BrickAssistLandingV2() {
               }}
             >
               After seeing friends and family struggle with biased broker
-              recommendations and confusing property decisions, our founders
+              recommendations, confusing property decisions and broken advise, our founders
               (ex-Google engineer) realized: Real estate is the only major
-              industry without organized, accessible data. That had to change.
+              industry without organized, accessible data and trusted approach. That had to change.
               Brickfi Assist applies the same data infrastructure principles
               that power modern tech platforms to an industry desperately
-              lacking them.
+              lacking them and radical transparency where its needed the most.
             </Typography.Text>
           ),
         }}
