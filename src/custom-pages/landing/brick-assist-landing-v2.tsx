@@ -403,8 +403,8 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
             </Flex>
           ),
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 100 : 200,
-          primaryImageSize: isMobile ? "100%" : "85%",
+          verticalPadding: isMobile ? 100 : 130,
+          primaryImageSize: isMobile ? "100%" : "90%",
           mainImgUrl: isMobile
             ? "/images/landing/brickassistv2/1-mob.png"
             : "/images/landing/brickassistv2/1.png",
@@ -434,7 +434,10 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
           ),
         }}
       ></SectionCenter>
-      <SectionCenter
+      <img width={isMobile ? "90%": "70%" } style={{margin: "auto", marginBottom: 100}} src={isMobile
+            ? "/images/landing/brickassistv2/4-mob.png"
+            : "/images/landing/brickassistv2/4.png"} />
+       {/* <SectionCenter
         sectionData={{
           fullHeight: true,
           bgColor: COLORS.LANDING.BLUISH,
@@ -442,12 +445,13 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
           mainImgUrl: isMobile
             ? "/images/landing/brickassistv2/4-mob.png"
             : "/images/landing/brickassistv2/4.png",
-          primaryImageSize: isMobile ? "80%" : "65%",
+          primaryImageSize: isMobile ? "80%" : "100%",
           mainImgAltText:
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
-          verticalPadding: 100,
+          verticalPadding: 1,
+          sectionMaxWidth: "100%"
         }}
-      ></SectionCenter>
+      ></SectionCenter> */}
       <SectionCenter
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,
@@ -522,7 +526,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
           mainImgAltText: "Brickfi Assist - End to End Property Consultation",
           primaryImageSize: "100%",
           imageContainerWidth: 50,
-          verticalPadding: isMobile ? 32 : 32,
+          verticalPadding: isMobile ? 32 : 100,
         }}
       ></SectionCenter>
       <SectionCenter
