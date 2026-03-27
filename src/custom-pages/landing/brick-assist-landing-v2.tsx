@@ -403,8 +403,8 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
             </Flex>
           ),
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 100 : 130,
-          primaryImageSize: isMobile ? "100%" : "90%",
+          verticalPadding: isMobile ? 100 : 100,
+          primaryImageSize: isMobile ? "100%" : "100%",
           mainImgUrl: isMobile
             ? "/images/landing/brickassistv2/1-mob.png"
             : "/images/landing/brickassistv2/1.png",
@@ -421,8 +421,8 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
               <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_2,
-                  marginTop: 16,
-                  marginBottom: 8,
+                  marginTop: 8,
+                  marginBottom: 0,
                 }}
               >
                 Brickfi Assist is a real estate advisory that works for you—the
@@ -434,9 +434,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
           ),
         }}
       ></SectionCenter>
-      <img width={isMobile ? "90%": "70%" } style={{margin: "auto", marginBottom: 100}} src={isMobile
-            ? "/images/landing/brickassistv2/4-mob.png"
-            : "/images/landing/brickassistv2/4.png"} />
+    
        {/* <SectionCenter
         sectionData={{
           fullHeight: true,
@@ -454,7 +452,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
       ></SectionCenter> */}
       <SectionCenter
         sectionData={{
-          bgColor: COLORS.LANDING.BLUISH,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
           heading: "",
 
           subHeading: (
@@ -474,7 +472,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
                   marginTop: 16,
                   fontSize: FONT_SIZE.HEADING_1 * 0.8,
                   maxWidth: 1000,
-                  color: "white",
+                  color: COLORS.textColorDark,
                   textAlign: "left",
                   paddingBottom: 24,
                 }}
@@ -526,9 +524,12 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
           mainImgAltText: "Brickfi Assist - End to End Property Consultation",
           primaryImageSize: "100%",
           imageContainerWidth: 50,
-          verticalPadding: isMobile ? 32 : 100,
+          verticalPadding: isMobile ? 32 : 32,
         }}
       ></SectionCenter>
+        <img width={isMobile ? "90%": "70%" } style={{margin: "auto", marginBottom: 100}} src={isMobile
+            ? "/images/landing/brickassistv2/4-mob.png"
+            : "/images/landing/brickassistv2/4.png"} />
       <SectionCenter
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,

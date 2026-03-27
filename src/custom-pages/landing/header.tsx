@@ -17,16 +17,16 @@ const LandingHeader: React.FC<{
   const router = useRouter();
   const navItems = [
     {
-      link: LandingConstants.genReportFormLink,
-      label: "Get Brick360 Report",
-    },
-    {
-      link: LandingConstants.blogLink,
-      label: "Blog",
+      link: "/",
+      label: "Brick360 Report",
     },
     {
       link: LandingConstants.brickAssistLink,
       label: "Brickfi Assist",
+    },
+    {
+      link: LandingConstants.blogLink,
+      label: "Blog",
     },
     {
       link: LandingConstants.appLink,

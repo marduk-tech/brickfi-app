@@ -209,27 +209,31 @@ export function BrickfiCallback() {
         params: {
           name: values.name,
           mobile: values.mobile,
-          callbackTime: values.callbackTime,
+          callbackCategory: values.assistance,
+          callbackTime: `${values.day}, ${values.time.value}`,
         },
       });
     }
   };
 
   const [flickerWait, setFlickerWait] = useState(true);
-  
-    useEffect(() => {
-      setTimeout(() => {
+
+  useEffect(() => {
+    setTimeout(
+      () => {
         setFlickerWait(false);
-      }, isMobile ? 1000: 100);
-    });
-  
-    if (flickerWait) {
-      return (
-        <Flex style={{ marginTop: 200 }} align="center" justify="center">
-          <Loader></Loader>
-        </Flex>
-      );
-    }
+      },
+      isMobile ? 1000 : 100,
+    );
+  });
+
+  if (flickerWait) {
+    return (
+      <Flex style={{ marginTop: 200 }} align="center" justify="center">
+        <Loader></Loader>
+      </Flex>
+    );
+  }
 
   return (
     <Flex gap={8} vertical style={{ paddingTop: 24, paddingBottom: 16 }}>
@@ -390,7 +394,9 @@ export function BrickfiCallback() {
                         disabled={!selectedAsstVal}
                         onChange={(value: any) => {
                           setDayOption(value);
-                            form.setFieldsValue({ time: getTimeOptions(value)[0] });
+                          form.setFieldsValue({
+                            time: getTimeOptions(value)[0],
+                          });
                         }}
                         optionLabelProp="label"
                       >
@@ -436,9 +442,9 @@ export function BrickfiCallback() {
             <Flex
               style={{
                 marginTop: 24,
-                alignSelf: isMobile ? "center" :"flex-end",
+                alignSelf: isMobile ? "center" : "flex-end",
                 marginLeft: isMobile ? 8 : 32,
-                marginBottom: isMobile ? 0: 24,
+                marginBottom: isMobile ? 0 : 24,
               }}
               gap={16}
             >
@@ -452,7 +458,7 @@ export function BrickfiCallback() {
                     updateUser.isPending ||
                     sendMail.isPending
                   }
-                  style={{width: 200}}
+                  style={{ width: 200 }}
                 >
                   {"Submit"}
                 </Button>
@@ -461,7 +467,10 @@ export function BrickfiCallback() {
           </Flex>
           {isMobile ? (
             <Flex
-              style={{ width: isMobile ? "100" : "40%", height: isMobile ? 400: 600 }}
+              style={{
+                width: isMobile ? "100" : "40%",
+                height: isMobile ? 400 : 600,
+              }}
               align={!isMobile ? "center" : "flex-start"}
               justify={isMobile ? "center" : "flex-start"}
             >
