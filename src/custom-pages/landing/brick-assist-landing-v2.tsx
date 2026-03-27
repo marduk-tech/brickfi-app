@@ -32,7 +32,7 @@ export default function BrickAssistLandingV2() {
       <Button
         type="primary"
         onClick={() => {
-          safeWindow.location.href = "/requestreport";
+          safeWindow.location.href = "/callback-request?srcIntent=brkassist-landing";
         }}
         style={{
           alignSelf: "flex-start",
@@ -49,7 +49,15 @@ export default function BrickAssistLandingV2() {
             iconName="RiChatAiFill"
             iconSet="ri"
           ></DynamicReactIcon>
-          <Typography.Text style={{color: "white", fontSize: FONT_SIZE.HEADING_2, fontWeight: 500}}>Book a Free Call</Typography.Text>
+          <Typography.Text
+            style={{
+              color: "white",
+              fontSize: FONT_SIZE.HEADING_2,
+              fontWeight: 500,
+            }}
+          >
+            Book a Free Call
+          </Typography.Text>
         </Flex>
       </Button>
     );
@@ -74,7 +82,7 @@ export default function BrickAssistLandingV2() {
 
   const getFaqText = (text: string | ReactNode) => {
     return (
-      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}>
+      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}>
         {typeof text == "string" ? text : <>{text}</>}
       </p>
     );
@@ -92,13 +100,11 @@ export default function BrickAssistLandingV2() {
       key: "1",
       label: getFaqHeading("What is Brickfi Assist ?"),
       style: faqPanelStyle,
-      children: getFaqText(`
-          With BrickfiAssist you get expert property buying advise on new and
-          under construction properties including apartments, villas and plots
-          in Bengaluru. We provide data backed and verified list of curated
-          properties personalized for your requirements. Besides, we also
-          provide end to end support when it comes to visits, negotiation, post
-          purchase documentation assistance and more.`),
+      children: getFaqText(<>
+          With Brickfi Assist, you get expert property-buying advice for new and under-construction properties, including apartments, villas, and plots in Bengaluru.<br></br>
+We provide a data-backed, verified list of curated properties tailored to your requirements.<br></br>
+Additionally, we offer end-to-end support—from site visits and negotiations to post-purchase documentation assistance.
+</>),
     },
     {
       key: "2",
@@ -110,12 +116,9 @@ export default function BrickAssistLandingV2() {
             The service is completely free for our buyers.
           </b>
           <br></br>
-          We usually charge commission from the developer. However, that does
-          not mean, that we prefer or have any bias with any particular
-          developer. Most of the developers have a set commisssion for
-          partners/advisors which is separate from the final cost quoted to the
-          buyer. That means, the buyer does not have to accomodate any part of
-          their cost when it comes to commissions.
+         We typically earn a commission from developers. However, this does not mean we favor any particular developer.
+ Most developers allocate a standard commission for advisors which varies. This ensures that buyers do not incur any additional costs.
+
         </>,
       ),
     },
@@ -126,59 +129,53 @@ export default function BrickAssistLandingV2() {
       children: (
         <Flex vertical gap={16}>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
             <p
               style={{
-                color: COLORS.redIdentifier,
+                color: COLORS.primaryColor,
                 margin: 0,
-                fontWeight: "bold",
+                lineHeight: "120%",
+                fontWeight: 500,
               }}
             >
-              We DON&apos;T sell or market specific projects like other channel
-              partners/brokers.
+              We DON&apos;T sell or promote specific projects like traditional brokers.
             </p>
-            Instead, we offer data backed advise, curation and analysis of
-            projects across Bangalore.
+            Instead, we provide data-backed advice, curation, and analysis across projects in Bangalore.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
             {" "}
             <p
               style={{
-                color: COLORS.redIdentifier,
+                color: COLORS.primaryColor,
                 margin: 0,
-                fontWeight: "bold",
+                lineHeight: "120%",
+                fontWeight: 500,
               }}
             >
-              We DON&apos;T provide superficial, biased marketing information.
+              We DON&apos;T provide superficial or biased marketing information.
             </p>{" "}
-            Instead we refer verified sources of information and show both sides
-            of the coin and go deep into understanding a particular project. Our
-            system has been integrated with source like{" "}
-            <span style={{ color: COLORS.primaryColor, marginRight: 8 }}>
-              RERA, Open Street, Google Maps, Open City
-            </span>
-            including how reliable the builder is, the location, upcoming
-            projects near the area, surroundings and more. We make sure you
-            understand the benefits as well as its shortcomings.
+            Our insights are derived from verified sources such as RERA, OpenStreetMap, Google Maps, and OpenCity—combined with deep analysis of builder track record, location dynamics, and future developments.<br></br>
+             We help you understand both the strengths and risks of every property.<br></br>
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
             {" "}
             <p
               style={{
-                color: COLORS.redIdentifier,
+                color: COLORS.primaryColor,
                 margin: 0,
-                fontWeight: "bold",
+                lineHeight: "120%",
+                fontWeight: 500,
               }}
             >
               Our work DOESN&apos;T stop once you make a decision.
             </p>{" "}
             We go the extra mile in terms of negotiation, post purchase
-            formalities and any other assistance you might need once you have
+            formalities, legal due-dilligence and any other assistance you might need once you have
             made your decision.
           </Typography.Text>
         </Flex>
@@ -189,41 +186,41 @@ export default function BrickAssistLandingV2() {
       label: getFaqHeading("What all to expect during consultation?"),
       style: faqPanelStyle,
       children: (
-        <Flex vertical gap={16}>
+        <Flex vertical gap={32}>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>INTRO CALL</b>
+            <b>✔ INTRO CALL</b>
             <br></br>
-            We initially do a intro call to discuss in detail your set of
-            requirements, provide overview of the Bangalore market in terms of
-            different micro markets
+           We begin with a detailed discussion of your requirements and provide an overview of Bangalore’s landscape and understanding of different micro-markets.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>SHORTLISTING</b>
+            <b>✔ SHORTLISTING</b>
             <br></br>
-            Based on your requirements, we shortlist/curate set of projects and
-            share detailed BRICK360 reports to help you understand each property
-            in detail.
+            Based on your needs, we curate a set of relevant projects and share detailed Brick360° reports for each to help you understand & evaluate each property.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>VISITS</b>
+            <b>✔ DECISION MAKING</b>
             <br></br>
-            Once you have selected a few properties, we assist with you visits
-            as well as any other assistance related to pricing, timeline, etc
-            which can help you make an informed decision .
+             Once you shortlist properties, we assist with site visits, pricing discussions, and timelines to help you make an informed decision.
+             We support you through final negotiations, unit selection, and payment planning.
           </Typography.Text>
           <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
           >
-            <b>DEAL MAKING</b>
+            <b>✔ POST BUY ASSISTANCE</b>
             <br></br>
-            Based on your final selection, we do strategic negotitation
-            including pricing negotiation, unit selection and payment planning.
+            Once a deal is finalized we help with{" "}
+            <span style={{ color: COLORS.textColorDark }}>
+              legal oversight, builder communication, contractual review, and
+              title verification
+            </span>{" "}
+            of the property. This ensures you are free from any legal conflicts
+            and payments are secure as well as risk free.
           </Typography.Text>
         </Flex>
       ),
@@ -234,21 +231,46 @@ export default function BrickAssistLandingV2() {
       style: faqPanelStyle,
       children: getFaqText(
         <>
-          We have an in house database of over{" "}
-          <span style={{ color: COLORS.primaryColor }}>
-            2000 projects across Bengaluru
+          We have a database of over{" "}
+          <span style={{ color: COLORS.textColorDark }}>
+            2000 projects across Bangalore
           </span>{" "}
-          including data around{" "}
-          <span style={{ color: COLORS.primaryColor }}>
+          including data points around{" "}
+          <span style={{ color: COLORS.textColorDark }}>
             builder credibility, upcoming infra projects near a location,
             surroundings & more
           </span>{" "}
-          . This helps us to narrow down the project based on your requirements.
-          For example, if you are looking for a home with more greenery nearby,
+          . This helps us to match-make projects based on your requirements.
+          For instance, if you are love a home with more greenery around,
           we can shortlist projects based on surroundings. If you are primary
-          purpose is investment, we can find projects near upcoming tech parks.
+          purpose is investment, we can find projects near upcoming infra or business centres.
         </>,
       ),
+    },
+     {
+      key: "6",
+      label: getFaqHeading(
+        "Do you provide legal services ?",
+      ),
+      style: faqPanelStyle,
+      children: getFaqText(`
+          We do offer legal services as part of our consultation including legal oversight, lawyer contractual review and title verification.`),
+    },
+    {
+      key: "6",
+      label: getFaqHeading(
+        "Do you help with property management including resale/rental ?",
+      ),
+      style: faqPanelStyle,
+      children: getFaqText(`
+          We do not directly provide services with resale or rental. However, we can help you get in touch with a partner who can assist you with the same.`),
+    },
+    {
+      key: "6",
+      label: getFaqHeading("Do you help with finding a rental property ?"),
+      style: faqPanelStyle,
+      children: getFaqText(`
+          As of now, we do NOT provide assistance with rentals.`),
     },
   ];
 
@@ -264,7 +286,7 @@ export default function BrickAssistLandingV2() {
             : `calc(${sectionMaxWidth * (data.fullWidth ? 2 : 1)}px - ${padding * 2}px - 32px)`,
           padding: `${padding}px`,
           borderRadius: 16,
-          marginLeft: isMobile ? 8: 0,
+          marginLeft: isMobile ? 8 : 0,
           border: `1px solid #0e5882`,
           backgroundColor: "#0d4f74",
         }}
@@ -275,7 +297,7 @@ export default function BrickAssistLandingV2() {
           vertical
           style={{ width: data.fullWidth && !isMobile ? "50%" : "100%" }}
         >
-          <Flex gap={8} vertical style={{width: "100%"}}>
+          <Flex gap={8} vertical style={{ width: "100%" }}>
             <Typography.Text
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.2,
@@ -350,9 +372,38 @@ export default function BrickAssistLandingV2() {
       <SectionCenter
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : 1000,
-          heading: "Make Your Biggest Investment Decision on Data, Not FOMO",
+          heading: (
+            <Flex vertical gap={8}>
+              <Flex align="center" gap={4}>
+                <img
+                  src="/images/landing/brickassistv2/logo.png"
+                  style={{ width: "auto", height: 28 }}
+                ></img>
+                <Typography.Text
+                  style={{
+                    fontSize: 28,
+                    color: COLORS.primaryColor,
+                    lineHeight: "100%",
+                    fontWeight: 500,
+                  }}
+                >
+                  BRICKFI ASSIST
+                </Typography.Text>
+              </Flex>
+              <Typography.Text
+                style={{
+                  fontSize: isMobile ? 40 : 54,
+                  color: COLORS.textColorDark,
+                  lineHeight: "100%",
+                  fontWeight: 800,
+                }}
+              >
+                Make Your Biggest Investment Decision on Data, Not FOMO
+              </Typography.Text>
+            </Flex>
+          ),
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 100 : 200,
+          verticalPadding: isMobile ? 100 : 100,
           primaryImageSize: isMobile ? "100%" : "100%",
           mainImgUrl: isMobile
             ? "/images/landing/brickassistv2/1-mob.png"
@@ -370,20 +421,21 @@ export default function BrickAssistLandingV2() {
               <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_2,
-                  marginTop: 16,
-                  marginBottom: 8,
+                  marginTop: 8,
+                  marginBottom: 0,
                 }}
               >
-                Brickfi is a real estate advisory that works for you the buyer.
-                Get data backed research & guided decision making to power your
-                home search and buying experience.
+                Brickfi Assist is a real estate advisory that works for you—the
+                buyer. Get data backed research & guided decision making to
+                power your home search and buying journey.
               </Typography.Text>
               {getCTA()}
             </Flex>
           ),
         }}
       ></SectionCenter>
-      <SectionCenter
+    
+       {/* <SectionCenter
         sectionData={{
           fullHeight: true,
           bgColor: COLORS.LANDING.BLUISH,
@@ -391,15 +443,16 @@ export default function BrickAssistLandingV2() {
           mainImgUrl: isMobile
             ? "/images/landing/brickassistv2/4-mob.png"
             : "/images/landing/brickassistv2/4.png",
-          primaryImageSize: isMobile ? "80%" : "65%",
+          primaryImageSize: isMobile ? "80%" : "100%",
           mainImgAltText:
             "Brickfi collects multiple data points from sources like RERA, Open City, BBMP, Open Street etc.",
-          verticalPadding: 100,
+          verticalPadding: 1,
+          sectionMaxWidth: "100%"
         }}
-      ></SectionCenter>
+      ></SectionCenter> */}
       <SectionCenter
         sectionData={{
-          bgColor: COLORS.LANDING.BLUISH,
+          bgColor: COLORS.LANDING.LIGHT_PINK,
           heading: "",
 
           subHeading: (
@@ -419,7 +472,7 @@ export default function BrickAssistLandingV2() {
                   marginTop: 16,
                   fontSize: FONT_SIZE.HEADING_1 * 0.8,
                   maxWidth: 1000,
-                  color: "white",
+                  color: COLORS.textColorDark,
                   textAlign: "left",
                   paddingBottom: 24,
                 }}
@@ -444,19 +497,17 @@ export default function BrickAssistLandingV2() {
                   best-fit
                 </span>{" "}
                 properties rarely show up, because the match making and curation
-                is never really happening at a deeper level.🫣
+                rarely happen at a deeper level.🫣
                 <br></br>
                 <br></br>
                 You sign{" "}
                 <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
                   stacks of papers
                 </span>{" "}
-                believing verbal assurances. And once the deal is done, the
-                cowboys ride off — leaving you alone to navigate the builder’s
-                maze. 😭
+                based on verbal assurances. And once the deal is done, you're left to navigate the builder’s maze alone. 😭
                 <br></br>
                 <br></br>
-                We started Brickfi to change this. Using{" "}
+                We started Brickfi to change this. By leveraging{" "}
                 <span style={{ color: COLORS.LANDING.PINK, fontWeight: 800 }}>
                   technology
                 </span>{" "}
@@ -465,8 +516,7 @@ export default function BrickAssistLandingV2() {
                   {" "}
                   radically transparent
                 </span>
-                , we aim to bring the much needed clarity and confidence in this
-                industry. 😇
+                , we aim to bring the much needed clarity and confidence to real estate decisions 😇
               </Typography.Text>
               {getCTA()}
             </Flex>
@@ -475,6 +525,53 @@ export default function BrickAssistLandingV2() {
           primaryImageSize: "100%",
           imageContainerWidth: 50,
           verticalPadding: isMobile ? 32 : 32,
+        }}
+      ></SectionCenter>
+        <img width={isMobile ? "90%": "70%" } style={{margin: "auto", marginBottom: 100}} src={isMobile
+            ? "/images/landing/brickassistv2/4-mob.png"
+            : "/images/landing/brickassistv2/4.png"} />
+      <SectionCenter
+        sectionData={{
+          bgColor: COLORS.LANDING.BLUISH,
+          sectionMaxWidth: "100%",
+          heading: (
+            <Flex
+              vertical
+              align="flex-start"
+              style={{ width: isMobile ? "100%" : 1000 }}
+            >
+              <Typography.Text
+                style={{
+                  fontSize: isMobile ? 40 : 54,
+                  lineHeight: "100%",
+                  fontWeight: 800,
+                  color: COLORS.LANDING.LIGHT_PINK,
+                  textAlign: "left",
+                }}
+              >
+                How does Brickfi Assist Work ?
+              </Typography.Text>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_2,
+                  lineHeight: "100%",
+                  maxWidth: 1000,
+                  color: COLORS.LANDING.LIGHT_PINK,
+                }}
+              >
+                Get end to end guidance and a holistic pre and post purchase
+                support.
+              </Typography.Text>
+            </Flex>
+          ),
+          subHeading: "",
+          centerSectionTextAlign: "left",
+          verticalPadding: 100,
+          textColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: isMobile
+            ? "/images/landing/brickassistv2/7-mob.png"
+            : "/images/landing/brickassistv2/7.png",
+          primaryImageSize: isMobile ? "90%" : "60%",
         }}
       ></SectionCenter>
       <SectionLeft
@@ -495,26 +592,14 @@ export default function BrickAssistLandingV2() {
           mainImgUrl: "/images/landing/brickassistv2/2.png",
           primaryImageSize: isMobile ? "100%" : "80%",
           imageContainerWidth: 50,
-          verticalPadding: 180,
+          verticalPadding: isMobile ? 60 : 180,
         }}
       ></SectionLeft>
 
-      <Flex
-        vertical
-        style={{ backgroundColor: COLORS.LANDING.BLUISH, padding: "64px 0" }}
-      >
-        <SectionCenter
-          sectionData={{
-            bgColor: COLORS.LANDING.BLUISH,
-            sectionMaxWidth: isMobile ? "100%" : 1250,
-            heading: "How does Brickfi Ensure Your Best Interest ?",
-            subHeading: "",
-            centerSectionTextAlign: "left",
-            verticalPadding: 16,
-            textColor: COLORS.LANDING.LIGHT_PINK,
-          }}
-        ></SectionCenter>
-        <Flex vertical style={{ width: isMobile ? "100%" : 1250, margin: "auto"}}>
+      {/* <Flex
+          vertical
+          style={{ width: isMobile ? "100%" : 1250, margin: "auto" }}
+        >
           <Flex
             vertical={isMobile}
             style={{
@@ -544,31 +629,30 @@ export default function BrickAssistLandingV2() {
               margin: "16px 0",
             }}
             justify="center"
+            gap={36}
           >
             {renderProcessStep({
               index: 3,
-              heading: "Pre & Post Purchase Support",
+              heading: "Pre Purchase Support",
+              subHeading: "End to end support including scheduling site visits, real time inventory availability, unit selection guidance, negotitations. We are there with you to he",
+              imageUrl: "/images/landing/brickassistv2/3-3.png",
+            })}
+            {renderProcessStep({
+              index: 4,
+              heading: "Post Purchase Support",
               subHeading:
                 "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
               imageUrl: "/images/landing/brickassistv2/3-3.png",
-              fullWidth: true,
             })}
           </Flex>
-        </Flex>
+        </Flex> */}
+      <Flex align="center" justify="center">
+        <img
+          src="/images/landing/brickassistv2/divider.png"
+          width={isMobile ? "60%":400}
+          height="auto"
+        ></img>
       </Flex>
-      <SectionLeft
-        sectionData={{
-          heading: "Built By People Who Understand Both Data & Real Estate",
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          sectionMaxWidth: isMobile ? "100%" : "90%",
-          verticalPadding: isMobile ? 24 : 100,
-          textColor: COLORS.LANDING.BLUISH,
-          mainImgUrl: "/images/landing/brickassistv2/5.png",
-          imageContainerWidth: 55,
-          subHeading:
-            <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3, margin: isMobile ? "16px 0": 0}}>After seeing friends and family struggle with biased broker recommendations and confusing property decisions, our founders (ex-Google engineer) realized: Real estate is the only major industry without organized, accessible data. That had to change. Brickfi Assist applies the same data infrastructure principles that power modern tech platforms to an industry desperately lacking them.</Typography.Text>,
-        }}
-      ></SectionLeft>
       <SectionCenter
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
@@ -580,17 +664,44 @@ export default function BrickAssistLandingV2() {
             : "/images/landing/brickassistv2/6.png",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
-          verticalPadding: 100,
+          verticalPadding: isMobile ? 32 : 100,
         }}
       ></SectionCenter>
+      <SectionLeft
+        sectionData={{
+          heading: "Built By People Who Understand Both Data & Real Estate",
+          bgColor: COLORS.LANDING.LIGHT_PINK,
+          sectionMaxWidth: isMobile ? "100%" : "85%",
+          verticalPadding: isMobile ? 48 : 100,
+          mainImgUrl: "/images/landing/brickassistv2/5.png",
+          imageContainerWidth: 60,
+          subHeading: (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_3,
+                margin: isMobile ? "16px 0" : 0,
+              }}
+            >
+              After seeing friends and family struggle with biased broker
+              recommendations, confusing property decisions and broken advise, our founders
+              (ex-Google engineer) realized: Real estate is the only major
+              industry without organized, accessible data and trusted approach. That had to change.
+              Brickfi Assist applies the same data infrastructure principles
+              that power modern tech platforms to an industry desperately
+              lacking them and radical transparency where its needed the most.
+            </Typography.Text>
+          ),
+        }}
+      ></SectionLeft>
+      
 
       <SectionCenter
         sectionData={{
           heading: "FAQ",
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 24 : 100,
+          verticalPadding: isMobile ? 48 : 100,
           subHeading: (
-            <Flex style={{ marginTop: 64 }}>
+            <Flex style={{ marginTop: 32 }}>
               <Collapse
                 expandIcon={({ isActive }) => (
                   <CaretRightOutlined

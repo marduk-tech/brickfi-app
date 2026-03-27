@@ -46,4 +46,6 @@ interface Profile {
   city?: string;
   source?: string;
   preferredCallbackTime?: string;
+  callbackCategory?: string;
+  sourceIntent?:string;
 }

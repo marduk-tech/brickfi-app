@@ -1,4 +1,5 @@
 import BrickAssistLanding from "@/custom-pages/landing/brick-assist-landing";
+import BrickAssistLandingV2 from "@/custom-pages/landing/brick-assist-landing-v2";
 import { SEO_CONTENT } from "@/libs/constants";
 import { Metadata } from "next";
 
@@ -85,5 +86,5 @@ export const metadata: Metadata = {
 };
 
 export default function BrickAssistPage() {
-  return <BrickAssistLanding />;
+  return <BrickAssistLandingV2 />;
 }

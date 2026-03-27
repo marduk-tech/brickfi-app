@@ -102,10 +102,10 @@ export default function LandingFooter() {
             Brickfi App
           </Link>
           <Link
-            href={LandingConstants.brickAssistLink}
+            href={`${LandingConstants.callbackLink}?srcIntent=footer`}
             style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
           >
-            Consult With Us
+            Consult For Free
           </Link>
           <Link
             href="/aboutus"

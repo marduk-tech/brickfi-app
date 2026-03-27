@@ -1,6 +1,6 @@
 "use server";
 
-import { baseApiUrl, sitemapApiKey } from "@/libs/constants";
+import { apiKey, baseApiUrl, sitemapApiKey } from "@/libs/constants";
 import { cache } from "react";
 import { DeveloperActionResult, RealEstateDeveloper } from "./types";
 
@@ -13,7 +13,7 @@ export const getDeveloperData = cache(
         {
           cache: "no-store",
           headers: {
-            "x-api-key": sitemapApiKey || "",
+            "x-api-key": sitemapApiKey || apiKey || "",
           },
         }
       );

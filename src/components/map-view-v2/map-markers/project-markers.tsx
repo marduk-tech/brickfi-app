@@ -6,6 +6,7 @@ import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { MapModalContent } from "../map-modal";
 import { Flex, Tag, Typography } from "antd";
 import moment from "moment";
+import Link from "next/link";
 
 interface ProjectMarkersProps {
   primaryProject?: any;
@@ -113,7 +114,7 @@ export const ProjectMarkers = ({
                   ),
                   content: (
                     <Flex vertical gap={0}>
-                      {project.info && project.info.reraProjectId ? <Typography.Text style={{fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium}}>
+                      {project.info?.reraProjectId?.projectDetails?.listOfRegistrationsExtensions ? <Typography.Text style={{fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium}}>
                           {getCompletionDate(
                             project.info.reraProjectId.projectDetails
                               .listOfRegistrationsExtensions
@@ -121,7 +122,7 @@ export const ProjectMarkers = ({
                         </Typography.Text>: null}
                         
                       <Flex style={{ marginBottom: 16 }}>
-                        {project.info.homeType.map((t: string) => (
+                        {(project.info.homeType || []).map((t: string) => (
                           <Typography.Text
                             style={{
                               fontSize: FONT_SIZE.HEADING_4,
@@ -133,7 +134,7 @@ export const ProjectMarkers = ({
                           </Typography.Text>
                         ))}
                         {project.info.unitConfigWithPricing &&
-                        project.info.unitConfigWithPricing.length ? (
+                        project.info.unitConfigWithPricing.length && project.info.rate ? (
                           <Flex>
                             <Typography.Text
                               style={{
@@ -178,7 +179,7 @@ export const ProjectMarkers = ({
                         }}
                       >
                         <Flex gap={8}>
-                          {project.media
+                          {(project.media || [])
                             .filter(
                               (i: any) =>
                                 !!i.image &&
@@ -204,6 +205,23 @@ export const ProjectMarkers = ({
                             })}
                         </Flex>
                       </Flex>
+                      <Link
+                        href={`/app/brick360/${project.slug || project._id}`}
+                        prefetch={false}
+                        style={{
+                          display: "block",
+                          textAlign: "center",
+                          padding: "10px 0",
+                          marginTop: 16,
+                          backgroundColor: COLORS.primaryColor,
+                          color: "#fff",
+                          borderRadius: 8,
+                          fontSize: FONT_SIZE.HEADING_4,
+                          textDecoration: "none",
+                        }}
+                      >
+                        Open Report
+                      </Link>
                     </Flex>
                   ),
                 });

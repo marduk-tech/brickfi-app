@@ -32,7 +32,7 @@ export const useFetchProjects = (params: {
           url += `&homeType=${params.homeType}`;
         }
         if (params.searchKeyword) {
-          url += `&searchKeyword=${params.searchKeyword}`;
+          url += `&keyword=${params.searchKeyword}`;
         }
          if (params.projectIds) {
           url += `&projectIds=${params.projectIds}`;

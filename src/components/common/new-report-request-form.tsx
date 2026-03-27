@@ -403,7 +403,7 @@ export const NewReportRequestForm = () => {
               marginTop: 8,
             }}
           >
-            You can also request a <Link href="https://www.brickfi.in/brickassist">callback here</Link> to expedite your report request. 
+            You can also request a <Link href={LandingConstants.callbackLink}>callback here</Link> to expedite your report request. 
           </Typography.Text>
         </>
       );
