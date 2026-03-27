@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminGuard } from "@/components/auth/admin-guard";
+import { Loader } from "@/components/common/loader";
 import { useFetchCorridors } from "@/hooks/use-corridors";
 import { useDevice } from "@/hooks/use-device";
 import { useFetchAllLvnzyProjects } from "@/hooks/use-lvnzy-project";
@@ -11,7 +12,7 @@ import {
   getMinMaxPrices,
   rupeeAmountFormat,
 } from "@/libs/lvnzy-helper";
-import { COLORS } from "@/theme/style-constants";
+import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Project } from "@/types/Project";
 import { EyeOutlined, SearchOutlined } from "@ant-design/icons";
 import { Flex, Input, Select, Table, Tag, Typography } from "antd";
@@ -73,7 +74,7 @@ function getNearbyCorridors(
   const corridors = project.info?.corridors;
   if (!Array.isArray(corridors)) return [];
   return corridors
-    .filter((c) => c.haversineDistance <= 5)
+    .filter((c) => c.haversineDistance <= 10)
     .map((c) => corridorMap.get(c.corridorId))
     .filter(Boolean) as string[];
 }
@@ -154,11 +155,15 @@ export default function FindProjectsClient() {
   }, [allLvnzyProjects]);
 
   const yearOptions = useMemo(() => {
-    const allYears = new Set<string>();
-    completionYearMap.forEach((years) => years.forEach((y) => allYears.add(y)));
-    return Array.from(allYears)
-      .sort()
-      .map((y) => ({ label: y, value: y }));
+    // const allYears = new Set<string>();
+    // completionYearMap.forEach((years) => years.forEach((y) => allYears.add(y)));
+    const yearsAll = [];
+    let yr = 2015;
+    while (yr <= 2035) {
+      yearsAll.push(`${yr}`);
+      yr++;
+    }
+    return yearsAll.sort().map((y) => ({ label: y, value: y }));
   }, [completionYearMap]);
 
   // Apply filters
@@ -215,14 +220,12 @@ export default function FindProjectsClient() {
       key: "name",
       width: "30%",
       render: (_, record) => (
-        <a
-          href={`https://admin-livinzy.netlify.app/projects/${record._id}/edit`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: COLORS.primaryColor }}
+        <Typography.Text
+          
+          style={{ fontSize: FONT_SIZE.PARA }}
         >
           {record.info?.name || record.metadata?.name || "Unnamed"}
-        </a>
+        </Typography.Text>
       ),
     },
     {
@@ -233,14 +236,14 @@ export default function FindProjectsClient() {
         const types = record.info?.homeType;
         if (Array.isArray(types) && types.length > 0) {
           return types.map((t: string) => (
-            <Tag key={t} style={{ marginBottom: 2 }}>
+            <Tag key={t} style={{ marginBottom: 2, fontSize: FONT_SIZE.SUB_TEXT, padding: "0 3px" }}>
               {capitalize(t)}
             </Tag>
           ));
         }
         const metaType = record.metadata?.homeType;
         if (metaType) {
-          return <Tag style={{ marginBottom: 2 }}>{capitalize(metaType)}</Tag>;
+          return <Tag style={{ marginBottom: 2, fontSize: FONT_SIZE.SUB_TEXT }}>{capitalize(metaType)}</Tag>;
         }
         return "-";
       },
@@ -255,10 +258,10 @@ export default function FindProjectsClient() {
           const prices = pricing
             .map((c: any) => c.price)
             .filter((p: any) => p > 0);
-          if (prices.length) return getMinMaxPrices(prices);
+          if (prices.length) return <Typography.Text style={{fontSize:  FONT_SIZE.PARA}}>{getMinMaxPrices(prices)}</Typography.Text>;
         }
         const minCost = record.info?.rate?.minimumUnitCost;
-        if (minCost) return rupeeAmountFormat(minCost);
+        if (minCost) return <Typography.Text style={{fontSize:  FONT_SIZE.PARA}}>{rupeeAmountFormat(minCost)}</Typography.Text>;
         return "-";
       },
     },
@@ -270,7 +273,7 @@ export default function FindProjectsClient() {
         const nearby = getNearbyCorridors(record, corridorMap);
         if (!nearby.length) return "-";
         return nearby.map((name) => (
-          <Tag key={name} style={{ marginBottom: 2 }}>
+          <Tag key={name} style={{ marginBottom: 2, fontSize: FONT_SIZE.SUB_TEXT, padding: "0px 2px" }}>
             {name}
           </Tag>
         ));
@@ -295,9 +298,7 @@ export default function FindProjectsClient() {
 
   return (
     <AdminGuard>
-      <Flex vertical gap={16} style={{ padding: isMobile ? 16 : 24 }}>
-        <Typography.Title level={3}>Find Projects</Typography.Title>
-
+      <Flex vertical gap={16} style={{ padding: 8 }}>
         {/* Filter bar */}
         <Flex gap={12} wrap="wrap">
           <Input
@@ -354,36 +355,65 @@ export default function FindProjectsClient() {
           />
         </Flex>
 
-        <Typography.Text style={{ color: COLORS.textColorMedium }}>
-          Showing {filteredProjects.length} projects
+        <Typography.Text
+          style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA }}
+        >
+          {filteredProjects && filteredProjects.length
+            ? `Showing ${filteredProjects.length} projects`
+            : `Loading projects...`}
         </Typography.Text>
 
         {/* Table + Map */}
         <Flex
           vertical={isMobile}
           gap={16}
-          style={{ minHeight: isMobile ? undefined : 600 }}
+          style={{ minHeight: isMobile ? undefined : 550 }}
         >
-          <div style={{ flex: 1, overflow: "auto" }}>
-            <Table
-              dataSource={filteredProjects}
-              columns={columns}
-              rowKey="_id"
-              loading={isLoading}
-              size="small"
-              pagination={{
-                pageSize,
-                showSizeChanger: true,
-                pageSizeOptions: [10, 20, 50, 100],
-                onShowSizeChange: (_, size) => setPageSize(size),
-              }}
-            />
-          </div>
-          <div
+          <Flex
+            style={{
+              height: isMobile ? 450 : 550,
+              overflowY: "scroll",
+              width: "48%",
+            }}
+            justify="center"
+          >
+            {isLoading ? (
+              <Loader size="small"></Loader>
+            ) : !filteredProjects.length ? (
+                <Typography.Text
+                  style={{
+                    marginTop: 100,
+                    height: 24,
+                    width: 300,
+                    textAlign:"center",
+                    borderRadius: 8,
+                    lineHeight: "24px",
+                    backgroundColor: COLORS.bgColorMedium,
+                  }}
+                >
+                  No matching projects
+                </Typography.Text>
+            ) : (
+              <Table
+                dataSource={filteredProjects}
+                columns={columns}
+                rowKey="_id"
+                loading={isLoading}
+                size="small"
+                pagination={{
+                  pageSize,
+                  showSizeChanger: true,
+                  pageSizeOptions: [10, 20, 50, 100],
+                  onShowSizeChange: (_, size) => setPageSize(size),
+                }}
+              />
+            )}
+          </Flex>
+          <Flex
             style={{
               flex: isMobile ? undefined : 1,
-              height: isMobile ? 400 : undefined,
-              minHeight: isMobile ? undefined : 600,
+              height: isMobile ? 450 : 550,
+              overflowY: "scroll",
             }}
           >
             <MapViewV2
@@ -395,7 +425,7 @@ export default function FindProjectsClient() {
               showCorridors={selectedCorridors.length > 0}
               corridorIds={selectedCorridorIds}
             />
-          </div>
+          </Flex>
         </Flex>
       </Flex>
     </AdminGuard>

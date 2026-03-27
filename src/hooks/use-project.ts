@@ -52,11 +52,14 @@ export const useFetchProjects = (params: {
  * @returns {UseQueryResult<Project, Error>} The result of the useQuery hook containing a single project
  */
 export const useFetchProjectById = (id: string) => {
-  return useQuery<Project, Error>({
+  return useQuery<Project|null, Error>({
     queryKey: [queryKeys.getProjectById, id],
     queryFn: async () => {
-      const { data } = await axiosApiInstance.get(`/projects/${id}`);
-      return data as Project;
+      if (!!id) {
+        const { data } = await axiosApiInstance.get(`/projects/${id}`);
+        return data as Project;
+      } 
+      return null;
     },
     refetchOnWindowFocus: false,
   });
