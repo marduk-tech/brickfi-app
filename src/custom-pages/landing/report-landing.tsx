@@ -12,6 +12,7 @@ import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import { Loader } from "@/components/common/loader";
 import { txtToId } from "@/libs/lvnzy-helper";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 export default function ReportLanding() {
   const { isMobile } = useDevice();
@@ -65,19 +66,18 @@ export default function ReportLanding() {
                   textTransform: "uppercase",
                   padding: 8,
                   border: `2px solid ${COLORS.primaryColor}`,
-                  borderRadius: 8
+                  borderRadius: 8,
                 }}
               >
-                Generate Free Report
+                Get a Free Report
               </a>
               <br></br>
             </>
           ) : null}
-        </>
+        </>,
       ),
     };
   });
-  
 
   useState(false);
   useEffect(() => {
@@ -150,18 +150,39 @@ export default function ReportLanding() {
         sectionData={{
           id: "demo-brkfi",
           heading: (
-            <Typography.Text
-              style={{
-                fontSize: isMobile
-                  ? FONT_SIZE.HEADING_1 * 1.6
-                  : FONT_SIZE.HEADING_1 * 2,
-                lineHeight: "100%",
-                fontWeight: 300,
-                paddingTop: isMobile ? 60 : 0,
-              }}
-            >
-              The 360° Report Card for Smarter Property Decisions
-            </Typography.Text>
+            <Flex vertical gap={4}>
+              {" "}
+              <Flex align="center" gap={4}>
+                <DynamicReactIcon
+                  color={COLORS.primaryColor}
+                  size={24}
+                  iconName="TbView360Number"
+                  iconSet="tb"
+                ></DynamicReactIcon>
+                <Typography.Text
+                  style={{
+                    fontSize: 24,
+                    color: COLORS.primaryColor,
+                    lineHeight: "100%",
+                    fontWeight: 500,
+                  }}
+                >
+                  BRICKFI ASSIST
+                </Typography.Text>
+              </Flex>
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 1.6
+                    : FONT_SIZE.HEADING_1 * 1.8,
+                  lineHeight: "100%",
+                  fontWeight: 300,
+                  paddingTop: isMobile ? 60 : 0,
+                }}
+              >
+                The 360° Report Card for Smarter Property Decisions
+              </Typography.Text>
+            </Flex>
           ),
           subHeading:
             "Get an independent, data-backed property report with builder history, surroundings, pricing, growth potential & more. Powered by 100% verified government and public data.",
@@ -169,9 +190,9 @@ export default function ReportLanding() {
           bgColor: "#fdf7f6",
           btn: {
             link: "/requestreport",
-            txt: "Generate Free Report",
+            txt: "Get a Free Report",
           },
-          imageContainerWidth: 45,
+          imageContainerWidth: 50,
           primaryImageSize: "100%",
           fullHeight: true,
           verticalPadding: isMobile ? 50 : 0,
@@ -521,7 +542,7 @@ export default function ReportLanding() {
                   fontSize: FONT_SIZE.HEADING_2,
                 }}
               >
-                Generate Free Report
+                Get a Free Report
               </Button>
             </Flex>
           ),
