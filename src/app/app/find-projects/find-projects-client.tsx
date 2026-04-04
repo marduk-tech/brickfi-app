@@ -19,7 +19,9 @@ import { Flex, Input, Select, Table, Tag, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import moment from "moment";
 import dynamic from "next/dynamic";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { FaRegNewspaper } from "react-icons/fa";
+import { TbView360Number } from "react-icons/tb";
 
 const MapViewV2 = dynamic(
   () => import("@/components/map-view-v2/map-view-v2"),
@@ -84,8 +86,12 @@ export default function FindProjectsClient() {
   const [searchText, setSearchText] = useState("");
   const [selectedHomeType, setSelectedHomeType] = useState<string>("apartment");
   const [selectedCorridors, setSelectedCorridors] = useState<string[]>([]);
-  const [costRange, setCostRange] = useState<string | null>(null);
-  const [completionYear, setCompletionYear] = useState<string | null>(null);
+  const [costRanges, setCostRanges] = useState<string[]>([]);
+  const [completionYears, setCompletionYears] = useState<string[]>([]);
+  const mapRef = useRef<any>(null);
+  const handleMapReady = useCallback((map: any) => {
+    mapRef.current = map;
+  }, []);
   const [pageSize, setPageSize] = useState(20);
 
   const { data: allProjects = [], isLoading } = useFetchProjects({
@@ -154,6 +160,16 @@ export default function FindProjectsClient() {
     return map;
   }, [allLvnzyProjects]);
 
+  // map projectId to lvnzyProject slug for Brick360 links
+  const lvnzySlugMap = useMemo(() => {
+    const map = new Map<string, string>();
+    allLvnzyProjects.forEach((lp: any) => {
+      const projectId = lp.originalProjectId?._id;
+      if (projectId && lp.slug) map.set(projectId, lp.slug);
+    });
+    return map;
+  }, [allLvnzyProjects]);
+
   const yearOptions = useMemo(() => {
     // const allYears = new Set<string>();
     // completionYearMap.forEach((years) => years.forEach((y) => allYears.add(y)));
@@ -175,18 +191,21 @@ export default function FindProjectsClient() {
         if (!selectedCorridors.some((sc) => nearby.includes(sc))) return false;
       }
 
-      // Cost filter
-      if (costRange) {
-        const [min, max] = parseCostRange(costRange);
+      // Cost filter (multi-select: match ANY selected range)
+      if (costRanges.length > 0) {
         const minPrice = getProjectMinPrice(p);
         if (minPrice === null) return false;
-        if (minPrice < min || minPrice >= max) return false;
+        const matchesAny = costRanges.some((range) => {
+          const [min, max] = parseCostRange(range);
+          return minPrice >= min && minPrice < max;
+        });
+        if (!matchesAny) return false;
       }
 
-      // Completion year filter
-      if (completionYear) {
+      // Completion year filter (multi-select: match ANY selected year)
+      if (completionYears.length > 0) {
         const years = completionYearMap.get(p._id) || [];
-        if (!years.includes(completionYear)) return false;
+        if (!completionYears.some((y) => years.includes(y))) return false;
       }
 
       return true;
@@ -195,8 +214,8 @@ export default function FindProjectsClient() {
     allProjects,
     selectedCorridors,
     corridorMap,
-    costRange,
-    completionYear,
+    costRanges,
+    completionYears,
     completionYearMap,
   ]);
 
@@ -281,18 +300,43 @@ export default function FindProjectsClient() {
     },
     {
       title: "",
-      key: "view",
-      width: "10%",
-      render: (_, record) => (
-        <a
-          href={`https://admin-livinzy.netlify.app/projects/${record._id}/edit`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ color: COLORS.textColorMedium }}
-        >
-          <EyeOutlined style={{ fontSize: 18 }} />
-        </a>
-      ),
+      key: "actions",
+      width: "12%",
+      render: (_, record) => {
+        const hasLocation = record.info?.location?.lat && record.info?.location?.lng;
+        const slug = lvnzySlugMap.get(record._id);
+        return (
+          <Flex gap={8} align="center">
+            {hasLocation && (
+              <EyeOutlined
+                style={{ fontSize: 16, color: COLORS.textColorMedium, cursor: "pointer" }}
+                onClick={() => {
+                  const { lat, lng } = record.info!.location!;
+                  mapRef.current?.setView([lat, lng], 16);
+                }}
+              />
+            )}
+            <a
+              href={`https://admin-livinzy.netlify.app/projects/${record._id}/edit`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: COLORS.textColorMedium, display: "flex" }}
+            >
+              <FaRegNewspaper style={{ fontSize: 16 }} />
+            </a>
+            {slug && (
+              <a
+                href={`/app/brick360/${slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: COLORS.textColorMedium, display: "flex" }}
+              >
+                <TbView360Number style={{ fontSize: 18 }} />
+              </a>
+            )}
+          </Flex>
+        );
+      },
     },
   ];
 
@@ -322,23 +366,27 @@ export default function FindProjectsClient() {
             }}
           />
           <Select
+            mode="multiple"
             placeholder="Completion Year"
             options={yearOptions}
-            value={completionYear}
-            onChange={setCompletionYear}
+            value={completionYears}
+            onChange={setCompletionYears}
             style={{
               width: isMobile ? "calc(50% - 6px)" : undefined,
               minWidth: isMobile ? undefined : 160,
             }}
             allowClear
+            maxTagCount="responsive"
           />
           <Select
+            mode="multiple"
             placeholder="Cost Range"
             options={COST_RANGES}
-            value={costRange}
-            onChange={setCostRange}
+            value={costRanges}
+            onChange={setCostRanges}
             style={{ width: isMobile ? "calc(50% - 6px)" : 170 }}
             allowClear
+            maxTagCount="responsive"
           />
           <Select
             mode="multiple"
@@ -424,6 +472,7 @@ export default function FindProjectsClient() {
               minMapZoom={10}
               showCorridors={selectedCorridors.length > 0}
               corridorIds={selectedCorridorIds}
+              onMapReady={handleMapReady}
             />
           </Flex>
         </Flex>
