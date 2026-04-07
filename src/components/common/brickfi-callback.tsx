@@ -167,6 +167,7 @@ export function BrickfiCallback() {
     const srcIntent = searchParams.get("srcIntent");
 
     let userId = user?._id;
+    const scheduledTime = values.time.value ? values.time.value : values.time;
 
     if (user) {
       await updateUser.mutateAsync({
@@ -176,7 +177,7 @@ export function BrickfiCallback() {
             ...user.profile,
             callbackCategory: values.assistance,
             sourceIntent: srcIntent || "",
-            preferredCallbackTime: `${values.day}, ${values.time.value ? values.time.value : values.time}`,
+            preferredCallbackTime: `${values.day}, ${scheduledTime}`,
           },
         },
       });
@@ -189,7 +190,7 @@ export function BrickfiCallback() {
             name: values.name,
             callbackCategory: values.assistance,
             sourceIntent: srcIntent || "",
-            preferredCallbackTime: `${values.day}, ${values.time.value ? values.time.value : values.time}`,
+            preferredCallbackTime: `${values.day}, ${scheduledTime}`,
           },
           countryCode: "91",
         },
@@ -211,7 +212,7 @@ export function BrickfiCallback() {
           mobile: values.mobile,
           source: srcIntent || "",
           callbackCategory: values.assistance,
-          callbackTime: `${values.day}, ${values.time}`,
+          callbackTime: `${values.day}, ${scheduledTime}`,
         },
       });
     }

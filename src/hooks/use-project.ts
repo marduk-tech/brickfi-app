@@ -24,7 +24,7 @@ export const useFetchProjects = (params: {
     queryKey: [queryKeys.projects, Object.entries(params).map(([key, value]) => value).join(",")],
     queryFn: async () => {
       if (Object.entries(params).length) {
-        let url = `/projects?source=app`;
+        let url = `/projects?source=app&limit=2000`;
         if (params.statusFilter) {
           url += `&statusFilter=${params.statusFilter}`;
         }
