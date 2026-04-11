@@ -572,8 +572,8 @@ export const DRIVER_CATEGORIES: Record<string, DriverCategory> = {
     icon: { name: "MdFoodBank", set: "md" },
     drivers: ["food"],
     filters: [
-      { key: "pop-dining", label: "Popular Dining" },
       { key: "high-rated", label: "Highly Rated" },
+      { key: "pop-dining", label: "Popular Dining" },
       { key: "cafe", label: "Cafes" },
     ],
     onFilter: (filter: string, driver: IDriverPlace) => {
