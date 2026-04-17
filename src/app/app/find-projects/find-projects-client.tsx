@@ -76,7 +76,7 @@ function getNearbyCorridors(
   const corridors = project.info?.corridors;
   if (!Array.isArray(corridors)) return [];
   return corridors
-    .filter((c) => c.haversineDistance <= 10)
+    .filter((c) => c.haversineDistance <= 14)
     .map((c) => corridorMap.get(c.corridorId))
     .filter(Boolean) as string[];
 }
