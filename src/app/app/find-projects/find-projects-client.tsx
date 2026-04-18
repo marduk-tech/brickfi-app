@@ -1,6 +1,9 @@
 "use client";
 
 import { AdminGuard } from "@/components/auth/admin-guard";
+import DynamicReactIcon, {
+  IconSetKey,
+} from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
 import { useFetchCorridors } from "@/hooks/use-corridors";
 import { useDevice } from "@/hooks/use-device";
@@ -38,10 +41,33 @@ const COST_RANGES = [
   { label: "5 Cr+", value: "50000000-Infinity" },
 ];
 
-const HOME_TYPE_OPTIONS = Object.values(ProjectHomeType).map((t) => ({
-  label: capitalize(t),
-  value: t,
-}));
+const HOME_TYPE_ICON: Record<string, { set: IconSetKey; name: string }> = {
+  apartment: { set: "pi", name: "PiBuildingApartment" },
+  villament: { set: "pi", name: "PiBuildingApartment" },
+  penthouse: { set: "pi", name: "PiBuildingApartment" },
+  villa: { set: "md", name: "MdOutlineVilla" },
+  rowhouse: { set: "md", name: "MdHomeWork" },
+  plot: { set: "lu", name: "LuLandPlot" },
+};
+
+const HOME_TYPE_OPTIONS = Object.values(ProjectHomeType).map((t) => {
+  const icon = HOME_TYPE_ICON[t];
+  return {
+    value: t,
+    label: (
+      <Flex align="center" gap={6}>
+        {icon && (
+          <DynamicReactIcon
+            iconSet={icon.set}
+            iconName={icon.name}
+            size={16}
+          />
+        )}
+        <span>{capitalize(t)}</span>
+      </Flex>
+    ),
+  };
+});
 
 function parseCostRange(val: string): [number, number] {
   const [min, max] = val.split("-");
@@ -84,7 +110,9 @@ function getNearbyCorridors(
 export default function FindProjectsClient() {
   const { isMobile } = useDevice();
   const [searchText, setSearchText] = useState("");
-  const [selectedHomeType, setSelectedHomeType] = useState<string>("apartment");
+  const [selectedHomeType, setSelectedHomeType] = useState<string[]>([
+    "apartment",
+  ]);
   const [selectedCorridors, setSelectedCorridors] = useState<string[]>([]);
   const [costRanges, setCostRanges] = useState<string[]>([]);
   const [completionYears, setCompletionYears] = useState<string[]>([]);
@@ -356,10 +384,13 @@ export default function FindProjectsClient() {
             allowClear
           />
           <Select
+            mode="multiple"
             placeholder="Home Type"
             options={HOME_TYPE_OPTIONS}
             value={selectedHomeType}
             onChange={setSelectedHomeType}
+            allowClear
+            maxTagCount="responsive"
             style={{
               width: isMobile ? "calc(50% - 6px)" : undefined,
               minWidth: isMobile ? undefined : 160,

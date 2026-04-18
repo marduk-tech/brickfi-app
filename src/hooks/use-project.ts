@@ -10,26 +10,38 @@ import { Project } from "../types/Project";
  * @returns {UseQueryResult<Project[], Error>} The result of the useQuery hook containing an array of projects
  */
 export const useFetchProjects = (params: {
-  homeType?: string;
+  homeType?: string | string[];
   statusFilter?: string;
   searchKeyword?: string;
   projectIds?: string;
   limit?: number;
   sortBy?: string;
 }) => {
+  const homeTypeValue = Array.isArray(params.homeType)
+    ? params.homeType.join(",")
+    : params.homeType;
+
   return useQuery<Project[], Error>({
     refetchOnWindowFocus: false, // Disable refetch on window focus
     refetchOnReconnect: false, // Disable refetch on network reconnect
     staleTime: Infinity, // Data will never be marked as stale
-    queryKey: [queryKeys.projects, Object.entries(params).map(([key, value]) => value).join(",")],
+    queryKey: [
+      queryKeys.projects,
+      homeTypeValue,
+      params.statusFilter,
+      params.searchKeyword,
+      params.projectIds,
+      params.limit,
+      params.sortBy,
+    ],
     queryFn: async () => {
       if (Object.entries(params).length) {
         let url = `/projects?source=app&limit=2000`;
         if (params.statusFilter) {
           url += `&statusFilter=${params.statusFilter}`;
         }
-        if (params.homeType) {
-          url += `&homeType=${params.homeType}`;
+        if (homeTypeValue) {
+          url += `&homeType=${homeTypeValue}`;
         }
         if (params.searchKeyword) {
           url += `&keyword=${params.searchKeyword}`;
@@ -41,7 +53,7 @@ export const useFetchProjects = (params: {
         return data;
       }
       return [];
-      
+
     },
   });
 };
