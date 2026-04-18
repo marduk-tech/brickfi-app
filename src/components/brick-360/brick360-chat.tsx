@@ -80,7 +80,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
     const [surroundingElements, setSurroundingElements] =
       useState<ISurroundingElement[]>();
 
-    const [projectsNearby, setProjectsNearby] = useState<any[]>();
+  const [projectsNearby, setProjectsNearby] = useState<any[]>();
 
     const [mapVisible, setMapVisible] = useState<boolean>(false);
 
@@ -124,7 +124,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
       setMapDrivers([]);
       setFollowupPrompts([]);
       setSurroundingElements([]);
-      setProjectsNearby([]);
+    setProjectsNearby([]);
       if (
         dataPointSelected &&
         dataPointSelected.selectedDataPointCategory &&
@@ -231,7 +231,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
               dataPointSelected.selectedDataPointSubCategory === "pricePoint"
             ) {
               setMapVisible(true);
-              setProjectsNearby(
+            setProjectsNearby(
                 lvnzyProject?.investment?.corridorPricing?.filter(
                   (p: any) => !!p.sqftCost
                 ) || []

@@ -226,6 +226,7 @@ export default function FindProjectsClient() {
           name: p.info?.name || p.metadata?.name,
         },
         media: p.media || [],
+        slug: lvnzySlugMap.get(p._id)
       }));
   }, [filteredProjects]);
 
