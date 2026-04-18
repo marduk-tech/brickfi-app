@@ -11,6 +11,8 @@ export function CustomErrorBoundary({
 }: {
   children: React.ReactNode;
 }) {
+
+  
   return (
     <ErrorBoundary fallbackRender={ErrorBoundaryFallback}>
       {children}
@@ -22,11 +24,11 @@ export function ErrorBoundaryFallback({ error }: { error: AxiosError<any> }) {
   const errorMessage =
     error.response?.data.message || error.message || "Something went wrong";
     
-    useEffect(() => {
-      captureAnalyticsEvent('error-fallback', {
-        message: errorMessage
-      })
-    }, [])
+    // useEffect(() => {
+    //   captureAnalyticsEvent('error-fallback', {
+    //     message: errorMessage
+    //   })
+    // }, [])
 
   return (
     <Flex align="center" justify="center" style={{ width: "100%" }}>

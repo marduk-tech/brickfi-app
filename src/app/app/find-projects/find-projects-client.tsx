@@ -102,7 +102,7 @@ function getNearbyCorridors(
   const corridors = project.info?.corridors;
   if (!Array.isArray(corridors)) return [];
   return corridors
-    .filter((c) => c.haversineDistance <= 10)
+    .filter((c) => c.haversineDistance <= 14)
     .map((c) => corridorMap.get(c.corridorId))
     .filter(Boolean) as string[];
 }
@@ -163,30 +163,26 @@ export default function FindProjectsClient() {
       .map((n) => ({ label: n, value: n }));
   }, [allProjects, corridorMap]);
 
-  // map projectId to completion years from LvnzyProject data
+  // map projectId to completion years from All Projects data
   const completionYearMap = useMemo(() => {
     const map = new Map<string, string[]>();
-    allLvnzyProjects.forEach((lp: any) => {
-      const projectId = lp.originalProjectId?._id;
+    allProjects.forEach((op: any) => {
+      const projectId = op._id;
       if (!projectId) return;
+      let projectTimelines =
+        op.info?.reraProjectId?.projectDetails?.listOfRegistrationsExtensions;
 
-      const phasesExtensions = (lp.developer?.reraOtherPhases || []).flatMap(
-        (p: any) => p.projectDetails?.listOfRegistrationsExtensions || [],
-      );
-      const extensions =
-        phasesExtensions.length > 0
-          ? phasesExtensions
-          : (lp.meta?.projectTimelines as any[]) || [];
+      if (projectTimelines) {
+        const years = projectTimelines
+          .map((ext: any) => moment(ext.completionDate, "DD-MM-YYYY"))
+          .filter((d: any) => d.isValid())
+          .map((d: any) => d.format("YYYY"));
 
-      const years = extensions
-        .map((ext: any) => moment(ext.completionDate, "DD-MM-YYYY"))
-        .filter((d: any) => d.isValid())
-        .map((d: any) => d.format("YYYY"));
-
-      if (years.length > 0) map.set(projectId, [...(new Set(years) as any)]);
+        if (years.length > 0) map.set(projectId, [...(new Set(years) as any)]);
+      }
     });
     return map;
-  }, [allLvnzyProjects]);
+  }, [allProjects, allLvnzyProjects]);
 
   // map projectId to lvnzyProject slug for Brick360 links
   const lvnzySlugMap = useMemo(() => {
@@ -208,7 +204,7 @@ export default function FindProjectsClient() {
       yr++;
     }
     return yearsAll.sort().map((y) => ({ label: y, value: y }));
-  }, [completionYearMap]);
+  }, []);
 
   // Apply filters
   const filteredProjects = useMemo(() => {
@@ -258,6 +254,7 @@ export default function FindProjectsClient() {
           name: p.info?.name || p.metadata?.name,
         },
         media: p.media || [],
+        slug: lvnzySlugMap.get(p._id)
       }));
   }, [filteredProjects]);
 
@@ -267,10 +264,7 @@ export default function FindProjectsClient() {
       key: "name",
       width: "30%",
       render: (_, record) => (
-        <Typography.Text
-          
-          style={{ fontSize: FONT_SIZE.PARA }}
-        >
+        <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
           {record.info?.name || record.metadata?.name || "Unnamed"}
         </Typography.Text>
       ),
@@ -283,14 +277,25 @@ export default function FindProjectsClient() {
         const types = record.info?.homeType;
         if (Array.isArray(types) && types.length > 0) {
           return types.map((t: string) => (
-            <Tag key={t} style={{ marginBottom: 2, fontSize: FONT_SIZE.SUB_TEXT, padding: "0 3px" }}>
+            <Tag
+              key={t}
+              style={{
+                marginBottom: 2,
+                fontSize: FONT_SIZE.SUB_TEXT,
+                padding: "0 3px",
+              }}
+            >
               {capitalize(t)}
             </Tag>
           ));
         }
         const metaType = record.metadata?.homeType;
         if (metaType) {
-          return <Tag style={{ marginBottom: 2, fontSize: FONT_SIZE.SUB_TEXT }}>{capitalize(metaType)}</Tag>;
+          return (
+            <Tag style={{ marginBottom: 2, fontSize: FONT_SIZE.SUB_TEXT }}>
+              {capitalize(metaType)}
+            </Tag>
+          );
         }
         return "-";
       },
@@ -305,10 +310,20 @@ export default function FindProjectsClient() {
           const prices = pricing
             .map((c: any) => c.price)
             .filter((p: any) => p > 0);
-          if (prices.length) return <Typography.Text style={{fontSize:  FONT_SIZE.PARA}}>{getMinMaxPrices(prices)}</Typography.Text>;
+          if (prices.length)
+            return (
+              <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
+                {getMinMaxPrices(prices)}
+              </Typography.Text>
+            );
         }
         const minCost = record.info?.rate?.minimumUnitCost;
-        if (minCost) return <Typography.Text style={{fontSize:  FONT_SIZE.PARA}}>{rupeeAmountFormat(minCost)}</Typography.Text>;
+        if (minCost)
+          return (
+            <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
+              {rupeeAmountFormat(minCost)}
+            </Typography.Text>
+          );
         return "-";
       },
     },
@@ -320,7 +335,14 @@ export default function FindProjectsClient() {
         const nearby = getNearbyCorridors(record, corridorMap);
         if (!nearby.length) return "-";
         return nearby.map((name) => (
-          <Tag key={name} style={{ marginBottom: 2, fontSize: FONT_SIZE.SUB_TEXT, padding: "0px 2px" }}>
+          <Tag
+            key={name}
+            style={{
+              marginBottom: 2,
+              fontSize: FONT_SIZE.SUB_TEXT,
+              padding: "0px 2px",
+            }}
+          >
             {name}
           </Tag>
         ));
@@ -331,13 +353,18 @@ export default function FindProjectsClient() {
       key: "actions",
       width: "12%",
       render: (_, record) => {
-        const hasLocation = record.info?.location?.lat && record.info?.location?.lng;
+        const hasLocation =
+          record.info?.location?.lat && record.info?.location?.lng;
         const slug = lvnzySlugMap.get(record._id);
         return (
           <Flex gap={8} align="center">
             {hasLocation && (
               <EyeOutlined
-                style={{ fontSize: 16, color: COLORS.textColorMedium, cursor: "pointer" }}
+                style={{
+                  fontSize: 16,
+                  color: COLORS.textColorMedium,
+                  cursor: "pointer",
+                }}
                 onClick={() => {
                   const { lat, lng } = record.info!.location!;
                   mapRef.current?.setView([lat, lng], 16);
@@ -459,19 +486,19 @@ export default function FindProjectsClient() {
             {isLoading ? (
               <Loader size="small"></Loader>
             ) : !filteredProjects.length ? (
-                <Typography.Text
-                  style={{
-                    marginTop: 100,
-                    height: 24,
-                    width: 300,
-                    textAlign:"center",
-                    borderRadius: 8,
-                    lineHeight: "24px",
-                    backgroundColor: COLORS.bgColorMedium,
-                  }}
-                >
-                  No matching projects
-                </Typography.Text>
+              <Typography.Text
+                style={{
+                  marginTop: 100,
+                  height: 24,
+                  width: 300,
+                  textAlign: "center",
+                  borderRadius: 8,
+                  lineHeight: "24px",
+                  backgroundColor: COLORS.bgColorMedium,
+                }}
+              >
+                No matching projects
+              </Typography.Text>
             ) : (
               <Table
                 dataSource={filteredProjects}

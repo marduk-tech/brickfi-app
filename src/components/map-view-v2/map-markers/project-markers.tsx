@@ -205,7 +205,7 @@ export const ProjectMarkers = ({
                             })}
                         </Flex>
                       </Flex>
-                      <Link
+                      {project.slug ?  <Link
                         href={`/app/brick360/${project.slug || project._id}`}
                         prefetch={false}
                         style={{
@@ -221,7 +221,8 @@ export const ProjectMarkers = ({
                         }}
                       >
                         Open Report
-                      </Link>
+                      </Link>: null}
+                     
                     </Flex>
                   ),
                 });
