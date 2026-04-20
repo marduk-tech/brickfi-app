@@ -95,35 +95,37 @@ export function BrickfiCallback() {
 
     if (isFriday(today)) {
       // Friday: Today, Sat, Sun, Mon
-      if (new Date().getHours() < 18) {
+      if (new Date().getHours() < 17) {
         options.push(createOption("Today", today));
       }
       options.push(createOption("Saturday", addDays(today, 1)));
-      options.push(createOption("Sunday", addDays(today, 2)));
       options.push(createOption("Monday", addDays(today, 3)));
     } else if (isSaturday(today)) {
-      // Saturday: Saturday, Sunday, Monday
-      options.push(createOption("Saturday", today));
-      options.push(createOption("Sunday", addDays(today, 1)));
-      options.push(createOption("Monday", addDays(today, 2)));
+      // Saturday: Today, Monday or Monday, Tuesday
+      if (new Date().getHours() < 17) {
+        options.push(createOption("Today", today));
+        options.push(createOption("Monday", addDays(today, 2)));
+      } else {
+        options.push(createOption("Monday", addDays(today, 2)));
+        options.push(createOption("Tuesday", addDays(today, 3)));
+      }
     } else if (isSunday(today)) {
-      // Sunday: Sunday, Monday, Tuesday
-      options.push(createOption("Sunday", today));
+      // Sunday: Monday, Tuesday
       options.push(createOption("Monday", addDays(today, 1)));
       options.push(createOption("Tuesday", addDays(today, 2)));
     } else {
-      // Standard Weekday (Mon-Thu): Today, Tomorrow, Saturday, Sunday
-      if (new Date().getHours() < 18) {
+      // Standard Weekday (Mon-Thu): Today, Tomorrow, Saturday
+      if (new Date().getHours() < 17) {
         options.push(createOption("Today", today));
+        options.push(createOption("Tomorrow", addDays(today, 1)));
+      } else {
+        options.push(createOption("Tomorrow", addDays(today, 1)));
+        options.push(createOption("Day after Tomorrow", addDays(today, 2)));
       }
-      options.push(createOption("Tomorrow", addDays(today, 1)));
 
       // Calculate days until upcoming Saturday/Sunday
       const daysToSat = (6 - today.getDay() + 7) % 7;
-      const daysToSun = (0 - today.getDay() + 7) % 7;
-
       options.push(createOption("Saturday", addDays(today, daysToSat)));
-      options.push(createOption("Sunday", addDays(today, daysToSun)));
     }
 
     return options;
