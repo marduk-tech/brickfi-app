@@ -219,13 +219,13 @@ export default function LandingFooter() {
         </Flex>
         <Typography.Text
           style={{
-            fontSize: FONT_SIZE.PARA,
+            fontSize: FONT_SIZE.SUB_TEXT,
             color: COLORS.textColorMedium,
             marginTop: 8,
             textAlign: "left"
           }}
         >
-          Copyright @Marduk Technologies Private Ltd
+          © 2026 | Marduk Technologies Private Ltd
         </Typography.Text>
       </Flex>
     </Flex>
