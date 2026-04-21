@@ -21,7 +21,7 @@ export default function LandingFooter() {
     >
       
       <Flex
-        style={{ width: isMobile ? "100%" : "95%", marginTop: 16, marginBottom: 32, borderBottom: "0.2px solid #666", paddingBottom: 32 }}
+        style={{ width: isMobile ? "100%" : "95%", marginTop: 16,  }}
         vertical={isMobile}
       >
         <Flex
@@ -194,7 +194,9 @@ export default function LandingFooter() {
             </Link>
           </Flex>
         </Flex>
+        
       </Flex>
+      <div style={{borderBottom: "0.2px solid #666", width: isMobile ? "100%":"600px", marginBottom: 32, alignSelf: "flex-start", marginLeft: isMobile ? 0: "2.5%"}}>&nbsp;</div>
       <Flex vertical style={{width: isMobile ? "100%": "95%", marginTop: 0}}>
         <Flex vertical={isMobile} gap={32} style={{ margin: "16px 0" }}>
           <img src="/images/stin.png" height="auto" width={isMobile ? 175: 125}></img>
