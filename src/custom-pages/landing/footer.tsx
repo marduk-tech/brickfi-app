@@ -31,7 +31,7 @@ export default function LandingFooter() {
           vertical
           style={{
             textAlign: "left",
-            width:"100%"
+            width: "100%",
           }}
         >
           <Typography.Text
@@ -47,7 +47,7 @@ export default function LandingFooter() {
             style={{
               color: COLORS.textColorLight,
               fontSize: FONT_SIZE.PARA,
-              maxWidth: isMobile ? "100%" : 500
+              maxWidth: isMobile ? "100%" : 500,
             }}
           >
             Brickfi is a real estate platform, committed to transparency and
@@ -55,116 +55,180 @@ export default function LandingFooter() {
             you make confident decisions.
           </Typography.Text>
         </Flex>
-        
-        <Flex gap={isMobile ? 16: 48} style={{marginTop: isMobile? 32: 0, width: isMobile ? "100%": "45%"}} align="flex-start" >
-           <Flex
-          vertical
-          style={{
-            textAlign: "left",
-          }}
-        >
-          <Link
-            href="https://www.brickfi.in/real-estate-developer"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-          >
-           Real Esate Developers
-          </Link>
-          <Link
-            href="https://www.brickfi.in/glossary"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-        >
-            Real Estate Glossary
-          </Link>
-          
-           <Link
-            href="https://blog.brickfi.in"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-          >
-            Brickfi Blog
-          </Link>
-        </Flex>
 
         <Flex
-          vertical
-         
-          align="flex-start"
-        >
-          <Link
-            href="/app"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-          >
-            Brickfi App
-          </Link>
-          <Link
-            href={`${LandingConstants.callbackLink}?srcIntent=footer`}
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-          >
-            Consult For Free
-          </Link>
-          <Link
-            href="/aboutus"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-          >
-            About Us
-          </Link>
-          <Link
-            href="/aboutus"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-          >
-            Help
-          </Link>
-        </Flex>
-        
-        
-        <Flex
-          vertical
+          gap={isMobile ? 16 : 48}
           style={{
-            textAlign: "left"
+            marginTop: isMobile ? 32 : 0,
+            width: isMobile ? "100%" : "45%",
           }}
           align="flex-start"
         >
-         <Link
-            href="https://www.linkedin.com/company/brickfi"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
+          <Flex
+            vertical
+            style={{
+              textAlign: "left",
+            }}
           >
-            LinkedIn
-          </Link>
-          <Link
-            href={LandingConstants.instaLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
-        >
-            Instagram
-          </Link>
-          <Link
-            href={LandingConstants.twitterLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textDecoration: 'none' }}
+            <Link
+              href="https://www.brickfi.in/real-estate-developer"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              Real Esate Developers
+            </Link>
+            <Link
+              href="https://www.brickfi.in/glossary"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              Real Estate Glossary
+            </Link>
+
+            <Link
+              href="https://blog.brickfi.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              Brickfi Blog
+            </Link>
+          </Flex>
+
+          <Flex vertical align="flex-start">
+            <Link
+              href="/app"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              Brickfi App
+            </Link>
+            <Link
+              href={`${LandingConstants.callbackLink}?srcIntent=footer`}
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              Consult For Free
+            </Link>
+            <Link
+              href="/aboutus"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              About Us
+            </Link>
+            <Link
+              href="/aboutus"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              Help
+            </Link>
+          </Flex>
+
+          <Flex
+            vertical
+            style={{
+              textAlign: "left",
+            }}
+            align="flex-start"
           >
-            X/Twitter
-          </Link>
+            <Link
+              href="https://www.linkedin.com/company/brickfi"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              LinkedIn
+            </Link>
+            <Link
+              href={LandingConstants.instaLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              Instagram
+            </Link>
+            <Link
+              href={LandingConstants.twitterLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: COLORS.textColorLight,
+                fontSize: FONT_SIZE.PARA,
+                textDecoration: "none",
+              }}
+            >
+              X/Twitter
+            </Link>
+          </Flex>
         </Flex>
-       </Flex>
       </Flex>
-      <Typography.Text
-        style={{
-          fontSize: FONT_SIZE.PARA,
-          color: COLORS.textColorLight,
-          marginTop: 48,
-        }}
-      >
-        Copyright @Marduk Technologies Private Ltd
-      </Typography.Text>
+      <Flex vertical style={{width: isMobile ? "100%": "95%", marginTop: 0}}>
+        <Flex vertical={isMobile} gap={32} style={{ margin: "16px 0" }}>
+          <img src="/images/stin.png" height="auto" width={isMobile ? 175: 125}></img>
+          <Flex vertical>
+            <Typography.Text
+              style={{
+                color: COLORS.textColorMedium,
+                fontSize: FONT_SIZE.SUB_TEXT,
+                textAlign: "left"
+              }}
+            >
+              REGISTERED RERA ENTITY
+            </Typography.Text>
+            <Typography.Text
+              style={{ color: COLORS.textColorLight, fontSize: FONT_SIZE.PARA, textAlign: "left" }}
+            >
+              PRM/KA/RERA/1251/446/AG/240715/004976
+            </Typography.Text>
+          </Flex>
+        </Flex>
+        <Typography.Text
+          style={{
+            fontSize: FONT_SIZE.PARA,
+            color: COLORS.textColorMedium,
+            marginTop: 8,
+            textAlign: "left"
+          }}
+        >
+          Copyright @Marduk Technologies Private Ltd
+        </Typography.Text>
+      </Flex>
     </Flex>
   );
 }
