@@ -14,17 +14,14 @@ export default function LandingFooter() {
       align="center"
       vertical
       style={{
-        padding: isMobile ? "64px 16px" : "64px 0",
+        padding: isMobile ? "32px 16px" : "32px 0",
         textAlign: "center",
         backgroundColor: COLORS.textColorDark,
       }}
     >
-      <img
-        src="/images/landing/divider.png"
-        width={isMobile ? "80%" : "30%"}
-      ></img>
+      
       <Flex
-        style={{ width: isMobile ? "100%" : "95%", marginTop: 40 }}
+        style={{ width: isMobile ? "100%" : "95%", marginTop: 16, marginBottom: 32, borderBottom: "0.2px solid #666", paddingBottom: 32 }}
         vertical={isMobile}
       >
         <Flex
