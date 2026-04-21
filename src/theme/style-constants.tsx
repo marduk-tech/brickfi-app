@@ -4,6 +4,7 @@ export const COLORS = {
   primaryColor: "#38b6ff",
   redIdentifier: "#FF8080",
   greenIdentifier: "#A6CF98",
+  darkGreenIdentifier: "#426e33",
   yellowIdentifier: "#f1b24b",
   orangeIdentifier: "#d68438",
   yellowBgColor: "#fcf1df",

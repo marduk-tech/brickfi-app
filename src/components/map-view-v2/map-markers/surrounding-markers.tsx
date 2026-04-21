@@ -102,7 +102,7 @@ export const SurroundingMarkers = ({
                 pathOptions={{
                   color:
                     element.impact > 0
-                      ? COLORS.greenIdentifier
+                      ? COLORS.darkGreenIdentifier
                       : COLORS.redIdentifier,
                   weight: 8,
                   opacity: 0.8,
