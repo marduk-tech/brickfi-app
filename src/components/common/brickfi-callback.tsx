@@ -66,6 +66,7 @@ const assistanceOptions = [
   },
 ];
 
+const SAME_DAY_HOUR_CUTOFF = 12;
 export function BrickfiCallback() {
   const [form] = Form.useForm();
 
@@ -95,14 +96,14 @@ export function BrickfiCallback() {
 
     if (isFriday(today)) {
       // Friday: Today, Sat, Sun, Mon
-      if (new Date().getHours() < 17) {
+      if (new Date().getHours() < SAME_DAY_HOUR_CUTOFF) {
         options.push(createOption("Today", today));
       }
       options.push(createOption("Saturday", addDays(today, 1)));
       options.push(createOption("Monday", addDays(today, 3)));
     } else if (isSaturday(today)) {
       // Saturday: Today, Monday or Monday, Tuesday
-      if (new Date().getHours() < 17) {
+      if (new Date().getHours() < SAME_DAY_HOUR_CUTOFF) {
         options.push(createOption("Today", today));
         options.push(createOption("Monday", addDays(today, 2)));
       } else {
@@ -115,7 +116,7 @@ export function BrickfiCallback() {
       options.push(createOption("Tuesday", addDays(today, 2)));
     } else {
       // Standard Weekday (Mon-Thu): Today, Tomorrow, Saturday
-      if (new Date().getHours() < 17) {
+      if (new Date().getHours() < SAME_DAY_HOUR_CUTOFF) {
         options.push(createOption("Today", today));
         options.push(createOption("Tomorrow", addDays(today, 1)));
       } else {
