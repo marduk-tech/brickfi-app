@@ -16,6 +16,8 @@ import { useDevice } from "@/hooks/use-device";
 import LandingFooter from "@/custom-pages/landing/footer";
 import { useParams } from "next/navigation";
 import { Loader } from "./loader";
+import { safeWindow } from "@/libs/browser-utils";
+import { LandingConstants } from "@/libs/constants";
 
 const assistanceOptions = [
   {
@@ -78,7 +80,7 @@ export function BrickfiCallback() {
   const [dayOption, setDayOption] = useState("");
   const [selectedAsstVal, setSelectedAsstVal] = useState("");
 
-  const [formSuccess, setFormSuccess] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
   /**
    * Generates AntD Select options based on the current day's logic.
@@ -166,6 +168,7 @@ export function BrickfiCallback() {
   }, [user, form]);
 
   const onFinish = async (values: any) => {
+    setFormLoading(true);
     const searchParams = new URLSearchParams(window.location.search);
     const srcIntent = searchParams.get("srcIntent");
 
@@ -201,11 +204,6 @@ export function BrickfiCallback() {
       userId = newUser._id;
     }
 
-    setFormSuccess(true);
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth", // Optional: adds a smooth sliding animation
-    });
     if (userId) {
       await sendMail.mutateAsync({
         userId,
@@ -219,6 +217,7 @@ export function BrickfiCallback() {
         },
       });
     }
+    safeWindow.location.assign(LandingConstants.callbackSuccessLink);
   };
 
   const [flickerWait, setFlickerWait] = useState(true);
@@ -273,46 +272,7 @@ export function BrickfiCallback() {
             align="center"
             justify="center"
           >
-            {formSuccess ? (
-              <Flex vertical>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_1 * 1.3,
-                    marginBottom: 24,
-                    lineHeight: "100%",
-                  }}
-                >
-                  Get in Touch with a Brickfi Advisor
-                </Typography.Text>
-                <Flex
-                  vertical
-                  style={{
-                    backgroundColor: COLORS.bgColorBlue,
-                    padding: "16px",
-                    borderRadius: 16,
-                  }}
-                >
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_2,
-                      fontWeight: 500,
-                      lineHeight: "120%",
-                    }}
-                  >
-                    Wohoo! Your request is submitted.
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_3,
-                      lineHeight: "120%",
-                    }}
-                  >
-                    Thank you for your request. A Brickfi Advisor will call you
-                    back at your preferred time.
-                  </Typography.Text>
-                </Flex>
-              </Flex>
-            ) : (
+           
               <Flex vertical gap={8}>
                 <Typography.Text
                   style={{
@@ -442,7 +402,6 @@ export function BrickfiCallback() {
                   </Flex>
                 </Form>
               </Flex>
-            )}
 
             <Flex
               style={{
@@ -453,21 +412,17 @@ export function BrickfiCallback() {
               }}
               gap={16}
             >
-              {formSuccess ? null : (
                 <Button
                   onClick={() => form.submit()}
                   type="primary"
                   disabled={!selectedAsstVal || !dayOption}
                   loading={
-                    createUser.isPending ||
-                    updateUser.isPending ||
-                    sendMail.isPending
+                    formLoading
                   }
                   style={{ width: 200 }}
                 >
                   {"Submit"}
                 </Button>
-              )}
             </Flex>
           </Flex>
           {isMobile ? (

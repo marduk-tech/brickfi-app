@@ -3,13 +3,13 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Brickfi | Request a callback",
-  description: "Admin view of all Brick360 project reports",
+   description: "Brickfi advisor callback form.",
   robots: {
     index: false,
     follow: false,
   },
 };
 
-export default function Brk360sPage() {
+export default function BrickfiCallbackPage() {
   return <BrickfiCallback />;
 }
