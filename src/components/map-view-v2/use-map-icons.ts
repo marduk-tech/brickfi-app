@@ -1,6 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
 import L from "leaflet";
-import { LivIndexDriversConfig, SurroundingElementLabels } from "../../libs/constants";
+import { useCallback, useEffect, useState } from "react";
+import {
+  LivIndexDriversConfig,
+  SurroundingElementLabels,
+} from "../../libs/constants";
+import { HOME_TYPE_ICON } from "../../libs/home-type-icons";
 import { rupeeAmountFormat } from "../../libs/lvnzy-helper";
 import { COLORS } from "../../theme/style-constants";
 import { IDriverPlace, ISurroundingElement } from "../../types/Project";
@@ -22,6 +26,7 @@ export interface IconState {
   }>;
   currentProjectMarkerIcon: L.DivIcon | null;
   projectMarkerIcon: L.DivIcon | null;
+  projectMarkerIconsByHomeType: Record<string, L.DivIcon>;
   transitStationIcon: L.DivIcon | null;
   roadIcon: L.DivIcon | null;
 }
@@ -30,8 +35,12 @@ export interface UseMapIconsReturn extends IconState {
   isLoadingIcons: boolean;
   refreshDriverIcons: () => Promise<void>;
   refreshProjectIcons: () => Promise<void>;
-  refreshSurroundingElementIcons: (elements: ISurroundingElement[]) => Promise<void>;
-  refreshProjectsNearbyIcons: (projects: Array<{ projectName: string; sqftCost: number }>) => Promise<void>;
+  refreshSurroundingElementIcons: (
+    elements: ISurroundingElement[],
+  ) => Promise<void>;
+  refreshProjectsNearbyIcons: (
+    projects: Array<{ projectName: string; sqftCost: number }>,
+  ) => Promise<void>;
 }
 
 export const useMapIcons = (
@@ -42,28 +51,40 @@ export const useMapIcons = (
     sqftCost: number;
     projectLocation: { lat: number; lng: number };
   }>,
-  projectSqftPricing?: number
+  projectSqftPricing?: number,
 ): UseMapIconsReturn => {
   // Icon state
-  const [simpleDriverMarkerIcons, setSimpleDriverMarkerIcons] = useState<Array<{
-    icon: L.DivIcon;
-    driverId: string;
-    duration?: number;
-  }>>([]);
-  
-  const [surroundingElementIcons, setSurroundingElementIcons] = useState<Array<{
-    type: string;
-    icon: L.DivIcon;
-  }>>([]);
-  
-  const [projectsNearbyIcons, setProjectsNearbyIcons] = useState<Array<{
-    name: string;
-    icon: L.DivIcon;
-  }>>([]);
-  
-  const [currentProjectMarkerIcon, setCurrentProjectMarkerIcon] = useState<L.DivIcon | null>(null);
-  const [projectMarkerIcon, setProjectMarkerIcon] = useState<L.DivIcon | null>(null);
-  const [transitStationIcon, setTransitStationIcon] = useState<L.DivIcon | null>(null);
+  const [simpleDriverMarkerIcons, setSimpleDriverMarkerIcons] = useState<
+    Array<{
+      icon: L.DivIcon;
+      driverId: string;
+      duration?: number;
+    }>
+  >([]);
+
+  const [surroundingElementIcons, setSurroundingElementIcons] = useState<
+    Array<{
+      type: string;
+      icon: L.DivIcon;
+    }>
+  >([]);
+
+  const [projectsNearbyIcons, setProjectsNearbyIcons] = useState<
+    Array<{
+      name: string;
+      icon: L.DivIcon;
+    }>
+  >([]);
+
+  const [currentProjectMarkerIcon, setCurrentProjectMarkerIcon] =
+    useState<L.DivIcon | null>(null);
+  const [projectMarkerIcon, setProjectMarkerIcon] = useState<L.DivIcon | null>(
+    null,
+  );
+  const [projectMarkerIconsByHomeType, setProjectMarkerIconsByHomeType] =
+    useState<Record<string, L.DivIcon>>({});
+  const [transitStationIcon, setTransitStationIcon] =
+    useState<L.DivIcon | null>(null);
   const [roadIcon, setRoadIcon] = useState<L.DivIcon | null>(null);
   const [isLoadingIcons, setIsLoadingIcons] = useState(false);
 
@@ -81,7 +102,9 @@ export const useMapIcons = (
           const iconConfig = (LivIndexDriversConfig as any)[driver.driver];
 
           if (!iconConfig) {
-            console.warn(`No icon config found for driver type: ${driver.driver}`);
+            console.warn(
+              `No icon config found for driver type: ${driver.driver}`,
+            );
             return null;
           }
 
@@ -90,7 +113,7 @@ export const useMapIcons = (
             iconConfig.icon.set,
             false,
             undefined,
-            driver
+            driver,
           );
 
           return baseIcon
@@ -100,7 +123,7 @@ export const useMapIcons = (
                 duration: driver?.duration,
               }
             : null;
-        })
+        }),
       );
 
       const validIcons = icons.filter(Boolean) as Array<{
@@ -128,8 +151,8 @@ export const useMapIcons = (
         projectsNearby && projectsNearby.length
           ? `₹${rupeeAmountFormat(`${projectSqftPricing}`)} /sqft`
           : primaryProject?.info.name.length > 20
-          ? `${primaryProject?.info.name.substring(0, 20)}..`
-          : primaryProject?.info.name,
+            ? `${primaryProject?.info.name.substring(0, 20)}..`
+            : primaryProject?.info.name,
         undefined,
         {
           iconBgColor: COLORS.primaryColor,
@@ -137,11 +160,11 @@ export const useMapIcons = (
           borderColor: "white",
           containerWidth: projectsNearby && projectsNearby.length ? 80 : 135,
           iconSize: projectsNearby && projectsNearby.length ? 18 : 16,
-        }
+        },
       );
       setCurrentProjectMarkerIcon(currentProjectIcon);
 
-      // Regular project marker icon
+      // Regular project marker icon (fallback for unknown home types)
       const projectIcon = await getIcon(
         "IoLocation",
         "io5",
@@ -153,9 +176,34 @@ export const useMapIcons = (
           iconColor: COLORS.textColorDark,
           iconSize: 24,
           borderColor: COLORS.primaryColor,
-        }
+        },
       );
       setProjectMarkerIcon(projectIcon);
+
+      // One marker icon per home type
+      const homeTypeEntries = await Promise.all(
+        Object.entries(HOME_TYPE_ICON).map(async ([homeType, cfg]) => {
+          const icon = await getIcon(
+            cfg.name,
+            cfg.set,
+            false,
+            undefined,
+            undefined,
+            {
+              iconBgColor: "white",
+              iconColor: COLORS.textColorDark,
+              iconSize: 18,
+              borderColor: COLORS.primaryColor,
+            },
+          );
+          return icon ? ([homeType, icon] as const) : null;
+        }),
+      );
+      const homeTypeIcons: Record<string, L.DivIcon> = {};
+      for (const entry of homeTypeEntries) {
+        if (entry) homeTypeIcons[entry[0]] = entry[1];
+      }
+      setProjectMarkerIconsByHomeType(homeTypeIcons);
 
       // Transit station icon
       const transitStationIcon = await getIcon(
@@ -168,7 +216,7 @@ export const useMapIcons = (
           iconBgColor: COLORS.textColorDark,
           iconColor: "white",
           iconSize: 12,
-        }
+        },
       );
       setTransitStationIcon(transitStationIcon);
 
@@ -183,7 +231,7 @@ export const useMapIcons = (
           iconBgColor: COLORS.textColorDark,
           iconColor: "white",
           iconSize: 14,
-        }
+        },
       );
       setRoadIcon(roadIcon);
     } catch (error) {
@@ -194,75 +242,81 @@ export const useMapIcons = (
   }, [primaryProject, projectsNearby, projectSqftPricing]);
 
   // Surrounding element icons generation
-  const refreshSurroundingElementIcons = useCallback(async (elements: ISurroundingElement[]) => {
-    if (!elements || !elements.length) {
-      setSurroundingElementIcons([]);
-      return;
-    }
-
-    setIsLoadingIcons(true);
-    try {
-      const elementIcons = [];
-      for (const element of elements) {
-        const icon = (SurroundingElementLabels as any)[element.type].icon;
-        const elementIcon = await getIcon(
-          icon.name,
-          icon.set,
-          false,
-          undefined,
-          undefined,
-          {
-            iconSize: 16,
-            iconBgColor: "white",
-            iconColor:
-              element.impact > 0
-                ? COLORS.greenIdentifier
-                : COLORS.redIdentifier,
-          }
-        );
-        if (elementIcon) {
-          elementIcons.push({ type: element.type, icon: elementIcon });
-        }
+  const refreshSurroundingElementIcons = useCallback(
+    async (elements: ISurroundingElement[]) => {
+      if (!elements || !elements.length) {
+        setSurroundingElementIcons([]);
+        return;
       }
-      setSurroundingElementIcons(elementIcons);
-    } catch (error) {
-      console.error("Error generating surrounding element icons:", error);
-    } finally {
-      setIsLoadingIcons(false);
-    }
-  }, []);
+
+      setIsLoadingIcons(true);
+      try {
+        const elementIcons = [];
+        for (const element of elements) {
+          const icon = (SurroundingElementLabels as any)[element.type].icon;
+          const elementIcon = await getIcon(
+            icon.name,
+            icon.set,
+            false,
+            undefined,
+            undefined,
+            {
+              iconSize: 16,
+              iconBgColor: "white",
+              iconColor:
+                element.impact > 0
+                  ? COLORS.greenIdentifier
+                  : COLORS.redIdentifier,
+            },
+          );
+          if (elementIcon) {
+            elementIcons.push({ type: element.type, icon: elementIcon });
+          }
+        }
+        setSurroundingElementIcons(elementIcons);
+      } catch (error) {
+        console.error("Error generating surrounding element icons:", error);
+      } finally {
+        setIsLoadingIcons(false);
+      }
+    },
+    [],
+  );
 
   // Nearby projects icons generation
-  const refreshProjectsNearbyIcons = useCallback(async (projects: Array<{ projectName: string; sqftCost: number }>) => {
-    if (!projects || !projects.length) {
-      setProjectsNearbyIcons([]);
-      return;
-    }
-
-    setIsLoadingIcons(true);
-    try {
-      const icons = [];
-      for (const project of projects) {
-        const icon = await getIcon(
-          "MdHomeWork",
-          "md",
-          false,
-          `${project.sqftCost} /sqft`
-        );
-        if (icon) {
-          icons.push({
-            name: project.projectName,
-            icon,
-          });
-        }
+  const refreshProjectsNearbyIcons = useCallback(
+    async (projects: Array<{ projectName: string; sqftCost: number }>) => {
+      if (!projects || !projects.length) {
+        setProjectsNearbyIcons([]);
+        return;
       }
-      setProjectsNearbyIcons(icons);
-    } catch (error) {
-      console.error("Error generating nearby project icons:", error);
-    } finally {
-      setIsLoadingIcons(false);
-    }
-  }, []);
+
+      setIsLoadingIcons(true);
+      try {
+        const icons = [];
+        for (const project of projects) {
+          const icon = await getIcon(
+            "MdHomeWork",
+            "md",
+            false,
+            `${project.sqftCost} /sqft`,
+          );
+          if (icon) {
+            icons.push({
+              name: project.projectName,
+              icon,
+            });
+          }
+        }
+        setProjectsNearbyIcons(icons);
+      } catch (error) {
+        console.error("Error generating nearby project icons:", error);
+      } finally {
+        setIsLoadingIcons(false);
+      }
+    },
+    [],
+  );
 
   // Auto-refresh driver icons when drivers change
   useEffect(() => {
@@ -288,6 +342,7 @@ export const useMapIcons = (
     projectsNearbyIcons,
     currentProjectMarkerIcon,
     projectMarkerIcon,
+    projectMarkerIconsByHomeType,
     transitStationIcon,
     roadIcon,
     isLoadingIcons,

@@ -13,6 +13,8 @@ interface ProjectMarkersProps {
   projects?: any[];
   currentProjectMarkerIcon?: L.DivIcon | null;
   projectMarkerIcon?: L.DivIcon | null;
+  projectMarkerIconsByHomeType?: Record<string, L.DivIcon>;
+  highlightedHomeTypes?: string[];
   setModalContent: (content: MapModalContent) => void;
   setInfoModalOpen: (open: boolean) => void;
 }
@@ -22,6 +24,8 @@ export const ProjectMarkers = ({
   projects,
   currentProjectMarkerIcon,
   projectMarkerIcon,
+  projectMarkerIconsByHomeType,
+  highlightedHomeTypes,
   setModalContent,
   setInfoModalOpen,
 }: ProjectMarkersProps) => {
@@ -83,11 +87,30 @@ export const ProjectMarkers = ({
         project?.info?.location?.lng &&
         currentProjectMarkerIcon
       ) {
+        const homeTypes: string[] = Array.isArray(project.info.homeType)
+          ? project.info.homeType
+          : [];
+
+        // Prefer a type the caller is highlighting (e.g. active filter);
+        // otherwise fall back to the first type with an icon mapping.
+        let chosen: string | undefined;
+        if (highlightedHomeTypes && highlightedHomeTypes.length > 0) {
+          chosen = homeTypes.find((t) => highlightedHomeTypes.includes(t));
+        }
+        if (!chosen) {
+          chosen = homeTypes.find(
+            (t) => !!projectMarkerIconsByHomeType?.[t]
+          );
+        }
+        const markerIcon =
+          (chosen && projectMarkerIconsByHomeType?.[chosen]) ||
+          projectMarkerIcon;
+
         markers.push(
           <Marker
             key={project._id}
             position={[project.info.location.lat, project.info.location.lng]}
-            icon={projectMarkerIcon}
+            icon={markerIcon}
             eventHandlers={{
               click: () => {
                 setModalContent({

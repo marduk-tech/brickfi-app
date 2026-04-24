@@ -1,15 +1,14 @@
 "use client";
 
 import { AdminGuard } from "@/components/auth/admin-guard";
-import DynamicReactIcon, {
-  IconSetKey,
-} from "@/components/common/dynamic-react-icon";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
 import { useFetchCorridors } from "@/hooks/use-corridors";
 import { useDevice } from "@/hooks/use-device";
 import { useFetchAllLvnzyProjects } from "@/hooks/use-lvnzy-project";
 import { useFetchProjects } from "@/hooks/use-project";
 import { ProjectHomeType } from "@/libs/constants";
+import { HOME_TYPE_ICON } from "@/libs/home-type-icons";
 import {
   capitalize,
   getMinMaxPrices,
@@ -41,15 +40,6 @@ const COST_RANGES = [
   { label: "5 Cr+", value: "50000000-Infinity" },
 ];
 
-const HOME_TYPE_ICON: Record<string, { set: IconSetKey; name: string }> = {
-  apartment: { set: "pi", name: "PiBuildingApartment" },
-  villament: { set: "pi", name: "PiBuildingApartment" },
-  penthouse: { set: "pi", name: "PiBuildingApartment" },
-  villa: { set: "md", name: "MdOutlineVilla" },
-  rowhouse: { set: "md", name: "MdHomeWork" },
-  plot: { set: "lu", name: "LuLandPlot" },
-};
-
 const HOME_TYPE_OPTIONS = Object.values(ProjectHomeType).map((t) => {
   const icon = HOME_TYPE_ICON[t];
   return {
@@ -57,11 +47,7 @@ const HOME_TYPE_OPTIONS = Object.values(ProjectHomeType).map((t) => {
     label: (
       <Flex align="center" gap={6}>
         {icon && (
-          <DynamicReactIcon
-            iconSet={icon.set}
-            iconName={icon.name}
-            size={16}
-          />
+          <DynamicReactIcon iconSet={icon.set} iconName={icon.name} size={16} />
         )}
         <span>{capitalize(t)}</span>
       </Flex>
@@ -169,7 +155,7 @@ export default function FindProjectsClient() {
     allProjects.forEach((op: any) => {
       const projectId = op._id;
       if (!projectId) return;
-      let projectTimelines =
+      const projectTimelines =
         op.info?.reraProjectId?.projectDetails?.listOfRegistrationsExtensions;
 
       if (projectTimelines) {
@@ -254,7 +240,7 @@ export default function FindProjectsClient() {
           name: p.info?.name || p.metadata?.name,
         },
         media: p.media || [],
-        slug: lvnzySlugMap.get(p._id)
+        slug: lvnzySlugMap.get(p._id),
       }));
   }, [filteredProjects]);
 
@@ -530,6 +516,7 @@ export default function FindProjectsClient() {
               minMapZoom={10}
               showCorridors={selectedCorridors.length > 0}
               corridorIds={selectedCorridorIds}
+              highlightedHomeTypes={selectedHomeType}
               onMapReady={handleMapReady}
             />
           </Flex>

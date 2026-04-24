@@ -91,7 +91,8 @@ interface MapViewV2Props {
   initialZoom?: number;
   categories?: string[];
   hideAllFilters?: boolean;
-  corridorIds?: string[]
+  corridorIds?: string[];
+  highlightedHomeTypes?: string[];
 }
 
 const MapViewV2Inner = ({
@@ -111,7 +112,8 @@ const MapViewV2Inner = ({
   categories,
   hideAllFilters,
   primaryProject,
-  corridorIds
+  corridorIds,
+  highlightedHomeTypes,
 }: MapViewV2Props & { primaryProject?: any }) => {
   // Use context hooks instead of local state
   const {
@@ -126,6 +128,7 @@ const MapViewV2Inner = ({
     projectsNearbyIcons,
     currentProjectMarkerIcon,
     projectMarkerIcon,
+    projectMarkerIconsByHomeType,
     transitStationIcon,
     roadIcon,
     refreshSurroundingElementIcons,
@@ -277,6 +280,8 @@ const MapViewV2Inner = ({
                   projects={projects}
                   currentProjectMarkerIcon={currentProjectMarkerIcon}
                   projectMarkerIcon={projectMarkerIcon}
+                  projectMarkerIconsByHomeType={projectMarkerIconsByHomeType}
+                  highlightedHomeTypes={highlightedHomeTypes}
                   setModalContent={openModal}
                   setInfoModalOpen={() => {}}
                 />
