@@ -167,7 +167,7 @@ export default function ReportLanding() {
                     fontWeight: 500,
                   }}
                 >
-                  BRICK360
+                  BRICK360° REPORT
                 </Typography.Text>
               </Flex>
               <Typography.Text
