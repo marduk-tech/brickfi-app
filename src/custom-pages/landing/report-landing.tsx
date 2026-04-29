@@ -167,7 +167,7 @@ export default function ReportLanding() {
                     fontWeight: 500,
                   }}
                 >
-                  BRICKFI ASSIST
+                  BRICK360
                 </Typography.Text>
               </Flex>
               <Typography.Text
