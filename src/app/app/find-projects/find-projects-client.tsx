@@ -36,8 +36,18 @@ const COST_RANGES = [
   { label: "Under 50 Lacs", value: "0-5000000" },
   { label: "50 Lacs - 1 Cr", value: "5000000-10000000" },
   { label: "1 Cr - 2 Cr", value: "10000000-20000000" },
-  { label: "2 Cr - 5 Cr", value: "20000000-50000000" },
-  { label: "5 Cr+", value: "50000000-Infinity" },
+  { label: "2 Cr - 3 Cr", value: "20000000-30000000" },
+  { label: "3 Cr - 4 Cr", value: "30000000-40000000" },
+  { label: "4 Cr+", value: "40000000-Infinity" },
+];
+
+const BUILTUP_RANGES = [
+  { label: "Under 1000 sq.ft", value: "0-1000" },
+  { label: "1000 - 1500", value: "1000-1500" },
+  { label: "1500 - 2000", value: "1500-2000" },
+  { label: "2000 - 2500", value: "2000-2500" },
+  { label: "2500 - 3000", value: "2500-3000" },
+  { label: "3000+", value: "3000-Infinity" },
 ];
 
 const HOME_TYPE_OPTIONS = Object.values(ProjectHomeType).map((t) => {
@@ -60,16 +70,6 @@ function parseCostRange(val: string): [number, number] {
   return [Number(min), max === "Infinity" ? Infinity : Number(max)];
 }
 
-function getProjectMinPrice(project: Project): number | null {
-  const pricing = project.info?.unitConfigWithPricing;
-  if (Array.isArray(pricing) && pricing.length > 0) {
-    const prices = pricing.map((c: any) => c.price).filter((p: any) => p > 0);
-    if (prices.length) return Math.min(...prices);
-  }
-  const minCost = project.info?.rate?.minimumUnitCost;
-  if (minCost && minCost > 0) return minCost;
-  return null;
-}
 
 function getProjectMaxPrice(project: Project): number | null {
   const pricing = project.info?.unitConfigWithPricing;
@@ -88,7 +88,7 @@ function getNearbyCorridors(
   const corridors = project.info?.corridors;
   if (!Array.isArray(corridors)) return [];
   return corridors
-    .filter((c) => c.haversineDistance <= 14)
+    .filter((c) => c.haversineDistance <= 10)
     .map((c) => corridorMap.get(c.corridorId))
     .filter(Boolean) as string[];
 }
@@ -101,6 +101,8 @@ export default function FindProjectsClient() {
   ]);
   const [selectedCorridors, setSelectedCorridors] = useState<string[]>([]);
   const [costRanges, setCostRanges] = useState<string[]>([]);
+    const [builtupRanges, setBuiltupRanges] = useState<string[]>([]);
+
   const [completionYears, setCompletionYears] = useState<string[]>([]);
   const mapRef = useRef<any>(null);
   const handleMapReady = useCallback((map: any) => {
@@ -203,15 +205,40 @@ export default function FindProjectsClient() {
 
       // Cost filter (multi-select: match ANY selected range)
       if (costRanges.length > 0) {
-        const minPrice = getProjectMinPrice(p);
-        if (minPrice === null) return false;
         const matchesAny = costRanges.some((range) => {
           const [min, max] = parseCostRange(range);
-          return minPrice >= min && minPrice < max;
+          const pricing = p.info?.unitConfigWithPricing;
+          if (Array.isArray(pricing) && pricing.length > 0) {
+            const prices = pricing
+              .map((c: any) => c.price)
+              .filter((p: any) => p > 0);
+            if (prices.length) return prices.some(pr => pr >= min && pr < max);
+          } else {
+            return false;
+          }
+          return false;
         });
         if (!matchesAny) return false;
       }
 
+
+        // Builtup size filter (multi-select: match ANY selected range)
+      if (builtupRanges.length > 0) {
+        const matchesAny = builtupRanges.some((range) => {
+          const [min, max] = parseCostRange(range);
+          const configs = p.info?.unitConfigWithPricing;
+          if (Array.isArray(configs) && configs.length > 0) {
+            const sizes = configs
+              .map((c: any) => c.sizeBuiltup)
+              .filter((p: any) => p > 0);
+            if (sizes.length) return sizes.some(si => si >= min && si < max);
+          } else {
+            return false;
+          }
+          return false;
+        });
+        if (!matchesAny) return false;
+      }
       // Completion year filter (multi-select: match ANY selected year)
       if (completionYears.length > 0) {
         const years = completionYearMap.get(p._id) || [];
@@ -225,6 +252,7 @@ export default function FindProjectsClient() {
     selectedCorridors,
     corridorMap,
     costRanges,
+    builtupRanges,
     completionYears,
     completionYearMap,
   ]);
@@ -240,7 +268,11 @@ export default function FindProjectsClient() {
           name: p.info?.name || p.metadata?.name,
         },
         media: p.media || [],
-        slug: lvnzySlugMap.get(p._id),
+        reportSlug:
+          p.info.reportStatus &&
+          p.info.reportStatus.status == "report-processed"
+            ? lvnzySlugMap.get(p._id)
+            : undefined,
       }));
   }, [filteredProjects]);
 
@@ -300,6 +332,33 @@ export default function FindProjectsClient() {
             return (
               <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
                 {getMinMaxPrices(prices)}
+              </Typography.Text>
+            );
+        }
+        const minCost = record.info?.rate?.minimumUnitCost;
+        if (minCost)
+          return (
+            <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
+              {rupeeAmountFormat(minCost)}
+            </Typography.Text>
+          );
+        return "-";
+      },
+    },
+    {
+      title: "Builtup Range",
+      key: "builtup",
+      width: "20%",
+      render: (_, record) => {
+        const uConfigs = record.info?.unitConfigWithPricing;
+        if (Array.isArray(uConfigs) && uConfigs.length > 0) {
+          const sizes = uConfigs
+            .map((c: any) => c.sizeBuiltup as number)
+            .filter((p: any) => p > 0);
+          if (sizes.length)
+            return (
+              <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
+                {Math.min(...sizes)} -  {Math.max(...sizes)} sq.ft
               </Typography.Text>
             );
         }
@@ -428,6 +487,16 @@ export default function FindProjectsClient() {
             options={COST_RANGES}
             value={costRanges}
             onChange={setCostRanges}
+            style={{ width: isMobile ? "calc(50% - 6px)" : 170 }}
+            allowClear
+            maxTagCount="responsive"
+          />
+          <Select
+            mode="multiple"
+            placeholder="Builtup Range"
+            options={BUILTUP_RANGES}
+            value={builtupRanges}
+            onChange={setBuiltupRanges}
             style={{ width: isMobile ? "calc(50% - 6px)" : 170 }}
             allowClear
             maxTagCount="responsive"
