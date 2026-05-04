@@ -88,12 +88,13 @@ export function BrickfiCallback() {
    */
   const getPickerOptions = () => {
     const today = new Date();
-    const options = [];
+    const options: { label: string; value: string; date: Date }[] = [];
 
     // Helper to create the option object
-    const createOption = (label: string, date: any) => ({
+    const createOption = (label: string, date: Date) => ({
       label: label, // This is what shows in the dropdown
       value: `${label}, ${format(date, "d MMMM")}`, // e.g., "Wed, 18 March"
+      date,
     });
 
     if (isFriday(today)) {
@@ -175,6 +176,20 @@ export function BrickfiCallback() {
     let userId = user?._id;
     const scheduledTime = values.time.value ? values.time.value : values.time;
 
+    // resolve absolute timestamp for the picked day + slot start hour
+    const matchedDay = getPickerOptions().find((o) => o.value === values.day);
+    const slotMatch = scheduledTime.match(/^(\d{1,2})(am|pm)/i);
+    let preferredCallbackTimestamp: string | undefined;
+    if (matchedDay && slotMatch) {
+      let hour = parseInt(slotMatch[1], 10);
+      const meridiem = slotMatch[2].toLowerCase();
+      if (meridiem === "pm" && hour !== 12) hour += 12;
+      if (meridiem === "am" && hour === 12) hour = 0;
+      const ts = new Date(matchedDay.date);
+      ts.setHours(hour, 0, 0, 0);
+      preferredCallbackTimestamp = ts.toISOString();
+    }
+
     if (user) {
       await updateUser.mutateAsync({
         userData: {
@@ -184,6 +199,7 @@ export function BrickfiCallback() {
             callbackCategory: values.assistance,
             sourceIntent: srcIntent || "",
             preferredCallbackTime: `${values.day}, ${scheduledTime}`,
+            preferredCallbackTimestamp,
           },
         },
       });
@@ -197,6 +213,7 @@ export function BrickfiCallback() {
             callbackCategory: values.assistance,
             sourceIntent: srcIntent || "",
             preferredCallbackTime: `${values.day}, ${scheduledTime}`,
+            preferredCallbackTimestamp,
           },
           countryCode: "91",
         },
