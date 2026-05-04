@@ -1,5 +1,4 @@
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { safeStorage } from "../libs/browser-utils";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
@@ -25,15 +24,32 @@ export function useUser() {
       );
     }
 
-    // Clear projects for user if the data has expired (1 day expiry)
-    if (
+    // Refresh stale user data after 1 day
+    const isExpired =
       localUserData &&
       (!localUserData.updated ||
         new Date().getTime() - USER_EXPIRY_DURATION >
-          new Date(localUserData.updated).getTime())
-    ) {
-      localUserData.user.savedLvnzyProjects = [];
+          new Date(localUserData.updated).getTime());
+
+    if (isExpired) {
+      try {
+        const data = await axiosApiInstance.get(
+          `/auth/myinfo/${localUserData.user._id}`,
+          {},
+        );
+
+        if (data?.data?.mobile) {
+          safeStorage.setItem(
+            LocalStorageKeys.user,
+            JSON.stringify({ updated: `${new Date()}`, user: data.data }),
+          );
+          return data.data;
+        }
+      } catch (error) {
+        console.error("Failed to refresh user info:", error);
+      }
     }
+
     axiosApiInstance
       .get(`/auth/myinfo/${localUserData.user._id}`, {})
       .then((data) => {

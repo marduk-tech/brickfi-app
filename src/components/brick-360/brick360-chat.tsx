@@ -44,6 +44,9 @@ const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
   ssr: false,
 });
 
+const REPORT_ACCESS_DENIED_MESSAGE =
+  "You don't have access to this report. Please request for one or reachout to Brickfi.";
+
 export interface AICuratedProject {
   projectId: string;
   relevancyScore: number;
@@ -303,6 +306,8 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         setLoadingLivThread(true);
         const response = await axiosApiInstance.post("/ai/history", {
           sessionId: historySessionId,
+          userId: user?._id,
+          lvnzyProjectId: lvnzyProject?._id,
         });
 
         if (response.data?.data) {
@@ -335,6 +340,14 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         setLoadingLivThread(false);
       } catch (error) {
         console.error("Error fetching history:", error);
+        const status = (error as any)?.response?.status;
+        if (status === 403) {
+          messageApi.open({
+            type: "warning",
+            content: REPORT_ACCESS_DENIED_MESSAGE,
+          });
+        }
+        setLoadingLivThread(false);
       }
     };
 
@@ -405,9 +418,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         setQueryStreaming(false);
       } catch (error) {
         console.error("Error sending message:", error);
+        const status = (error as any)?.response?.status;
         messageApi.open({
-          type: "error",
-          content: "Oops. Can you please try again?",
+          type: status === 403 ? "warning" : "error",
+          content:
+            status === 403
+              ? REPORT_ACCESS_DENIED_MESSAGE
+              : "Oops. Can you please try again?",
         });
       } finally {
         setQueryStreaming(false);

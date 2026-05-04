@@ -23,6 +23,7 @@ import {
   FONT_SIZE,
   HORIZONTAL_PADDING,
 } from "../../theme/style-constants";
+import { LvnzyProject } from "../../types/LvnzyProject";
 import { Brick360Tab } from "./brick-360-tab";
 import Brick360Chat from "./brick360-chat";
 import { ConfigurationsModal } from "./configurations-modal";
@@ -39,9 +40,10 @@ const FAKE_TIMER_SECS = 500;
 
 interface Brick360v2Props {
   slug: string;
+  projectData?: LvnzyProject;
 }
 
-export function Brick360v2({ slug }: Brick360v2Props) {
+export function Brick360v2({ slug, projectData }: Brick360v2Props) {
   const { isMobile } = useDevice();
   const { width } = useWindowDimensions();
 
@@ -49,8 +51,9 @@ export function Brick360v2({ slug }: Brick360v2Props) {
     expandChat: () => void;
   } | null>(null);
 
-  const { data: lvnzyProject, isLoading: lvnzyProjectIsLoading } =
-    useFetchLvnzyProjectBySlug(slug);
+  const { data: fetchedProject, isLoading: lvnzyProjectIsLoading } =
+    useFetchLvnzyProjectBySlug(slug, !projectData);
+  const lvnzyProject = projectData || fetchedProject;
 
   const scoreParamTourRef = useRef(null);
   const pmtPlanTourRef = useRef(null);
