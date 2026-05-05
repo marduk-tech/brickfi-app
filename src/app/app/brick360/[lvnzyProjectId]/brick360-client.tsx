@@ -108,7 +108,7 @@ export default function Brick360Client({ slug }: { slug: string }) {
   }, [savedProjects]);
 
   const shouldFetchReport =
-    !!user?._id && (!canCheckLocally || !!accessibleProject);
+    !!user?._id && !["admin","member"].includes(user.role || "") && (!canCheckLocally || !!accessibleProject);
 
   const {
     data: lvnzyProject,
@@ -122,7 +122,7 @@ export default function Brick360Client({ slug }: { slug: string }) {
 
   const parsedError = error ? CustomError.parse(error) : null;
   const isAccessDenied =
-    !!user && !userLoading && canCheckLocally && !accessibleProject;
+    !!user && !["admin","member"].includes(user.role || "")  && !userLoading && canCheckLocally && !accessibleProject;
   const isDeniedByApi = parsedError?.status === 403;
 
   if (flickerWait || userLoading || (!user && !isAccessDenied)) {
@@ -154,7 +154,7 @@ export default function Brick360Client({ slug }: { slug: string }) {
     );
   }
 
-  if (projectLoading || !lvnzyProject) {
+  if (!["admin","member"].includes(user.role || "") && (projectLoading || !lvnzyProject)) {
     return (
       <Flex style={{ marginTop: 200 }} align="center" justify="center">
         <Loader />
