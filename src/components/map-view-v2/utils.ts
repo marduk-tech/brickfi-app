@@ -162,7 +162,7 @@ export const processDriversToPolygons = (
 ) => {
   const polygons = data
     .filter((driver) => {
-      const hasGeojson = driver.details?.osm?.geojson;
+      const hasGeojson = driver.location?.osm?.geojson;
 
       if (!hasGeojson) {
         return false;
@@ -208,9 +208,9 @@ export const processDriversToPolygons = (
     .flatMap((driver) => {
       try {
         const geojson =
-          typeof driver.details.osm.geojson === "string"
-            ? JSON.parse(driver.details.osm.geojson)
-            : driver.details.osm.geojson;
+          typeof driver.location.osm.geojson === "string"
+            ? JSON.parse(driver.location.osm.geojson)
+            : driver.location.osm.geojson;
 
         if (!geojson || !["Polygon", "MultiPolygon"].includes(geojson.type)) {
           return [];

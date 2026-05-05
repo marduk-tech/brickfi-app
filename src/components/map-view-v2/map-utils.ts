@@ -137,7 +137,7 @@ export const formatProjectName = (name: string, maxLength: number = 20): string 
  * Check if driver has valid geometry data
  */
 export const hasValidGeometry = (driver: any): boolean => {
-  return !!(driver?.details?.osm?.geojson || driver?.features);
+  return !!(driver?.location?.osm?.geojson || driver?.features);
 };
 
 /**
