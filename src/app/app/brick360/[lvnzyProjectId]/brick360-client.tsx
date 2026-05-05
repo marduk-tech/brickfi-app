@@ -56,7 +56,7 @@ function AccessDeniedState() {
             Request a Brick360 Report
           </Button>
           </Link>
-           <Link href="/brickassist" target="_blank">
+           <Link href="/callback-request?srcIntent=brick360-access-denied" target="_blank">
           <Button >Reachout to an Advisor</Button>
           </Link>
         </Flex>
