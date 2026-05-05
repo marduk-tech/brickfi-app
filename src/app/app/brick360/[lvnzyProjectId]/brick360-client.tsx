@@ -1,63 +1,64 @@
 "use client";
 
 import { Brick360v2 } from "@/components/brick-360/brick360-v2";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
+import { useDevice } from "@/hooks/use-device";
 import { useFetchAccessibleLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
 import { CustomError } from "@/libs/error-handler";
+import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Button, Flex, Modal, Typography } from "antd";
+import Link from "antd/es/typography/Link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 const REPORT_ACCESS_DENIED_MESSAGE =
-  "You don't have access to this report. Please request for one or reachout to Brickfi.";
+  "You don't have access to this Brick360 Report. You can submit a request or if you need additional assistance, you can reachout to a Brickfi Advisor.";
 
 function AccessDeniedState() {
-  const router = useRouter();
+  const {isMobile} = useDevice();
 
   return (
     <>
-      <Modal
-        open
-        closable={false}
-        footer={null}
-        maskClosable={false}
-        centered
-      >
-        <Flex vertical gap={16}>
-          <Typography.Title level={4} style={{ margin: 0 }}>
-            Access denied
-          </Typography.Title>
-          <Typography.Text>{REPORT_ACCESS_DENIED_MESSAGE}</Typography.Text>
-          <Flex gap={12} wrap>
-            <Button type="primary" onClick={() => router.push("/requestreport")}>
-              Request for one
-            </Button>
-            <Button onClick={() => router.push("/brickassist")}>
-              Reachout
-            </Button>
-          </Flex>
-        </Flex>
-      </Modal>
-
       <Flex
         vertical
-        align="center"
-        justify="center"
+        align="flex-start"
+        justify="flex-start"
         gap={16}
-        style={{ minHeight: "70vh", textAlign: "center", padding: "24px" }}
+        style={{
+          minHeight: "70vh",
+          maxWidth: 720,
+          textAlign: "center",
+          padding: "32px",
+          marginTop: 128,
+          marginLeft: isMobile ? 0 : 200
+        }}
       >
-        <Typography.Title level={3} style={{ margin: 0 }}>
-          This report is not available on your account
-        </Typography.Title>
-        <Typography.Text style={{ maxWidth: 520 }}>
+        <DynamicReactIcon size={64} color={COLORS.textColorDark} iconName="TbFaceIdError" iconSet="tb"></DynamicReactIcon>
+        <Typography.Text
+          style={{
+            margin: 0,
+            fontSize: FONT_SIZE.HEADING_1,
+            textAlign: "left",
+            alignSelf: "flex-start",
+            fontWeight: 500
+          }}
+        >
+          Access Denied
+        </Typography.Text>
+        <Typography.Text style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}>
           {REPORT_ACCESS_DENIED_MESSAGE}
         </Typography.Text>
-        <Flex gap={12} wrap justify="center">
-          <Button type="primary" onClick={() => router.push("/requestreport")}>
-            Request for one
+        <Flex gap={12} wrap align="flex-start">
+          <Link href="/requestreport" target="_blank">
+          <Button type="primary">
+            Request a Brick360 Report
           </Button>
-          <Button onClick={() => router.push("/brickassist")}>Reachout</Button>
+          </Link>
+           <Link href="/brickassist" target="_blank">
+          <Button >Reachout to an Advisor</Button>
+          </Link>
         </Flex>
       </Flex>
     </>
@@ -106,7 +107,8 @@ export default function Brick360Client({ slug }: { slug: string }) {
     );
   }, [savedProjects]);
 
-  const shouldFetchReport = !!user?._id && (!canCheckLocally || !!accessibleProject);
+  const shouldFetchReport =
+    !!user?._id && (!canCheckLocally || !!accessibleProject);
 
   const {
     data: lvnzyProject,
