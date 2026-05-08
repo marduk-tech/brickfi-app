@@ -18,8 +18,10 @@ import {
 import { useState } from "react";
 import { BiSend } from "react-icons/bi";
 import { AdminGuard } from "@/components/auth/admin-guard";
-import MapViewV2 from "@/components/map-view-v2/map-view-v2";
-
+import dynamic from "next/dynamic";
+const MapViewV2 = dynamic(() => import("../../../components/map-view-v2/map-view-v2"), {
+  ssr: false,
+});
 export interface ProjectResult {
   projectId: string;
   projectName: string;

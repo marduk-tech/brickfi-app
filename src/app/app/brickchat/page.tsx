@@ -1,11 +1,6 @@
 import { Metadata } from "next";
 import BrickChatClient from "./brickchat-client";
 
-interface PageProps {
-  params: Promise<{ lvnzyProjectId: string }>;
-}
-
-
 const META_DESCR =
   "BrickChat. Find the perfect home.";
 const META_TITLE = "BrickChat";
@@ -67,6 +62,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function BrickChatPage({ params }: PageProps) {
+export default async function BrickChatPage() {
   return <BrickChatClient />;
 }
