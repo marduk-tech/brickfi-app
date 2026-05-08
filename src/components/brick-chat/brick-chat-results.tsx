@@ -4,20 +4,8 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Card, Flex, Typography } from "antd";
 import Link from "next/link";
 import styles from "./brick-chat-results.module.css";
+import { ProjectResult } from "@/app/app/brickchat/page";
 
-interface ProjectResult {
-  projectId: string;
-  projectName: string;
-  oneLiner: string;
-  projectSlug?: string;
-  projectImage?: string;
-  projectCorridor?: number;
-  projectMinMaxPrice?: {
-    min: number;
-    max: number;
-  };
-  projectUnitTypes?: string[];
-}
 
 interface BrickChatResultsProps {
   results: ProjectResult[];
@@ -36,7 +24,7 @@ const getProjectMetadata = (project: ProjectResult): string => {
   }
 
   if (project.projectCorridor !== undefined) {
-    parts.push(`${project.projectCorridor.toFixed(1)} km from ORR`);
+    parts.push(`${project.projectCorridor}`);
   }
 
   if (project.projectMinMaxPrice) {
@@ -62,7 +50,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
         {results.map((project) => (
           <Link
             key={project.projectId}
-            href={`/app/brick360/${project.projectSlug || project.projectId}`}
+            href={`/app/brick360/${project.projectSlug || project.lvnzyProjectId}`}
             style={{ textDecoration: "none" }}
           >
             <Card
@@ -120,7 +108,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                   {project.projectName}
                 </Typography.Text>
 
-                {getProjectMetadata(project) && (
+                {/* {getProjectMetadata(project) && (
                   <Typography.Text
                     style={{
                       fontSize: FONT_SIZE.SUB_TEXT,
@@ -130,7 +118,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                   >
                     {getProjectMetadata(project)}
                   </Typography.Text>
-                )}
+                )} */}
 
                 <Typography.Paragraph
                   style={{

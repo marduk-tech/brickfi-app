@@ -5,21 +5,45 @@ import { useUser } from "@/hooks/use-user";
 import { axiosApiInstance } from "@/libs/axios-api-Instance";
 import { baseApiUrl } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Button, Flex, Form, Input, Spin, Tag, Typography, message } from "antd";
+import {
+  Button,
+  Flex,
+  Form,
+  Input,
+  Spin,
+  Tag,
+  Typography,
+  message,
+} from "antd";
 import { useState } from "react";
 import { BiSend } from "react-icons/bi";
 import { AdminGuard } from "@/components/auth/admin-guard";
 
-interface ProjectResult {
+
+export interface ProjectResult {
   projectId: string;
   projectName: string;
   oneLiner: string;
+  projectSlug?: string;
+  projectImage?: string;
+  projectCorridor?: string;
+  lvnzyProjectId: string;
+  projectMinMaxPrice?: {
+    min: number;
+    max: number;
+  };
+  projectUnitTypes?: string[];
 }
-
 interface ChatMessage {
   question: string;
   results: ProjectResult[];
 }
+
+const SAMPLE_PROMPTS = [
+  "Looking for a 3BHK above 1200 sq.ft near Electronic City",
+  "Find me a plot at less than 6000 per sq.ft in North Bangalore",
+  "4BHK apartment above 2500 sq.ft with lake facing units",
+];
 
 export default function BrickChatPage() {
   const [form] = Form.useForm();
@@ -45,9 +69,9 @@ export default function BrickChatPage() {
         `${baseApiUrl}ai/explore-projects`,
         {
           query: question.trim(),
-          limit: 10,
+          limit: 20,
           userId: user?._id,
-        }
+        },
       );
 
       const results = response.data.data || [];
@@ -63,20 +87,22 @@ export default function BrickChatPage() {
     }
   };
 
-  function renderQuestion (q: string) {
- return <Flex>
-                <Tag
-                  style={{
-                    color: "white",
-                    fontSize: FONT_SIZE.HEADING_3,
-                    backgroundColor: COLORS.textColorDark,
-                    borderRadius: 16,
-                    padding: "8px 16px"
-                  }}
-                >
-                  {q}
-                </Tag>
-                </Flex>
+  function renderQuestion(q: string) {
+    return (
+      <Flex>
+        <Tag
+          style={{
+            color: "white",
+            fontSize: FONT_SIZE.HEADING_3,
+            backgroundColor: COLORS.textColorDark,
+            borderRadius: 16,
+            padding: "8px 16px",
+          }}
+        >
+          {q}
+        </Tag>
+      </Flex>
+    );
   }
   return (
     <AdminGuard>
@@ -87,27 +113,55 @@ export default function BrickChatPage() {
           maxWidth: 1200,
           margin: "0 auto",
           width: "100%",
-          minHeight: "80vh",
+          minHeight: "87vh",
+          position: "relative",
+          paddingBottom: 100
         }}
       >
-        {/* Page Title */}
-        <Typography.Title level={2} style={{ marginBottom: 24 }}>
-          Project Search
-        </Typography.Title>
-        <Typography.Paragraph
-          style={{ marginBottom: 32, fontSize: FONT_SIZE.PARA }}
-        >
-          Search for projects using natural language. Try: &quot;apartments
-          near Whitefield&quot;, &quot;3 BHK near Outer Ring Road&quot;, or
-          &quot;projects with swimming pool&quot;
-        </Typography.Paragraph>
+        {!chatHistory || !chatHistory.length ? (
+          <Flex vertical>
+            <Typography.Text
+              style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
+            >
+              Welcome to Brickfi
+            </Typography.Text>
+            <Typography.Text
+              style={{
+                marginBottom: 24,
+                fontSize: FONT_SIZE.HEADING_4,
+                color: COLORS.textColorLight,
+              }}
+            >
+              Start your home search with Brickfi. Just enter your requirement
+              and let Brickfi do the work.
+            </Typography.Text>
+            <Flex style={{ width: 800, flexWrap: "wrap" }}>
+              {SAMPLE_PROMPTS.map((p) => {
+                return (
+                  <Tag
+                    style={{
+                      marginBottom: 8,
+                      fontSize: FONT_SIZE.PARA,
+                      borderRadius: 16,
+                      backgroundColor: COLORS.textColorDark,
+                      color: "white",
+                      padding: "2px 8px",
+                    }}
+                  >
+                    {p}
+                  </Tag>
+                );
+              })}
+            </Flex>
+          </Flex>
+        ) : null}
 
         {/* Chat History Display */}
         <Flex vertical gap={24} style={{ marginBottom: 24, flex: 1 }}>
           {chatHistory.map((msg, idx) => (
             <Flex key={idx} vertical gap={12}>
               {/* Question Display */}
-             {renderQuestion(msg.question)}
+              {renderQuestion(msg.question)}
 
               {/* Answer Display */}
               <Flex vertical gap={8} style={{ marginTop: 8 }}>
@@ -135,7 +189,16 @@ export default function BrickChatPage() {
         </Flex>
 
         {/* Search Input */}
-        <Form form={form} onFinish={handleSearch} style={{ marginTop: 24 }}>
+        <Form
+          form={form}
+          onFinish={handleSearch}
+          style={{
+            marginTop: 24,
+            position: "absolute",
+            bottom: 16,
+            width: "100%",
+          }}
+        >
           <Form.Item name="question" style={{ marginBottom: 0 }}>
             <Input
               placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
