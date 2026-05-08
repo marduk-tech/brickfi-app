@@ -4,7 +4,7 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Card, Flex, Typography } from "antd";
 import Link from "next/link";
 import styles from "./brick-chat-results.module.css";
-import { ProjectResult } from "@/app/app/brickchat/page";
+import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
 
 
 interface BrickChatResultsProps {
