@@ -23,16 +23,6 @@ const getProjectMetadata = (project: ProjectResult): string => {
     parts.push(project.projectUnitTypes[0]);
   }
 
-  if (project.projectCorridor !== undefined) {
-    parts.push(`${project.projectCorridor}`);
-  }
-
-  if (project.projectMinMaxPrice) {
-    const minPrice = formatPriceInCrores(project.projectMinMaxPrice.min);
-    const maxPrice = formatPriceInCrores(project.projectMinMaxPrice.max);
-    parts.push(`${minPrice}-${maxPrice}`);
-  }
-
   return parts.join(" · ");
 };
 
@@ -136,5 +126,6 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
           </Link>
         ))}
     </Flex>
+   
   );
 }
