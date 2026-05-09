@@ -161,7 +161,7 @@ export default function BrickChatClient() {
           ) : null}
 
           {/* Chat History Display */}
-          <Flex vertical gap={24} style={{ marginBottom: 24, flex: 1 }}>
+          <Flex vertical gap={24} style={{ marginBottom: 24, flex: 1, width: "100%" }}>
             {chatHistory.map((msg, idx) => (
               <Flex key={idx} vertical gap={12}>
                 {/* Question Display */}

@@ -42,6 +42,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
             key={project.projectId}
             href={`/app/brick360/${project.projectSlug || project.lvnzyProjectId}`}
             style={{ textDecoration: "none" }}
+            target="_blank"
           >
             <Card
               hoverable
