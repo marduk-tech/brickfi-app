@@ -37,7 +37,10 @@ export interface ProjectResult {
 }
 interface ChatMessage {
   question: string;
-  results: ProjectResult[];
+  answer: {
+    projectsList: ProjectResult[],
+    summary: string
+  }
 }
 
 const SAMPLE_PROMPTS = [
@@ -75,9 +78,9 @@ export default function BrickChatClient() {
         },
       );
 
-      const results = response.data.data || [];
+      const answer = response.data.data || [];
 
-      setChatHistory((prev) => [...prev, { question, results }]);
+      setChatHistory((prev) => [...prev, { question, answer }]);
       setCurrentQuestion(undefined);
     } catch (error) {
       console.error("Search error:", error);
@@ -108,18 +111,18 @@ export default function BrickChatClient() {
   }
   return (
     <AdminGuard>
-      <Flex style={{ maxWidth: 2000 }}>
+      <Flex style={{ maxWidth: 2000, padding: 8 }}>
         <Flex
           vertical
           style={{
-            padding: "24px 0",
             margin: "0 auto",
-            minHeight: "87vh",
             position: "relative",
             paddingBottom: 100,
             width: "50%",
+            height: "90vh"
           }}
         >
+          <Flex style={{height: "80vh",overflowY: "scroll", scrollbarWidth: "none"}}>
           {(!chatHistory || !chatHistory.length) && !currentQuestion ? (
             <Flex vertical>
               <Typography.Text
@@ -165,12 +168,15 @@ export default function BrickChatClient() {
                 {renderQuestion(msg.question)}
 
                 {/* Answer Display */}
-                <Flex vertical gap={8} style={{ marginTop: 8 }}>
-                  <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
-                    Found {msg.results.length} matching project
-                    {msg.results.length !== 1 ? "s" : ""}
+                <Flex vertical gap={4} style={{ marginTop: 8 }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}>
+                    Found {msg.answer.projectsList.length} matching project
+                    {msg.answer.projectsList.length !== 1 ? "s" : ""}
                   </Typography.Text>
-                  <BrickChatResults results={msg.results} />
+                  <Typography.Text style={{ fontSize: FONT_SIZE.PARA, fontWeight: 500, marginBottom: 16 }}>
+                     {msg.answer.summary}
+                  </Typography.Text>
+                  <BrickChatResults results={msg.answer.projectsList} />
                 </Flex>
               </Flex>
             ))}
@@ -188,16 +194,17 @@ export default function BrickChatClient() {
               </Flex>
             )}
           </Flex>
+          </Flex>
 
           {/* Search Input */}
           <Form
             form={form}
             onFinish={handleSearch}
             style={{
-              marginTop: 24,
+              marginTop: 8,
               position: "absolute",
-              bottom: 16,
-              width: 600,
+              bottom: 8,
+              width: "100%",
             }}
           >
             <Form.Item name="question" style={{ marginBottom: 0 }}>
@@ -228,11 +235,11 @@ export default function BrickChatClient() {
             </Form.Item>
           </Form>
         </Flex>
-        <Flex style={{ width: "47%", padding: "24px 1.5%" }}>
+        <Flex style={{ width: "47%", padding: "0 1.5%" }}>
           <MapViewV2
             projects={
               chatHistory && chatHistory.length
-                ? chatHistory[chatHistory.length - 1].results.map((p) => {
+                ? chatHistory[chatHistory.length - 1].answer.projectsList.map((p) => {
                     return {
                       info: {
                         name: p.projectName,
