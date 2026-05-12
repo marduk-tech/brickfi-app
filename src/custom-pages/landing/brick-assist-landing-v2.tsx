@@ -9,7 +9,7 @@ import {
   Flex,
   Typography,
 } from "antd";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
 import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
@@ -19,6 +19,7 @@ import { SectionCenter, SectionLeft, SectionRight } from "./section";
 import LandingFooter from "./footer";
 import { safeWindow } from "@/libs/browser-utils";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 
 export default function BrickAssistLandingV2() {
   const { isMobile } = useDevice();
@@ -26,6 +27,12 @@ export default function BrickAssistLandingV2() {
 
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
+
+    
+  useEffect(() => {
+    captureAnalyticsEvent("brickassist-landing",{});
+  },[])
+
 
   const getCTA = () => {
     return (

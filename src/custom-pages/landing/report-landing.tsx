@@ -11,7 +11,7 @@ import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import { Loader } from "@/components/common/loader";
-import { txtToId } from "@/libs/lvnzy-helper";
+import { captureAnalyticsEvent, txtToId } from "@/libs/lvnzy-helper";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 export default function ReportLanding() {
@@ -89,6 +89,7 @@ export default function ReportLanding() {
         element.scrollIntoView({ behavior: "smooth" });
       }
     }
+    captureAnalyticsEvent("report-landing",{});
   }, []);
   const whoAreWeText = (
     <Flex vertical>
