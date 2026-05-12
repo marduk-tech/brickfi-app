@@ -148,11 +148,11 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                   ₹
                   {thsndFormat(
                     `${Math.round(
-                      lvnzyProject?.originalProjectId.info.rate
+                      (lvnzyProject?.originalProjectId.info.rate
                         .minimumUnitCost /
                         lvnzyProject?.originalProjectId.info.rate
-                          .minimumUnitSize
-                    )}`
+                          .minimumUnitSize) / 25
+                    ) * 25}`
                   )}{" "}
                 </Typography.Text>
               )}
