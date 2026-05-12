@@ -177,7 +177,7 @@ export const RoadDriversComponent = ({
                   key={`${driver._id}-${lineIndex}`}
                   positions={positions}
                   pathOptions={{
-                    color: feature.properties?.strokeColor || COLORS.textColorDark,
+                    color: COLORS.LANDING.BLUISH,
                     weight: 5,
                     opacity: 0.5,
                     dashArray:
@@ -202,7 +202,7 @@ export const RoadDriversComponent = ({
                     html: `<div style="
                       position: absolute;
                       transform: translate(-50%, -50%) rotate(${angle}deg);
-                      background: #666;
+                      background: ${COLORS.LANDING.BLUISH};
                       border: 1px solid rgba(0,0,0,0.18);
                       border-radius: 3px;
                       padding: 1px 4px;
