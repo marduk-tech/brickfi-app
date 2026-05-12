@@ -3,9 +3,11 @@
 import LandingFooter from "@/custom-pages/landing/footer";
 import LandingHeader from "@/custom-pages/landing/header";
 import { useDevice } from "@/hooks/use-device";
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Typography } from "antd";
 import { Metadata } from "next";
+import { useEffect } from "react";
 
 export const metadata: Metadata = {
   title: "Brickfi | Advisor Callback",
@@ -17,10 +19,13 @@ export const metadata: Metadata = {
 };
 
 export default function BrickfiCallbackSuccess() {
-      const { isMobile } = useDevice();
-    
+  const { isMobile } = useDevice();
+  useEffect(() => {
+    captureAnalyticsEvent("callback-form-success", {});
+  });
+
   return (
-      <Flex gap={8} vertical style={{ paddingTop: 24, paddingBottom: 16 }}>
+    <Flex gap={8} vertical style={{ paddingTop: 24, paddingBottom: 16 }}>
       <>
         <LandingHeader></LandingHeader>
         <Flex
@@ -52,46 +57,44 @@ export default function BrickfiCallbackSuccess() {
             align="center"
             justify="center"
           >
-              <Flex vertical>
+            <Flex vertical>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_1 * 1.3,
+                  marginBottom: 24,
+                  lineHeight: "100%",
+                }}
+              >
+                Get in Touch with a Brickfi Advisor
+              </Typography.Text>
+              <Flex
+                vertical
+                style={{
+                  backgroundColor: COLORS.bgColorBlue,
+                  padding: "16px",
+                  borderRadius: 16,
+                }}
+              >
                 <Typography.Text
                   style={{
-                    fontSize: FONT_SIZE.HEADING_1 * 1.3,
-                    marginBottom: 24,
-                    lineHeight: "100%",
+                    fontSize: FONT_SIZE.HEADING_2,
+                    fontWeight: 500,
+                    lineHeight: "120%",
                   }}
                 >
-                  Get in Touch with a Brickfi Advisor
+                  Wohoo! Your request is submitted.
                 </Typography.Text>
-                <Flex
-                  vertical
+                <Typography.Text
                   style={{
-                    backgroundColor: COLORS.bgColorBlue,
-                    padding: "16px",
-                    borderRadius: 16,
+                    fontSize: FONT_SIZE.HEADING_3,
+                    lineHeight: "120%",
                   }}
                 >
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_2,
-                      fontWeight: 500,
-                      lineHeight: "120%",
-                    }}
-                  >
-                    Wohoo! Your request is submitted.
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_3,
-                      lineHeight: "120%",
-                    }}
-                  >
-                    Thank you for your request. A Brickfi Advisor will call you
-                    back at your preferred time.
-                  </Typography.Text>
-                </Flex>
+                  Thank you for your request. A Brickfi Advisor will call you
+                  back at your preferred time.
+                </Typography.Text>
               </Flex>
-
-        
+            </Flex>
           </Flex>
           {isMobile ? (
             <Flex

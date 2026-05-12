@@ -18,6 +18,7 @@ import { useParams } from "next/navigation";
 import { Loader } from "./loader";
 import { safeWindow } from "@/libs/browser-utils";
 import { LandingConstants } from "@/libs/constants";
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 
 const assistanceOptions = [
   {
@@ -166,6 +167,7 @@ export function BrickfiCallback() {
         mobile: user.mobile,
       });
     }
+    captureAnalyticsEvent("callback-form", {});
   }, [user, form]);
 
   const onFinish = async (values: any) => {
@@ -289,70 +291,99 @@ export function BrickfiCallback() {
             align="center"
             justify="center"
           >
-           
-              <Flex vertical gap={8}>
-                <Typography.Text
-                  style={{
-                    fontSize: isMobile
-                      ? FONT_SIZE.HEADING_1 * 1.2
-                      : FONT_SIZE.HEADING_1 * 1.5,
-                    lineHeight: "100%",
-                  }}
+            <Flex vertical gap={8}>
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 1.2
+                    : FONT_SIZE.HEADING_1 * 1.5,
+                  lineHeight: "100%",
+                }}
+              >
+                Get in Touch with a Brickfi Advisor
+              </Typography.Text>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_3,
+                  color: COLORS.textColorMedium,
+                  lineHeight: "120%",
+                }}
+              >
+                Fill details below and one of our advisors will get in touch
+                with you.
+              </Typography.Text>
+              <Form
+                form={form}
+                layout="vertical"
+                onFinish={onFinish}
+                style={{
+                  marginTop: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0,
+                  padding: "8px 16px",
+                  backgroundColor: COLORS.bgColorLightBlue,
+                }}
+              >
+                <Form.Item
+                  label="Your Name"
+                  name="name"
+                  rules={[{ required: true }]}
                 >
-                  Get in Touch with a Brickfi Advisor
-                </Typography.Text>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_3,
-                    color: COLORS.textColorMedium,
-                    lineHeight: "120%",
-                  }}
+                  <Input disabled={!!user} />
+                </Form.Item>
+                <Form.Item
+                  label="Your Mobile Number"
+                  name="mobile"
+                  rules={[{ required: true }]}
                 >
-                  Fill details below and one of our advisors will get in touch
-                  with you.
-                </Typography.Text>
-                <Form
-                  form={form}
-                  layout="vertical"
-                  onFinish={onFinish}
-                  style={{
-                    marginTop: 16,
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 0,
-                    padding: "8px 16px",
-                    backgroundColor: COLORS.bgColorLightBlue,
-                  }}
+                  <Input disabled={!!user} />
+                </Form.Item>
+                <Form.Item
+                  label="What kind of assistance do you need"
+                  name="assistance"
+                  rules={[{ required: true }]}
                 >
-                  <Form.Item
-                    label="Your Name"
-                    name="name"
-                    rules={[{ required: true }]}
+                  <Select
+                    placeholder="Select an option"
+                    style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
+                    allowClear
+                    optionLabelProp="label"
+                    onChange={(value) => {
+                      setSelectedAsstVal(value);
+                    }}
                   >
-                    <Input disabled={!!user} />
-                  </Form.Item>
+                    {assistanceOptions.map((option) => (
+                      <Select.Option
+                        key={option.value}
+                        value={option.value}
+                        label={option.value}
+                      >
+                        {option.label}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Form.Item>
+                <Flex vertical={isMobile} gap={16}>
                   <Form.Item
-                    label="Your Mobile Number"
-                    name="mobile"
-                    rules={[{ required: true }]}
-                  >
-                    <Input disabled={!!user} />
-                  </Form.Item>
-                  <Form.Item
-                    label="What kind of assistance do you need"
-                    name="assistance"
+                    label="What day works for you?"
+                    name="day"
                     rules={[{ required: true }]}
                   >
                     <Select
                       placeholder="Select an option"
                       style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
                       allowClear
-                      optionLabelProp="label"
-                      onChange={(value) => {
-                        setSelectedAsstVal(value);
+                      disabled={!selectedAsstVal}
+                      onChange={(value: any) => {
+                        setDayOption(value);
+                        form.setFieldsValue({
+                          time: getTimeOptions(value)[0],
+                        });
                       }}
+                      optionLabelProp="label"
                     >
-                      {assistanceOptions.map((option) => (
+                      {getPickerOptions().map((option) => (
                         <Select.Option
                           key={option.value}
                           value={option.value}
@@ -363,62 +394,32 @@ export function BrickfiCallback() {
                       ))}
                     </Select>
                   </Form.Item>
-                  <Flex vertical={isMobile} gap={16}>
-                    <Form.Item
-                      label="What day works for you?"
-                      name="day"
-                      rules={[{ required: true }]}
+                  <Form.Item
+                    label="What time works for you?"
+                    name="time"
+                    rules={[{ required: true }]}
+                  >
+                    <Select
+                      placeholder="Select an option"
+                      style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
+                      allowClear
+                      disabled={!dayOption}
+                      optionLabelProp="label"
                     >
-                      <Select
-                        placeholder="Select an option"
-                        style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
-                        allowClear
-                        disabled={!selectedAsstVal}
-                        onChange={(value: any) => {
-                          setDayOption(value);
-                          form.setFieldsValue({
-                            time: getTimeOptions(value)[0],
-                          });
-                        }}
-                        optionLabelProp="label"
-                      >
-                        {getPickerOptions().map((option) => (
-                          <Select.Option
-                            key={option.value}
-                            value={option.value}
-                            label={option.value}
-                          >
-                            {option.label}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                    <Form.Item
-                      label="What time works for you?"
-                      name="time"
-                      rules={[{ required: true }]}
-                    >
-                      <Select
-                        placeholder="Select an option"
-                        style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
-                        allowClear
-                        disabled={!dayOption}
-                        optionLabelProp="label"
-                      >
-                        {getTimeOptions(dayOption).map((option) => (
-                          <Select.Option
-                            key={option.value}
-                            value={option.value}
-                            label={option.value}
-                          >
-                            {option.label}
-                          </Select.Option>
-                        ))}
-                      </Select>
-                    </Form.Item>
-                  </Flex>
-                </Form>
-              </Flex>
+                      {getTimeOptions(dayOption).map((option) => (
+                        <Select.Option
+                          key={option.value}
+                          value={option.value}
+                          label={option.value}
+                        >
+                          {option.label}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                </Flex>
+              </Form>
+            </Flex>
 
             <Flex
               style={{
@@ -429,17 +430,15 @@ export function BrickfiCallback() {
               }}
               gap={16}
             >
-                <Button
-                  onClick={() => form.submit()}
-                  type="primary"
-                  disabled={!selectedAsstVal || !dayOption}
-                  loading={
-                    formLoading
-                  }
-                  style={{ width: 200 }}
-                >
-                  {"Submit"}
-                </Button>
+              <Button
+                onClick={() => form.submit()}
+                type="primary"
+                disabled={!selectedAsstVal || !dayOption}
+                loading={formLoading}
+                style={{ width: 200 }}
+              >
+                {"Submit"}
+              </Button>
             </Flex>
           </Flex>
           {isMobile ? (
