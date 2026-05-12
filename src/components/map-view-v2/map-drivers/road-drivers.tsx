@@ -120,79 +120,115 @@ export const RoadDriversComponent = ({
             setInfoModalOpen(true);
           };
 
-          let totalMarkers = 0;
-          const RoadLine = processedFeatures
-            .filter((feature) => {
-              return feature.coordinates.some(([lng, lat]) =>
-                bounds.contains([lat, lng])
-              );
-            })
-            .map((feature, lineIndex) => {
+          const visibleFeatures = processedFeatures.filter((feature) =>
+            feature.coordinates.some(([lng, lat]) => bounds.contains([lat, lng]))
+          );
+
+          type CandidateMarker = {
+            coords: number[];
+            angle: number;
+            feature: (typeof visibleFeatures)[0];
+            lineIndex: number;
+          };
+
+          // First pass: collect all candidate label points across all polylines
+          const allCandidates: CandidateMarker[] = [];
+          visibleFeatures.forEach((feature, lineIndex) => {
+            const line = turf.lineString(feature.coordinates);
+            const totalLength = turf.length(line, { units: "kilometers" });
+            const numPoints = totalLength >= 2 ? Math.ceil(totalLength)/2 : 1;
+            const startOffset = 2;
+
+            for (let i = 0; i < numPoints; i++) {
+              const distance = startOffset + (i * totalLength) / numPoints;
+              if (distance >= totalLength) break;
+              const point = turf.along(line, distance, { units: "kilometers" });
+              const coords = point.geometry.coordinates;
+
+              const step = 0.15;
+              const p1 = turf.along(line, Math.max(0, distance - step), { units: "kilometers" });
+              const p2 = turf.along(line, Math.min(totalLength, distance + step), { units: "kilometers" });
+              // Convert compass bearing to CSS rotation, normalize to [-90, 90] so text is never upside-down
+              let angle = turf.bearing(p1, p2) - 90;
+              if (angle < -90) angle += 180;
+              if (angle > 90) angle -= 180;
+
+              allCandidates.push({ coords, angle, feature, lineIndex });
+            }
+          });
+
+          // Second pass: deduplicate globally — distance threshold scales with zoom
+          const zoom = map.getZoom();
+          const minDistance = zoom < 13.5 ? 8 : zoom < 14.5 ? 4 : 2;
+          const globalMarkers = allCandidates.reduce<CandidateMarker[]>((kept, candidate) => {
+            const tooClose = kept.some(
+              (k) => turf.distance(candidate.coords, k.coords, { units: "kilometers" }) < minDistance
+            );
+            return tooClose ? kept : [...kept, candidate];
+          }, []);
+
+          const RoadLine = [
+            ...visibleFeatures.map((feature, lineIndex) => {
               const positions = feature.coordinates.map(
                 ([lng, lat]) => [lat, lng] as [number, number]
               );
-
-              const line = turf.lineString(feature.coordinates);
-              const totalLength = turf.length(line, { units: "kilometers" });
-
-              const numPoints =
-                totalLength >= 4
-                  ? Math.floor(totalLength / 4)
-                  : lineIndex == processedFeatures.length - 1 && !totalMarkers
-                  ? 1
-                  : 0;
-              totalMarkers += numPoints;
-
-              const points = [];
-              for (let i = 0; i < numPoints; i++) {
-                const distance = (i * totalLength) / numPoints;
-                const point = turf.along(line, distance, {
-                  units: "kilometers",
-                });
-                points.push(point.geometry.coordinates);
-              }
-
               return (
-                <React.Fragment key={`road-line-${driver._id}-${lineIndex}`}>
-                  {map.getZoom() > 11.5
-                    ? points.map((p, pointIndex) => (
-                        <Marker
-                          key={`road-${driver._id}-${lineIndex}-${pointIndex}`}
-                          position={[p![1], p![0]]}
-                          icon={roadIcon}
-                          eventHandlers={{
-                            click: () => {
-                              handleRoadDriverClick(feature);
-                            },
-                          }}
-                        />
-                      ))
-                    : null}
-                  <Polyline
-                    key={`${driver._id}-${lineIndex}`}
-                    positions={positions}
-                    pathOptions={{
-                      color:
-                        feature.properties?.strokeColor || COLORS.textColorDark,
-                      weight: 5,
-                      opacity: 0.5,
-                      dashArray:
-                        isDashed ||
-                        (feature.properties &&
-                        feature.properties.status &&
-                        feature.properties.status == "construction"
-                          ? true
-                          : false)
-                          ? "10, 10"
-                          : undefined,
-                    }}
-                    eventHandlers={{
-                      click: handleRoadDriverClick,
-                    }}
-                  />
-                </React.Fragment>
+                <Polyline
+                  key={`${driver._id}-${lineIndex}`}
+                  positions={positions}
+                  pathOptions={{
+                    color: feature.properties?.strokeColor || COLORS.textColorDark,
+                    weight: 5,
+                    opacity: 0.5,
+                    dashArray:
+                      isDashed ||
+                      (feature.properties?.status === "construction")
+                        ? "10, 10"
+                        : undefined,
+                  }}
+                  eventHandlers={{
+                    click: handleRoadDriverClick,
+                  }}
+                />
               );
-            });
+            }),
+            ...(map.getZoom() > 12.5
+              ? globalMarkers.map(({ coords, angle, feature, lineIndex }, pointIndex) => {
+                  const labelText = driver.name || feature.properties?.name || "Highway";
+                  const labelIcon = L.divIcon({
+                    className: "",
+                    iconSize: [0, 0],
+                    iconAnchor: [0, 0],
+                    html: `<div style="
+                      position: absolute;
+                      transform: translate(-50%, -50%) rotate(${angle}deg);
+                      background: #666;
+                      border: 1px solid rgba(0,0,0,0.18);
+                      border-radius: 3px;
+                      padding: 1px 4px;
+                      font-size: 10px;
+                      font-weight: 400;
+                      white-space: nowrap;
+                      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                      color: white;
+                      cursor: pointer;
+                      pointer-events: auto;
+                      letter-spacing: 0.3px;
+                    ">${labelText}</div>`,
+                  });
+                  return (
+                    <Marker
+                      key={`road-label-${driver._id}-${lineIndex}-${pointIndex}`}
+                      position={[coords[1], coords[0]]}
+                      icon={labelIcon}
+                      eventHandlers={{
+                        click: () => handleRoadDriverClick(feature),
+                      }}
+                    />
+                  );
+                })
+              : []),
+          ];
 
           return (
             <React.Fragment key={`road-group-${driver._id}`}>

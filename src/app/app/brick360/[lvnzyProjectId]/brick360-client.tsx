@@ -7,6 +7,7 @@ import { useDevice } from "@/hooks/use-device";
 import { useFetchAccessibleLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
 import { CustomError } from "@/libs/error-handler";
+import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Button, Flex, Modal, Typography } from "antd";
 import Link from "antd/es/typography/Link";
@@ -17,7 +18,7 @@ const REPORT_ACCESS_DENIED_MESSAGE =
   "You don't have access to this Brick360 Report. You can submit a request or if you need additional assistance, you can reachout to a Brickfi Advisor.";
 
 function AccessDeniedState() {
-  const {isMobile} = useDevice();
+  const { isMobile } = useDevice();
 
   return (
     <>
@@ -32,32 +33,40 @@ function AccessDeniedState() {
           textAlign: "center",
           padding: "32px",
           marginTop: 128,
-          marginLeft: isMobile ? 0 : 200
+          marginLeft: isMobile ? 0 : 200,
         }}
       >
-        <DynamicReactIcon size={64} color={COLORS.textColorDark} iconName="TbFaceIdError" iconSet="tb"></DynamicReactIcon>
+        <DynamicReactIcon
+          size={64}
+          color={COLORS.textColorDark}
+          iconName="TbFaceIdError"
+          iconSet="tb"
+        ></DynamicReactIcon>
         <Typography.Text
           style={{
             margin: 0,
             fontSize: FONT_SIZE.HEADING_1,
             textAlign: "left",
             alignSelf: "flex-start",
-            fontWeight: 500
+            fontWeight: 500,
           }}
         >
           Access Denied
         </Typography.Text>
-        <Typography.Text style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}>
+        <Typography.Text
+          style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_3 }}
+        >
           {REPORT_ACCESS_DENIED_MESSAGE}
         </Typography.Text>
         <Flex gap={12} wrap align="flex-start">
           <Link href="/requestreport" target="_blank">
-          <Button type="primary">
-            Request a Brick360 Report
-          </Button>
+            <Button type="primary">Request a Brick360 Report</Button>
           </Link>
-           <Link href="/callback-request?srcIntent=brick360-access-denied" target="_blank">
-          <Button >Reachout to an Advisor</Button>
+          <Link
+            href="/callback-request?srcIntent=brick360-access-denied"
+            target="_blank"
+          >
+            <Button>Reachout to an Advisor</Button>
           </Link>
         </Flex>
       </Flex>
@@ -108,7 +117,9 @@ export default function Brick360Client({ slug }: { slug: string }) {
   }, [savedProjects]);
 
   const shouldFetchReport =
-    !!user?._id && !["admin","member"].includes(user.role || "") && (!canCheckLocally || !!accessibleProject);
+    !!user?._id &&
+    !["admin", "member"].includes(user.role || "") &&
+    (!canCheckLocally || !!accessibleProject);
 
   const {
     data: lvnzyProject,
@@ -122,7 +133,11 @@ export default function Brick360Client({ slug }: { slug: string }) {
 
   const parsedError = error ? CustomError.parse(error) : null;
   const isAccessDenied =
-    !!user && !["admin","member"].includes(user.role || "")  && !userLoading && canCheckLocally && !accessibleProject;
+    !!user &&
+    !["admin", "member"].includes(user.role || "") &&
+    !userLoading &&
+    canCheckLocally &&
+    !accessibleProject;
   const isDeniedByApi = parsedError?.status === 403;
 
   if (flickerWait || userLoading || (!user && !isAccessDenied)) {
@@ -134,6 +149,10 @@ export default function Brick360Client({ slug }: { slug: string }) {
   }
 
   if (isAccessDenied || isDeniedByApi) {
+    captureAnalyticsEvent("report-invalid-access", {
+     projectName: lvnzyProject?.meta.projectName,
+      projectId: lvnzyProject?._id,
+    });
     return <AccessDeniedState />;
   }
 
@@ -154,7 +173,10 @@ export default function Brick360Client({ slug }: { slug: string }) {
     );
   }
 
-  if (!["admin","member"].includes(user.role || "") && (projectLoading || !lvnzyProject)) {
+  if (
+    !["admin", "member"].includes(user.role || "") &&
+    (projectLoading || !lvnzyProject)
+  ) {
     return (
       <Flex style={{ marginTop: 200 }} align="center" justify="center">
         <Loader />
