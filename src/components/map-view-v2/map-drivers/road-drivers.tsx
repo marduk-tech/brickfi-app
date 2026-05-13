@@ -82,19 +82,18 @@ export const RoadDriversComponent = ({
                   >
                     {driver.name}
                   </Typography.Text>
-                  <Flex style={{}}>
+                  {feature.properties && feature.properties.name && feature.properties.name.toLowerCase() != driver.name.toLowerCase() ? <Flex style={{}}>
                     <Tag
                       style={{
                         fontSize: FONT_SIZE.HEADING_4,
                       }}
                     >
                       {capitalize(
-                        feature.properties && feature.properties.name
-                          ? feature.properties.name
-                          : ""
+                        feature.properties.name
                       )}
                     </Tag>
-                  </Flex>
+                  </Flex>: null}
+                  
                 </Flex>
               ),
               content: driver.details?.description || "",

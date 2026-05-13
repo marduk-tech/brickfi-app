@@ -142,7 +142,7 @@ export function BrickfiCallback() {
         if (
           !dayVal ||
           !dayVal.toLowerCase().includes("today") ||
-          new Date().getHours() < t
+          new Date().getHours() < t-4
         ) {
           return true;
         }
