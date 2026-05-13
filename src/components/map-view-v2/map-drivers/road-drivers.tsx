@@ -73,7 +73,7 @@ export const RoadDriversComponent = ({
             PLACE_TIMELINE.PARTIAL_LAUNCH,
           ].includes(driver.status as PLACE_TIMELINE);
 
-          const handleRoadDriverClick = (feature?: any) => {
+          const handleRoadDriverClick = (driver: any, feature?: any) => {
             setModalContent({
               title: (
                 <Flex vertical>
@@ -105,7 +105,7 @@ export const RoadDriversComponent = ({
                 },
                 {
                   label: driverStatusLabel(
-                    feature.properties.status || driver.status
+                    feature.properties ? feature.properties.status || driver.status : driver.status
                   ),
                   color:
                     isDashed ||
@@ -221,8 +221,9 @@ export const RoadDriversComponent = ({
                       key={`road-label-${driver._id}-${lineIndex}-${pointIndex}`}
                       position={[coords[1], coords[0]]}
                       icon={labelIcon}
+                      zIndexOffset={1000}
                       eventHandlers={{
-                        click: () => handleRoadDriverClick(feature),
+                        click: () => handleRoadDriverClick(driver, feature),
                       }}
                     />
                   );
