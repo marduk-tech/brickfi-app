@@ -19,6 +19,7 @@ import { Loader } from "./loader";
 import { safeWindow } from "@/libs/browser-utils";
 import { LandingConstants } from "@/libs/constants";
 import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
+import posthog from "posthog-js";
 
 const assistanceOptions = [
   {
@@ -142,7 +143,7 @@ export function BrickfiCallback() {
         if (
           !dayVal ||
           !dayVal.toLowerCase().includes("today") ||
-          new Date().getHours() < t-4
+          new Date().getHours() < t - 4
         ) {
           return true;
         }
@@ -221,6 +222,10 @@ export function BrickfiCallback() {
         },
       });
       userId = newUser._id;
+      posthog.identify(userId, {
+        countryCode: "91",
+        name: values.name,
+      });
     }
 
     if (userId) {
