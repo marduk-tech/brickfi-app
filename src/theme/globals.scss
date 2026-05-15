@@ -247,3 +247,20 @@ input#mobileNumber {
     border-radius: 8px;
   }
 }
+
+.bkchat-summary {
+  h3, h4 {
+    margin: 2px 0;
+  }
+
+  ul {
+
+    li {
+      padding-left: 4px;
+
+      ul {
+        padding-left: 24px;
+      }
+    }
+  }
+}

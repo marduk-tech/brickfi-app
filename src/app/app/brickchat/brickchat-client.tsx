@@ -21,6 +21,8 @@ import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiSend } from "react-icons/bi";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const MapViewV2 = dynamic(
   () => import("../../../components/map-view-v2/map-view-v2"),
@@ -46,6 +48,7 @@ export interface ProjectResult {
 interface ExploreAnswer {
   projectsList: ProjectResult[];
   summary: string;
+  directAnswer: boolean;
 }
 
 interface ChatMessage {
@@ -274,7 +277,7 @@ export default function BrickChatClient() {
         },
         body: JSON.stringify({
           query: question,
-          limit: 20,
+          limit: 7,
           userId: user._id,
           threadId: activeThreadId,
         }),
@@ -517,7 +520,7 @@ export default function BrickChatClient() {
                   {renderQuestion(messageItem.question)}
 
                   <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                    <Typography.Text
+                    {!messageItem.answer.directAnswer ? <Typography.Text
                       style={{
                         fontSize: FONT_SIZE.SUB_TEXT,
                         color: COLORS.textColorLight,
@@ -526,19 +529,33 @@ export default function BrickChatClient() {
                       Found {messageItem.answer.projectsList.length} matching
                       project
                       {messageItem.answer.projectsList.length !== 1 ? "s" : ""}
-                    </Typography.Text>
-                    <Typography.Text
-                      style={{
-                        fontSize: FONT_SIZE.PARA,
-                        fontWeight: 500,
-                        marginBottom: 16,
+                    </Typography.Text>: null}
+                    
+                    <Markdown
+                    className="bkchat-summary"
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({ children }) => (
+                          <Typography.Text
+                          
+                            style={{
+                              fontSize: FONT_SIZE.HEADING_3,
+                              fontWeight: 500,
+                              marginBottom: 16,
+                              display: "block",
+                            }}
+                          >
+                            {children}
+                          </Typography.Text>
+                        ),
                       }}
                     >
                       {messageItem.answer.summary}
-                    </Typography.Text>
+                    </Markdown>
+                    {!messageItem.answer.directAnswer ?
                     <BrickChatResults
                       results={messageItem.answer.projectsList}
-                    />
+                    />: null}
                   </Flex>
                 </Flex>
               ))}
