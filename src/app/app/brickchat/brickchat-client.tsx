@@ -13,7 +13,6 @@ import {
   Form,
   Input,
   Spin,
-  Table,
   Tag,
   Typography,
   message,
@@ -117,7 +116,10 @@ export default function BrickChatClient() {
 
   const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
   const showWelcome =
-    !selectedThreadId && !activeThreadId && !chatHistory.length && !historyLoading;
+    !selectedThreadId &&
+    !activeThreadId &&
+    !chatHistory.length &&
+    !historyLoading;
 
   const syncThreadSearchParam = (threadId?: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -236,7 +238,14 @@ export default function BrickChatClient() {
     return () => {
       cancelled = true;
     };
-  }, [activeThreadId, chatHistory.length, pathname, router, selectedThreadId, user?._id]);
+  }, [
+    activeThreadId,
+    chatHistory.length,
+    pathname,
+    router,
+    selectedThreadId,
+    user?._id,
+  ]);
 
   const handleSearch = async (values: { question: string }) => {
     const question = values.question?.trim();
@@ -330,12 +339,14 @@ export default function BrickChatClient() {
 
   const latestProjects =
     chatHistory.length > 0
-      ? chatHistory[chatHistory.length - 1].answer.projectsList.map((project) => ({
-          info: {
-            name: project.projectName,
-            location: project.projectLocation,
-          },
-        }))
+      ? chatHistory[chatHistory.length - 1].answer.projectsList.map(
+          (project) => ({
+            info: {
+              name: project.projectName,
+              location: project.projectLocation,
+            },
+          }),
+        )
       : [];
 
   return (
@@ -363,102 +374,129 @@ export default function BrickChatClient() {
           >
             {showWelcome ? (
               <Flex vertical>
-                <Typography.Text
-                  style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
-                >
-                  Welcome to Brickfi
-                </Typography.Text>
-                <Typography.Text
-                  style={{
-                    marginBottom: 24,
-                    fontSize: FONT_SIZE.HEADING_4,
-                    color: COLORS.textColorLight,
-                  }}
-                >
-                  Start your home search with Brickfi. Just enter your requirement
-                  and let Brickfi do the work.
-                </Typography.Text>
-                <Flex style={{ width: "100%", flexWrap: "wrap" }}>
-                  {SAMPLE_PROMPTS.map((prompt) => (
-                    <Tag
-                      key={prompt}
-                      style={{
-                        marginBottom: 8,
-                        fontSize: FONT_SIZE.PARA,
-                        backgroundColor: COLORS.textColorDark,
-                        color: "white",
-                        padding: "2px 8px",
-                        cursor: loading ? "not-allowed" : "pointer",
-                      }}
-                      onClick={() => {
-                        if (loading) {
-                          return;
-                        }
+                <Flex vertical>
+                  <Typography.Text
+                    style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
+                  >
+                    Welcome to Brickfi
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      marginBottom: 24,
+                      fontSize: FONT_SIZE.HEADING_4,
+                      color: COLORS.textColorLight,
+                    }}
+                  >
+                    Start your home search with Brickfi. Just enter your
+                    requirement and let Brickfi do the work.
+                  </Typography.Text>
+                </Flex>
+                <Flex vertical gap={12}>
+                  <Flex align="center" justify="space-between">
+                    {(activeThreadId || selectedThreadId) && (
+                      <Button onClick={handleNewChat}>New Chat</Button>
+                    )}
+                  </Flex>
+                  {threadsLoading ? (
+                    <Flex align="center" gap={8}>
+                      <Spin size="small" />
+                      <Typography.Text type="secondary">
+                        Loading threads...
+                      </Typography.Text>
+                    </Flex>
+                  ) : chatThreads.length === 0 ? (
+                    <Flex style={{ width: "100%", flexWrap: "wrap" }}>
+                      {SAMPLE_PROMPTS.map((prompt) => (
+                        <Tag
+                          key={prompt}
+                          style={{
+                            marginBottom: 8,
+                            fontSize: FONT_SIZE.PARA,
+                            backgroundColor: COLORS.textColorDark,
+                            color: "white",
+                            padding: "2px 8px",
+                            cursor: loading ? "not-allowed" : "pointer",
+                          }}
+                          onClick={() => {
+                            if (loading) {
+                              return;
+                            }
 
-                        form.setFieldsValue({ question: prompt });
-                        form.submit();
-                      }}
-                    >
-                      {prompt}
-                    </Tag>
-                  ))}
+                            form.setFieldsValue({ question: prompt });
+                            form.submit();
+                          }}
+                        >
+                          {prompt}
+                        </Tag>
+                      ))}
+                    </Flex>
+                  ) : (
+                    <Flex vertical>
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.PARA,
+                          color: COLORS.textColorLight,
+                          marginBottom: 4,
+                        }}
+                      >
+                        Your recent chats
+                      </Typography.Text>
+
+                      <Flex
+                        vertical
+                        style={{
+                          maxHeight: 250,
+                          border: `1px solid ${COLORS.primaryColor}`,
+                          borderRadius: 8,
+                          padding: 4,
+                          backgroundColor: COLORS.bgColorLightBlue,
+                          overflowY: "scroll",
+                          scrollbarWidth: "none",
+                        }}
+                      >
+                        {chatThreads.map((thread, index) => (
+                          <Flex
+                            key={thread.thread_id}
+                            vertical
+                            gap={2}
+                            onClick={() => handleThreadSelect(thread.thread_id)}
+                            style={{
+                              cursor: "pointer",
+                              padding: "8px 4px",
+                              borderBottom:
+                                index == chatThreads.length - 1
+                                  ? "none"
+                                  : `1px solid ${COLORS.primaryColor}`,
+                              backgroundColor:
+                                thread.thread_id ===
+                                (selectedThreadId || activeThreadId)
+                                  ? "#fafafa"
+                                  : undefined,
+                            }}
+                          >
+                            <Typography.Text
+                              ellipsis
+                              style={{
+                                fontWeight: 500,
+                                fontSize: FONT_SIZE.HEADING_4,
+                              }}
+                            >
+                              {thread.thread_title}
+                            </Typography.Text>
+                            <Typography.Text
+                              type="secondary"
+                              style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                            >
+                              {formatThreadDate(thread.createdAt)}
+                            </Typography.Text>
+                          </Flex>
+                        ))}
+                      </Flex>
+                    </Flex>
+                  )}
                 </Flex>
               </Flex>
             ) : null}
-
-            <Flex vertical gap={12}>
-              <Flex align="center" justify="space-between">
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_4,
-                    fontWeight: 600,
-                  }}
-                >
-                  Saved Threads
-                </Typography.Text>
-                {(activeThreadId || selectedThreadId) && (
-                  <Button onClick={handleNewChat}>New Chat</Button>
-                )}
-              </Flex>
-              <Table<ChatThread>
-                rowKey="thread_id"
-                size="small"
-                loading={threadsLoading}
-                dataSource={chatThreads}
-                pagination={false}
-                scroll={{ y: 220 }}
-                locale={{
-                  emptyText: (
-                    <Empty description="No BrickChat threads saved yet" />
-                  ),
-                }}
-                onRow={(record) => ({
-                  onClick: () => handleThreadSelect(record.thread_id),
-                  style: {
-                    cursor: "pointer",
-                    backgroundColor:
-                      record.thread_id === (selectedThreadId || activeThreadId)
-                        ? "#fafafa"
-                        : undefined,
-                  },
-                })}
-                columns={[
-                  {
-                    title: "Title",
-                    dataIndex: "thread_title",
-                    key: "thread_title",
-                    ellipsis: true,
-                  },
-                  {
-                    title: "Created",
-                    dataIndex: "createdAt",
-                    key: "createdAt",
-                    width: 180,
-                    render: (value: string) => formatThreadDate(value),
-                  },
-                ]}
-              />
-            </Flex>
 
             {historyLoading && !chatHistory.length ? (
               <Flex align="center" gap={12}>
@@ -471,7 +509,11 @@ export default function BrickChatClient() {
 
             <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
               {chatHistory.map((messageItem, index) => (
-                <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
+                <Flex
+                  key={`${messageItem.question}-${index}`}
+                  vertical
+                  gap={12}
+                >
                   {renderQuestion(messageItem.question)}
 
                   <Flex vertical gap={4} style={{ marginTop: 8 }}>
@@ -494,7 +536,9 @@ export default function BrickChatClient() {
                     >
                       {messageItem.answer.summary}
                     </Typography.Text>
-                    <BrickChatResults results={messageItem.answer.projectsList} />
+                    <BrickChatResults
+                      results={messageItem.answer.projectsList}
+                    />
                   </Flex>
                 </Flex>
               ))}
