@@ -20,7 +20,7 @@ const getProjectMetadata = (project: ProjectResult): string => {
   const parts: string[] = [];
 
   if (project.projectUnitTypes && project.projectUnitTypes.length > 0) {
-    parts.push(project.projectUnitTypes[0]);
+    parts.push(String(project.projectUnitTypes[0]));
   }
 
   return parts.join(" · ");

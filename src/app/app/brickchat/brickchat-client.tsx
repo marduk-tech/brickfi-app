@@ -1,46 +1,57 @@
 "use client";
 
 import BrickChatResults from "@/components/brick-chat/brick-chat-results";
+import { AdminGuard } from "@/components/auth/admin-guard";
 import { useUser } from "@/hooks/use-user";
-import { axiosApiInstance } from "@/libs/axios-api-Instance";
-import { baseApiUrl } from "@/libs/constants";
+import { apiKey, baseApiUrl } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
+import { ChatThread } from "@/types/User";
 import {
   Button,
+  Empty,
   Flex,
   Form,
   Input,
   Spin,
+  Table,
   Tag,
   Typography,
   message,
 } from "antd";
-import { useState } from "react";
-import { BiSend } from "react-icons/bi";
-import { AdminGuard } from "@/components/auth/admin-guard";
 import dynamic from "next/dynamic";
-const MapViewV2 = dynamic(() => import("../../../components/map-view-v2/map-view-v2"), {
-  ssr: false,
-});
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { BiSend } from "react-icons/bi";
+
+const MapViewV2 = dynamic(
+  () => import("../../../components/map-view-v2/map-view-v2"),
+  {
+    ssr: false,
+  },
+);
+
 export interface ProjectResult {
   projectId: string;
   projectName: string;
   oneLiner: string;
   projectSlug?: string;
   projectImage?: string;
-  lvnzyProjectId: string;
-  projectUnitTypes?: string[];
+  lvnzyProjectId?: string;
+  projectUnitTypes?: Array<string | number>;
   projectLocation: {
     lat: number;
     lng: number;
   };
 }
+
+interface ExploreAnswer {
+  projectsList: ProjectResult[];
+  summary: string;
+}
+
 interface ChatMessage {
   question: string;
-  answer: {
-    projectsList: ProjectResult[],
-    summary: string
-  }
+  answer: ExploreAnswer;
 }
 
 const SAMPLE_PROMPTS = [
@@ -49,18 +60,194 @@ const SAMPLE_PROMPTS = [
   "4BHK apartment above 2500 sq.ft with lake facing units",
 ];
 
+const formatThreadDate = (value: string) =>
+  new Date(value).toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+const fetchChatThreads = async (userId: string): Promise<ChatThread[]> => {
+  const res = await fetch(`${baseApiUrl}user/${userId}/chat-threads`, {
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey || "",
+    },
+  });
+  if (!res.ok) throw new Error(`chat-threads ${res.status}`);
+  const json = await res.json();
+  return json?.data || [];
+};
+
+const fetchThreadHistory = async (
+  userId: string,
+  threadId: string,
+): Promise<ChatMessage[]> => {
+  const res = await fetch(`${baseApiUrl}ai/explore-projects/history`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey || "",
+    },
+    body: JSON.stringify({ userId, threadId }),
+  });
+  if (!res.ok) throw new Error(`history ${res.status}`);
+  const json = await res.json();
+  return json?.data || [];
+};
+
 export default function BrickChatClient() {
   const [form] = Form.useForm();
   const { user } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
+  const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
+  const [activeThreadId, setActiveThreadId] = useState<string>();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
   const [loading, setLoading] = useState(false);
+  const [threadsLoading, setThreadsLoading] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
+  const showWelcome =
+    !selectedThreadId && !activeThreadId && !chatHistory.length && !historyLoading;
+
+  const syncThreadSearchParam = (threadId?: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (threadId) {
+      params.set("threadId", threadId);
+    } else {
+      params.delete("threadId");
+    }
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
+  };
+
+  const refreshChatThreads = async () => {
+    if (!user?._id) {
+      return;
+    }
+
+    setThreadsLoading(true);
+
+    try {
+      const threads = await fetchChatThreads(user._id);
+      setChatThreads(threads);
+    } catch (error) {
+      console.error("Failed to load chat threads:", error);
+      message.error("Failed to load saved threads.");
+    } finally {
+      setThreadsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user?._id) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadChatThreads = async () => {
+      setThreadsLoading(true);
+
+      try {
+        const threads = await fetchChatThreads(user._id);
+
+        if (cancelled) {
+          return;
+        }
+
+        setChatThreads(threads);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error("Failed to load chat threads:", error);
+        message.error("Failed to load saved threads.");
+      } finally {
+        if (!cancelled) {
+          setThreadsLoading(false);
+        }
+      }
+    };
+
+    void loadChatThreads();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?._id]);
+
+  useEffect(() => {
+    if (!user?._id || !selectedThreadId) {
+      return;
+    }
+
+    if (selectedThreadId === activeThreadId && chatHistory.length > 0) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadThreadHistory = async () => {
+      setHistoryLoading(true);
+
+      try {
+        const history = await fetchThreadHistory(user._id, selectedThreadId);
+
+        if (cancelled) {
+          return;
+        }
+
+        setChatHistory(history);
+        setActiveThreadId(selectedThreadId);
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error("Failed to load thread history:", error);
+        message.error("Failed to load thread history.");
+        setActiveThreadId(undefined);
+        setChatHistory([]);
+        router.replace(pathname, { scroll: false });
+      } finally {
+        if (!cancelled) {
+          setHistoryLoading(false);
+        }
+      }
+    };
+
+    void loadThreadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeThreadId, chatHistory.length, pathname, router, selectedThreadId, user?._id]);
 
   const handleSearch = async (values: { question: string }) => {
-    const { question } = values;
+    const question = values.question?.trim();
 
-    if (!question || question.trim().length < 3) {
+    if (!question || question.length < 3) {
       message.warning("Please enter at least 3 characters");
+      return;
+    }
+
+    if (!user?._id) {
+      message.error("User not found. Please refresh and try again.");
       return;
     }
 
@@ -69,46 +256,88 @@ export default function BrickChatClient() {
     form.resetFields();
 
     try {
-      const response = await axiosApiInstance.post(
-        `${baseApiUrl}ai/explore-projects`,
-        {
-          query: question.trim(),
-          limit: 20,
-          userId: user?._id,
+      const res = await fetch(`${baseApiUrl}ai/explore-projects`, {
+        method: "POST",
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": apiKey || "",
         },
-      );
+        body: JSON.stringify({
+          query: question,
+          limit: 20,
+          userId: user._id,
+          threadId: activeThreadId,
+        }),
+      });
 
-      const answer = response.data.data || [];
+      if (!res.ok) throw new Error(`explore-projects ${res.status}`);
+      const json = await res.json();
+      const answer = json?.data as ExploreAnswer;
+      const resolvedThreadId = json?.meta?.threadId as string | undefined;
 
       setChatHistory((prev) => [...prev, { question, answer }]);
-      setCurrentQuestion(undefined);
+
+      if (!activeThreadId && resolvedThreadId) {
+        setActiveThreadId(resolvedThreadId);
+        syncThreadSearchParam(resolvedThreadId);
+      }
+
+      await refreshChatThreads();
     } catch (error) {
       console.error("Search error:", error);
       message.error("Failed to search projects. Please try again.");
-      setCurrentQuestion(undefined);
     } finally {
+      setCurrentQuestion(undefined);
       setLoading(false);
     }
   };
 
-  function renderQuestion(q: string) {
-    return (
-      <Flex>
-        <Typography.Text
-          style={{
-            color: "white",
-            fontSize: FONT_SIZE.HEADING_3,
-            backgroundColor: COLORS.textColorDark,
-            borderRadius: 16,
-            padding: "8px 16px",
-            width: 400,
-          }}
-        >
-          {q}
-        </Typography.Text>
-      </Flex>
-    );
-  }
+  const handleThreadSelect = (threadId: string) => {
+    if (!threadId || threadId === selectedThreadId) {
+      return;
+    }
+
+    setChatHistory([]);
+    setCurrentQuestion(undefined);
+    syncThreadSearchParam(threadId);
+  };
+
+  const handleNewChat = () => {
+    setActiveThreadId(undefined);
+    setChatHistory([]);
+    setCurrentQuestion(undefined);
+    setHistoryLoading(false);
+    syncThreadSearchParam();
+  };
+
+  const renderQuestion = (question: string) => (
+    <Flex>
+      <Typography.Text
+        style={{
+          color: "white",
+          fontSize: FONT_SIZE.HEADING_3,
+          backgroundColor: COLORS.textColorDark,
+          borderRadius: 16,
+          padding: "8px 16px",
+          maxWidth: 420,
+        }}
+      >
+        {question}
+      </Typography.Text>
+    </Flex>
+  );
+
+  const latestProjects =
+    chatHistory.length > 0
+      ? chatHistory[chatHistory.length - 1].answer.projectsList.map((project) => ({
+          info: {
+            name: project.projectName,
+            location: project.projectLocation,
+          },
+        }))
+      : [];
+
   return (
     <AdminGuard>
       <Flex style={{ maxWidth: 2000, padding: 8 }}>
@@ -119,84 +348,171 @@ export default function BrickChatClient() {
             position: "relative",
             paddingBottom: 100,
             width: "50%",
-            height: "90vh"
+            height: "90vh",
           }}
         >
-          <Flex style={{height: "80vh",overflowY: "scroll", scrollbarWidth: "none"}}>
-          {(!chatHistory || !chatHistory.length) && !currentQuestion ? (
-            <Flex vertical>
-              <Typography.Text
-                style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
-              >
-                Welcome to Brickfi
-              </Typography.Text>
-              <Typography.Text
-                style={{
-                  marginBottom: 24,
-                  fontSize: FONT_SIZE.HEADING_4,
-                  color: COLORS.textColorLight,
-                }}
-              >
-                Start your home search with Brickfi. Just enter your requirement
-                and let Brickfi do the work.
-              </Typography.Text>
-              <Flex style={{ width: "100%", flexWrap: "wrap" }}>
-                {SAMPLE_PROMPTS.map((p) => {
-                  return (
+          <Flex
+            vertical
+            gap={24}
+            style={{
+              height: "80vh",
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+              paddingRight: 8,
+            }}
+          >
+            {showWelcome ? (
+              <Flex vertical>
+                <Typography.Text
+                  style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
+                >
+                  Welcome to Brickfi
+                </Typography.Text>
+                <Typography.Text
+                  style={{
+                    marginBottom: 24,
+                    fontSize: FONT_SIZE.HEADING_4,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  Start your home search with Brickfi. Just enter your requirement
+                  and let Brickfi do the work.
+                </Typography.Text>
+                <Flex style={{ width: "100%", flexWrap: "wrap" }}>
+                  {SAMPLE_PROMPTS.map((prompt) => (
                     <Tag
+                      key={prompt}
                       style={{
                         marginBottom: 8,
                         fontSize: FONT_SIZE.PARA,
                         backgroundColor: COLORS.textColorDark,
                         color: "white",
                         padding: "2px 8px",
+                        cursor: loading ? "not-allowed" : "pointer",
+                      }}
+                      onClick={() => {
+                        if (loading) {
+                          return;
+                        }
+
+                        form.setFieldsValue({ question: prompt });
+                        form.submit();
                       }}
                     >
-                      {p}
+                      {prompt}
                     </Tag>
-                  );
+                  ))}
+                </Flex>
+              </Flex>
+            ) : null}
+
+            <Flex vertical gap={12}>
+              <Flex align="center" justify="space-between">
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_4,
+                    fontWeight: 600,
+                  }}
+                >
+                  Saved Threads
+                </Typography.Text>
+                {(activeThreadId || selectedThreadId) && (
+                  <Button onClick={handleNewChat}>New Chat</Button>
+                )}
+              </Flex>
+              <Table<ChatThread>
+                rowKey="thread_id"
+                size="small"
+                loading={threadsLoading}
+                dataSource={chatThreads}
+                pagination={false}
+                scroll={{ y: 220 }}
+                locale={{
+                  emptyText: (
+                    <Empty description="No BrickChat threads saved yet" />
+                  ),
+                }}
+                onRow={(record) => ({
+                  onClick: () => handleThreadSelect(record.thread_id),
+                  style: {
+                    cursor: "pointer",
+                    backgroundColor:
+                      record.thread_id === (selectedThreadId || activeThreadId)
+                        ? "#fafafa"
+                        : undefined,
+                  },
                 })}
-              </Flex>
+                columns={[
+                  {
+                    title: "Title",
+                    dataIndex: "thread_title",
+                    key: "thread_title",
+                    ellipsis: true,
+                  },
+                  {
+                    title: "Created",
+                    dataIndex: "createdAt",
+                    key: "createdAt",
+                    width: 180,
+                    render: (value: string) => formatThreadDate(value),
+                  },
+                ]}
+              />
             </Flex>
-          ) : null}
 
-          {/* Chat History Display */}
-          <Flex vertical gap={24} style={{ marginBottom: 24, flex: 1, width: "100%" }}>
-            {chatHistory.map((msg, idx) => (
-              <Flex key={idx} vertical gap={12}>
-                {/* Question Display */}
-                {renderQuestion(msg.question)}
-
-                {/* Answer Display */}
-                <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}>
-                    Found {msg.answer.projectsList.length} matching project
-                    {msg.answer.projectsList.length !== 1 ? "s" : ""}
-                  </Typography.Text>
-                  <Typography.Text style={{ fontSize: FONT_SIZE.PARA, fontWeight: 500, marginBottom: 16 }}>
-                     {msg.answer.summary}
-                  </Typography.Text>
-                  <BrickChatResults results={msg.answer.projectsList} />
-                </Flex>
+            {historyLoading && !chatHistory.length ? (
+              <Flex align="center" gap={12}>
+                <Spin size="small" />
+                <Typography.Text type="secondary">
+                  Loading thread history...
+                </Typography.Text>
               </Flex>
-            ))}
+            ) : null}
 
-            {/* Current Question Loading State */}
-            {currentQuestion && loading && (
-              <Flex vertical gap={12}>
-                {renderQuestion(currentQuestion)}
-                <Flex align="center" gap={12} style={{ marginTop: 8 }}>
-                  <Spin size="small" />
-                  <Typography.Text type="secondary">
-                    Searching for projects...
-                  </Typography.Text>
+            <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
+              {chatHistory.map((messageItem, index) => (
+                <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
+                  {renderQuestion(messageItem.question)}
+
+                  <Flex vertical gap={4} style={{ marginTop: 8 }}>
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.SUB_TEXT,
+                        color: COLORS.textColorLight,
+                      }}
+                    >
+                      Found {messageItem.answer.projectsList.length} matching
+                      project
+                      {messageItem.answer.projectsList.length !== 1 ? "s" : ""}
+                    </Typography.Text>
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.PARA,
+                        fontWeight: 500,
+                        marginBottom: 16,
+                      }}
+                    >
+                      {messageItem.answer.summary}
+                    </Typography.Text>
+                    <BrickChatResults results={messageItem.answer.projectsList} />
+                  </Flex>
                 </Flex>
-              </Flex>
-            )}
-          </Flex>
+              ))}
+
+              {currentQuestion && loading && (
+                <Flex vertical gap={12}>
+                  {renderQuestion(currentQuestion)}
+                  <Flex align="center" gap={12} style={{ marginTop: 8 }}>
+                    <Spin size="small" />
+                    <Typography.Text type="secondary">
+                      Searching for projects...
+                    </Typography.Text>
+                  </Flex>
+                </Flex>
+              )}
+            </Flex>
           </Flex>
 
-          {/* Search Input */}
           <Form
             form={form}
             onFinish={handleSearch}
@@ -211,13 +527,13 @@ export default function BrickChatClient() {
               <Input
                 placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
                 size="large"
-                disabled={loading}
+                disabled={loading || historyLoading}
                 suffix={
                   <Button
                     type="text"
                     htmlType="submit"
                     icon={<BiSend size={20} />}
-                    disabled={loading}
+                    disabled={loading || historyLoading}
                     style={{ color: COLORS.primaryColor }}
                   />
                 }
@@ -235,20 +551,10 @@ export default function BrickChatClient() {
             </Form.Item>
           </Form>
         </Flex>
+
         <Flex style={{ width: "47%", padding: "0 1.5%" }}>
           <MapViewV2
-            projects={
-              chatHistory && chatHistory.length
-                ? chatHistory[chatHistory.length - 1].answer.projectsList.map((p) => {
-                    return {
-                      info: {
-                        name: p.projectName,
-                        location: p.projectLocation,
-                      },
-                    };
-                  })
-                : []
-            }
+            projects={latestProjects}
             fullSize={false}
             showLocalities={false}
             hideAllFilters={true}
@@ -257,7 +563,6 @@ export default function BrickChatClient() {
             corridorIds={[]}
             highlightedHomeTypes={[]}
           />
-          :
         </Flex>
       </Flex>
     </AdminGuard>

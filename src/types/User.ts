@@ -4,6 +4,12 @@ export interface ChatSession {
   createdAt: string;
 }
 
+export interface ChatThread {
+  thread_id: string;
+  thread_title: string;
+  createdAt: string;
+}
+
 export interface UtmEntry {
   utm_source?: string;
   utm_medium?: string;
@@ -28,6 +34,7 @@ export interface User {
   savedLvnzyProjects: any;
   requestedProjects?: string[];
   chatSessions: ChatSession[];
+  chatThreads?: ChatThread[];
   profile: Profile;
   requestedReports?: {
     projectName: string;
