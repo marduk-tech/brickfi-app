@@ -117,6 +117,8 @@ export default function BrickChatClient() {
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  const [projectResults, setProjectResults] = useState<ProjectResult[]>();
+
   const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
   const showWelcome =
     !selectedThreadId &&
@@ -219,6 +221,11 @@ export default function BrickChatClient() {
 
         setChatHistory(history);
         setActiveThreadId(selectedThreadId);
+        history.forEach(h => {
+          if (h.answer.projectsList && h.answer.projectsList.length) {
+            setProjectResults(h.answer.projectsList);
+          }
+        })
       } catch (error) {
         if (cancelled) {
           return;
@@ -288,6 +295,9 @@ export default function BrickChatClient() {
       const answer = json?.data as ExploreAnswer;
       const resolvedThreadId = json?.meta?.threadId as string | undefined;
 
+      if (answer.projectsList && answer.projectsList.length) {
+        setProjectResults(answer.projectsList);
+      }
       setChatHistory((prev) => [...prev, { question, answer }]);
 
       if (!activeThreadId && resolvedThreadId) {
@@ -340,17 +350,6 @@ export default function BrickChatClient() {
     </Flex>
   );
 
-  const latestProjects =
-    chatHistory.length > 0
-      ? chatHistory[chatHistory.length - 1].answer.projectsList.map(
-          (project) => ({
-            info: {
-              name: project.projectName,
-              location: project.projectLocation,
-            },
-          }),
-        )
-      : [];
 
   return (
     <AdminGuard>
@@ -615,7 +614,14 @@ export default function BrickChatClient() {
 
         <Flex style={{ width: "47%", padding: "0 1.5%" }}>
           <MapViewV2
-            projects={latestProjects}
+            projects={projectResults ? projectResults.map(
+          (project) => ({
+            info: {
+              name: project.projectName,
+              location: project.projectLocation,
+            },
+          }),
+        ): []}
             fullSize={false}
             showLocalities={false}
             hideAllFilters={true}
