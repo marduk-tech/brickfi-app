@@ -1,6 +1,7 @@
 import React, { JSX } from "react";
 import L from "leaflet";
 import { Marker } from "react-leaflet";
+import { getPrimaryHomeType } from "../../../libs/home-type-icons";
 import { capitalize, getMinMaxPrices } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { MapModalContent } from "../map-modal";
@@ -91,16 +92,14 @@ export const ProjectMarkers = ({
           ? project.info.homeType
           : [];
 
-        // Prefer a type the caller is highlighting (e.g. active filter);
-        // otherwise fall back to the first type with an icon mapping.
+        // Filter highlight wins on find-projects; otherwise use the project's
+        // primary type so curated/brickchat views aren't at the mercy of array order.
         let chosen: string | undefined;
         if (highlightedHomeTypes && highlightedHomeTypes.length > 0) {
           chosen = homeTypes.find((t) => highlightedHomeTypes.includes(t));
         }
         if (!chosen) {
-          chosen = homeTypes.find(
-            (t) => !!projectMarkerIconsByHomeType?.[t]
-          );
+          chosen = getPrimaryHomeType(homeTypes);
         }
         const markerIcon =
           (chosen && projectMarkerIconsByHomeType?.[chosen]) ||
