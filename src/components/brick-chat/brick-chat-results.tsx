@@ -6,7 +6,6 @@ import Link from "next/link";
 import styles from "./brick-chat-results.module.css";
 import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
 
-
 interface BrickChatResultsProps {
   results: ProjectResult[];
 }
@@ -37,69 +36,67 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
 
   return (
     <Flex className={styles.scrollContainer} gap={16}>
-        {results.map((project) => (
-          <Link
-            key={project.projectId}
-            href={`/app/brick360/${project.projectSlug || project.lvnzyProjectId}`}
-            style={{ textDecoration: "none" }}
-            target="_blank"
+      {results.map((project) => (
+        <Link
+          key={project.projectId}
+          href={`/app/brick360/${project.projectSlug || project.lvnzyProjectId}`}
+          style={{ textDecoration: "none" }}
+          target="_blank"
+        >
+          <Card
+            hoverable
+            style={{
+              width: 200,
+              borderRadius: 12,
+              overflow: "hidden",
+              border: `1px solid ${COLORS.borderColor}`,
+            }}
+            styles={{ body: { padding: 12 } }}
+            cover={
+              <div
+                style={{
+                  height: 125,
+                  width: "100%",
+                  backgroundColor: COLORS.bgColor,
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                {project.projectImage ? (
+                  <img
+                    src={project.projectImage}
+                    alt={project.projectName}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <Flex
+                    justify="center"
+                    align="center"
+                    style={{ height: "100%", color: COLORS.textColorLight }}
+                  >
+                    <Typography.Text type="secondary">No Image</Typography.Text>
+                  </Flex>
+                )}
+              </div>
+            }
           >
-            <Card
-              hoverable
-              style={{
-                width: 200,
-                borderRadius: 12,
-                overflow: "hidden",
-                border: `1px solid ${COLORS.borderColor}`,
-              }}
-              styles={{ body: { padding: 12 } }}
-              cover={
-                <div
-                  style={{
-                    height: 125,
-                    width: "100%",
-                    backgroundColor: COLORS.bgColor,
-                    position: "relative",
-                    overflow: "hidden",
-                  }}
-                >
-                  {project.projectImage ? (
-                    <img
-                      src={project.projectImage}
-                      alt={project.projectName}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <Flex
-                      justify="center"
-                      align="center"
-                      style={{ height: "100%", color: COLORS.textColorLight }}
-                    >
-                      <Typography.Text type="secondary">
-                        No Image
-                      </Typography.Text>
-                    </Flex>
-                  )}
-                </div>
-              }
-            >
-              <Flex vertical gap={8}>
-                <Typography.Text
-                  strong
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_4,
-                    color: COLORS.textColorDark,
-                  }}
-                  ellipsis={{ tooltip: project.projectName }}
-                >
-                  {project.projectName}
-                </Typography.Text>
+            <Flex vertical gap={8}>
+              <Typography.Text
+                strong
+                style={{
+                  fontSize: FONT_SIZE.HEADING_4,
+                  color: COLORS.textColorDark,
+                }}
+                ellipsis={{ tooltip: project.projectName }}
+              >
+                {project.projectName}
+              </Typography.Text>
 
-                {/* {getProjectMetadata(project) && (
+              {/* {getProjectMetadata(project) && (
                   <Typography.Text
                     style={{
                       fontSize: FONT_SIZE.SUB_TEXT,
@@ -111,22 +108,48 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                   </Typography.Text>
                 )} */}
 
-                <Typography.Paragraph
-                  style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
-                    color: COLORS.textColorMedium,
-                    lineHeight: 1.5,
-                    marginBottom: 0,
-                  }}
-                  ellipsis={{ rows: 2, tooltip: project.oneLiner }}
-                >
-                  {project.oneLiner}
-                </Typography.Paragraph>
+              <Typography.Paragraph
+                style={{
+                  fontSize: FONT_SIZE.SUB_TEXT,
+                  color: COLORS.textColorMedium,
+                  lineHeight: 1.5,
+                  marginBottom: 0,
+                }}
+                ellipsis={{ rows: 2, tooltip: project.oneLiner }}
+              >
+                {project.oneLiner}
+              </Typography.Paragraph>
+              <Flex style={{ width: "100%", marginTop: 8 }}>
+                {project.projectStatus == "report-verified" ? (
+                  <Link
+                    href={`/app/brick360/${project.projectSlug}`}
+                    prefetch={false}
+                    style={{
+                      textDecoration: "none",
+                      color: "inherit",
+                      width: "100%",
+                      border: `1px solid ${COLORS.primaryColor}`,
+                      borderRadius: 8,
+                      textAlign: "center",
+                    }}
+                    target="_blank"
+                  >
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.PARA,
+                        color: COLORS.primaryColor,
+                        width: "100%",
+                      }}
+                    >
+                      View 360 Report
+                    </Typography.Text>
+                  </Link>
+                ) : null}
               </Flex>
-            </Card>
-          </Link>
-        ))}
+            </Flex>
+          </Card>
+        </Link>
+      ))}
     </Flex>
-   
   );
 }
