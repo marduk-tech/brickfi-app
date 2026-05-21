@@ -56,7 +56,10 @@ import {
   MapInstanceCapture,
   MapResizeHandler,
 } from "./map-utils/map-handlers";
+import { ProjectMarkerInput } from "./types";
 import { processDriversToPolygons } from "./utils";
+
+export type { ProjectMarkerInput } from "./types";
 
 // Utility function to get tile URL based on map style
 const getTileUrl = (style: MapStyleType): string => {
@@ -75,7 +78,7 @@ interface MapViewV2Props {
   lvnzyProjectId?: string;
   drivers?: any[];
   projectId?: string;
-  projects?: any[];
+  projects?: ProjectMarkerInput[];
   fullSize: boolean;
   surroundingElements?: ISurroundingElement[];
   projectsNearby?: {

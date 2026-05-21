@@ -2,16 +2,17 @@ import React, { useCallback, useEffect, useRef } from "react";
 import * as turf from "@turf/turf";
 import { LatLngTuple } from "leaflet";
 import { useMap } from "react-leaflet";
+import { ProjectMarkerInput } from "../types";
 
 interface MapCenterHandlerProps {
   projectData: any;
-  projects?: any[];
+  projects?: ProjectMarkerInput[];
   initialZoom?: number;
 }
 
 export const MapCenterHandler = ({ projectData, projects, initialZoom }: MapCenterHandlerProps) => {
   const map = useMap();
-  
+
   useEffect(() => {
     if (
       projectData &&
@@ -25,17 +26,14 @@ export const MapCenterHandler = ({ projectData, projects, initialZoom }: MapCent
     } else if (projects && projects.length && projects.length < 10) {
       const projectsLoc = turf.points(
         projects
-          .filter((p) => !!p.info.location && !!p.info.location.lat)
-          .map((p) => {
-            return [p.info.location.lng, p.info.location.lat];
-          })
+          .filter((p) => !!p.location?.lat && !!p.location?.lng)
+          .map((p) => [p.location.lng, p.location.lat])
       );
 
       const center = turf.center(projectsLoc);
       map.setView(center.geometry.coordinates.reverse() as LatLngTuple, 12);
-      console.warn("Project data missing location:", projectData);
     }
-  }, [projectData, map, projects]);
+  }, [projectData, map, projects, initialZoom]);
 
   return null;
 };

@@ -8,7 +8,9 @@ import { useDevice } from "@/hooks/use-device";
 import { useFetchAllLvnzyProjects } from "@/hooks/use-lvnzy-project";
 import { useFetchProjects } from "@/hooks/use-project";
 import { ProjectHomeType } from "@/libs/constants";
-import { HOME_TYPE_ICON } from "@/libs/home-type-icons";
+import { getPrimaryHomeType, HOME_TYPE_ICON } from "@/libs/home-type-icons";
+import type { ProjectMarkerInput } from "@/components/map-view-v2/map-view-v2";
+import { buildFindProjectsModalContent } from "./find-projects-modal-content";
 import {
   capitalize,
   getMinMaxPrices,
@@ -257,24 +259,46 @@ export default function FindProjectsClient() {
     completionYearMap,
   ]);
 
-  // Map projects format
-  const mapProjects = useMemo(() => {
+  // Map projects format — transform Project documents into the minimal marker contract.
+  const mapProjects = useMemo<ProjectMarkerInput[]>(() => {
     return filteredProjects
       .filter((p) => p.info?.location?.lat && p.info?.location?.lng)
-      .map((p) => ({
-        _id: p._id,
-        info: {
-          ...p.info,
-          name: p.info?.name || p.metadata?.name,
-        },
-        media: p.media || [],
-        reportSlug:
-          p.info.reportStatus &&
-          p.info.reportStatus.status == "report-processed"
-            ? lvnzySlugMap.get(p._id)
-            : undefined,
-      }));
-  }, [filteredProjects]);
+      .map((p) => {
+        const homeTypes: string[] = Array.isArray(p.info?.homeType)
+          ? (p.info.homeType as string[])
+          : [];
+        // Highlighted filter wins over the project's primary type, otherwise fall back.
+        const type =
+          homeTypes.find((t) => selectedHomeType.includes(t)) ||
+          getPrimaryHomeType(homeTypes) ||
+          homeTypes[0] ||
+          "apartment";
+
+        const enrichedProject = {
+          _id: p._id,
+          info: {
+            ...p.info,
+            name: p.info?.name || p.metadata?.name,
+          },
+          media: p.media || [],
+          reportSlug:
+            p.info.reportStatus &&
+            p.info.reportStatus.status == "report-processed"
+              ? lvnzySlugMap.get(p._id)
+              : undefined,
+        };
+
+        return {
+          id: p._id,
+          location: {
+            lat: p.info!.location!.lat as number,
+            lng: p.info!.location!.lng as number,
+          },
+          type,
+          modalContent: buildFindProjectsModalContent(enrichedProject),
+        };
+      });
+  }, [filteredProjects, selectedHomeType, lvnzySlugMap]);
 
   const columns: ColumnsType<Project> = [
     {

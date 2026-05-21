@@ -614,14 +614,23 @@ export default function BrickChatClient() {
 
         <Flex style={{ width: "47%", padding: "0 1.5%" }}>
           <MapViewV2
-            projects={projectResults ? projectResults.map(
-          (project) => ({
-            info: {
-              name: project.projectName,
-              location: project.projectLocation,
-            },
-          }),
-        ): []}
+            projects={
+              projectResults
+                ? projectResults
+                    .filter(
+                      (p) => !!p.projectLocation?.lat && !!p.projectLocation?.lng
+                    )
+                    .map((p) => ({
+                      id: p.projectId,
+                      location: p.projectLocation,
+                      type: "apartment",
+                      modalContent: {
+                        title: p.projectName,
+                        content: p.oneLiner || "",
+                      },
+                    }))
+                : []
+            }
             fullSize={false}
             showLocalities={false}
             hideAllFilters={true}
