@@ -23,6 +23,7 @@ import { useEffect, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useDevice } from "@/hooks/use-device";
 
 const MapViewV2 = dynamic(
   () => import("../../../components/map-view-v2/map-view-v2"),
@@ -36,6 +37,7 @@ export interface ProjectResult {
   projectName: string;
   oneLiner: string;
   projectSlug?: string;
+  projectStatus?: string;
   projectImage?: string;
   lvnzyProjectId?: string;
   projectUnitTypes?: Array<string | number>;
@@ -108,6 +110,7 @@ export default function BrickChatClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const {isMobile} = useDevice();
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
@@ -353,14 +356,14 @@ export default function BrickChatClient() {
 
   return (
     <AdminGuard>
-      <Flex style={{ maxWidth: 2000, padding: 8 }}>
+      <Flex vertical={isMobile} style={{ maxWidth: 2000, padding: 8, overflowY:"scroll" }}>
         <Flex
           vertical
           style={{
             margin: "0 auto",
             position: "relative",
             paddingBottom: 100,
-            width: "50%",
+            width: isMobile ? "100%":"50%",
             height: "90vh",
           }}
         >
@@ -447,11 +450,10 @@ export default function BrickChatClient() {
                       <Flex
                         vertical
                         style={{
-                          maxHeight: 250,
+                          maxHeight: 300,
                           border: `1px solid ${COLORS.primaryColor}`,
                           borderRadius: 8,
                           padding: 4,
-                          backgroundColor: COLORS.bgColorLightBlue,
                           overflowY: "scroll",
                           scrollbarWidth: "none",
                         }}
@@ -468,7 +470,7 @@ export default function BrickChatClient() {
                               borderBottom:
                                 index == chatThreads.length - 1
                                   ? "none"
-                                  : `1px solid ${COLORS.primaryColor}`,
+                                  : `1px solid ${COLORS.bgColorBlue}`,
                               backgroundColor:
                                 thread.thread_id ===
                                 (selectedThreadId || activeThreadId)
@@ -612,7 +614,7 @@ export default function BrickChatClient() {
           </Form>
         </Flex>
 
-        <Flex style={{ width: "47%", padding: "0 1.5%" }}>
+        <Flex style={{ width: isMobile ? "100%":"47%", padding: "0 1.5%" }}>
           <MapViewV2
             projects={
               projectResults
