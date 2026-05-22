@@ -85,6 +85,7 @@ interface MapViewV2Props {
     projectName: string;
     sqftCost: number;
     projectLocation: { lat: number; lng: number };
+    projectType?: string;
   }[];
   projectSqftPricing?: number;
   showLocalities?: boolean;

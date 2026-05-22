@@ -54,6 +54,7 @@ export interface MapViewContextProps {
     projectName: string;
     sqftCost: number;
     projectLocation: { lat: number; lng: number };
+    projectType?: string;
   }>;
   projectSqftPricing?: number;
 }
