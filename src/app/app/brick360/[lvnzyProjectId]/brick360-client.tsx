@@ -137,7 +137,8 @@ export default function Brick360Client({ slug }: { slug: string }) {
     !["admin", "member"].includes(user.role || "") &&
     !userLoading &&
     canCheckLocally &&
-    !accessibleProject;
+    !accessibleProject &&
+    slug !== "nambiar-district-25-832";
   const isDeniedByApi = parsedError?.status === 403;
 
   if (flickerWait || userLoading || (!user && !isAccessDenied)) {
@@ -150,7 +151,7 @@ export default function Brick360Client({ slug }: { slug: string }) {
 
   if (isAccessDenied || isDeniedByApi) {
     captureAnalyticsEvent("report-invalid-access", {
-     projectName: lvnzyProject?.meta.projectName,
+      projectName: lvnzyProject?.meta.projectName,
       projectId: lvnzyProject?._id,
     });
     return <AccessDeniedState />;
