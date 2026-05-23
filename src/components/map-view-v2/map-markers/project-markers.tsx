@@ -1,17 +1,14 @@
 import React, { JSX } from "react";
 import L from "leaflet";
 import { Marker } from "react-leaflet";
-import { getPrimaryHomeType } from "../../../libs/home-type-icons";
-import { capitalize, getMinMaxPrices } from "../../../libs/lvnzy-helper";
-import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
+import { capitalize } from "../../../libs/lvnzy-helper";
+import { COLORS } from "../../../theme/style-constants";
 import { MapModalContent } from "../map-modal";
-import { Flex, Tag, Typography } from "antd";
-import moment from "moment";
-import Link from "next/link";
+import { ProjectMarkerInput } from "../types";
 
 interface ProjectMarkersProps {
   primaryProject?: any;
-  projects?: any[];
+  projects?: ProjectMarkerInput[];
   currentProjectMarkerIcon?: L.DivIcon | null;
   projectMarkerIcon?: L.DivIcon | null;
   projectMarkerIconsByHomeType?: Record<string, L.DivIcon>;
@@ -32,19 +29,11 @@ export const ProjectMarkers = ({
 }: ProjectMarkersProps) => {
   const markers: JSX.Element[] = [];
 
-  const getCompletionDate = (timeline: any[]) => {
-    const lastEntry = timeline[timeline.length - 1];
-    return `${moment(timeline[0].startDate, "DD-MM-YYYY").format(
-      "ll"
-    )} - ${moment(lastEntry.completionDate, "DD-MM-YYYY").format("ll")}`;
-  };
-
-  // Wait for icon to be loaded and verify coordinates
   if (!currentProjectMarkerIcon) {
     return <>{markers}</>;
   }
 
-  // Primary project marker
+  // Primary project marker (still consumes the legacy Project shape — fetched internally by id)
   if (
     primaryProject &&
     primaryProject?.info?.location?.lat &&
@@ -80,180 +69,37 @@ export const ProjectMarkers = ({
     );
   }
 
-  // Other project markers
+  // Caller-supplied markers — caller owns icon-type selection and modal content.
   if (projects && projects.length > 0 && projectMarkerIcon) {
-    projects.forEach((project) => {
-      if (
-        project?.info?.location?.lat &&
-        project?.info?.location?.lng &&
-        currentProjectMarkerIcon
-      ) {
-        const homeTypes: string[] = Array.isArray(project.info.homeType)
-          ? project.info.homeType
-          : [];
-
-        // Filter highlight wins on find-projects; otherwise use the project's
-        // primary type so curated/brickchat views aren't at the mercy of array order.
-        let chosen: string | undefined;
-        if (highlightedHomeTypes && highlightedHomeTypes.length > 0) {
-          chosen = homeTypes.find((t) => highlightedHomeTypes.includes(t));
-        }
-        if (!chosen) {
-          chosen = getPrimaryHomeType(homeTypes);
-        }
-        const markerIcon =
-          (chosen && projectMarkerIconsByHomeType?.[chosen]) ||
-          projectMarkerIcon;
-
-        markers.push(
-          <Marker
-            key={project._id}
-            position={[project.info.location.lat, project.info.location.lng]}
-            icon={markerIcon}
-            eventHandlers={{
-              click: () => {
-                setModalContent({
-                  title: (
-                    <Flex vertical style={{ marginBottom: 0 }}>
-                      {project.info.developerId ? (
-                        <Typography.Text
-                          style={{
-                            color: COLORS.primaryColor,
-                            textTransform: "uppercase",
-                            fontSize: FONT_SIZE.PARA,
-                          }}
-                        >
-                          {project.info.developerId.name}
-                        </Typography.Text>
-                      ) : null}
-
-                      <Typography.Text
-                        style={{ fontSize: FONT_SIZE.HEADING_1*.9, lineHeight: "100%", marginBottom: 8 }}
-                      >
-                        {project.info.name}
-                      </Typography.Text>
-                    </Flex>
-                  ),
-                  content: (
-                    <Flex vertical gap={0}>
-                      {project.info?.reraProjectId?.projectDetails?.listOfRegistrationsExtensions ? <Typography.Text style={{fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium}}>
-                          {getCompletionDate(
-                            project.info.reraProjectId.projectDetails
-                              .listOfRegistrationsExtensions
-                          )}
-                        </Typography.Text>: null}
-                        
-                      <Flex style={{ marginBottom: 16 }}>
-                        {(project.info.homeType || []).map((t: string) => (
-                          <Typography.Text
-                            style={{
-                              fontSize: FONT_SIZE.HEADING_4,
-                              color: COLORS.textColorMedium,
-                              marginRight: 3
-                            }}
-                          >
-                            {capitalize(t)} ·{" "}
-                          </Typography.Text>
-                        ))}
-                        {project.info.unitConfigWithPricing &&
-                        project.info.unitConfigWithPricing.length && project.info.rate ? (
-                          <Flex>
-                            <Typography.Text
-                              style={{
-                                fontSize: FONT_SIZE.HEADING_4,
-                                marginLeft: 2,
-                                color: COLORS.textColorMedium
-                              }}
-                            >
-                              {getMinMaxPrices(
-                                project.info.unitConfigWithPricing.map(
-                                  (c: any) => c.price
-                                )
-                              )}{" "}
-                              ·{" "}
-                            </Typography.Text>
-
-                            <Typography.Text
-                              style={{
-                                fontSize: FONT_SIZE.HEADING_4,
-                                marginLeft: 2,
-                                color: COLORS.textColorMedium
-                              }}
-                            >
-                              ₹
-                              {Math.round(
-                                (project.info.rate.minimumUnitCost /
-                                  (project.info.rate.minimumUnitSize * 1000)) *
-                                  10
-                              ) / 10}
-                              k per sq.ft
-                            </Typography.Text>
-                          </Flex>
-                        ) : null}
-                      </Flex>
-                      <Flex
-                        gap={8}
-                        style={{
-                          overflowX: "scroll",
-                          whiteSpace: "nowrap",
-                          width: "100%",
-                          scrollbarWidth: "none",
-                        }}
-                      >
-                        <Flex gap={8}>
-                          {(project.media || [])
-                            .filter(
-                              (i: any) =>
-                                !!i.image &&
-                                !!i.image.url &&
-                                i.image.tags.length &&
-                                !i.image.tags.includes("na")
-                            )
-                            .map((i: any) => {
-                              return (
-                                <div
-                                  style={{
-                                    backgroundImage: `url('${i.image.url}')`,
-                                    backgroundSize: "cover",
-                                    backgroundPosition: "center",
-                                    backgroundRepeat: "no-repeat",
-                                    width: 200,
-                                    height: 200,
-                                    borderRadius: 8,
-                                    border: `1px solid ${COLORS.borderColor}`,
-                                  }}
-                                ></div>
-                              );
-                            })}
-                        </Flex>
-                      </Flex>
-                      {project.reportSlug ?  <Link
-                        href={`/app/brick360/${project.reportSlug}`}
-                        prefetch={false}
-                        style={{
-                          display: "block",
-                          textAlign: "center",
-                          padding: "10px 0",
-                          marginTop: 16,
-                          backgroundColor: COLORS.primaryColor,
-                          color: "#fff",
-                          borderRadius: 8,
-                          fontSize: FONT_SIZE.HEADING_4,
-                          textDecoration: "none",
-                        }}
-                      >
-                        Open Report
-                      </Link>: null}
-                     
-                    </Flex>
-                  ),
-                });
-                setInfoModalOpen(true);
-              },
-            }}
-          />
-        );
+    projects.forEach((p) => {
+      if (!p?.location?.lat || !p?.location?.lng) {
+        return;
       }
+
+      // highlightedHomeTypes only affects icon when the marker's type isn't in the highlight set,
+      // we still show it but fall back to the generic icon so highlighted ones stand out.
+      const isHighlighted =
+        !highlightedHomeTypes ||
+        highlightedHomeTypes.length === 0 ||
+        highlightedHomeTypes.includes(p.type);
+
+      const markerIcon =
+        (isHighlighted && projectMarkerIconsByHomeType?.[p.type]) ||
+        projectMarkerIcon;
+
+      markers.push(
+        <Marker
+          key={p.id}
+          position={[p.location.lat, p.location.lng]}
+          icon={markerIcon}
+          eventHandlers={{
+            click: () => {
+              setModalContent(p.modalContent);
+              setInfoModalOpen(true);
+            },
+          }}
+        />
+      );
     });
   }
 

@@ -1,5 +1,6 @@
 import L from "leaflet";
 import { useCallback, useEffect, useState } from "react";
+import { IconSetKey } from "../common/dynamic-react-icon";
 import {
   LivIndexDriversConfig,
   SurroundingElementLabels,
@@ -39,7 +40,7 @@ export interface UseMapIconsReturn extends IconState {
     elements: ISurroundingElement[],
   ) => Promise<void>;
   refreshProjectsNearbyIcons: (
-    projects: Array<{ projectName: string; sqftCost: number }>,
+    projects: Array<{ projectName: string; sqftCost: number; projectType?: string }>,
   ) => Promise<void>;
 }
 
@@ -50,6 +51,7 @@ export const useMapIcons = (
     projectName: string;
     sqftCost: number;
     projectLocation: { lat: number; lng: number };
+    projectType?: string;
   }>,
   projectSqftPricing?: number,
 ): UseMapIconsReturn => {
@@ -285,7 +287,7 @@ export const useMapIcons = (
 
   // Nearby projects icons generation
   const refreshProjectsNearbyIcons = useCallback(
-    async (projects: Array<{ projectName: string; sqftCost: number }>) => {
+    async (projects: Array<{ projectName: string; sqftCost: number; projectType?: string }>) => {
       if (!projects || !projects.length) {
         setProjectsNearbyIcons([]);
         return;
@@ -295,9 +297,14 @@ export const useMapIcons = (
       try {
         const icons = [];
         for (const project of projects) {
+          // pick icon by home type; fall back to a generic home icon when type is missing/unknown
+          const iconCfg = (project.projectType && HOME_TYPE_ICON[project.projectType]) || {
+            set: "md" as IconSetKey,
+            name: "MdHomeWork",
+          };
           const icon = await getIcon(
-            "MdHomeWork",
-            "md",
+            iconCfg.name,
+            iconCfg.set,
             false,
             `${project.sqftCost} /sqft`,
           );

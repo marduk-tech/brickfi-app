@@ -1,5 +1,5 @@
 import { AutoComplete, Flex, Select, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFetchAllLivindexPlaces } from "../../../hooks/use-livindex-places";
 import { useFetchProjects } from "../../../hooks/use-project";
 import {
@@ -10,11 +10,13 @@ import {
   LivIndexDriversConfig,
   ProjectHomeType,
 } from "../../../libs/constants";
+import { getPrimaryHomeType } from "../../../libs/home-type-icons";
 import { capitalize } from "../../../libs/lvnzy-helper";
 import { COLORS } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 import { Loader } from "../../common/loader";
 import dynamic from "next/dynamic";
+import type { ProjectMarkerInput } from "../map-view-v2";
 const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
 export function BrickMapAdmin() {
@@ -130,6 +132,25 @@ export function BrickMapAdmin() {
       projectId: project._id,
     })) || [];
 
+  const projectMarkers = useMemo<ProjectMarkerInput[]>(() => {
+    return filteredProjects
+      .filter((p) => p?.info?.location?.lat && p?.info?.location?.lng)
+      .map((p) => {
+        const homeTypes: string[] = Array.isArray(p.info?.homeType)
+          ? p.info.homeType
+          : [];
+        return {
+          id: p._id,
+          location: { lat: p.info.location.lat, lng: p.info.location.lng },
+          type: getPrimaryHomeType(homeTypes) || homeTypes[0] || "apartment",
+          modalContent: {
+            title: p.info?.name || "Project",
+            content: "",
+          },
+        };
+      });
+  }, [filteredProjects]);
+
   if (livindexPlacesLoading) {
     return <Loader />;
   }
@@ -226,7 +247,7 @@ export function BrickMapAdmin() {
                 ...p,
                 duration: p.distance ? Math.round(p.distance / 60) : 0,
               }))}
-              projects={filteredProjects}
+              projects={projectMarkers}
               projectId={selectedProjectId || undefined}
               fullSize={false}
               showLocalities={true}

@@ -1,13 +1,15 @@
 import { Flex, Typography } from "antd";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useFetchAllLivindexPlaces } from "../../../hooks/use-livindex-places";
 import {
   DRIVER_CATEGORIES,
 } from "../../../libs/constants";
+import { getPrimaryHomeType } from "../../../libs/home-type-icons";
 import { IDriverPlace } from "../../../types/Project";
 import { Loader } from "../../common/loader";
 import dynamic from "next/dynamic";
 import { useFetchProjects } from "@/hooks/use-project";
+import type { ProjectMarkerInput } from "../map-view-v2";
 const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
 export function BrickMapCustomer({
@@ -50,6 +52,28 @@ export function BrickMapCustomer({
   const handleDriverSelect = (value: string[]) => {
     setDriverFilters(value);
   };
+
+  const projectMarkers = useMemo<ProjectMarkerInput[]>(() => {
+    return (allProjects || [])
+      .filter((p) => p.info?.location?.lat && p.info?.location?.lng)
+      .map((p) => {
+        const homeTypes: string[] = Array.isArray(p.info?.homeType)
+          ? (p.info.homeType as string[])
+          : [];
+        return {
+          id: p._id,
+          location: {
+            lat: p.info!.location!.lat as number,
+            lng: p.info!.location!.lng as number,
+          },
+          type: getPrimaryHomeType(homeTypes) || homeTypes[0] || "apartment",
+          modalContent: {
+            title: p.info?.name || "Project",
+            content: "",
+          },
+        };
+      });
+  }, [allProjects]);
 
   // const projectOptions =
   //   allProjects?.map((project) => ({
@@ -158,7 +182,7 @@ export function BrickMapCustomer({
                 ...p,
                 duration: p.distance ? Math.round(p.distance / 60) : 0,
               }))}
-              projects={allProjects}
+              projects={projectMarkers}
               fullSize={false}
               showLocalities={false}
               showCorridors={true}

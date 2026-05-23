@@ -1,4 +1,12 @@
 import { IDriverPlace } from "../../types/Project";
+import { MapModalContent } from "./map-modal";
+
+export interface ProjectMarkerInput {
+  id: string;
+  location: { lat: number; lng: number };
+  type: string;
+  modalContent: MapModalContent;
+}
 
 export type GeoJSONCoordinate = [number, number];
 export type GeoJSONLineString = GeoJSONCoordinate[];
