@@ -141,7 +141,7 @@ export default function Brick360Client({ slug }: { slug: string }) {
     slug !== "nambiar-district-25-832";
   const isDeniedByApi = parsedError?.status === 403;
 
-  if (flickerWait || userLoading || (!user && !isAccessDenied)) {
+  if (flickerWait || userLoading || projectLoading) {
     return (
       <Flex style={{ marginTop: 200 }} align="center" justify="center">
         <Loader />
@@ -170,17 +170,6 @@ export default function Brick360Client({ slug }: { slug: string }) {
           Unable to load this report
         </Typography.Title>
         <Typography.Text>{parsedError.description}</Typography.Text>
-      </Flex>
-    );
-  }
-
-  if (
-    !["admin", "member"].includes(user.role || "") &&
-    (projectLoading || !lvnzyProject)
-  ) {
-    return (
-      <Flex style={{ marginTop: 200 }} align="center" justify="center">
-        <Loader />
       </Flex>
     );
   }
