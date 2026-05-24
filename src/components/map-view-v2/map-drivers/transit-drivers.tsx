@@ -1,4 +1,5 @@
 import React from "react";
+import * as turf from "@turf/turf";
 import L from "leaflet";
 import { Flex } from "antd";
 import { Marker, useMap } from "react-leaflet";
@@ -136,6 +137,124 @@ export const TransitDriversComponent = ({
             );
           });
 
+          const visibleLineFeatures = lineFeatures.filter((feature) =>
+            feature.coordinates.some(([lng, lat]) => bounds.contains([lat, lng]))
+          );
+
+          type CandidateLabel = {
+            coords: number[];
+            angle: number;
+            feature: (typeof visibleLineFeatures)[0];
+            lineIndex: number;
+          };
+
+          const allCandidates: CandidateLabel[] = [];
+          visibleLineFeatures.forEach((feature, lineIndex) => {
+            const line = turf.lineString(feature.coordinates);
+            const totalLength = turf.length(line, { units: "kilometers" });
+            const numPoints = totalLength >= 2 ? Math.ceil(totalLength) / 2 : 1;
+            const startOffset = 2;
+
+            for (let i = 0; i < numPoints; i++) {
+              const distance = startOffset + (i * totalLength) / numPoints;
+              if (distance >= totalLength) break;
+              const point = turf.along(line, distance, { units: "kilometers" });
+              const coords = point.geometry.coordinates;
+
+              const step = 0.15;
+              const p1 = turf.along(line, Math.max(0, distance - step), { units: "kilometers" });
+              const p2 = turf.along(line, Math.min(totalLength, distance + step), { units: "kilometers" });
+              let angle = turf.bearing(p1, p2) - 90;
+              if (angle < -90) angle += 180;
+              if (angle > 90) angle -= 180;
+
+              allCandidates.push({ coords, angle, feature, lineIndex });
+            }
+          });
+
+          const zoom = map.getZoom();
+          const minDistance = zoom < 13.5 ? 6 : zoom < 14.5 ? 3 : 1.5;
+
+          const stationCoords = pointFeatures
+            .filter((f: any) => {
+              const [lng, lat] = f.geometry.coordinates;
+              return bounds.contains([lat, lng]);
+            })
+            .map((f: any) => f.geometry.coordinates as number[]);
+
+          const globalLabelMarkers = allCandidates.reduce<CandidateLabel[]>((kept, candidate) => {
+            const tooCloseToLabel = kept.some(
+              (k) => turf.distance(candidate.coords, k.coords, { units: "kilometers" }) < minDistance
+            );
+            const tooCloseToStation = stationCoords.some(
+              (s: number[]) => turf.distance(candidate.coords, s, { units: "kilometers" }) < 0.4
+            );
+            return tooCloseToLabel || tooCloseToStation ? kept : [...kept, candidate];
+          }, []);
+
+          const transitLabels = zoom > 14
+            ? globalLabelMarkers.map(({ coords, angle, feature, lineIndex }, pointIndex) => {
+                const labelColor = feature.properties?.strokeColor || COLORS.textColorDark;
+                const labelIcon = L.divIcon({
+                  className: "",
+                  iconSize: [0, 0],
+                  iconAnchor: [0, 0],
+                  html: `<div style="
+                    position: absolute;
+                    transform: translate(-50%, -50%) rotate(${angle}deg);
+                    background: ${labelColor};
+                    border: 1px solid rgba(0,0,0,0.18);
+                    border-radius: 3px;
+                    padding: 1px 4px;
+                    font-size: 10px;
+                    font-weight: 400;
+                    white-space: nowrap;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                    color: white;
+                    cursor: pointer;
+                    pointer-events: auto;
+                    letter-spacing: 0.3px;
+                  ">${driver.name}</div>`,
+                });
+                return (
+                  <Marker
+                    key={`transit-label-${driver._id}-${lineIndex}-${pointIndex}`}
+                    position={[coords[1], coords[0]]}
+                    icon={labelIcon}
+                    zIndexOffset={1000}
+                    eventHandlers={{
+                      click: () => {
+                        setModalContent({
+                          title: driver.name,
+                          subHeading:
+                            driver.distance && driver.duration
+                              ? fetchTravelDurationElement(
+                                  driver.distance!,
+                                  driver.duration,
+                                  "Nearest station "
+                                )
+                              : "",
+                          content: driver.details?.oneLiner || driver.details?.description || "",
+                          footerContent: getFooterContent(driver.details?.info),
+                          tags: [
+                            {
+                              label: driverStatusLabel(driver.status),
+                              color: isDashed ? "warning" : "success",
+                            },
+                            ...(driver.tags || []).map((t: string) => ({
+                              label: capitalize(t),
+                              color: "info",
+                            })),
+                          ],
+                        });
+                        setInfoModalOpen(true);
+                      },
+                    }}
+                  />
+                );
+              })
+            : [];
+
           let stations = null;
           if (map.getZoom() > 13.5) {
             stations = pointFeatures
@@ -163,11 +282,7 @@ export const TransitDriversComponent = ({
                                 "Nearest station "
                               )
                             : "",
-                        content: driver.details
-                          ? driver.details.info
-                            ? getTransitContent(driver.details.info)
-                            : driver.details?.description
-                          : "",
+                        content: driver.details?.oneLiner || driver.details?.description || "",
 
                         footerContent: getFooterContent(driver.details?.info),
                         tags: [
@@ -199,6 +314,7 @@ export const TransitDriversComponent = ({
           return (
             <React.Fragment key={`transit-${driver._id}`}>
               {transitLines}
+              {transitLabels}
               {stations}
             </React.Fragment>
           );

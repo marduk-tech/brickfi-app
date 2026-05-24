@@ -141,9 +141,7 @@ export const SimpleDriversRenderer = ({
                         driver.duration
                       )
                     : undefined,
-                  content: driver.details?.info
-                    ? driver.details.info.summary
-                    : driver.details?.description || "",
+                  content: driver.details?.oneLiner || driver.details?.description || "",
                   tags: [
                     {
                       label: (LivIndexDriversConfig as any)[driver.driver]
