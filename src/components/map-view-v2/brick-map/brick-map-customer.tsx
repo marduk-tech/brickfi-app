@@ -1,15 +1,16 @@
 import { Flex, Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useFetchAllLivindexPlaces } from "../../../hooks/use-livindex-places";
-import {
-  DRIVER_CATEGORIES,
-} from "../../../libs/constants";
+import { DRIVER_CATEGORIES } from "../../../libs/constants";
 import { getPrimaryHomeType } from "../../../libs/home-type-icons";
 import { IDriverPlace } from "../../../types/Project";
 import { Loader } from "../../common/loader";
 import dynamic from "next/dynamic";
 import { useFetchProjects } from "@/hooks/use-project";
 import type { ProjectMarkerInput } from "../map-view-v2";
+import { COLORS, FONT_SIZE } from "@/theme/style-constants";
+import moment from "moment";
+import { capitalize, getMinMaxPrices } from "@/libs/lvnzy-helper";
 const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
 export function BrickMapCustomer({
@@ -53,6 +54,117 @@ export function BrickMapCustomer({
     setDriverFilters(value);
   };
 
+  const getCompletionDate = (timeline: any[]) => {
+    const lastEntry = timeline[timeline.length - 1];
+    return `${moment(timeline[0].startDate, "DD-MM-YYYY").format(
+      "ll",
+    )} - ${moment(lastEntry.completionDate, "DD-MM-YYYY").format("ll")}`;
+  };
+
+  const getProjectMakerContent = (p: any) => {
+    return (
+      <Flex vertical gap={0}>
+        {p.info?.reraProjectId?.projectDetails
+          ?.listOfRegistrationsExtensions ? (
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_4,
+              color: COLORS.textColorMedium,
+            }}
+          >
+            {getCompletionDate(
+              p.info.reraProjectId.projectDetails.listOfRegistrationsExtensions,
+            )}
+          </Typography.Text>
+        ) : null}
+
+        <Flex style={{ marginBottom: 16 }}>
+          {(p.info.homeType || []).map((t: string) => (
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.HEADING_4,
+                color: COLORS.textColorMedium,
+                marginRight: 3,
+              }}
+            >
+              {capitalize(t)} ·{" "}
+            </Typography.Text>
+          ))}
+          {p.info.unitConfigWithPricing &&
+          p.info.unitConfigWithPricing.length &&
+          p.info.rate ? (
+            <Flex>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_4,
+                  marginLeft: 2,
+                  color: COLORS.textColorMedium,
+                }}
+              >
+                {getMinMaxPrices(
+                  p.info.unitConfigWithPricing.map((c: any) => c.price),
+                )}{" "}
+                ·{" "}
+              </Typography.Text>
+
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_4,
+                  marginLeft: 2,
+                  color: COLORS.textColorMedium,
+                }}
+              >
+                ₹
+                {Math.round(
+                  (p.info.rate.minimumUnitCost /
+                    (p.info.rate.minimumUnitSize * 1000)) *
+                    10,
+                ) / 10}
+                k per sq.ft
+              </Typography.Text>
+            </Flex>
+          ) : null}
+        </Flex>
+        <Flex
+          gap={8}
+          style={{
+            overflowX: "scroll",
+            whiteSpace: "nowrap",
+            width: "100%",
+            scrollbarWidth: "none",
+          }}
+        >
+          <Flex gap={8}>
+            {(p.media || [])
+              .filter(
+                (i: any) =>
+                  !!i.image &&
+                  !!i.image.url &&
+                  i.image.tags.length &&
+                  !i.image.tags.includes("na"),
+              )
+              .map((i: any) => {
+                return (
+                  <div
+                    style={{
+                      backgroundImage: `url('${i.image.url}')`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                      width: 200,
+                      height: 200,
+                      borderRadius: 8,
+                      border: `1px solid ${COLORS.borderColor}`,
+                    }}
+                  ></div>
+                );
+              })}
+          </Flex>
+        </Flex>
+      </Flex>
+    );
+  };
+
   const projectMarkers = useMemo<ProjectMarkerInput[]>(() => {
     return (allProjects || [])
       .filter((p) => p.info?.location?.lat && p.info?.location?.lng)
@@ -60,6 +172,7 @@ export function BrickMapCustomer({
         const homeTypes: string[] = Array.isArray(p.info?.homeType)
           ? (p.info.homeType as string[])
           : [];
+
         return {
           id: p._id,
           location: {
@@ -68,8 +181,32 @@ export function BrickMapCustomer({
           },
           type: getPrimaryHomeType(homeTypes) || homeTypes[0] || "apartment",
           modalContent: {
-            title: p.info?.name || "Project",
-            content: "",
+            title: (
+              <Flex vertical style={{ marginBottom: 0 }}>
+                {p.info.developerId ? (
+                  <Typography.Text
+                    style={{
+                      color: COLORS.primaryColor,
+                      textTransform: "uppercase",
+                      fontSize: FONT_SIZE.PARA,
+                    }}
+                  >
+                    {p.info.developerId.name}
+                  </Typography.Text>
+                ) : null}
+
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_1 * 0.9,
+                    lineHeight: "100%",
+                    marginBottom: 8,
+                  }}
+                >
+                  {p.info.name}
+                </Typography.Text>
+              </Flex>
+            ),
+            content: getProjectMakerContent(p),
           },
         };
       });
@@ -84,7 +221,12 @@ export function BrickMapCustomer({
 
   if (livindexPlacesLoading) {
     return (
-      <Flex vertical align="center" justify="center" style={{ width: "100%", marginTop: 100 }}>
+      <Flex
+        vertical
+        align="center"
+        justify="center"
+        style={{ width: "100%", marginTop: 100 }}
+      >
         <Loader />
         <Typography.Text>Initializing Map..</Typography.Text>
       </Flex>
@@ -189,7 +331,7 @@ export function BrickMapCustomer({
               minMapZoom={11}
               categories={Object.keys(DRIVER_CATEGORIES).filter(
                 (k) =>
-                  !excludeMapCategories || !excludeMapCategories.includes(k)
+                  !excludeMapCategories || !excludeMapCategories.includes(k),
               )}
             />
           </>
