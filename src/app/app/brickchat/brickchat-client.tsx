@@ -8,6 +8,7 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { ChatThread } from "@/types/User";
 import {
   Button,
+  Collapse,
   Empty,
   Flex,
   Form,
@@ -436,67 +437,71 @@ export default function BrickChatClient() {
                       ))}
                     </Flex>
                   ) : (
-                    <Flex vertical>
-                      <Typography.Text
-                        style={{
-                          fontSize: FONT_SIZE.PARA,
-                          color: COLORS.textColorLight,
-                          marginBottom: 4,
-                        }}
-                      >
-                        Your recent chats
-                      </Typography.Text>
-
-                      <Flex
-                        vertical
-                        style={{
-                          maxHeight: 300,
-                          border: `1px solid ${COLORS.primaryColor}`,
-                          borderRadius: 8,
-                          padding: 4,
-                          overflowY: "scroll",
-                          scrollbarWidth: "none",
-                        }}
-                      >
-                        {chatThreads.map((thread, index) => (
-                          <Flex
-                            key={thread.thread_id}
-                            vertical
-                            gap={2}
-                            onClick={() => handleThreadSelect(thread.thread_id)}
-                            style={{
-                              cursor: "pointer",
-                              padding: "8px 4px",
-                              borderBottom:
-                                index == chatThreads.length - 1
-                                  ? "none"
-                                  : `1px solid ${COLORS.bgColorBlue}`,
-                              backgroundColor:
-                                thread.thread_id ===
-                                (selectedThreadId || activeThreadId)
-                                  ? "#fafafa"
-                                  : undefined,
-                            }}
-                          >
+                    <Collapse
+                      items={[
+                        {
+                          key: "recent-chats",
+                          label: (
                             <Typography.Text
-                              ellipsis
                               style={{
-                                fontWeight: 500,
-                                fontSize: FONT_SIZE.HEADING_4,
+                                fontSize: FONT_SIZE.PARA,
+                                color: COLORS.textColorLight,
                               }}
                             >
-                              {thread.thread_title}
+                              Your recent chats
                             </Typography.Text>
-                            <Typography.Text
-                              type="secondary"
-                              style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                          ),
+                          children: (
+                            <Flex
+                              vertical
+                              style={{
+                                maxHeight: 300,
+                                overflowY: "scroll",
+                                scrollbarWidth: "none",
+                              }}
                             >
-                              {formatThreadDate(thread.createdAt)}
-                            </Typography.Text>
-                          </Flex>
-                        ))}
-                      </Flex>
-                    </Flex>
+                              {chatThreads.map((thread, index) => (
+                                <Flex
+                                  key={thread.thread_id}
+                                  vertical
+                                  gap={2}
+                                  onClick={() => handleThreadSelect(thread.thread_id)}
+                                  style={{
+                                    cursor: "pointer",
+                                    padding: "8px 4px",
+                                    borderBottom:
+                                      index == chatThreads.length - 1
+                                        ? "none"
+                                        : `1px solid ${COLORS.bgColorBlue}`,
+                                    backgroundColor:
+                                      thread.thread_id ===
+                                      (selectedThreadId || activeThreadId)
+                                        ? "#fafafa"
+                                        : undefined,
+                                  }}
+                                >
+                                  <Typography.Text
+                                    ellipsis
+                                    style={{
+                                      fontWeight: 500,
+                                      fontSize: FONT_SIZE.HEADING_4,
+                                    }}
+                                  >
+                                    {thread.thread_title}
+                                  </Typography.Text>
+                                  <Typography.Text
+                                    type="secondary"
+                                    style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                                  >
+                                    {formatThreadDate(thread.createdAt)}
+                                  </Typography.Text>
+                                </Flex>
+                              ))}
+                            </Flex>
+                          ),
+                        },
+                      ]}
+                    />
                   )}
                 </Flex>
               </Flex>
