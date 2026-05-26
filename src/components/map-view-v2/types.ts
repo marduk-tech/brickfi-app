@@ -31,6 +31,7 @@ export interface GeoJSONFeature {
     name?: string;
     Name?: string;
     status?: string;
+    type?: string;
   };
   geometry: GeoJSONGeometry;
 }
