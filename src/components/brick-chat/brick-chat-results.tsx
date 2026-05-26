@@ -120,15 +120,14 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                 {project.oneLiner}
               </Typography.Paragraph>
               <Flex style={{ width: "100%", marginTop: 8 }}>
-                {project.projectStatus == "report-verified" ? (
                   <Link
-                    href={`/app/brick360/${project.projectSlug}`}
+                    href={project.projectStatus == "report-verified" ? `/app/brick360/${project.projectSlug}`: `/requestreport`}
                     prefetch={false}
                     style={{
                       textDecoration: "none",
                       color: "inherit",
                       width: "100%",
-                      border: `1px solid ${COLORS.primaryColor}`,
+                      border: `1px solid ${project.projectStatus == "report-verified" ? COLORS.primaryColor: COLORS.textColorMedium}`,
                       borderRadius: 8,
                       textAlign: "center",
                     }}
@@ -137,14 +136,13 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                     <Typography.Text
                       style={{
                         fontSize: FONT_SIZE.PARA,
-                        color: COLORS.primaryColor,
+                        color: project.projectStatus == "report-verified" ? COLORS.primaryColor : COLORS.textColorMedium,
                         width: "100%",
                       }}
                     >
-                      View 360 Report
+                      {project.projectStatus == "report-verified" ? "View 360 Report": "Request 360 Report"}
                     </Typography.Text>
                   </Link>
-                ) : null}
               </Flex>
             </Flex>
           </Card>

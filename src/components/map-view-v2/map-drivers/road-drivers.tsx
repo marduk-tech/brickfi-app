@@ -98,7 +98,7 @@ export const RoadDriversComponent = ({
                   ) : null}
                 </Flex>
               ),
-              content: driver.details?.description || "",
+              content: driver.details?.oneLiner || driver.details?.description || "",
               tags: [
                 {
                   label: "Highway",

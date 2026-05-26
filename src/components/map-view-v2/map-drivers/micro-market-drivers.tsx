@@ -59,9 +59,7 @@ export const MicroMarketDriversComponent = ({
                 setModalContent({
                   title: d.name,
                   subHeading: d.distance && d.duration ? fetchTravelDurationElement(d.distance, d.duration) : undefined,
-                  content: d.details?.info
-                    ? d.details.info.summary
-                    : d.details?.description || "",
+                  content: d.details?.oneLiner || d.details?.description || "",
                   tags: [
                     {
                       label: "Micro Market",
