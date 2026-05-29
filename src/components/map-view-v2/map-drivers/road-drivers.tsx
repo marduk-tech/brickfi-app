@@ -98,7 +98,8 @@ export const RoadDriversComponent = ({
                   ) : null}
                 </Flex>
               ),
-              content: driver.details?.oneLiner || driver.details?.description || "",
+              content:
+                driver.details?.oneLiner || driver.details?.description || "",
               tags: [
                 {
                   label: "Highway",
@@ -205,16 +206,45 @@ export const RoadDriversComponent = ({
                       <CircleMarker
                         key={`entry-exit-${driver._id}-${idx}`}
                         center={[lat, lng]}
-                        radius={6}
+                        radius={10}
+                        eventHandlers={{
+                          click: () => {
+                            setModalContent({
+                              title: (
+                                <Flex vertical>
+                                  <Typography.Text
+                                    style={{
+                                      fontSize: FONT_SIZE.HEADING_2,
+                                      fontWeight: 500,
+                                    }}
+                                  >
+                                    {driver.name}
+                                  </Typography.Text>
+
+                                </Flex>
+                              ),
+                              content: "",
+                              tags: [
+                                {
+                                  label: "Highway",
+                                  color: COLORS.primaryColor,
+                                },
+                                {
+                                  label: capitalize(name),
+                                  color: COLORS.textColorDark
+                                }
+                              ],
+                            });
+                            setInfoModalOpen(true);
+                          },
+                        }}
                         pathOptions={{
                           color: "#ffffff",
                           weight: 2,
                           fillColor: COLORS.LANDING.BLUISH,
                           fillOpacity: 1,
                         }}
-                      >
-                        <Popup>{capitalize(name)}</Popup>
-                      </CircleMarker>
+                      ></CircleMarker>
                     );
                   })
               : [];
