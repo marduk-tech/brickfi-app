@@ -402,6 +402,14 @@ export const SurroundingElementLabels = {
     label: "Sewage/Drainage",
     icon: { name: "FaHouseFloodWater", set: "fa6" },
   },
+  depot: {
+    label: "Industrial Depot",
+    icon: { name: "MdOutlineLineStyle", set: "md" },
+  },
+  landfill: {
+    label: "Landfill / Dumpsite",
+    icon: { name: "FaDumpster", set: "fa" },
+  }
 };
 
 export const LandingConstants = {
