@@ -238,6 +238,7 @@ export function BrickfiCallback() {
           source: srcIntent || "",
           callbackCategory: values.assistance,
           callbackTime: `${values.day}, ${scheduledTime}`,
+          callbackTimestamp: preferredCallbackTimestamp
         },
       });
     }

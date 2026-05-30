@@ -168,6 +168,7 @@ export interface ISurroundingElement {
   description: string;
   geometry: any;
   impact: number;
+  approxDistanceMeters: number;
 }
 
 export interface IDriverPlace {

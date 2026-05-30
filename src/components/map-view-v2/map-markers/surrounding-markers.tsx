@@ -84,7 +84,7 @@ export const SurroundingMarkers = ({
               : "";
             openModal({
               title: element.description || typeLabel || "",
-              content: "",
+              content: element.approxDistanceMeters ? `(Approximately ${Math.round(element.approxDistanceMeters / 25) * 25} mtrs away)`: '' ,
               tags: [
                 {
                   label: typeLabel || "",
