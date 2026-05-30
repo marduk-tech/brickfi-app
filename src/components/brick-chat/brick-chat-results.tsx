@@ -3,6 +3,7 @@
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Card, Flex, Typography } from "antd";
 import Link from "next/link";
+import DynamicReactIcon from "../common/dynamic-react-icon";
 import styles from "./brick-chat-results.module.css";
 import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
 
@@ -127,21 +128,31 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                       textDecoration: "none",
                       color: "inherit",
                       width: "100%",
-                      border: `1px solid ${project.projectStatus == "report-verified" ? COLORS.primaryColor: COLORS.textColorMedium}`,
+                      border: `1px solid ${COLORS.borderColorMedium}`,
                       borderRadius: 8,
                       textAlign: "center",
                     }}
                     target="_blank"
                   >
-                    <Typography.Text
-                      style={{
-                        fontSize: FONT_SIZE.PARA,
-                        color: project.projectStatus == "report-verified" ? COLORS.primaryColor : COLORS.textColorMedium,
-                        width: "100%",
-                      }}
-                    >
-                      {project.projectStatus == "report-verified" ? "View 360 Report": "Request 360 Report"}
-                    </Typography.Text>
+                    <Flex align="center" justify="center" gap={6} style={{ padding: "4px 0" }}>
+                      
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.PARA,
+                          color:  COLORS.textColorDark,
+                        }}
+                      >
+                        {"See Details"}
+                      </Typography.Text>
+                      {project.projectStatus === "report-verified" && (
+                          <DynamicReactIcon
+                            iconName="TbView360Number"
+                            iconSet="tb"
+                            size={18}
+                            color = {COLORS.primaryColor}
+                          />
+                      )}
+                    </Flex>
                   </Link>
               </Flex>
             </Flex>
