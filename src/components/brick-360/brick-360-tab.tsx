@@ -1,4 +1,4 @@
-import { Alert, Flex, List, Typography } from "antd";
+import { Alert, Button, Flex, List, Modal, Typography } from "antd";
 import { forwardRef, ReactNode, useState } from "react";
 import { BRICK360_CATEGORY, Brick360DataPoints } from "../../libs/constants";
 import {
@@ -27,6 +27,14 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
       useState(false);
     const [quickSnapshotDialogContent, setQuickSnapshotDialogContent] =
       useState<ReactNode>("");
+    const [reportRequestDialogOpen, setReportRequestDialogOpen] =
+      useState(false);
+
+    function handleReportRequest() {
+      // TODO: integrate report generation request API
+      console.log("Report requested for project:", lvnzyProject._id);
+      setReportRequestDialogOpen(false);
+    }
 
     function renderSummaryPoint(pt: string, isPro: boolean) {
       const { title, content } = parseProConHtml(pt);
@@ -113,42 +121,42 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
     return (
       <ScrollableContainer>
         <Flex vertical>
-          {/* Summary point */}
-          {lvnzyProject?.score.summary && (
-            <Flex vertical style={{ marginBottom: 16 }}>
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.PARA,
-                  marginBottom: 4,
-                  color: COLORS.textColorMedium,
-                }}
-              >
-                360 HIGHLIGHTS
-              </Typography.Text>
-              <Flex
-                gap={16}
-                style={{
-                  width: "100%",
-                  overflowX: "scroll",
-                  whiteSpace: "nowrap",
-                  scrollbarWidth: "none",
-                }}
-              >
-                {lvnzyProject?.score.summary.pros.map((p: any) => {
-                  return renderSummaryPoint(p, true);
-                })}
-                {lvnzyProject?.score.summary.cons.map((p: any) => {
-                  return renderSummaryPoint(p, false);
-                })}
+          {lvnzyProject?.score?.summary ? (
+            <>
+              {/* Summary point */}
+              <Flex vertical style={{ marginBottom: 16 }}>
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.PARA,
+                    marginBottom: 4,
+                    color: COLORS.textColorMedium,
+                  }}
+                >
+                  360 HIGHLIGHTS
+                </Typography.Text>
+                <Flex
+                  gap={16}
+                  style={{
+                    width: "100%",
+                    overflowX: "scroll",
+                    whiteSpace: "nowrap",
+                    scrollbarWidth: "none",
+                  }}
+                >
+                  {lvnzyProject.score.summary.pros.map((p: any) => {
+                    return renderSummaryPoint(p, true);
+                  })}
+                  {lvnzyProject.score.summary.cons.map((p: any) => {
+                    return renderSummaryPoint(p, false);
+                  })}
+                </Flex>
               </Flex>
-            </Flex>
-          )}
-          {/*  data points */}
-          <Flex vertical gap={24} style={{ paddingBottom: 125, paddingTop: 0 }}>
-            {scoreParams &&
-              scoreParams.map((sc) => {
-                return (
-                  <Flex vertical>
+              {/*  data points */}
+              <Flex vertical gap={24} style={{ paddingBottom: 125, paddingTop: 0 }}>
+                {scoreParams &&
+                  scoreParams.map((sc) => {
+                    return (
+                      <Flex vertical>
                     <Flex
                       gap={4}
                       align="center"
@@ -303,10 +311,47 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                     )}
                   </Flex>
                 );
-              })}
-          </Flex>
+                  })}
+              </Flex>
+            </>
+          ) : (
+            <Flex
+              vertical
+              align="center"
+              justify="center"
+              gap={12}
+              style={{
+                padding: "32px 16px",
+                marginBottom: 16,
+                borderRadius: 12,
+                backgroundColor: "#f8f8f8",
+                border: "1px dashed #d9d9d9",
+              }}
+            >
+              <Typography.Text
+                style={{ marginBottom:  16, color: "#8c8c8c", textAlign: "left" }}
+              >
+                The Brick 360 report for this project has not been generated yet. Request the admin.
+              </Typography.Text>
+              {/* <Button disabled type="primary" onClick={() => setReportRequestDialogOpen(true)}>
+                Request Admin
+              </Button> */}
+            </Flex>
+          )}
         </Flex>
 
+        <Modal
+          title="Request Report Generation"
+          open={reportRequestDialogOpen}
+          onOk={handleReportRequest}
+          onCancel={() => setReportRequestDialogOpen(false)}
+          okText="Confirm"
+          cancelText="Cancel"
+        >
+          <Typography.Text>
+            Are you sure you want to request a Brick 360 report for this project? We'll notify you once it's ready.
+          </Typography.Text>
+        </Modal>
         <SnapshotModal
           isOpen={quickSnapshotDialogOpen}
           onClose={() => setQuickSnapshotDialogOpen(false)}
