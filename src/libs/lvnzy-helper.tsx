@@ -77,7 +77,7 @@ export const thsndFormat = (amt: string | number) => {
     return amt;
   }
   const val = Math.abs(amtNum);
-  if (val >= 1000) return `${Math.floor(amtNum / 1000)},${amtNum % 1000}`;
+  if (val >= 1000) return `${Math.floor(amtNum / 1000)},${String(amtNum % 1000).padStart(3, "0")}`;
   return amtNum;
 };
 
