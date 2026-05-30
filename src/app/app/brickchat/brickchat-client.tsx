@@ -356,7 +356,7 @@ export default function BrickChatClient() {
 
 
   return (
-    <AdminGuard>
+    <AdminGuard allowedRoles={["admin", "member"]}>
       <Flex vertical={isMobile} style={{ maxWidth: 2000, padding: 8, overflowY:"scroll" }}>
         <Flex
           vertical
