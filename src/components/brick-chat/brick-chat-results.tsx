@@ -122,7 +122,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
               </Typography.Paragraph>
               <Flex style={{ width: "100%", marginTop: 8 }}>
                   <Link
-                    href={project.projectStatus == "report-verified" ? `/app/brick360/${project.projectSlug}`: `/requestreport`}
+                    href={`/app/brick360/${project.projectSlug}`}
                     prefetch={false}
                     style={{
                       textDecoration: "none",
