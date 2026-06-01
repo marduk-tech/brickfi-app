@@ -159,9 +159,15 @@ export function Brick360v2({ slug, projectData }: Brick360v2Props) {
   }, []);
 
   const [scoreParams, setScoreParams] = useState<any[]>([]);
-  const [selectedTabKey, setSelectedTabKey] = useState<string>(
-    lvnzyProject?.score?.summary ? "brick360" : "units"
-  );
+  const [selectedTabKey, setSelectedTabKey] = useState<string>("brick360");
+  const tabKeyInitialized = useRef(false);
+
+  useEffect(() => {
+    if (lvnzyProject && !tabKeyInitialized.current) {
+      tabKeyInitialized.current = true;
+      setSelectedTabKey(lvnzyProject?.score?.summary ? "brick360" : "units");
+    }
+  }, [lvnzyProject]);
 
   const [selectedDataPointCategory, setSelectedDataPointCategory] =
     useState<any>();
@@ -303,7 +309,7 @@ export function Brick360v2({ slug, projectData }: Brick360v2Props) {
 
       <Tabs
         tabBarGutter={40}
-        defaultActiveKey={lvnzyProject?.score?.summary ? "brick360" : "units"}
+        activeKey={selectedTabKey}
         onChange={(activeKey: string) => {
           captureAnalyticsEvent("tab-navigate", {
             tabName: activeKey,
