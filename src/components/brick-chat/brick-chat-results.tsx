@@ -6,6 +6,7 @@ import Link from "next/link";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import styles from "./brick-chat-results.module.css";
 import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
+import { rupeeAmountFormat } from "@/libs/lvnzy-helper";
 
 interface BrickChatResultsProps {
   results: ProjectResult[];
@@ -20,7 +21,18 @@ const getProjectMetadata = (project: ProjectResult): string => {
   const parts: string[] = [];
 
   if (project.projectUnitTypes && project.projectUnitTypes.length > 0) {
-    parts.push(String(project.projectUnitTypes[0]));
+    const unitTypes = project.projectUnitTypes
+      .slice(0, 3)
+      .sort((a: number, b: number) => (a-b))
+      .join(", ");
+    parts.push(unitTypes + ` BHK`);
+  } else  {
+    parts.push('Various Plot Sizes')
+  }
+
+  if (project.projectAvgSquareFootPrice && project.sizeBuiltupMin) {
+    const price = project.projectAvgSquareFootPrice * project.sizeBuiltupMin;
+    parts.push(String(rupeeAmountFormat(price)));
   }
 
   return parts.join(" · ");
@@ -97,17 +109,17 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                 {project.projectName}
               </Typography.Text>
 
-              {/* {getProjectMetadata(project) && (
+              {getProjectMetadata(project) && (
                   <Typography.Text
                     style={{
                       fontSize: FONT_SIZE.SUB_TEXT,
-                      color: COLORS.textColorMedium,
+                      color: COLORS.textColorLight,
                     }}
                     ellipsis={{ tooltip: getProjectMetadata(project) }}
                   >
                     {getProjectMetadata(project)}
                   </Typography.Text>
-                )} */}
+                )}
 
               <Typography.Paragraph
                 style={{

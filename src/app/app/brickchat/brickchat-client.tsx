@@ -41,7 +41,9 @@ export interface ProjectResult {
   projectStatus?: string;
   projectImage?: string;
   lvnzyProjectId?: string;
-  projectUnitTypes?: Array<string | number>;
+  projectUnitTypes?: Array<number>;
+  projectAvgSquareFootPrice?: number;
+  sizeBuiltupMin?: number;
   projectLocation: {
     lat: number;
     lng: number;
@@ -288,7 +290,7 @@ export default function BrickChatClient() {
         },
         body: JSON.stringify({
           query: question,
-          limit: 7,
+          limit: 10,
           userId: user._id,
           threadId: activeThreadId,
         }),
