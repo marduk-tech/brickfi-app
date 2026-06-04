@@ -43,6 +43,8 @@ export interface ProjectResult {
   lvnzyProjectId?: string;
   projectUnitTypes?: Array<number>;
   projectAvgSquareFootPrice?: number;
+  projectCorridor?: string;
+  projectHomeTypes?: Array<string>;
   sizeBuiltupMin?: number;
   projectLocation: {
     lat: number;
@@ -107,13 +109,21 @@ const fetchThreadHistory = async (
   return json?.data || [];
 };
 
-export default function BrickChatClient() {
+interface BrickChatCoreProps {
+  defaultProjectResults?: ProjectResult[];
+  defaultProjectsDescription?: string;
+}
+
+export function BrickChatCore({
+  defaultProjectResults,
+  defaultProjectsDescription,
+}: BrickChatCoreProps) {
   const [form] = Form.useForm();
   const { user } = useUser();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const {isMobile} = useDevice();
+  const { isMobile } = useDevice();
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
@@ -123,13 +133,20 @@ export default function BrickChatClient() {
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
 
-  const [projectResults, setProjectResults] = useState<ProjectResult[]>();
+  const [projectResults, setProjectResults] = useState<
+    ProjectResult[] | undefined
+  >(defaultProjectResults);
+
+  useEffect(() => {
+    if (defaultProjectResults?.length) setProjectResults(defaultProjectResults);
+  }, [defaultProjectResults]);
 
   const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
   const showWelcome =
     !selectedThreadId &&
     !activeThreadId &&
     !chatHistory.length &&
+    !defaultProjectResults?.length &&
     !historyLoading;
 
   const syncThreadSearchParam = (threadId?: string) => {
@@ -227,11 +244,11 @@ export default function BrickChatClient() {
 
         setChatHistory(history);
         setActiveThreadId(selectedThreadId);
-        history.forEach(h => {
+        history.forEach((h) => {
           if (h.answer.projectsList && h.answer.projectsList.length) {
             setProjectResults(h.answer.projectsList);
           }
-        })
+        });
       } catch (error) {
         if (cancelled) {
           return;
@@ -356,179 +373,211 @@ export default function BrickChatClient() {
     </Flex>
   );
 
-
   return (
-    <AdminGuard allowedRoles={["admin", "member"]}>
-      <Flex vertical={isMobile} style={{ maxWidth: 2000, padding: 8, overflowY:"scroll" }}>
+    <Flex
+      vertical={isMobile}
+      style={{ width: "100%", maxWidth: 2000, padding: 8, overflowY: "scroll" }}
+    >
+      <Flex
+        vertical
+        style={{
+          margin: "0 auto",
+          position: "relative",
+          paddingBottom: 100,
+          width: isMobile ? "100%" : "50%",
+          height: "90vh",
+        }}
+      >
         <Flex
           vertical
+          gap={24}
           style={{
-            margin: "0 auto",
-            position: "relative",
-            paddingBottom: 100,
-            width: isMobile ? "100%":"50%",
-            height: "90vh",
+            height: "80vh",
+            overflowY: "scroll",
+            scrollbarWidth: "none",
+            paddingRight: 8,
           }}
         >
-          <Flex
-            vertical
-            gap={24}
-            style={{
-              height: "80vh",
-              overflowY: "scroll",
-              scrollbarWidth: "none",
-              paddingRight: 8,
-            }}
-          >
-            {showWelcome ? (
+          {showWelcome ? (
+            <Flex vertical>
               <Flex vertical>
-                <Flex vertical>
-                  <Typography.Text
-                    style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
-                  >
-                    Welcome to Brickfi
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      marginBottom: 24,
-                      fontSize: FONT_SIZE.HEADING_4,
-                      color: COLORS.textColorLight,
-                    }}
-                  >
-                    Start your home search with Brickfi. Just enter your
-                    requirement and let Brickfi do the work.
-                  </Typography.Text>
-                </Flex>
-                <Flex vertical gap={12}>
-                  <Flex align="center" justify="space-between">
-                    {(activeThreadId || selectedThreadId) && (
-                      <Button onClick={handleNewChat}>New Chat</Button>
-                    )}
-                  </Flex>
-                  {threadsLoading ? (
-                    <Flex align="center" gap={8}>
-                      <Spin size="small" />
-                      <Typography.Text type="secondary">
-                        Loading threads...
-                      </Typography.Text>
-                    </Flex>
-                  ) : chatThreads.length === 0 ? (
-                    <Flex style={{ width: "100%", flexWrap: "wrap" }}>
-                      {SAMPLE_PROMPTS.map((prompt) => (
-                        <Tag
-                          key={prompt}
-                          style={{
-                            marginBottom: 8,
-                            fontSize: FONT_SIZE.PARA,
-                            backgroundColor: COLORS.textColorDark,
-                            color: "white",
-                            padding: "2px 8px",
-                            cursor: loading ? "not-allowed" : "pointer",
-                          }}
-                          onClick={() => {
-                            if (loading) {
-                              return;
-                            }
-
-                            form.setFieldsValue({ question: prompt });
-                            form.submit();
-                          }}
-                        >
-                          {prompt}
-                        </Tag>
-                      ))}
-                    </Flex>
-                  ) : (
-                    <Collapse
-                      items={[
-                        {
-                          key: "recent-chats",
-                          label: (
-                            <Typography.Text
-                              style={{
-                                fontSize: FONT_SIZE.PARA,
-                                color: COLORS.textColorLight,
-                              }}
-                            >
-                              Your recent chats
-                            </Typography.Text>
-                          ),
-                          children: (
-                            <Flex
-                              vertical
-                              style={{
-                                maxHeight: 300,
-                                overflowY: "scroll",
-                                scrollbarWidth: "none",
-                              }}
-                            >
-                              {chatThreads.map((thread, index) => (
-                                <Flex
-                                  key={thread.thread_id}
-                                  vertical
-                                  gap={2}
-                                  onClick={() => handleThreadSelect(thread.thread_id)}
-                                  style={{
-                                    cursor: "pointer",
-                                    padding: "8px 4px",
-                                    borderBottom:
-                                      index == chatThreads.length - 1
-                                        ? "none"
-                                        : `1px solid ${COLORS.bgColorBlue}`,
-                                    backgroundColor:
-                                      thread.thread_id ===
-                                      (selectedThreadId || activeThreadId)
-                                        ? "#fafafa"
-                                        : undefined,
-                                  }}
-                                >
-                                  <Typography.Text
-                                    ellipsis
-                                    style={{
-                                      fontWeight: 500,
-                                      fontSize: FONT_SIZE.HEADING_4,
-                                    }}
-                                  >
-                                    {thread.thread_title}
-                                  </Typography.Text>
-                                  <Typography.Text
-                                    type="secondary"
-                                    style={{ fontSize: FONT_SIZE.SUB_TEXT }}
-                                  >
-                                    {formatThreadDate(thread.createdAt)}
-                                  </Typography.Text>
-                                </Flex>
-                              ))}
-                            </Flex>
-                          ),
-                        },
-                      ]}
-                    />
-                  )}
-                </Flex>
-              </Flex>
-            ) : null}
-
-            {historyLoading && !chatHistory.length ? (
-              <Flex align="center" gap={12}>
-                <Spin size="small" />
-                <Typography.Text type="secondary">
-                  Loading thread history...
+                <Typography.Text
+                  style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
+                >
+                  Welcome to Brickfi
+                </Typography.Text>
+                <Typography.Text
+                  style={{
+                    marginBottom: 24,
+                    fontSize: FONT_SIZE.HEADING_4,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  Start your home search with Brickfi. Just enter your
+                  requirement and let Brickfi do the work.
                 </Typography.Text>
               </Flex>
-            ) : null}
 
-            <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
-              {chatHistory.map((messageItem, index) => (
-                <Flex
-                  key={`${messageItem.question}-${index}`}
-                  vertical
-                  gap={12}
-                >
-                  {renderQuestion(messageItem.question)}
+             
 
-                  <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                    {!messageItem.answer.directAnswer ? <Typography.Text
+              <Flex vertical gap={12}>
+                <Flex align="center" justify="space-between">
+                  {(activeThreadId || selectedThreadId) && (
+                    <Button onClick={handleNewChat}>New Chat</Button>
+                  )}
+                </Flex>
+                {threadsLoading ? (
+                  <Flex align="center" gap={8}>
+                    <Spin size="small" />
+                    <Typography.Text type="secondary">
+                      Loading threads...
+                    </Typography.Text>
+                  </Flex>
+                ) : chatThreads.length === 0 ? (
+                  <Flex style={{ width: "100%", flexWrap: "wrap" }}>
+                    {SAMPLE_PROMPTS.map((prompt) => (
+                      <Tag
+                        key={prompt}
+                        style={{
+                          marginBottom: 8,
+                          fontSize: FONT_SIZE.PARA,
+                          backgroundColor: COLORS.textColorDark,
+                          color: "white",
+                          padding: "2px 8px",
+                          cursor: loading ? "not-allowed" : "pointer",
+                        }}
+                        onClick={() => {
+                          if (loading) {
+                            return;
+                          }
+
+                          form.setFieldsValue({ question: prompt });
+                          form.submit();
+                        }}
+                      >
+                        {prompt}
+                      </Tag>
+                    ))}
+                  </Flex>
+                ) : (
+                  <Collapse
+                    items={[
+                      {
+                        key: "recent-chats",
+                        label: (
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.PARA,
+                              color: COLORS.textColorLight,
+                            }}
+                          >
+                            Your recent chats
+                          </Typography.Text>
+                        ),
+                        children: (
+                          <Flex
+                            vertical
+                            style={{
+                              maxHeight: 300,
+                              overflowY: "scroll",
+                              scrollbarWidth: "none",
+                            }}
+                          >
+                            {chatThreads.map((thread, index) => (
+                              <Flex
+                                key={thread.thread_id}
+                                vertical
+                                gap={2}
+                                onClick={() =>
+                                  handleThreadSelect(thread.thread_id)
+                                }
+                                style={{
+                                  cursor: "pointer",
+                                  padding: "8px 4px",
+                                  borderBottom:
+                                    index == chatThreads.length - 1
+                                      ? "none"
+                                      : `1px solid ${COLORS.bgColorBlue}`,
+                                  backgroundColor:
+                                    thread.thread_id ===
+                                    (selectedThreadId || activeThreadId)
+                                      ? "#fafafa"
+                                      : undefined,
+                                }}
+                              >
+                                <Typography.Text
+                                  ellipsis
+                                  style={{
+                                    fontWeight: 500,
+                                    fontSize: FONT_SIZE.HEADING_4,
+                                  }}
+                                >
+                                  {thread.thread_title}
+                                </Typography.Text>
+                                <Typography.Text
+                                  type="secondary"
+                                  style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                                >
+                                  {formatThreadDate(thread.createdAt)}
+                                </Typography.Text>
+                              </Flex>
+                            ))}
+                          </Flex>
+                        ),
+                      },
+                    ]}
+                  />
+                )}
+              </Flex>
+            </Flex>
+          ) : defaultProjectResults?.length ? (
+            <Flex vertical gap={12}>
+              {defaultProjectsDescription && (
+                <Flex vertical>
+                  <Typography.Text
+                    style={{
+                      color: "white",
+                      fontSize: FONT_SIZE.HEADING_3,
+                      backgroundColor: COLORS.textColorDark,
+                      borderRadius: 16,
+                      padding: "8px 16px",
+                    }}
+                  >
+                    {defaultProjectsDescription}
+                  </Typography.Text>
+                   <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.PARA,
+                      color: COLORS.textColorLight,
+                      marginLeft: 8,
+                      marginTop: 16
+                    }}
+                  >
+                    Curated by your Brickfi Advisor
+                  </Typography.Text>
+                </Flex>
+              )}
+              <BrickChatResults results={defaultProjectResults} />
+            </Flex>
+          ) : null}
+
+          {historyLoading && !chatHistory.length ? (
+            <Flex align="center" gap={12}>
+              <Spin size="small" />
+              <Typography.Text type="secondary">
+                Loading thread history...
+              </Typography.Text>
+            </Flex>
+          ) : null}
+
+          <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
+            {chatHistory.map((messageItem, index) => (
+              <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
+                {renderQuestion(messageItem.question)}
+
+                <Flex vertical gap={4} style={{ marginTop: 8 }}>
+                  {!messageItem.answer.directAnswer ? (
+                    <Typography.Text
                       style={{
                         fontSize: FONT_SIZE.SUB_TEXT,
                         color: COLORS.textColorLight,
@@ -537,119 +586,127 @@ export default function BrickChatClient() {
                       Found {messageItem.answer.projectsList.length} matching
                       project
                       {messageItem.answer.projectsList.length !== 1 ? "s" : ""}
-                    </Typography.Text>: null}
-                    
-                    <Markdown
+                    </Typography.Text>
+                  ) : null}
+
+                  <Markdown
                     className="bkchat-summary"
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        p: ({ children }) => (
-                          <Typography.Text
-                          
-                            style={{
-                              fontSize: FONT_SIZE.HEADING_3,
-                              fontWeight: 500,
-                              marginBottom: 16,
-                              display: "block",
-                            }}
-                          >
-                            {children}
-                          </Typography.Text>
-                        ),
-                      }}
-                    >
-                      {messageItem.answer.summary}
-                    </Markdown>
-                    {!messageItem.answer.directAnswer ?
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => (
+                        <Typography.Text
+                          style={{
+                            fontSize: FONT_SIZE.HEADING_3,
+                            fontWeight: 500,
+                            marginBottom: 16,
+                            display: "block",
+                          }}
+                        >
+                          {children}
+                        </Typography.Text>
+                      ),
+                    }}
+                  >
+                    {messageItem.answer.summary}
+                  </Markdown>
+                  {!messageItem.answer.directAnswer ? (
                     <BrickChatResults
                       results={messageItem.answer.projectsList}
-                    />: null}
-                  </Flex>
+                    />
+                  ) : null}
                 </Flex>
-              ))}
+              </Flex>
+            ))}
 
-              {currentQuestion && loading && (
-                <Flex vertical gap={12}>
-                  {renderQuestion(currentQuestion)}
-                  <Flex align="center" gap={12} style={{ marginTop: 8 }}>
-                    <Spin size="small" />
-                    <Typography.Text type="secondary">
-                      Searching for projects...
-                    </Typography.Text>
-                  </Flex>
+            {currentQuestion && loading && (
+              <Flex vertical gap={12}>
+                {renderQuestion(currentQuestion)}
+                <Flex align="center" gap={12} style={{ marginTop: 8 }}>
+                  <Spin size="small" />
+                  <Typography.Text type="secondary">
+                    Searching for projects...
+                  </Typography.Text>
                 </Flex>
-              )}
-            </Flex>
+              </Flex>
+            )}
           </Flex>
-
-          <Form
-            form={form}
-            onFinish={handleSearch}
-            style={{
-              marginTop: 8,
-              position: "absolute",
-              bottom: 8,
-              width: "100%",
-            }}
-          >
-            <Form.Item name="question" style={{ marginBottom: 0 }}>
-              <Input
-                placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
-                size="large"
-                disabled={loading || historyLoading}
-                suffix={
-                  <Button
-                    type="text"
-                    htmlType="submit"
-                    icon={<BiSend size={20} />}
-                    disabled={loading || historyLoading}
-                    style={{ color: COLORS.primaryColor }}
-                  />
-                }
-                style={{
-                  boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-                  height: 50,
-                  backgroundColor: "white",
-                  border: "1px solid",
-                  borderColor: COLORS.borderColorMedium,
-                  borderRadius: 16,
-                  fontSize: FONT_SIZE.HEADING_4,
-                }}
-                onPressEnter={() => form.submit()}
-              />
-            </Form.Item>
-          </Form>
         </Flex>
 
-        <Flex style={{ width: isMobile ? "100%":"47%", padding: "0 1.5%" }}>
-          <MapViewV2
-            projects={
-              projectResults
-                ? projectResults
-                    .filter(
-                      (p) => !!p.projectLocation?.lat && !!p.projectLocation?.lng
-                    )
-                    .map((p) => ({
-                      id: p.projectId,
-                      location: p.projectLocation,
-                      type: "apartment",
-                      modalContent: {
-                        title: p.projectName,
-                        content: p.oneLiner || "",
-                      },
-                    }))
-                : []
-            }
-            fullSize={false}
-            showLocalities={false}
-            hideAllFilters={true}
-            minMapZoom={10}
-            showCorridors={false}
-            corridorIds={[]}
-            highlightedHomeTypes={[]}
-          />
-        </Flex>
+        <Form
+          form={form}
+          onFinish={handleSearch}
+          style={{
+            marginTop: 8,
+            position: "absolute",
+            bottom: 8,
+            width: "100%",
+          }}
+        >
+          <Form.Item name="question" style={{ marginBottom: 0 }}>
+            <Input
+              placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
+              size="large"
+              disabled={loading || historyLoading}
+              suffix={
+                <Button
+                  type="text"
+                  htmlType="submit"
+                  icon={<BiSend size={20} />}
+                  disabled={loading || historyLoading}
+                  style={{ color: COLORS.primaryColor }}
+                />
+              }
+              style={{
+                boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                height: 50,
+                backgroundColor: "white",
+                border: "1px solid",
+                borderColor: COLORS.borderColorMedium,
+                borderRadius: 16,
+                fontSize: FONT_SIZE.HEADING_4,
+              }}
+              onPressEnter={() => form.submit()}
+            />
+          </Form.Item>
+        </Form>
       </Flex>
+
+      <Flex style={{ width: isMobile ? "100%" : "47%", minWidth: isMobile ? undefined : "47%", padding: "0 1.5%", flexShrink: 0 }}>
+        <MapViewV2
+          projects={
+            projectResults
+              ? projectResults
+                  .filter(
+                    (p) => !!p.projectLocation?.lat && !!p.projectLocation?.lng,
+                  )
+                  .map((p) => ({
+                    id: p.projectId,
+                    location: p.projectLocation,
+                    type: "apartment",
+                    modalContent: {
+                      title: p.projectName,
+                      content: p.oneLiner || "",
+                    },
+                  }))
+              : []
+          }
+          fullSize={false}
+          showLocalities={false}
+          hideAllFilters={true}
+          minMapZoom={10}
+          showCorridors={false}
+          corridorIds={[]}
+          highlightedHomeTypes={[]}
+        />
+      </Flex>
+    </Flex>
+  );
+}
+
+export default function BrickChatClient() {
+  return (
+    <AdminGuard allowedRoles={["admin", "member"]}>
+      <BrickChatCore />
     </AdminGuard>
   );
 }

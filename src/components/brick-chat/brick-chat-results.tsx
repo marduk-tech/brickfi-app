@@ -1,12 +1,12 @@
 "use client";
 
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Card, Flex, Typography } from "antd";
+import { Card, Flex, Tag, Typography } from "antd";
 import Link from "next/link";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import styles from "./brick-chat-results.module.css";
 import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
-import { rupeeAmountFormat } from "@/libs/lvnzy-helper";
+import { capitalize, rupeeAmountFormat } from "@/libs/lvnzy-helper";
 
 interface BrickChatResultsProps {
   results: ProjectResult[];
@@ -20,14 +20,19 @@ const formatPriceInCrores = (price: number): string => {
 const getProjectMetadata = (project: ProjectResult): string => {
   const parts: string[] = [];
 
+  if (project.projectHomeTypes && project.projectHomeTypes.length > 0) {
+    parts.push(capitalize(project.projectHomeTypes[0]));
+  }
+
   if (project.projectUnitTypes && project.projectUnitTypes.length > 0) {
     const unitTypes = project.projectUnitTypes
+      .filter((u: number) => u % 1 !== 0.5)
+      .sort((a: number, b: number) => a - b)
       .slice(0, 3)
-      .sort((a: number, b: number) => (a-b))
       .join(", ");
     parts.push(unitTypes + ` BHK`);
-  } else  {
-    parts.push('Various Plot Sizes')
+  } else {
+    parts.push("Various Plot Sizes");
   }
 
   if (project.projectAvgSquareFootPrice && project.sizeBuiltupMin) {
@@ -59,7 +64,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
           <Card
             hoverable
             style={{
-              width: 200,
+              width: 225,
               borderRadius: 12,
               overflow: "hidden",
               border: `1px solid ${COLORS.borderColor}`,
@@ -97,7 +102,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
               </div>
             }
           >
-            <Flex vertical gap={8}>
+            <Flex vertical gap={2}>
               <Typography.Text
                 strong
                 style={{
@@ -108,64 +113,85 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
               >
                 {project.projectName}
               </Typography.Text>
-
-              {getProjectMetadata(project) && (
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.SUB_TEXT,
-                      color: COLORS.textColorLight,
-                    }}
-                    ellipsis={{ tooltip: getProjectMetadata(project) }}
-                  >
-                    {getProjectMetadata(project)}
-                  </Typography.Text>
-                )}
-
-              <Typography.Paragraph
+              <Flex>
+              <Tag
                 style={{
                   fontSize: FONT_SIZE.SUB_TEXT,
-                  color: COLORS.textColorMedium,
-                  lineHeight: 1.5,
-                  marginBottom: 0,
+                  color: COLORS.textColorDark,
                 }}
-                ellipsis={{ rows: 2, tooltip: project.oneLiner }}
               >
-                {project.oneLiner}
-              </Typography.Paragraph>
+                {project.projectCorridor}
+              </Tag>
+              </Flex>
+
+              {getProjectMetadata(project) && (
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.PARA,
+                    color: COLORS.textColorLight,
+                  }}
+                  ellipsis={{ tooltip: getProjectMetadata(project) }}
+                >
+                  {getProjectMetadata(project)}
+                </Typography.Text>
+              )}
+
+              {project.oneLiner && (
+                <Typography.Paragraph
+                  style={{
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorMedium,
+                    marginBottom: 0,
+                    marginTop: 8,
+                    lineHeight: "140%",
+                    backgroundColor: COLORS.bgColorLightBlue,
+                    padding: 4,
+                    borderRadius: 4,
+                    border: `1px solid ${COLORS.borderColor}`,
+                  }}
+                  ellipsis={{ rows: 4, tooltip: project.oneLiner }}
+                >
+                  {project.oneLiner}
+                </Typography.Paragraph>
+              )}
               <Flex style={{ width: "100%", marginTop: 8 }}>
-                  <Link
-                    href={`/app/brick360/${project.projectSlug}`}
-                    prefetch={false}
-                    style={{
-                      textDecoration: "none",
-                      color: "inherit",
-                      width: "100%",
-                      border: `1px solid ${COLORS.borderColorMedium}`,
-                      borderRadius: 8,
-                      textAlign: "center",
-                    }}
-                    target="_blank"
+                <Link
+                  href={`/app/brick360/${project.projectSlug}`}
+                  prefetch={false}
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    width: "100%",
+                    border: `1px solid ${COLORS.borderColorMedium}`,
+                    borderRadius: 8,
+                    textAlign: "center",
+                  }}
+                  target="_blank"
+                >
+                  <Flex
+                    align="center"
+                    justify="center"
+                    gap={6}
+                    style={{ padding: "4px 0" }}
                   >
-                    <Flex align="center" justify="center" gap={6} style={{ padding: "4px 0" }}>
-                      
-                      <Typography.Text
-                        style={{
-                          fontSize: FONT_SIZE.PARA,
-                          color:  COLORS.textColorDark,
-                        }}
-                      >
-                        {"See Details"}
-                      </Typography.Text>
-                      {project.projectStatus === "report-verified" && (
-                          <DynamicReactIcon
-                            iconName="TbView360Number"
-                            iconSet="tb"
-                            size={18}
-                            color = {COLORS.primaryColor}
-                          />
-                      )}
-                    </Flex>
-                  </Link>
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.PARA,
+                        color: COLORS.textColorDark,
+                      }}
+                    >
+                      {"See Details"}
+                    </Typography.Text>
+                    {project.projectStatus === "report-verified" && (
+                      <DynamicReactIcon
+                        iconName="TbView360Number"
+                        iconSet="tb"
+                        size={18}
+                        color={COLORS.primaryColor}
+                      />
+                    )}
+                  </Flex>
+                </Link>
               </Flex>
             </Flex>
           </Card>
