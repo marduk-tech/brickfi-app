@@ -192,7 +192,7 @@ export const TransitDriversComponent = ({
             return tooCloseToLabel || tooCloseToStation ? kept : [...kept, candidate];
           }, []);
 
-          const transitLabels = zoom > 14
+          const transitLabels = zoom > 13
             ? globalLabelMarkers.map(({ coords, angle, feature, lineIndex }, pointIndex) => {
                 const labelColor = feature.properties?.strokeColor || COLORS.textColorDark;
                 const labelIcon = L.divIcon({
