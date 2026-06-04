@@ -10,6 +10,7 @@ import dynamic from "next/dynamic";
 import type { ProjectMarkerInput } from "../../../components/map-view-v2/map-view-v2";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import type { ProjectResult } from "./brickchat-client";
+import MapViewWrapper from "@/components/map-view-v2/map-view-google/map-view-wrapper";
 
 const MapViewV2 = dynamic(
   () => import("../../../components/map-view-v2/map-view-v2"),
@@ -76,7 +77,7 @@ export function BrickMapChat({ projects }: BrickMapChatProps) {
 
   return (
     <Flex vertical style={{ height: "100%", width: "100%" }}>
-      <MapViewV2
+      <MapViewWrapper
         key="brick-map-chat"
         drivers={filteredDrivers.map((p) => ({
           ...p,

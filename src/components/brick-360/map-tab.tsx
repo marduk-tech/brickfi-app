@@ -12,6 +12,7 @@ const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
 
 import { ScrollableContainer } from "../scrollable-container";
 import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
+import MapViewWrapper from "../map-view-v2/map-view-google/map-view-wrapper";
 
 interface MapTabProps {
   lvnzyProject: any;
@@ -75,7 +76,8 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
         )}
 
         {!isMapFullScreen && (
-          <MapViewV2
+          <MapViewWrapper
+          defaultMode="openstreet"
             fullSize={false}
             projectId={lvnzyProject?.originalProjectId._id}
             drivers={drivers}
@@ -122,7 +124,8 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             vertical
             gap={16}
           >
-            <MapViewV2
+            <MapViewWrapper
+            defaultMode="openstreet"
               projectId={lvnzyProject?.originalProjectId._id}
               drivers={drivers}
               lvnzyProjectId={lvnzyProject._id}
