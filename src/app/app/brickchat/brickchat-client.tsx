@@ -25,6 +25,7 @@ import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useDevice } from "@/hooks/use-device";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 const MapViewV2 = dynamic(
   () => import("../../../components/map-view-v2/map-view-v2"),
@@ -642,6 +643,44 @@ export function BrickChatCore({
             width: "100%",
           }}
         >
+          <Flex justify="flex-end" style={{ marginBottom: 2, }}>
+            {(activeThreadId || selectedThreadId) && (
+              <Button
+                type="text"
+                style={{ padding: "8px 0", height: "auto", width: 32, lineHeight: 1  }}
+                icon={
+                  <DynamicReactIcon
+                    iconName="LuUnlink"
+                    iconSet="lu"
+                    color={COLORS.textColorMedium}
+                    size={16}
+                  />
+                }
+                onClick={() => {
+                  const threadId = activeThreadId || selectedThreadId;
+                  window.open(
+                    `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
+                    "_blank",
+                  );
+                }}
+              />
+            )}
+            <Button
+              type="text"
+              style={{ padding: "8px 0", height: "auto", width: 32, lineHeight: 1 }}
+              icon={
+                <DynamicReactIcon
+                  iconName="RiChatAiFill"
+                  iconSet="ri"
+                  color={COLORS.textColorMedium}
+                  size={16}
+                />
+              }
+              onClick={() => {
+                window.location.href = window.location.pathname;
+              }}
+            />
+          </Flex>
           <Form.Item name="question" style={{ marginBottom: 0 }}>
             <Input
               placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
