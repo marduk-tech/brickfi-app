@@ -4,7 +4,7 @@ import { safeStorage } from "../libs/browser-utils";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { User } from "../types/User";
 
-const USER_EXPIRY_DURATION =  60 * 1000;
+const USER_EXPIRY_DURATION =  6 * 60 * 60 * 1000;
 
 export function useUser() {
   const getUser = async (): Promise<User> => {
