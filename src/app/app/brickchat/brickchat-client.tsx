@@ -19,7 +19,6 @@ import {
   Typography,
   message,
 } from "antd";
-import dynamic from "next/dynamic";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BiSend } from "react-icons/bi";
@@ -27,13 +26,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useDevice } from "@/hooks/use-device";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
-
-const MapViewV2 = dynamic(
-  () => import("../../../components/map-view-v2/map-view-v2"),
-  {
-    ssr: false,
-  },
-);
+import { BrickMapChat } from "./brick-map-chat";
 
 export interface ProjectResult {
   projectId: string;
@@ -138,6 +131,7 @@ export function BrickChatCore({
   const [projectResults, setProjectResults] = useState<
     ProjectResult[] | undefined
   >(defaultProjectResults);
+  const [mapResultsIndex, setMapResultsIndex] = useState<number | undefined>();
 
   useEffect(() => {
     if (defaultProjectResults?.length) setProjectResults(defaultProjectResults);
@@ -246,11 +240,14 @@ export function BrickChatCore({
 
         setChatHistory(history);
         setActiveThreadId(selectedThreadId);
-        history.forEach((h) => {
+        let lastIdx = -1;
+        history.forEach((h, i) => {
           if (h.answer.projectsList && h.answer.projectsList.length) {
             setProjectResults(h.answer.projectsList);
+            lastIdx = i;
           }
         });
+        if (lastIdx >= 0) setMapResultsIndex(lastIdx);
       } catch (error) {
         if (cancelled) {
           return;
@@ -322,6 +319,7 @@ export function BrickChatCore({
 
       if (answer.projectsList && answer.projectsList.length) {
         setProjectResults(answer.projectsList);
+        setMapResultsIndex(chatHistory.length);
       }
       setChatHistory((prev) => [...prev, { question, answer }]);
 
@@ -347,6 +345,7 @@ export function BrickChatCore({
 
     setChatHistory([]);
     setCurrentQuestion(undefined);
+    setMapResultsIndex(undefined);
     syncThreadSearchParam(threadId);
   };
 
@@ -354,6 +353,7 @@ export function BrickChatCore({
     setActiveThreadId(undefined);
     setChatHistory([]);
     setCurrentQuestion(undefined);
+    setMapResultsIndex(undefined);
     setHistoryLoading(false);
     syncThreadSearchParam();
   };
@@ -419,8 +419,6 @@ export function BrickChatCore({
                   requirement and let Brickfi do the work.
                 </Typography.Text>
               </Flex>
-
-             
 
               <Flex vertical gap={12}>
                 <Flex align="center" justify="space-between">
@@ -547,12 +545,12 @@ export function BrickChatCore({
                   >
                     {defaultProjectsDescription}
                   </Typography.Text>
-                   <Typography.Text
+                  <Typography.Text
                     style={{
                       fontSize: FONT_SIZE.PARA,
                       color: COLORS.textColorLight,
                       marginLeft: 8,
-                      marginTop: 16
+                      marginTop: 16,
                     }}
                   >
                     Curated by your Brickfi Advisor
@@ -612,9 +610,55 @@ export function BrickChatCore({
                     {messageItem.answer.summary}
                   </Markdown>
                   {!messageItem.answer.directAnswer ? (
-                    <BrickChatResults
-                      results={messageItem.answer.projectsList}
-                    />
+                    <Flex
+                      vertical
+                      gap={8}
+                      style={{
+                        borderRadius: 8,
+                        padding: mapResultsIndex === index ? "8px 16px" : 0,
+                        backgroundColor:
+                          mapResultsIndex === index
+                            ? COLORS.bgColorLightBlue
+                            : undefined,
+                        transition: "background-color 0.2s",
+                        border: `${
+                          mapResultsIndex === index ? "0.5px" : "0"
+                        } solid ${COLORS.borderColor}`,
+                      }}
+                    >
+                      <Flex justify="flex-end">
+                        <Button
+                          size="small"
+                          icon={
+                            <DynamicReactIcon
+                              iconName="FaMapMarkedAlt"
+                              iconSet="fa"
+                              size={16}
+                              color={mapResultsIndex === index ? "white" : COLORS.primaryColor}
+                            ></DynamicReactIcon>
+                          }
+                          type={
+                            mapResultsIndex === index ? "primary" : "default"
+                          }
+                          onClick={() => {
+                            if (mapResultsIndex === index) {
+                              setMapResultsIndex(undefined);
+                            } else {
+                              setMapResultsIndex(index);
+                              setProjectResults(
+                                messageItem.answer.projectsList,
+                              );
+                            }
+                          }}
+                          style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
+                        >
+                          
+                        </Button>
+                      </Flex>
+                      <BrickChatResults
+                        results={messageItem.answer.projectsList}
+                      />
+                    </Flex>
                   ) : null}
                 </Flex>
               </Flex>
@@ -644,12 +688,17 @@ export function BrickChatCore({
             width: "100%",
           }}
         >
-          <Flex justify="flex-end" style={{ marginBottom: 2, }}>
+          <Flex justify="flex-end" style={{ marginBottom: 2 }}>
             {(activeThreadId || selectedThreadId) && (
               <Tooltip title="View in LangSmith">
                 <Button
                   type="text"
-                  style={{ padding: "8px 0", height: "auto", width: 32, lineHeight: 1 }}
+                  style={{
+                    padding: "8px 0",
+                    height: "auto",
+                    width: 32,
+                    lineHeight: 1,
+                  }}
                   icon={
                     <DynamicReactIcon
                       iconName="LuUnlink"
@@ -671,7 +720,12 @@ export function BrickChatCore({
             <Tooltip title="New chat">
               <Button
                 type="text"
-                style={{ padding: "8px 0", height: "auto", width: 32, lineHeight: 1 }}
+                style={{
+                  padding: "8px 0",
+                  height: "auto",
+                  width: 32,
+                  lineHeight: 1,
+                }}
                 icon={
                   <DynamicReactIcon
                     iconName="RiChatAiFill"
@@ -715,33 +769,15 @@ export function BrickChatCore({
         </Form>
       </Flex>
 
-      <Flex style={{ width: isMobile ? "100%" : "47%", minWidth: isMobile ? undefined : "47%", padding: "0 1.5%", flexShrink: 0 }}>
-        <MapViewV2
-          projects={
-            projectResults
-              ? projectResults
-                  .filter(
-                    (p) => !!p.projectLocation?.lat && !!p.projectLocation?.lng,
-                  )
-                  .map((p) => ({
-                    id: p.projectId,
-                    location: p.projectLocation,
-                    type: "apartment",
-                    modalContent: {
-                      title: p.projectName,
-                      content: p.oneLiner || "",
-                    },
-                  }))
-              : []
-          }
-          fullSize={false}
-          showLocalities={false}
-          hideAllFilters={true}
-          minMapZoom={10}
-          showCorridors={false}
-          corridorIds={[]}
-          highlightedHomeTypes={[]}
-        />
+      <Flex
+        style={{
+          width: isMobile ? "100%" : "47%",
+          minWidth: isMobile ? undefined : "47%",
+          padding: "0 1.5%",
+          flexShrink: 0,
+        }}
+      >
+        <BrickMapChat projects={projectResults || []} />
       </Flex>
     </Flex>
   );

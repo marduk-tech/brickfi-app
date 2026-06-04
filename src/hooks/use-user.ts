@@ -4,7 +4,7 @@ import { safeStorage } from "../libs/browser-utils";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { User } from "../types/User";
 
-const USER_EXPIRY_DURATION = 24 * 60 * 60 * 1000;
+const USER_EXPIRY_DURATION =  60 * 1000;
 
 export function useUser() {
   const getUser = async (): Promise<User> => {
@@ -16,7 +16,7 @@ export function useUser() {
     }
 
     // Backwards compatibility
-    if (localUserData && localUserData.mobile) {
+    if (localUserData.mobile) {
       localUserData = { user: localUserData };
       safeStorage.setItem(
         LocalStorageKeys.user,
@@ -24,64 +24,40 @@ export function useUser() {
       );
     }
 
-    // Refresh stale user data after 1 day
     const isExpired =
-      localUserData &&
-      (!localUserData.updated ||
-        new Date().getTime() - USER_EXPIRY_DURATION >
-          new Date(localUserData.updated).getTime());
+      !localUserData.updated ||
+      new Date().getTime() - USER_EXPIRY_DURATION >
+        new Date(localUserData.updated).getTime();
 
-    if (isExpired) {
-      try {
-        const data = await axiosApiInstance.get(
-          `/auth/myinfo/${localUserData.user._id}`,
-          {},
-        );
-
-        if (data?.data?.mobile) {
-          safeStorage.setItem(
-            LocalStorageKeys.user,
-            JSON.stringify({ updated: `${new Date()}`, user: data.data }),
-          );
-          return data.data;
-        }
-      } catch (error) {
-        console.error("Failed to refresh user info:", error);
-      }
+    if (!isExpired) {
+      return localUserData.user;
     }
 
-    axiosApiInstance
-      .get(`/auth/myinfo/${localUserData.user._id}`, {})
-      .then((data) => {
-        if (data && data.data && data.data.mobile) {
-          safeStorage.setItem(
-            LocalStorageKeys.user,
-            JSON.stringify({ updated: `${new Date()}`, user: data.data }),
-          );
-        }
-      });
+    const response = await axiosApiInstance.get(
+      `/auth/myinfo/${localUserData.user._id}`,
+      {},
+    );
 
-    return localUserData.user;
+    if (response?.data?.mobile) {
+      safeStorage.setItem(
+        LocalStorageKeys.user,
+        JSON.stringify({ updated: `${new Date()}`, user: response.data }),
+      );
+      return response.data;
+    }
+
+    throw new Error("Failed to fetch fresh user data");
   };
 
-  const { data, isLoading, isError, error, refetch } = useQuery({
+  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
     queryKey: [queryKeys.user],
     queryFn: getUser,
     refetchOnWindowFocus: false,
     retry: 2,
+    staleTime: USER_EXPIRY_DURATION,
   });
 
-  // useEffect(() => {
-  //   const handleStorageChange = (e: StorageEvent) => {
-  //     if (e.key === LocalStorageKeys.user && e.newValue) {
-  //       console.log("LocalStorage user changed, refetching...");
-  //       refetch();
-  //     }
-  //   };
+  const loading = isLoading || isFetching;
 
-  //   window.addEventListener("storage", handleStorageChange);
-  //   return () => window.removeEventListener("storage", handleStorageChange);
-  // }, [refetch]);
-
-  return { user: data, isLoading, isError, error, refetch };
+  return { user: loading ? undefined : data, isLoading: loading, isError, error, refetch };
 }
