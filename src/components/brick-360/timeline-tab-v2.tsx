@@ -40,10 +40,12 @@ function getMonthsDiff(dateStart: string, dateComp: string) {
   let months = cDate.diff(sDate, "months");
   let yrs;
   if (months >= 12) {
-    yrs = Math.floor(months/12);
+    yrs = Math.floor(months / 12);
     months = months - yrs * 12;
   }
-  let txtDelay = yrs ? (`${yrs} yrs${months ? `, ${months} months`: ''}`) : `${months} months`;
+  let txtDelay = yrs
+    ? `${yrs} yrs${months ? `, ${months} months` : ""}`
+    : `${months} months`;
   if (sDate.isValid() && cDate.isValid()) {
     return ` by ${txtDelay}`;
   }
@@ -55,34 +57,45 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
   useEffect(() => {
     let timelines: any[] = [];
     try {
-      const projectCurrentPhaseTimeline = lvnzyProject.originalProjectId.info.reraProjectId.projectDetails.listOfRegistrationsExtensions ? lvnzyProject.originalProjectId.info.reraProjectId.projectDetails.listOfRegistrationsExtensions : [];
+      const projectCurrentPhaseTimeline = lvnzyProject.originalProjectId.info
+        .reraProjectId.projectDetails.listOfRegistrationsExtensions
+        ? lvnzyProject.originalProjectId.info.reraProjectId.projectDetails
+            .listOfRegistrationsExtensions
+        : [];
       timelines.push({
         name: lvnzyProject.originalProjectId.info.reraProjectId.projectDetails
           .projectName,
-          reraNumber: lvnzyProject.originalProjectId.info.reraProjectId.projectDetails.projectRegistrationNumber,
+        reraNumber:
+          lvnzyProject.originalProjectId.info.reraProjectId.projectDetails
+            .projectRegistrationNumber,
         timeline: projectCurrentPhaseTimeline.sort((a: any, b: any) =>
           moment(a.startDate, "DD-MM-YYYY").diff(
-            moment(b.startDate, "DD-MM-YYYY")
-          )
+            moment(b.startDate, "DD-MM-YYYY"),
+          ),
         ),
       });
 
-      lvnzyProject.developer.reraOtherPhases.forEach((p: any) => {
-        timelines.push({
-          name: p.projectDetails.projectName,
-          reraNumber: p.projectDetails.projectRegistrationNumber,
-          timeline: p.projectDetails.listOfRegistrationsExtensions.sort(
-            (a: any, b: any) =>
-              moment(a.startDate, "DD-MM-YYYY").diff(
-                moment(b.startDate, "DD-MM-YYYY")
-              )
-          ),
+      lvnzyProject.developer.reraOtherPhases
+        .filter(
+          (r: any) =>
+            !!r.projectDetails && !!r.projectDetails.listOfRegistrationsExtensions,
+        )
+        .forEach((p: any) => {
+          timelines.push({
+            name: p.projectDetails.projectName,
+            reraNumber: p.projectDetails.projectRegistrationNumber,
+            timeline: p.projectDetails.listOfRegistrationsExtensions.sort(
+              (a: any, b: any) =>
+                moment(a.startDate, "DD-MM-YYYY").diff(
+                  moment(b.startDate, "DD-MM-YYYY"),
+                ),
+            ),
+          });
         });
-      });
 
       timelines = timelines.sort((a: any, b: any) => {
         const diff = moment(a.timeline[0].completionDate, "DD-MM-YYYY").diff(
-          moment(b.timeline[0].completionDate, "DD-MM-YYYY")
+          moment(b.timeline[0].completionDate, "DD-MM-YYYY"),
         );
         return diff;
       });
@@ -98,7 +111,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                   border: `2px solid ${COLORS.textColorDark}`,
                   backgroundColor: COLORS.primaryColor,
                   borderRadius: "50%",
-                  marginTop: -8
+                  marginTop: -8,
                 }}
               ></div>
             ),
@@ -113,9 +126,10 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                       color: COLORS.primaryColor,
                     }}
                   >
-                    {moment(t.timeline[t.timeline.length - 1].completionDate, "DD-MM-YYYY").format(
-                      "MMM YYYY"
-                    )}
+                    {moment(
+                      t.timeline[t.timeline.length - 1].completionDate,
+                      "DD-MM-YYYY",
+                    ).format("MMM YYYY")}
                   </Typography.Text>
                   {t.timeline.length > 1 ? (
                     <Flex>
@@ -131,15 +145,13 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                         Delayed
                         {getMonthsDiff(
                           t.timeline[0].completionDate,
-                          t.timeline[t.timeline.length - 1].completionDate
-                          
-                          
+                          t.timeline[t.timeline.length - 1].completionDate,
                         )}
                       </Typography.Text>
                     </Flex>
                   ) : null}
                 </Flex>
-                <Flex align="center" gap={8} style={{marginBottom: 8}}>
+                <Flex align="center" gap={8} style={{ marginBottom: 8 }}>
                   <Flex vertical gap={4}>
                     <Typography.Text
                       style={{
@@ -154,7 +166,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
                         fontSize: FONT_SIZE.SUB_TEXT,
                         lineHeight: "110%",
                         textTransform: "uppercase",
-                        color: COLORS.textColorLight
+                        color: COLORS.textColorLight,
                       }}
                     >
                       RERA: {capitalize(t.reraNumber)}
@@ -190,7 +202,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
               </Flex>
             ),
           };
-        })
+        }),
       );
     } catch (err) {
       console.log("error while setting timelines");
@@ -219,7 +231,8 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
           }}
           color="processing"
         >
-          The timeline shows different phases of the same project as per RERA in chronological order.
+          The timeline shows different phases of the same project as per RERA in
+          chronological order.
         </Tag>
       </Flex>
       <Timeline items={timelines}></Timeline>
