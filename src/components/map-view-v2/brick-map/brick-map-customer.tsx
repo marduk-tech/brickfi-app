@@ -11,7 +11,7 @@ import type { ProjectMarkerInput } from "../map-view-v2";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import moment from "moment";
 import { capitalize, getMinMaxPrices } from "@/libs/lvnzy-helper";
-import MapViewWrapper from "../map-view-google/map-view-wrapper";
+const MapViewWrapper = dynamic(() => import("../map-view-google/map-view-wrapper"), { ssr: false });
 const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
 export function BrickMapCustomer({
