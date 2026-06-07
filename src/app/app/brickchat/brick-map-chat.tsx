@@ -10,7 +10,10 @@ import dynamic from "next/dynamic";
 import type { ProjectMarkerInput } from "../../../components/map-view-v2/map-view-v2";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import type { ProjectResult } from "./brickchat-client";
-import MapViewWrapper from "@/components/map-view-v2/map-view-google/map-view-wrapper";
+const MapViewWrapper = dynamic(
+  () => import("@/components/map-view-v2/map-view-google/map-view-wrapper"),
+  { ssr: false },
+);
 
 const MapViewV2 = dynamic(
   () => import("../../../components/map-view-v2/map-view-v2"),
