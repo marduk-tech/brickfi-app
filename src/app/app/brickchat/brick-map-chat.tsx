@@ -80,7 +80,7 @@ export function BrickMapChat({ projects }: BrickMapChatProps) {
 
   return (
     <Flex vertical style={{ height: "100%", width: "100%" }}>
-      <MapViewWrapper
+      <MapViewV2
         key="brick-map-chat"
         drivers={filteredDrivers.map((p) => ({
           ...p,
