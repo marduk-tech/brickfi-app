@@ -1,7 +1,9 @@
 "use client";
 
-import BrickChatResults from "@/components/brick-chat/brick-chat-results";
 import { AdminGuard } from "@/components/auth/admin-guard";
+import BrickChatResults from "@/components/brick-chat/brick-chat-results";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
+import { useDevice } from "@/hooks/use-device";
 import { useUser } from "@/hooks/use-user";
 import { apiKey, baseApiUrl } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
@@ -13,6 +15,7 @@ import {
   Flex,
   Form,
   Input,
+  Modal,
   Spin,
   Tag,
   Tooltip,
@@ -24,8 +27,6 @@ import { useEffect, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useDevice } from "@/hooks/use-device";
-import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { BrickMapChat } from "./brick-map-chat";
 
 export interface ProjectResult {
@@ -104,6 +105,39 @@ const fetchThreadHistory = async (
   return json?.data || [];
 };
 
+// Flag a thread shareable
+const shareThread = async (userId: string, threadId: string): Promise<void> => {
+  const res = await fetch(`${baseApiUrl}ai/explore-projects/share`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey || "",
+    },
+    body: JSON.stringify({ userId, threadId }),
+  });
+  if (!res.ok) throw new Error(`share ${res.status}`);
+};
+
+const openSharedThread = async (
+  userId: string,
+  sharedBy: string,
+  threadId: string,
+): Promise<{ history: ChatMessage[]; threadId?: string }> => {
+  const res = await fetch(`${baseApiUrl}ai/explore-projects/open-shared`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey || "",
+    },
+    body: JSON.stringify({ userId, sharedBy, threadId }),
+  });
+  if (!res.ok) throw new Error(`open-shared ${res.status}`);
+  const json = await res.json();
+  return { history: json?.data || [], threadId: json?.meta?.threadId };
+};
+
 interface BrickChatCoreProps {
   defaultProjectResults?: ProjectResult[];
   defaultProjectsDescription?: string;
@@ -133,11 +167,16 @@ export function BrickChatCore({
   >(defaultProjectResults);
   const [mapResultsIndex, setMapResultsIndex] = useState<number | undefined>();
 
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareLink, setShareLink] = useState<string>();
+  const [sharePreparing, setSharePreparing] = useState(false);
+
   useEffect(() => {
     if (defaultProjectResults?.length) setProjectResults(defaultProjectResults);
   }, [defaultProjectResults]);
 
   const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
+  const sharedBy = searchParams.get("sharedBy")?.trim() || undefined;
   const showWelcome =
     !selectedThreadId &&
     !activeThreadId &&
@@ -218,7 +257,7 @@ export function BrickChatCore({
   }, [user?._id]);
 
   useEffect(() => {
-    if (!user?._id || !selectedThreadId) {
+    if (!user?._id || !selectedThreadId || sharedBy) {
       return;
     }
 
@@ -276,8 +315,77 @@ export function BrickChatCore({
     pathname,
     router,
     selectedThreadId,
+    sharedBy,
     user?._id,
   ]);
+
+  // clone the thread into the current user and swap the URL to it.
+  useEffect(() => {
+    if (!user?._id || !selectedThreadId || !sharedBy) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadSharedThread = async () => {
+      setHistoryLoading(true);
+
+      try {
+        const { history, threadId: newThreadId } = await openSharedThread(
+          user._id,
+          sharedBy,
+          selectedThreadId,
+        );
+
+        if (cancelled) {
+          return;
+        }
+
+        setChatHistory(history);
+        if (newThreadId) {
+          setActiveThreadId(newThreadId);
+        }
+
+        let lastIdx = -1;
+        history.forEach((h, i) => {
+          if (h.answer.projectsList && h.answer.projectsList.length) {
+            setProjectResults(h.answer.projectsList);
+            lastIdx = i;
+          }
+        });
+        if (lastIdx >= 0) setMapResultsIndex(lastIdx);
+
+        // Drop sharedBy and point the URL at the user's own thread copy.
+        router.replace(
+          newThreadId ? `${pathname}?threadId=${newThreadId}` : pathname,
+          { scroll: false },
+        );
+
+        await refreshChatThreads();
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error("Failed to open shared thread:", error);
+        message.error("This conversation is not available.");
+        setActiveThreadId(undefined);
+        setChatHistory([]);
+        router.replace(pathname, { scroll: false });
+      } finally {
+        if (!cancelled) {
+          setHistoryLoading(false);
+        }
+      }
+    };
+
+    void loadSharedThread();
+
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?._id, selectedThreadId, sharedBy]);
 
   const handleSearch = async (values: { question: string }) => {
     const question = values.question?.trim();
@@ -356,6 +464,42 @@ export function BrickChatCore({
     setMapResultsIndex(undefined);
     setHistoryLoading(false);
     syncThreadSearchParam();
+  };
+
+  const handleShare = async () => {
+    const threadId = activeThreadId || selectedThreadId;
+    if (!threadId || !user?._id) {
+      return;
+    }
+
+    setShareModalOpen(true);
+    setSharePreparing(true);
+    setShareLink(undefined);
+
+    try {
+      await shareThread(user._id, threadId);
+      const link = `${window.location.origin}${pathname}?threadId=${threadId}&sharedBy=${user._id}`;
+      setShareLink(link);
+    } catch (error) {
+      console.error("Failed to prepare share link:", error);
+      message.error("Failed to create share link. Please try again.");
+      setShareModalOpen(false);
+    } finally {
+      setSharePreparing(false);
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!shareLink) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareLink);
+      message.success("Link copied to clipboard");
+    } catch {
+      message.error("Couldn't copy. Please copy the link manually.");
+    }
   };
 
   const renderQuestion = (question: string) => (
@@ -634,7 +778,11 @@ export function BrickChatCore({
                               iconName="FaMapMarkedAlt"
                               iconSet="fa"
                               size={16}
-                              color={mapResultsIndex === index ? "white" : COLORS.primaryColor}
+                              color={
+                                mapResultsIndex === index
+                                  ? "white"
+                                  : COLORS.primaryColor
+                              }
                             ></DynamicReactIcon>
                           }
                           type={
@@ -651,9 +799,7 @@ export function BrickChatCore({
                             }
                           }}
                           style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
-                        >
-                          
-                        </Button>
+                        ></Button>
                       </Flex>
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
@@ -689,6 +835,28 @@ export function BrickChatCore({
           }}
         >
           <Flex justify="flex-end" style={{ marginBottom: 2 }}>
+            {(activeThreadId || selectedThreadId) && (
+              <Tooltip title="Share chat">
+                <Button
+                  type="text"
+                  style={{
+                    padding: "8px 0",
+                    height: "auto",
+                    width: 32,
+                    lineHeight: 1,
+                  }}
+                  icon={
+                    <DynamicReactIcon
+                      iconName="IoIosShareAlt"
+                      iconSet="io"
+                      color={COLORS.textColorMedium}
+                      size={18}
+                    />
+                  }
+                  onClick={handleShare}
+                />
+              </Tooltip>
+            )}
             {(activeThreadId || selectedThreadId) && (
               <Tooltip title="View in LangSmith">
                 <Button
@@ -779,13 +947,39 @@ export function BrickChatCore({
       >
         <BrickMapChat projects={projectResults || []} />
       </Flex>
+
+      <Modal
+        open={shareModalOpen}
+        onCancel={() => setShareModalOpen(false)}
+        footer={null}
+        closable
+        title="Share this chat"
+        styles={{ content: { padding: 24 } }}
+      >
+        <Typography.Paragraph style={{ color: COLORS.textColorMedium }}>
+          Anyone with this link can open a copy of this conversation and
+          continue it on their own.
+        </Typography.Paragraph>
+        {sharePreparing || !shareLink ? (
+          <Flex justify="center" style={{ padding: 16 }}>
+            <Spin />
+          </Flex>
+        ) : (
+          <Flex gap={8}>
+            <Input value={shareLink} readOnly />
+            <Button type="primary" onClick={handleCopyShareLink}>
+              Copy link
+            </Button>
+          </Flex>
+        )}
+      </Modal>
     </Flex>
   );
 }
 
 export default function BrickChatClient() {
   return (
-    <AdminGuard allowedRoles={["admin", "member"]}>
+    <AdminGuard allowedRoles={["admin", "member", "user"]}>
       <BrickChatCore />
     </AdminGuard>
   );

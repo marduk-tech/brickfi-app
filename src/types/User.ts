@@ -8,6 +8,9 @@ export interface ChatThread {
   thread_id: string;
   thread_title: string;
   createdAt: string;
+  isShareable?: boolean;
+  sharedOriginallyBy?: string;
+  sharedFromThreadId?: string;
 }
 
 export interface UtmEntry {
