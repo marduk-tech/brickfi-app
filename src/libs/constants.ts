@@ -312,6 +312,8 @@ export const Brick360CategoryInfo: Record<
 
 export const Brick360DataPoints = {
   property: {
+    noDataPlaceholder:
+      "Property assessment is currently not available since the project is yet to be launched. Full assessment will be available on launch.",
     amenities: {
       label: "Amenities",
       note: "The amenities list here are as marketed by the developer and should be reviewed in agreement.",
@@ -339,6 +341,8 @@ export const Brick360DataPoints = {
     designAndBuildQuality: { label: "Design/Build Quality" },
   },
   areaConnectivity: {
+    noDataPlaceholder:
+      "Insufficient data is available to rate the area and connectivity for this project.",
     schoolsOffices: {
       label: "Schools/Offices",
       prompts: ["International schools", "Type of companies"],
@@ -353,6 +357,8 @@ export const Brick360DataPoints = {
     },
   },
   developer: {
+    noDataPlaceholder:
+      "Due to the absence of a meaningful track record of RERA-registered projects, a rating cannot be provided for this developer.",
     experience: {
       label: "Experience",
       prompts: ["All RERA projects", "More about management"],
@@ -365,6 +371,8 @@ export const Brick360DataPoints = {
     },
   },
   financials: {
+    noDataPlaceholder:
+      "Insufficient data is available to assess the financial metrics for this project.",
     pricePoint: {
       label: "Price Point",
       prompts: ["Projects priced higher", "Price vs distance"],
