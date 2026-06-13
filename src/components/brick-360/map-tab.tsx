@@ -79,7 +79,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
         )}
 
         {!isMapFullScreen && (
-          <MapViewV2
+          <MapViewWrapper
             fullSize={false}
             projectId={lvnzyProject?.originalProjectId._id}
             drivers={drivers}
