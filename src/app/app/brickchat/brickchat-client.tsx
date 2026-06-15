@@ -296,6 +296,8 @@ export function BrickChatCore({
         message.error("Failed to load thread history.");
         setActiveThreadId(undefined);
         setChatHistory([]);
+
+        setHistoryLoading(false);
         router.replace(pathname, { scroll: false });
       } finally {
         if (!cancelled) {
@@ -355,13 +357,15 @@ export function BrickChatCore({
         });
         if (lastIdx >= 0) setMapResultsIndex(lastIdx);
 
+        await refreshChatThreads();
+
+        setHistoryLoading(false);
+
         // Drop sharedBy and point the URL at the user's own thread copy.
         router.replace(
           newThreadId ? `${pathname}?threadId=${newThreadId}` : pathname,
           { scroll: false },
         );
-
-        await refreshChatThreads();
       } catch (error) {
         if (cancelled) {
           return;
@@ -371,6 +375,8 @@ export function BrickChatCore({
         message.error("This conversation is not available.");
         setActiveThreadId(undefined);
         setChatHistory([]);
+
+        setHistoryLoading(false);
         router.replace(pathname, { scroll: false });
       } finally {
         if (!cancelled) {
