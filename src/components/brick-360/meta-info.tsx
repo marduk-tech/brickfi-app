@@ -1,4 +1,4 @@
-import { Flex, Typography } from "antd";
+import { Flex, Tag, Typography } from "antd";
 import moment from "moment";
 import { forwardRef } from "react";
 import { capitalize, getMinMaxPrices } from "../../libs/lvnzy-helper";
@@ -7,6 +7,34 @@ import { LvnzyProject } from "../../types/LvnzyProject";
 
 type MetaInfoProps = {
   lvnzyProject: LvnzyProject;
+};
+
+const getLatestCompletionDate = (lvnzyProject: LvnzyProject): string => {
+  const phasesExtensions = (
+    lvnzyProject?.developer?.reraOtherPhases || []
+  ).flatMap((p: any) => p.projectDetails?.listOfRegistrationsExtensions || []);
+
+  const timelineExtensions =
+    phasesExtensions.length > 0
+      ? phasesExtensions
+      : (lvnzyProject?.meta?.projectTimelines as any[]) || [];
+
+  const allCompletionDates = timelineExtensions
+    .map((ext: any) => moment(ext.completionDate, "DD-MM-YYYY"))
+    .filter((d: any) => d.isValid());
+
+  if (allCompletionDates.length > 0) {
+    return moment.max(allCompletionDates).format("MMM YYYY");
+  }
+
+  const expectedDate =
+    lvnzyProject?.originalProjectId?.info?.realTimeStatus?.expectedCompletionDate;
+  if (expectedDate) {
+    const parsed = moment(expectedDate);
+    if (parsed.isValid()) return parsed.format("MMM YYYY");
+  }
+
+  return "";
 };
 
 const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
@@ -26,24 +54,13 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
 
   if (!lvnzyProject) return null;
 
-  // Latest RERA completion date prfer reraOtherPhases, fallback to meta.projectTimelines
-  const phasesExtensions = (
-    lvnzyProject?.developer?.reraOtherPhases || []
-  ).flatMap((p: any) => p.projectDetails?.listOfRegistrationsExtensions || []);
+  const latestCompletionDate = getLatestCompletionDate(lvnzyProject);
 
-  const extensions =
-    phasesExtensions.length > 0
-      ? phasesExtensions
-      : (lvnzyProject?.meta?.projectTimelines as any[]) || [];
-
-  const allCompletionDates = extensions
-    .map((ext: any) => moment(ext.completionDate, "DD-MM-YYYY"))
-    .filter((d: any) => d.isValid());
-
-  const latestCompletionDate =
-    allCompletionDates.length > 0
-      ? moment.max(allCompletionDates).format("MMM YYYY")
-      : "";
+  const expectedLaunchDate =
+    lvnzyProject?.originalProjectId?.info?.realTimeStatus?.expectedLaunchDate;
+  const isPreLaunch =
+    !!expectedLaunchDate &&
+    moment(expectedLaunchDate).isAfter(moment());
 
   return (
     <>
@@ -63,6 +80,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
               lvnzyProject?.meta.projectUnitTypes.split(",").join(" · "),
             )}
           </Typography.Text>
+          {isPreLaunch && <Tag style={{fontSize: 12}} color="orange">Pre Launch</Tag>}
         </Flex>
         <Flex align="center">
           {renderText(`

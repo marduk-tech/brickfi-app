@@ -387,7 +387,7 @@ export function Brick360v2({ slug, projectData }: Brick360v2Props) {
                 ) : null,
             },
           ],
-          ...(lvnzyProject?.property.layout.totalPhases > 0
+          ...((lvnzyProject?.meta?.projectTimelines?.length ?? 0) > 0
             ? [
                 {
                   key: "timeline",

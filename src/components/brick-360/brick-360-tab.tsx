@@ -121,10 +121,10 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
     return (
       <ScrollableContainer>
         <Flex vertical>
-          {lvnzyProject?.score?.summary ? (
+          {!!lvnzyProject?.score && Object.keys(lvnzyProject?.score).length >= 3 ? (
             <>
               {/* Summary point */}
-              <Flex vertical style={{ marginBottom: 16 }}>
+              {lvnzyProject.score.summary && (lvnzyProject.score.summary.pros || lvnzyProject.score.summary.cons) ? <Flex vertical style={{ marginBottom: 16 }}>
                 <Typography.Text
                   style={{
                     fontSize: FONT_SIZE.PARA,
@@ -150,7 +150,8 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                     return renderSummaryPoint(p, false);
                   })}
                 </Flex>
-              </Flex>
+              </Flex>: null}
+              
               {/*  data points */}
               <Flex vertical gap={24} style={{ paddingBottom: 125, paddingTop: 0 }}>
                 {scoreParams &&
@@ -304,7 +305,7 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                     ) : (
                       <Flex style={{marginTop: 16}}>
                       <Alert
-                        message="Due to the absence of a meaningful track record of RERA-registered projects, a rating cannot be provided for this developer. "
+                        message={(Brick360DataPoints as any)[sc.key]?.noDataPlaceholder}
                         type="warning"
                       />
                       </Flex>
