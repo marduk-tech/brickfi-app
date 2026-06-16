@@ -127,7 +127,6 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             gap={16}
           >
             <MapViewV2
-            defaultMode="openstreet"
               projectId={lvnzyProject?.originalProjectId._id}
               drivers={drivers}
               lvnzyProjectId={lvnzyProject._id}
