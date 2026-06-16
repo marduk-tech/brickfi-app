@@ -192,12 +192,12 @@ export function UserProjects({
             >
               {/* {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹ */}
               {primaryCorridor} ·{" "}
-              {moment(
+              {itemInfo?.meta.projectTimelines && itemInfo?.meta.projectTimelines.length ? moment(
                 itemInfo?.meta.projectTimelines[
                   itemInfo?.meta.projectTimelines.length - 1
                 ].completionDate,
                 "DD-MM-YYYY",
-              ).format("MMM YYYY")}{" "}
+              ).format("MMM YYYY"): null}{" "}
               · ₹
               {rupeeAmountFormat(
                 itemInfo?.originalProjectId?.info?.rate?.minimumUnitCost || 0,
