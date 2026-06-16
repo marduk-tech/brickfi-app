@@ -54,13 +54,32 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
 
   if (!lvnzyProject) return null;
 
-  const latestCompletionDate = getLatestCompletionDate(lvnzyProject);
-
   const expectedLaunchDate =
     lvnzyProject?.originalProjectId?.info?.realTimeStatus?.expectedLaunchDate;
   const isPreLaunch =
-    !!expectedLaunchDate &&
-    moment(expectedLaunchDate).isAfter(moment());
+    !!expectedLaunchDate && moment(expectedLaunchDate).isAfter(moment());
+
+  // Latest RERA completion date prefer reraOtherPhases, fallback to meta.projectTimelines
+  const phasesExtensions = isPreLaunch
+    ? []
+    : (lvnzyProject?.developer?.reraOtherPhases || []).flatMap(
+        (p: any) => p.projectDetails?.listOfRegistrationsExtensions || [],
+      );
+
+  const extensions =
+    phasesExtensions.length > 0
+      ? phasesExtensions
+      : (lvnzyProject?.meta?.projectTimelines as any[]) || [];
+
+  const allCompletionDates = extensions
+    .map((ext: any) => moment(ext.completionDate, "DD-MM-YYYY"))
+    .filter((d: any) => d.isValid());
+
+  const latestCompletionDate = isPreLaunch
+    ? "PreLaunch"
+    : allCompletionDates.length > 0
+      ? moment.max(allCompletionDates).format("MMM YYYY")
+      : "";
 
   return (
     <>
