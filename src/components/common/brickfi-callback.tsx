@@ -1,6 +1,7 @@
 "use client";
 
 import { Button, Flex, Form, Input, Modal, Select, Typography } from "antd";
+import PhoneInput from "antd-phone-input";
 import { addDays, format, isSaturday, isSunday, isFriday } from "date-fns";
 
 import { useEffect, useState } from "react";
@@ -84,6 +85,20 @@ export function BrickfiCallback() {
 
   const [formLoading, setFormLoading] = useState(false);
 
+  const nameValue = Form.useWatch("name", form);
+  const mobileValue = Form.useWatch("mobile", form);
+
+  const isNameValid =
+    !!user || (!!nameValue && /^[a-zA-Z\s]+$/.test(String(nameValue)));
+  const isMobileValid =
+    !!user ||
+    (!!mobileValue &&
+      /^\d+$/.test(
+        typeof mobileValue === "object"
+          ? `${mobileValue.areaCode || ""}${mobileValue.phoneNumber || ""}`
+          : String(mobileValue),
+      ));
+
   /**
    * Generates AntD Select options based on the current day's logic.
    * Format: "DayName, Date Month" (e.g., "Wed, 18 March")
@@ -165,7 +180,7 @@ export function BrickfiCallback() {
     if (user) {
       form.setFieldsValue({
         name: user.profile.name,
-        mobile: user.mobile,
+        mobile: { countryCode: 91, phoneNumber: user.mobile, isoCode: "in" },
       });
     }
     captureAnalyticsEvent("callback-form", {});
@@ -175,6 +190,12 @@ export function BrickfiCallback() {
     setFormLoading(true);
     const searchParams = new URLSearchParams(window.location.search);
     const srcIntent = searchParams.get("srcIntent");
+
+    const mobileStr =
+      typeof values.mobile === "object"
+        ? `${values.mobile.areaCode || ""}${values.mobile.phoneNumber || ""}`
+        : values.mobile;
+    values = { ...values, mobile: mobileStr };
 
     let userId = user?._id;
     const scheduledTime = values.time.value ? values.time.value : values.time;
@@ -334,16 +355,38 @@ export function BrickfiCallback() {
                 <Form.Item
                   label="Your Name"
                   name="name"
-                  rules={[{ required: true }]}
+                  rules={[
+                    { required: true, message: "Please enter your name" },
+                    {
+                      pattern: /^[a-zA-Z\s]+$/,
+                      message: "Name can only contain letters",
+                    },
+                  ]}
                 >
                   <Input disabled={!!user} />
                 </Form.Item>
                 <Form.Item
-                  label="Your Mobile Number"
+                  label="Your Mobile or Whatsapp Number"
                   name="mobile"
-                  rules={[{ required: true }]}
+                  rules={[
+                    { required: true, message: "Please enter your mobile number" },
+                    {
+                      validator: (_, value) => {
+                        if (!value) return Promise.resolve();
+                        const digits = `${value.areaCode || ""}${value.phoneNumber || ""}`;
+                        if (!/^\d*$/.test(digits))
+                          return Promise.reject("Only digits are allowed");
+                        return Promise.resolve();
+                      },
+                    },
+                  ]}
                 >
-                  <Input disabled={!!user} />
+                  <PhoneInput
+                    country="in"
+                    enableArrow
+                    disableParentheses
+                    disabled={!!user}
+                  />
                 </Form.Item>
                 <Form.Item
                   label="What kind of assistance do you need"
@@ -439,7 +482,12 @@ export function BrickfiCallback() {
               <Button
                 onClick={() => form.submit()}
                 type="primary"
-                disabled={!selectedAsstVal || !dayOption}
+                disabled={
+                  !selectedAsstVal ||
+                  !dayOption ||
+                  !isNameValid ||
+                  !isMobileValid
+                }
                 loading={formLoading}
                 style={{ width: 200 }}
               >
