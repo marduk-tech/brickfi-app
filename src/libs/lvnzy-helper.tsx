@@ -159,3 +159,14 @@ export const renderCitations = (citations: any) => {
       );
     });
 };
+
+// Dedupe a list of ids and put newId at the front
+export const removeDuplicatesAndPrepend = (
+  arr: string[],
+  newId: string,
+): string[] => {
+  const uniqueSet = new Set(
+    arr.filter((id) => id?.toString() !== newId.toString()),
+  );
+  return [newId, ...Array.from(uniqueSet)];
+};

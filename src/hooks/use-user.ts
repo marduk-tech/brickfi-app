@@ -4,7 +4,7 @@ import { safeStorage } from "../libs/browser-utils";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { User } from "../types/User";
 
-const USER_EXPIRY_DURATION =  60 * 1000;
+const USER_EXPIRY_DURATION = 60 * 1000;
 
 export function useUser() {
   const getUser = async (): Promise<User> => {
@@ -18,10 +18,7 @@ export function useUser() {
     // Backwards compatibility
     if (localUserData.mobile) {
       localUserData = { user: localUserData };
-      safeStorage.setItem(
-        LocalStorageKeys.user,
-        JSON.stringify(localUserData),
-      );
+      safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(localUserData));
     }
 
     const isExpired =
@@ -49,7 +46,7 @@ export function useUser() {
     throw new Error("Failed to fetch fresh user data");
   };
 
-  const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
+  const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: [queryKeys.user],
     queryFn: getUser,
     refetchOnWindowFocus: false,
@@ -57,7 +54,11 @@ export function useUser() {
     staleTime: USER_EXPIRY_DURATION,
   });
 
-  const loading = isLoading || isFetching;
-
-  return { user: loading ? undefined : data, isLoading: loading, isError, error, refetch };
+  return {
+    user: isLoading ? undefined : data,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  };
 }

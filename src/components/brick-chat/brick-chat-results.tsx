@@ -1,16 +1,35 @@
 "use client";
 
+import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
+import { useUser } from "@/hooks/use-user";
+import { useUpdateUserMutation } from "@/hooks/user-hooks";
+import { safeStorage } from "@/libs/browser-utils";
+import { LocalStorageKeys } from "@/libs/constants";
+import {
+  capitalize,
+  removeDuplicatesAndPrepend,
+  rupeeAmountFormat,
+} from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Card, Flex, Tag, Typography } from "antd";
+import { Card, Flex, message, Tag, Typography } from "antd";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import styles from "./brick-chat-results.module.css";
-import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
-import { capitalize, rupeeAmountFormat } from "@/libs/lvnzy-helper";
 
 interface BrickChatResultsProps {
   results: ProjectResult[];
 }
+
+// Pull the ids of projects already in the user's default collection
+const getDefaultCollectionIds = (user: any): string[] => {
+  const defaultCollection = (user?.savedLvnzyProjects || []).find(
+    (c: any) => c.collectionName === "default",
+  );
+  return (defaultCollection?.projects || []).map((p: any) =>
+    (p?._id || p)?.toString(),
+  );
+};
 
 const formatPriceInCrores = (price: number): string => {
   const crores = price / 10000000;
@@ -44,6 +63,81 @@ const getProjectMetadata = (project: ProjectResult): string => {
 };
 
 export default function BrickChatResults({ results }: BrickChatResultsProps) {
+  const { user, refetch } = useUser();
+  const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
+  const [messageApi, contextHolder] = message.useMessage();
+
+  const [savedIds, setSavedIds] = useState<string[]>(() =>
+    getDefaultCollectionIds(user),
+  );
+
+  useEffect(() => {
+    setSavedIds(getDefaultCollectionIds(user));
+  }, [user]);
+
+  const handleToggleSave = async (
+    e: React.MouseEvent,
+    project: ProjectResult,
+  ) => {
+    // cards are wrapped in a Link - don't navigate on icon click
+    e.preventDefault();
+    e.stopPropagation();
+
+    const lvnzyId = project.lvnzyProjectId;
+    if (!lvnzyId || !user) return;
+
+    const isSaved = savedIds.includes(lvnzyId);
+
+    const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
+    const defaultCollectionIndex = savedLvnzyProjects.findIndex(
+      (c: any) => c.collectionName === "default",
+    );
+
+    if (defaultCollectionIndex === -1) {
+      // nothing saved yet - create default collection with this project
+      savedLvnzyProjects.push({
+        collectionName: "default",
+        projects: [lvnzyId],
+      });
+    } else {
+      const existingProjects = (
+        savedLvnzyProjects[defaultCollectionIndex].projects || []
+      ).map((proj: any) => (proj?._id || proj)?.toString());
+
+      savedLvnzyProjects[defaultCollectionIndex].projects = isSaved
+        ? existingProjects.filter((id: string) => id !== lvnzyId)
+        : removeDuplicatesAndPrepend(existingProjects, lvnzyId);
+    }
+
+    // optimistic update
+    const prevSavedIds = savedIds;
+    setSavedIds(
+      isSaved
+        ? savedIds.filter((id) => id !== lvnzyId)
+        : [lvnzyId, ...savedIds.filter((id) => id !== lvnzyId)],
+    );
+
+    try {
+      await updateUser.mutateAsync({
+        userData: { savedLvnzyProjects },
+      });
+
+      const cached = safeStorage.getItem(LocalStorageKeys.user);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        parsed.updated = new Date(0).toString();
+        safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(parsed));
+      }
+      refetch();
+
+      messageApi.success(
+        isSaved ? "Removed from saved" : "Saved to your collection",
+      );
+    } catch {
+      setSavedIds(prevSavedIds);
+    }
+  };
+
   if (!results || results.length === 0) {
     return (
       <Typography.Text type="secondary">
@@ -54,6 +148,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
 
   return (
     <Flex className={styles.scrollContainer} gap={16}>
+      {contextHolder}
       {results.map((project) => (
         <Link
           key={project.projectId}
@@ -99,6 +194,36 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                     <Typography.Text type="secondary">No Image</Typography.Text>
                   </Flex>
                 )}
+
+                {project.lvnzyProjectId && (
+                  <Flex
+                    align="center"
+                    justify="center"
+                    onClick={(e) => handleToggleSave(e, project)}
+                    style={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <DynamicReactIcon
+                      iconName={
+                        savedIds.includes(project.lvnzyProjectId)
+                          ? "IoBookmark"
+                          : "IoBookmarkOutline"
+                      }
+                      iconSet="io5"
+                      size={18}
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                )}
               </div>
             }
           >
@@ -114,14 +239,14 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                 {project.projectName}
               </Typography.Text>
               <Flex>
-              <Tag
-                style={{
-                  fontSize: FONT_SIZE.SUB_TEXT,
-                  color: COLORS.textColorDark,
-                }}
-              >
-                {project.projectCorridor}
-              </Tag>
+                <Tag
+                  style={{
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorDark,
+                  }}
+                >
+                  {project.projectCorridor}
+                </Tag>
               </Flex>
 
               {getProjectMetadata(project) && (
