@@ -10,17 +10,7 @@ import {
 import { useUser } from "../hooks/use-user";
 import { useUpdateUserMutation } from "../hooks/user-hooks";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
-
-// Utility function to remove duplicates and prepend new ID
-const removeDuplicatesAndPrepend = (arr: string[], newId: string): string[] => {
-  // Convert to Set to remove duplicates, filter out the newId if it exists
-  const uniqueSet = new Set(
-    arr.filter((id) => id.toString() !== newId.toString())
-  );
-
-  // Convert back to array with newId at start
-  return [newId, ...Array.from(uniqueSet)];
-};
+import { removeDuplicatesAndPrepend } from "../libs/lvnzy-helper";
 
 interface ProjectSearchProps {
   onSelect?: (

@@ -48,6 +48,10 @@ export function UserProjects({
     }
   }, [user]);
   const renderLvnzyProject = (itemInfo: any) => {
+    // skip entries that haven't been populated into full project docs yet
+    if (!itemInfo || (!itemInfo.meta && !itemInfo.reraNumber && !itemInfo.reraId)) {
+      return null;
+    }
     if (itemInfo.reraNumber || itemInfo.reraId) {
       return (
         <Flex
