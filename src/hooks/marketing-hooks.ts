@@ -1,7 +1,27 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { notification } from "antd";
 import { AxiosError } from "axios";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
+
+export interface GhostBlog {
+  title: string;
+  slug: string;
+  feature_image: string | null;
+  published_at: string;
+  excerpt: string | null;
+}
+
+export function useLatestBlogs() {
+  return useQuery<GhostBlog[], Error>({
+    queryKey: ["marketing", "blogs", "latest"],
+    queryFn: async () => {
+      const { data } = await axiosApiInstance.get("/marketing/blogs/latest");
+      return data as GhostBlog[];
+    },
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+  });
+}
 
 interface FeedbackQuestion {
   question: string;

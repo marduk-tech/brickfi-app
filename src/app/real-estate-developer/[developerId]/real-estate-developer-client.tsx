@@ -28,6 +28,7 @@ import { CaretRightOutlined } from "@ant-design/icons";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import ReportCTABar from "@/components/common/report-cta-bar";
 import SectionCenter from "@/custom-pages/landing/section";
+import { useLatestBlogs } from "@/hooks/marketing-hooks";
 
 const { Paragraph, Text } = Typography;
 
@@ -46,6 +47,8 @@ export default function RealEstateDeveloperClient({
     isError,
     error,
   } = useQuery({ ...getRealEstateDeveloperBySlugQuery(slug), retry: 3 });
+
+  const { data: latestBlogs = [] } = useLatestBlogs();
 
   const [isMobile, setIsMobile] = useState(initialIsMobile);
 
@@ -483,29 +486,96 @@ export default function RealEstateDeveloperClient({
             isMobile={isMobile}
           ></ReportCTABar>
         </Flex>
-        {/* <Flex
-            align="center"
-            style={{ width: "100%", marginTop: 72 }}
-            justify="center"
-            onClick={() => {
-              safeWindow.location.assign(LandingConstants.reportLink);
-            }}
+
+        {/* Blogs List */}
+        {latestBlogs.length > 0 && (
+          <Flex
+            vertical
+            align="flex-start"
+            style={{ marginTop: 32, width: isMobile ? "96%" : "auto" }}
           >
-            <img
+            <h2
               style={{
-                border: `1px solid ${COLORS.borderColor}`,
-                borderRadius: 8,
-                maxWidth: 500,
+                color: COLORS.textColorDark,
+                fontWeight: 300,
+                margin: 0,
+                marginBottom: 16,
+                fontSize: FONT_SIZE.HEADING_1,
               }}
-              src={
-                isMobile
-                  ? "/images/builder-page/free-report-cta-mob.png"
-                  : "/images/builder-page/free-report-cta.png"
-              }
-              height="auto"
-              width="100%"
-            ></img>
-          </Flex> */}
+            >
+              Latest from the Blog
+            </h2>
+            <Flex
+              style={{
+                width: isMobile ? "100%" : 1200,
+                overflowX: "scroll",
+                whiteSpace: "nowrap",
+                scrollbarWidth: "none",
+              }}
+              gap={16}
+            >
+              {latestBlogs.map((blog) => (
+                <Flex
+                  key={blog.slug}
+                  vertical
+                  style={{
+                    width: 220,
+                    flexShrink: 0,
+                    border: `1.5px solid ${COLORS.borderColor}`,
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    cursor: "pointer",
+                  }}
+                  onClick={() =>
+                    safeWindow.location.assign(
+                      `https://blog.brickfi.in/${blog.slug}`,
+                    )
+                  }
+                >
+                  <div
+                    style={{
+                      height: 130,
+                      backgroundImage: blog.feature_image
+                        ? `url(${blog.feature_image})`
+                        : undefined,
+                      backgroundColor: blog.feature_image
+                        ? undefined
+                        : COLORS.borderColorMedium,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  />
+                  <Flex vertical style={{ padding: 8 }} gap={4}>
+                    <Text
+                      ellipsis={{ tooltip: blog.title }}
+                      style={{
+                        fontSize: FONT_SIZE.HEADING_4,
+                        fontWeight: 500,
+                        whiteSpace: "normal",
+                        lineHeight: "120%",
+                      }}
+                    >
+                      {blog.title}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: FONT_SIZE.SUB_TEXT,
+                        color: COLORS.textColorMedium,
+                      }}
+                    >
+                      {new Date(blog.published_at).toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </Text>
+                  </Flex>
+                </Flex>
+              ))}
+            </Flex>
+          </Flex>
+        )}
       </Flex>
       <LandingFooter></LandingFooter>
     </>
