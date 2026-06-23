@@ -2,7 +2,6 @@
 
 import { Button, Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useEffect, useState } from "react";
-import { useDevice } from "../../hooks/use-device";
 import { safeWindow } from "../../libs/browser-utils";
 import { FAQ_360, LandingConstants } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -10,12 +9,26 @@ import LandingHeader from "./header";
 import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
-import { Loader } from "@/components/common/loader";
 import { captureAnalyticsEvent, txtToId } from "@/libs/lvnzy-helper";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
-export default function ReportLanding() {
-  const { isMobile } = useDevice();
+export default function ReportLanding({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
+
+  useEffect(() => {
+    const detect = () => {
+      const el = document.createElement("div");
+      el.className = "mobile-only";
+      el.style.cssText = "position:absolute;visibility:hidden";
+      document.body.appendChild(el);
+      const detected = window.getComputedStyle(el).display === "block";
+      document.body.removeChild(el);
+      setIsMobile(detected);
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
 
   const getFaqHeading = (text: string) => {
     return (
@@ -79,17 +92,15 @@ export default function ReportLanding() {
     };
   });
 
-  useState(false);
   useEffect(() => {
     const hash = safeWindow.location.hash;
     if (hash) {
       const element = document.querySelector(hash);
       if (element) {
-        // Optional: add smooth scrolling
         element.scrollIntoView({ behavior: "smooth" });
       }
     }
-    captureAnalyticsEvent("report-landing",{});
+    captureAnalyticsEvent("report-landing", {});
   }, []);
   const whoAreWeText = (
     <Flex vertical>
@@ -115,21 +126,6 @@ export default function ReportLanding() {
     </Flex>
   );
 
-  const [flickerWait, setFlickerWait] = useState(true);
-
-  useEffect(() => {
-    setTimeout(() => {
-      setFlickerWait(false);
-    }, 1000);
-  });
-
-  if (flickerWait) {
-    return (
-      <Flex style={{ marginTop: 200 }} align="center" justify="center">
-        <Loader></Loader>
-      </Flex>
-    );
-  }
   return (
     <Flex
       vertical

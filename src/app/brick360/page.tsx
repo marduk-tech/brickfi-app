@@ -1,6 +1,7 @@
 import ReportLanding from "@/custom-pages/landing/report-landing";
 import { FAQ_360, SEO_CONTENT } from "@/libs/constants";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 const META_DESCR =
   "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";
@@ -95,6 +96,10 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ReportLandingPage() {
-  return <ReportLanding />;
+export default async function ReportLandingPage() {
+  const headersList = await headers();
+  const ua = headersList.get("user-agent") ?? "";
+  const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+
+  return <ReportLanding initialIsMobile={isMobileSSR} />;
 }
