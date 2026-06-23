@@ -413,16 +413,17 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
                   BRICKFI ASSIST
                 </Typography.Text>
               </Flex>
-              <Typography.Text
+              <h1
                 style={{
                   fontSize: isMobile ? 40 : 54,
                   color: COLORS.textColorDark,
                   lineHeight: "100%",
                   fontWeight: 800,
+                  margin: 0
                 }}
               >
                 Make Your Biggest Investment Decision on Data, Not FOMO
-              </Typography.Text>
+              </h1>
             </Flex>
           ),
           bgColor: COLORS.LANDING.LIGHT_PINK,
@@ -481,16 +482,17 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
 
           subHeading: (
             <Flex vertical style={{ paddingBottom: 100 }}>
-              <Typography.Text
+              <h2
                 style={{
                   textTransform: "uppercase",
                   color: COLORS.primaryColor,
                   textAlign: "left",
                   fontSize: FONT_SIZE.HEADING_2,
+                  margin: 0
                 }}
               >
                 A NOTE FROM OUR FOUNDER
-              </Typography.Text>
+              </h2>
               <Typography.Text
                 style={{
                   marginTop: 16,
@@ -565,17 +567,18 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
               align="flex-start"
               style={{ width: isMobile ? "100%" : 1000 }}
             >
-              <Typography.Text
+              <h2
                 style={{
                   fontSize: isMobile ? 40 : 54,
                   lineHeight: "100%",
                   fontWeight: 800,
                   color: COLORS.LANDING.LIGHT_PINK,
                   textAlign: "left",
+                  margin: 0
                 }}
               >
                 How does Brickfi Assist Work ?
-              </Typography.Text>
+              </h2>
               <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_2,

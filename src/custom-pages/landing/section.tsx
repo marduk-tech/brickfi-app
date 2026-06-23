@@ -105,7 +105,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps; isMobile: boolean }> = 
           justify="center"
         >
           {typeof sectionData.heading == "string" ? (
-            <h1
+            <h2
               style={{
                 ...styles.h1,
                 fontSize: isMobile ? 40 : 54,
@@ -113,7 +113,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps; isMobile: boolean }> = 
               }}
             >
               {sectionData.heading}
-            </h1>
+            </h2>
           ) : (
             <>{sectionData.heading}</>
           )}
@@ -282,7 +282,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps; isMobile: boolean }> =
           gap={16}
         >
           {typeof sectionData.heading == "string" ? (
-            <h1
+            <h2
               style={{
                 ...styles.h1,
                 fontSize: isMobile ? 42 : 48,
@@ -290,7 +290,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps; isMobile: boolean }> =
               }}
             >
               {sectionData.heading}
-            </h1>
+            </h2>
           ) : (
             <>{sectionData.heading}</>
           )}
@@ -372,7 +372,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps; isMobile: boolean }> 
         justify="center"
       >
         {typeof sectionData.heading == "string" ? (
-          <h1
+          <h2
             style={{
               ...styles.h1,
               fontSize: isMobile ? 50 : 60,
@@ -380,7 +380,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps; isMobile: boolean }> 
             }}
           >
             {sectionData.heading}
-          </h1>
+          </h2>
         ) : (
           <>{sectionData.heading}</>
         )}
