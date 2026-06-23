@@ -5,6 +5,7 @@ import {
 } from "@/queries/real-estate-developer";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import RealEstateDeveloperClient from "./real-estate-developer-client";
 import FourOFour from "@/custom-pages/landing/404";
@@ -116,11 +117,16 @@ export default async function RealEstateDeveloperPage({ params }: PageProps) {
   const { developerId: slug } = await params;
   const queryClient = getQueryClient();
 
-  await queryClient.prefetchQuery(getRealEstateDeveloperBySlugQuery(slug));
+  const [headersList] = await Promise.all([
+    headers(),
+    queryClient.prefetchQuery(getRealEstateDeveloperBySlugQuery(slug)),
+  ]);
+  const ua = headersList.get("user-agent") ?? "";
+  const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <RealEstateDeveloperClient slug={slug} />
+      <RealEstateDeveloperClient slug={slug} initialIsMobile={isMobileSSR} />
     </HydrationBoundary>
   );
 }

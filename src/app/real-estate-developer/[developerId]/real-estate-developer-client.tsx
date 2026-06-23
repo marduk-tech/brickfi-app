@@ -1,6 +1,5 @@
 "use client";
 
-import { useDevice } from "@/hooks/use-device";
 import { CustomError } from "@/libs/error-handler";
 import { getRealEstateDeveloperBySlugQuery } from "@/queries/real-estate-developer";
 import { COLORS, FONT_SIZE, MAX_WIDTH } from "@/theme/style-constants";
@@ -23,10 +22,12 @@ const { Paragraph, Text } = Typography;
 
 interface RealEstateDeveloperClientProps {
   slug: string;
+  initialIsMobile?: boolean;
 }
 
 export default function RealEstateDeveloperClient({
   slug,
+  initialIsMobile = false,
 }: RealEstateDeveloperClientProps) {
   const {
     data: developer,
@@ -35,15 +36,22 @@ export default function RealEstateDeveloperClient({
     error,
   } = useQuery({ ...getRealEstateDeveloperBySlugQuery(slug), retry: 3 });
 
-  const [flickerWait, setFlickerWait] = useState(true);
-
-  const { isMobile } = useDevice();
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
 
   useEffect(() => {
-    setTimeout(() => {
-      setFlickerWait(false);
-    }, 1000);
-  });
+    const detect = () => {
+      const el = document.createElement("div");
+      el.className = "mobile-only";
+      el.style.cssText = "position:absolute;visibility:hidden";
+      document.body.appendChild(el);
+      const detected = window.getComputedStyle(el).display === "block";
+      document.body.removeChild(el);
+      setIsMobile(detected);
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
 
   const items: TabsProps["items"] =
     developer && developer.genDetails
@@ -114,7 +122,7 @@ export default function RealEstateDeveloperClient({
         ]
       : [];
 
-  if (isLoading || flickerWait) {
+  if (isLoading) {
     return <RealEstateDeveloperLoading />;
   }
 
