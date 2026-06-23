@@ -182,6 +182,7 @@ export const FeedbackForm = () => {
   return (
     <>
       <LandingHeader
+        isMobile={isMobile}
         bgColor="transparent"
         logo="/images/brickfi-logo.png"
         color={COLORS.textColorMedium}
