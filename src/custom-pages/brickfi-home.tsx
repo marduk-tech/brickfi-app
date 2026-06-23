@@ -1,20 +1,17 @@
 "use client";
 
-import { Button, Flex, Typography } from "antd";
+import { Flex, Typography } from "antd";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Brick360v2 } from "../components/brick-360/brick360-v2";
-import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { Loader } from "../components/common/loader";
+import { NoProjectsFound } from "../components/common/no-projects-found";
 import { RequestedProjectsList } from "../components/requested-projects-list";
 import { UserProjects } from "../components/user-projects";
 import { useUser } from "../hooks/use-user";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
-import { LandingConstants } from "../libs/constants";
-import { safeWindow } from "../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 import { Brick360v3 } from "@/components/brick-360/brick360-v3";
-import Link from "next/link";
 
 interface SavedLvnzyProject {
   _id: string;
@@ -115,79 +112,7 @@ const BrickfiHome: React.FC = () => {
           {lvnzyProjects && lvnzyProjects.length ? (
             <UserProjects lvnzyProjects={lvnzyProjects} />
           ) : (
-            <Flex
-              vertical
-              style={{ margin: 16, marginTop: 100 }}
-              align="center"
-            >
-              <DynamicReactIcon
-                size={60}
-                iconName="TbHomeSearch"
-                iconSet="tb"
-                color={COLORS.textColorLight}
-              ></DynamicReactIcon>
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_2,
-                  fontWeight: 500,
-                  marginTop: 24,
-                }}
-              >
-                No Reports Found
-              </Typography.Text>
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.PARA,
-                  textAlign: "center",
-                  color: COLORS.textColorDark,
-                }}
-              >
-                Click reload below if you recently requested reports
-              </Typography.Text>
-
-              <Button
-                style={{
-                  marginTop: 48,
-                  fontSize: FONT_SIZE.HEADING_3,
-                  padding: "0 16px",
-                }}
-                onClick={() => {
-                  window.location.reload();
-                }}
-                size="small"
-              >
-                Reload Page
-              </Button>
-
-              <Flex
-                gap={16}
-                style={{ position: "absolute", bottom: 100, padding: 16 }}
-              >
-                <Link
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_4,
-                    color: COLORS.textColorMedium,
-                  }}
-                  onClick={() => {
-                    safeWindow.location.assign(
-                      LandingConstants.genReportFormLink,
-                    );
-                  }}
-                  href={LandingConstants.genReportFormLink}
-                >
-                  Request Brick360 Report
-                </Link>
-                <Link
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_4,
-                    color: COLORS.textColorMedium,
-                  }}
-                  href="https://api.whatsapp.com/send?phone=919901623170"
-                >
-                  Need help ?
-                </Link>
-              </Flex>
-            </Flex>
+            <NoProjectsFound />
           )}
         </>
       )}

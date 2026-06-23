@@ -4,17 +4,19 @@ import { BrickChatCore } from "./brickchat/brickchat-client";
 import { usePinnedProjects } from "@/hooks/use-pinned-projects";
 import { Loader } from "@/components/common/loader";
 import { NoProjectsFound } from "@/components/common/no-projects-found";
+import BrickfiHome from "../../custom-pages/brickfi-home";
 
 export default function AppHomePage() {
-  const { defaultProjectResults, defaultProjectsDescription, isLoading } = usePinnedProjects();
+  // const { defaultProjectResults, defaultProjectsDescription, isLoading } = usePinnedProjects();
 
-  if (isLoading) return <Loader />;
-  if (!defaultProjectResults?.length) return <NoProjectsFound />;
+  // if (isLoading) return <Loader />;
+  // if (!defaultProjectResults?.length) return <NoProjectsFound />;
 
   return (
-    <BrickChatCore
-      defaultProjectResults={defaultProjectResults}
-      defaultProjectsDescription={defaultProjectsDescription}
-    />
+    // <BrickChatCore
+    //   defaultProjectResults={defaultProjectResults}
+    //   defaultProjectsDescription={defaultProjectsDescription}
+    // />
+    <BrickfiHome></BrickfiHome>
   );
 }
