@@ -2,7 +2,6 @@
 
 import { Button, Collapse, CollapseProps, Flex, Typography } from "antd";
 import { ReactNode, useEffect, useState } from "react";
-import { useDevice } from "../../hooks/use-device";
 import { safeWindow } from "../../libs/browser-utils";
 import { LandingConstants } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -14,15 +13,30 @@ import Marquee from "react-fast-marquee";
 import { Loader } from "@/components/common/loader";
 const { Paragraph } = Typography;
 
-export default function MainLanding() {
+export default function MainLanding({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
   const [flickerWait, setFlickerWait] = useState(true);
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
 
   useEffect(() => {
     setTimeout(() => {
       setFlickerWait(false);
     }, 1000);
   });
-  const { isMobile } = useDevice();
+
+  useEffect(() => {
+    const detect = () => {
+      const el = document.createElement("div");
+      el.className = "mobile-only";
+      el.style.cssText = "position:absolute;visibility:hidden";
+      document.body.appendChild(el);
+      const detected = window.getComputedStyle(el).display === "block";
+      document.body.removeChild(el);
+      setIsMobile(detected);
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
 
   const newsLinks = [
     {
@@ -215,8 +229,10 @@ export default function MainLanding() {
       <LandingHeader
         bgColor="transparent"
         color={COLORS.textColorDark}
+        isMobile={isMobile}
       ></LandingHeader>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           itemsAlignSectionLeft: "flex-start",
           heading: (
@@ -264,6 +280,7 @@ export default function MainLanding() {
       ></SectionLeft>
 
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
           id: "demo-brkfi",
@@ -318,6 +335,7 @@ export default function MainLanding() {
         Our Offerings
       </Typography.Text>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,
           textColor: "white",
@@ -377,6 +395,7 @@ export default function MainLanding() {
         }}
       ></SectionLeft>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           id: "demo-brkfi",
           heading: (
@@ -438,6 +457,7 @@ export default function MainLanding() {
       ></SectionLeft>
 
       <SectionRight
+        isMobile={isMobile}
         sectionData={{
           heading: (
             <Typography.Text

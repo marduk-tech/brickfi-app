@@ -1,14 +1,31 @@
+"use client";
+
 import { Flex, Typography } from "antd";
-import { useDevice } from "../../hooks/use-device";
+import { useState, useEffect } from "react";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { SectionLeft, SectionRight } from "./section";
 import LandingHeader from "./header";
 import LandingFooter from "./footer";
 
-export default function AboutUs() {
-  const { isMobile } = useDevice();
+export default function AboutUs({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
   const { height } = useWindowDimensions();
+
+  useEffect(() => {
+    const detect = () => {
+      const el = document.createElement("div");
+      el.className = "mobile-only";
+      el.style.cssText = "position:absolute;visibility:hidden";
+      document.body.appendChild(el);
+      const detected = window.getComputedStyle(el).display === "block";
+      document.body.removeChild(el);
+      setIsMobile(detected);
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
   const highlightStyle = {
     fontWeight: 500,
     color: COLORS.primaryColor,
@@ -65,8 +82,9 @@ export default function AboutUs() {
         scrollbarWidth: "none",
       }}
     >
-      <LandingHeader bgColor="white" logo="/images/brickfi-logo.png"></LandingHeader>
+      <LandingHeader bgColor="white" logo="/images/brickfi-logo.png" isMobile={isMobile}></LandingHeader>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           heading: "Home Ownership for the New India",
           mainImgAltText: "About Brickfi",
@@ -154,6 +172,7 @@ export default function AboutUs() {
         </Flex>
       </Flex>
       <SectionRight
+        isMobile={isMobile}
         sectionData={{
           heading: "Who Are We",
           mainImgAltText: "About Brickfi",

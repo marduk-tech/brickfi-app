@@ -2,18 +2,32 @@
 
 import { CaretRightOutlined } from "@ant-design/icons";
 import { Collapse, CollapseProps, Flex, Typography } from "antd";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
-import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import LandingHeader from "./header";
 import { SectionCenter, SectionLeft, SectionRight } from "./section";
 import LandingFooter from "./footer";
 
-export default function BrickAssistLanding() {
-  const { isMobile } = useDevice();
+export default function BrickAssistLanding({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
   const { height } = useWindowDimensions();
+
+  useEffect(() => {
+    const detect = () => {
+      const el = document.createElement("div");
+      el.className = "mobile-only";
+      el.style.cssText = "position:absolute;visibility:hidden";
+      document.body.appendChild(el);
+      const detected = window.getComputedStyle(el).display === "block";
+      document.body.removeChild(el);
+      setIsMobile(detected);
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
 
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
@@ -234,8 +248,10 @@ export default function BrickAssistLanding() {
         bgColor={COLORS.textColorDark}
         color={"white"}
         logo="/images/brickfi-logo-white.png"
+        isMobile={isMobile}
       ></LandingHeader>
       <SectionRight
+        isMobile={isMobile}
         sectionData={{
           heading: (
             <Flex vertical>
@@ -278,6 +294,7 @@ export default function BrickAssistLanding() {
         }}
       ></SectionRight>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           heading: "We are there with you, every step of the way.",
           subHeading: (
@@ -302,6 +319,7 @@ export default function BrickAssistLanding() {
         }}
       ></SectionLeft>
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           heading: "FAQ",
           bgColor: "#fdf7f6",

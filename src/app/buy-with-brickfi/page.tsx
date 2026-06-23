@@ -1,5 +1,6 @@
 import MainLanding from "@/custom-pages/landing/main-landing";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 
 const META_DESCR = "The stress-free way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.";
 const META_TITLE = "Brickfi | Stress Free Home Buying Experience";
@@ -64,6 +65,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Home() {
-  return <MainLanding />;
+export default async function Home() {
+  const headersList = await headers();
+  const ua = headersList.get("user-agent") ?? "";
+  const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+  return <MainLanding initialIsMobile={isMobileSSR} />;
 }

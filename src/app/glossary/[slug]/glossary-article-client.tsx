@@ -56,6 +56,7 @@ export default function GlossaryArticleClient({
         bgColor="white"
         logo={"/images/brickfi-logo.png"}
         color={COLORS.textColorDark}
+        isMobile={isMobile}
       />
 
       <Flex

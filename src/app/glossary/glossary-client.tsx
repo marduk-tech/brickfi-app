@@ -241,6 +241,7 @@ export default function GlossaryClient() {
         bgColor="white"
         logo={"/images/brickfi-logo.png"}
         color={COLORS.textColorDark}
+        isMobile={isMobile}
       />
 
       {/* Main Content Container */}

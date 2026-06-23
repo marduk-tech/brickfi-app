@@ -1,6 +1,7 @@
 import BrickAssistLandingV2 from "@/custom-pages/landing/brick-assist-landing-v2";
 import { SEO_CONTENT } from "@/libs/constants";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 
 const META_DESCR =
   "Consult with Brickfi to get an expert advice on your next home purchase. We provide unbiased, data backed and technology driven real estate advisory.";
@@ -84,6 +85,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BrickAssistPage() {
-  return <BrickAssistLandingV2 />;
+export default async function BrickAssistPage() {
+  const headersList = await headers();
+  const ua = headersList.get("user-agent") ?? "";
+  const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+  return <BrickAssistLandingV2 initialIsMobile={isMobileSSR} />;
 }

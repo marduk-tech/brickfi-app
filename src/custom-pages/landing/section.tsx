@@ -2,7 +2,6 @@
 
 import { Button, Flex } from "antd";
 import React from "react";
-import { useDevice } from "../../hooks/use-device";
 import { safeWindow } from "../../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 
@@ -49,10 +48,10 @@ const styles = {
   },
 };
 
-const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
+const SectionLeft: React.FC<{ sectionData: SectionProps; isMobile: boolean }> = ({
   sectionData,
+  isMobile,
 }) => {
-  const { isMobile } = useDevice();
 
   return (
     <Flex
@@ -200,10 +199,10 @@ const SectionLeft: React.FC<{ sectionData: SectionProps }> = ({
   );
 };
 
-const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
+const SectionRight: React.FC<{ sectionData: SectionProps; isMobile: boolean }> = ({
   sectionData,
+  isMobile,
 }) => {
-  const { isMobile } = useDevice();
 
   return (
     <Flex
@@ -339,10 +338,10 @@ const SectionRight: React.FC<{ sectionData: SectionProps }> = ({
     </Flex>
   );
 };
-const SectionCenter: React.FC<{ sectionData: SectionProps }> = ({
+const SectionCenter: React.FC<{ sectionData: SectionProps; isMobile: boolean }> = ({
   sectionData,
+  isMobile,
 }) => {
-  const { isMobile } = useDevice();
   if (!sectionData) {
     return null;
   }

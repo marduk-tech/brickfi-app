@@ -4,7 +4,6 @@ import { Dropdown, Flex, Typography } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import { useDevice } from "../../hooks/use-device";
 import { LandingConstants } from "../../libs/constants";
 import DynamicReactIcon from "../../components/common/dynamic-react-icon";
 
@@ -12,8 +11,8 @@ const LandingHeader: React.FC<{
   bgColor?: string;
   color?: string;
   logo?: string;
-}> = ({ bgColor, color, logo }) => {
-  const { isMobile } = useDevice();
+  isMobile: boolean;
+}> = ({ bgColor, color, logo, isMobile }) => {
   const router = useRouter();
   const navItems = [
     {

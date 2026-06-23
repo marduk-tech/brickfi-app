@@ -23,7 +23,7 @@ export async function generateMetadata({
   try {
     const developer = await getDeveloperBySlug(slug, false);
 
-    if (!developer) {
+    if (!developer || !developer.name) {
       return {
         title: "Real Estate Developer Not Found | Brickfi",
         description: "The requested real estate developer could not be found.",
@@ -59,7 +59,7 @@ export async function generateMetadata({
           "@graph": [
             {
               "@type": "WebPage",
-              url: "https://www.brickfi.in/real-estate-developer/aashish-developer-and-builders",
+              url: `https://www.brickfi.in/real-estate-developer/${slug}`,
               name: title,
               description,
               publisher: {
@@ -75,7 +75,7 @@ export async function generateMetadata({
             },
             {
               "@type": "FAQPage",
-              mainEntity: developer.info.faq.map((q: any) => {
+              mainEntity: developer.info && developer.info.faq ? developer.info.faq.map((q: any) => {
                 return {
                   "@type": "Question",
                   name: q.question,
@@ -84,7 +84,7 @@ export async function generateMetadata({
                     text: q.answer,
                   },
                 }
-              }),
+              }): [],
             },
           ],
         }),
@@ -105,6 +105,7 @@ export async function generateMetadata({
       },
     };
   } catch (error) {
+    console.error("[generateMetadata] error for slug:", slug, error);
     return {
       title: "Page Not Found",
       description: "The requested real estate developer could not be found.",
@@ -120,7 +121,7 @@ export default async function RealEstateDeveloperPage({ params }: PageProps) {
   const [headersList] = await Promise.all([
     headers(),
     queryClient.prefetchQuery(getRealEstateDeveloperBySlugQuery(slug)),
-  ]);
+  ]); 
   const ua = headersList.get("user-agent") ?? "";
   const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
 

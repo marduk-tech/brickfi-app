@@ -221,6 +221,7 @@ export default function DevelopersClient() {
         bgColor="white"
         logo={"/images/brickfi-logo.png"}
         color={COLORS.textColorDark}
+        isMobile={isMobile}
       />
 
       <div

@@ -142,14 +142,16 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         bgColor="#fdf7f6"
         logo="/images/brickfi-logo.png"
         color={COLORS.textColorDark}
+        isMobile={isMobile}
       ></LandingHeader>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           id: "demo-brkfi",
           heading: (
             <Flex vertical gap={4}>
               {" "}
-              <Flex align="center" gap={4}>
+              <Flex align="center" gap={4} style={{marginTop: isMobile ? 64: 0, }}>
                 <DynamicReactIcon
                   color={COLORS.primaryColor}
                   size={24}
@@ -167,18 +169,20 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
                   BRICK360° REPORT
                 </Typography.Text>
               </Flex>
-              <Typography.Text
+              <h1
                 style={{
                   fontSize: isMobile
                     ? FONT_SIZE.HEADING_1 * 1.6
                     : FONT_SIZE.HEADING_1 * 1.8,
                   lineHeight: "100%",
                   fontWeight: 300,
-                  paddingTop: isMobile ? 60 : 0,
+                  paddingTop: 0,
+                  marginTop: 0,
+                  marginBottom: 8
                 }}
               >
                 The 360° Report Card for Smarter Property Decisions
-              </Typography.Text>
+              </h1>
             </Flex>
           ),
           subHeading:
@@ -197,6 +201,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
       ></SectionLeft>
 
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           fullHeight: true,
           bgColor: COLORS.LANDING.BLUISH,
@@ -221,25 +226,27 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         ></img>
       </Flex>
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,
           heading: "",
           subHeading: (
             <Flex vertical>
-              <Typography.Text
+              <h1
                 style={{
                   textAlign: "left",
                   fontSize: isMobile
                     ? FONT_SIZE.HEADING_1 * 1.4
                     : FONT_SIZE.HEADING_1 * 1.7,
-                  marginBottom: 8,
                   lineHeight: "100%",
                   fontWeight: 200,
                   color: COLORS.textColorVeryLight,
+                  margin: 0,
+                  marginBottom: 8,
                 }}
               >
                 Property Buying can be Risky & Confusing.
-              </Typography.Text>
+              </h1>
               <Typography.Text
                 style={{
                   textAlign: "left",
@@ -267,6 +274,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
       ></SectionCenter>
 
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,
           heading: "",
@@ -295,16 +303,18 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
           vertical
           style={{ maxWidth: 1400, margin: "auto", padding: "0 16px" }}
         >
-          <Typography.Text
+          <h1
             style={{
               fontSize: FONT_SIZE.HEADING_1 * 1.5,
               lineHeight: "100%",
               fontWeight: 300,
+              margin: 0,
+              marginBottom: 8
             }}
           >
             Make a <span style={{ color: COLORS.LANDING.PINK }}>Confident</span>{" "}
             Decision with Brick360 Report
-          </Typography.Text>
+          </h1>
           <Typography.Text
             style={{
               fontSize: FONT_SIZE.HEADING_1,
@@ -317,6 +327,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
       </Flex>
 
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           heading: (
             <Typography.Text
@@ -365,13 +376,14 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         },
       ].map((a: any) => {
         return isMobile ? (
-          <SectionLeft sectionData={a}></SectionLeft>
+          <SectionLeft isMobile={isMobile} sectionData={a}></SectionLeft>
         ) : (
-          <SectionRight sectionData={a}></SectionRight>
+          <SectionRight isMobile={isMobile} sectionData={a}></SectionRight>
         );
       })}
 
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
@@ -420,13 +432,14 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         },
       ].map((a: any) => {
         return isMobile ? (
-          <SectionLeft sectionData={a}></SectionLeft>
+          <SectionLeft isMobile={isMobile} sectionData={a}></SectionLeft>
         ) : (
-          <SectionRight sectionData={a}></SectionRight>
+          <SectionRight isMobile={isMobile} sectionData={a}></SectionRight>
         );
       })}
 
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
@@ -452,6 +465,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
       ></SectionLeft>
 
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           heading: (
             <Typography.Text
@@ -493,6 +507,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         }}
       ></SectionCenter>
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           heading: (
             <Flex style={{ width: "100%", maxWidth: 1000 }}>
@@ -556,6 +571,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
       ></SectionCenter>
 
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           heading: (
             <Typography.Text

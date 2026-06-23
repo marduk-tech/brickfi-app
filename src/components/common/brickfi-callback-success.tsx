@@ -27,7 +27,7 @@ export default function BrickfiCallbackSuccess() {
   return (
     <Flex gap={8} vertical style={{ paddingTop: 24, paddingBottom: 16 }}>
       <>
-        <LandingHeader></LandingHeader>
+        <LandingHeader isMobile={isMobile}></LandingHeader>
         <Flex
           vertical={isMobile}
           style={{

@@ -278,7 +278,7 @@ export const NewReportRequestFormV3 = () => {
 
   return (
     <>
-      <LandingHeader bgColor="#fff"></LandingHeader>
+      <LandingHeader bgColor="#fff" isMobile={isMobile}></LandingHeader>
       <Flex
         vertical={isMobile}
         style={{

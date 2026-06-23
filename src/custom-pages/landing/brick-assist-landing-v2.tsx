@@ -11,7 +11,6 @@ import {
 } from "antd";
 import { ReactNode, useEffect, useState } from "react";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
-import { useDevice } from "../../hooks/use-device";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import LandingHeader from "./header";
@@ -21,9 +20,24 @@ import { safeWindow } from "@/libs/browser-utils";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 
-export default function BrickAssistLandingV2() {
-  const { isMobile } = useDevice();
+export default function BrickAssistLandingV2({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
   const { height } = useWindowDimensions();
+
+  useEffect(() => {
+    const detect = () => {
+      const el = document.createElement("div");
+      el.className = "mobile-only";
+      el.style.cssText = "position:absolute;visibility:hidden";
+      document.body.appendChild(el);
+      const detected = window.getComputedStyle(el).display === "block";
+      document.body.removeChild(el);
+      setIsMobile(detected);
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
 
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
@@ -374,9 +388,11 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
         bgColor={COLORS.LANDING.LIGHT_PINK}
         color={COLORS.textColorDark}
         logo="/images/brickfi-logo.png"
+        isMobile={isMobile}
       ></LandingHeader>
 
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : 1000,
           heading: (
@@ -458,6 +474,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
         }}
       ></SectionCenter> */}
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
           heading: "",
@@ -538,6 +555,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
             ? "/images/landing/brickassistv2/4-mob.png"
             : "/images/landing/brickassistv2/4.png"} />
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.BLUISH,
           sectionMaxWidth: "100%",
@@ -582,6 +600,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
         }}
       ></SectionCenter>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
           heading:
@@ -661,6 +680,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
         ></img>
       </Flex>
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.LANDING.LIGHT_PINK,
           heading: "",
@@ -675,6 +695,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
         }}
       ></SectionCenter>
       <SectionLeft
+        isMobile={isMobile}
         sectionData={{
           heading: "Built By People Who Understand Both Data & Real Estate",
           bgColor: COLORS.LANDING.LIGHT_PINK,
@@ -703,6 +724,7 @@ Additionally, we offer end-to-end support—from site visits and negotiations to
       
 
       <SectionCenter
+        isMobile={isMobile}
         sectionData={{
           heading: "FAQ",
           bgColor: COLORS.LANDING.LIGHT_PINK,
