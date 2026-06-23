@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Flex } from "antd";
+import { Button, Flex, Typography } from "antd";
 import React from "react";
 import { safeWindow } from "../../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -119,14 +119,14 @@ const SectionLeft: React.FC<{ sectionData: SectionProps; isMobile: boolean }> = 
           )}
           {sectionData.subHeading ? (
             typeof sectionData.subHeading == "string" ? (
-              <h2
+              <Typography.Text
                 style={{
                   ...styles.h2,
                   color: sectionData.textColor || COLORS.textColorDark,
                 }}
               >
                 {sectionData.subHeading}
-              </h2>
+              </Typography.Text>
             ) : (
               <>{sectionData.subHeading}</>
             )
@@ -297,7 +297,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps; isMobile: boolean }> =
 
           {sectionData.subHeading ? (
             typeof sectionData.subHeading == "string" ? (
-              <h2
+              <Typography.Text
                 style={{
                   ...styles.h2,
                   fontSize: isMobile ? 20 : 24,
@@ -307,7 +307,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps; isMobile: boolean }> =
                 }}
               >
                 {sectionData.subHeading}
-              </h2>
+              </Typography.Text>
             ) : (
               <div style={{ maxWidth: 600, alignSelf: "flex-start" }}>
                 {sectionData.subHeading}
@@ -387,14 +387,14 @@ const SectionCenter: React.FC<{ sectionData: SectionProps; isMobile: boolean }> 
 
         {sectionData.subHeading ? (
           typeof sectionData.subHeading == "string" ? (
-            <h2
+            <Typography.Text
               style={{
                 ...styles.h2,
                 color: sectionData.textColor || COLORS.textColorDark,
               }}
             >
               {sectionData.subHeading}
-            </h2>
+            </Typography.Text>
           ) : (
             <>{sectionData.subHeading}</>
           )

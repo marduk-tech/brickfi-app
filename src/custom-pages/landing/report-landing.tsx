@@ -232,7 +232,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
           heading: "",
           subHeading: (
             <Flex vertical>
-              <h1
+              <h2
                 style={{
                   textAlign: "left",
                   fontSize: isMobile
@@ -246,7 +246,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
                 }}
               >
                 Property Buying can be Risky & Confusing.
-              </h1>
+              </h2>
               <Typography.Text
                 style={{
                   textAlign: "left",
@@ -303,7 +303,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
           vertical
           style={{ maxWidth: 1400, margin: "auto", padding: "0 16px" }}
         >
-          <h1
+          <h2
             style={{
               fontSize: FONT_SIZE.HEADING_1 * 1.5,
               lineHeight: "100%",
@@ -314,7 +314,7 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
           >
             Make a <span style={{ color: COLORS.LANDING.PINK }}>Confident</span>{" "}
             Decision with Brick360 Report
-          </h1>
+          </h2>
           <Typography.Text
             style={{
               fontSize: FONT_SIZE.HEADING_1,
@@ -330,15 +330,16 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         isMobile={isMobile}
         sectionData={{
           heading: (
-            <Typography.Text
+            <h2
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
                 marginBottom: 16,
+                margin: 0
               }}
             >
               Detailed Breakdown of The Layout
-            </Typography.Text>
+            </h2>
           ),
           subHeading:
             "Don't judge a property by its brochure (said someone); Brick360 looks at numbers like open space, unit density, unit distribution, amenities mix and more to give a deeper insights into property layout.",
@@ -356,14 +357,15 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         {
           sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
-            <Typography.Text
+            <h2
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
+                margin: 0
               }}
             >
               Location Dissection to Assess Livability & Future Growth.
-            </Typography.Text>
+            </h2>
           ),
           subHeading:
             "Analysing livability is more than just checking the nearest mall. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
@@ -387,15 +389,17 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
-            <Typography.Text
+            <h2
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
+                margin: 0,
                 marginBottom: 16,
+                fontWeight: 300
               }}
             >
               Builder Track Records, Complaints & Delays
-            </Typography.Text>
+            </h2>
           ),
           subHeading:
             "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity to get a sense of execution risks and credibility.",
@@ -412,14 +416,16 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         {
           sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
-            <Typography.Text
+            <h2
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
+                margin: 0,
+                fontWeight: 300
               }}
             >
               Financials Assessment including Price Point, Rental Yield.
-            </Typography.Text>
+            </h2>
           ),
           subHeading:
             "Making the right financial decisions becomes all the more necessary. Assess the price point, rental yield and growth potential with upto date pricing information. ",
@@ -443,15 +449,17 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         sectionData={{
           sectionMaxWidth: isMobile ? "100%" : "1300px",
           heading: (
-            <Typography.Text
+            <h2
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 1.25,
                 lineHeight: "100%",
+                margin: 0,
                 marginBottom: 16,
+                fontWeight: 300
               }}
             >
               AI Assistance to Clarify Doubts & DIY Research.
-            </Typography.Text>
+            </h2>
           ),
           subHeading:
             "Get answers to your questions and generate your own insights. Our AI assistant with every report can help you explore the hidden data and provide answers that any broker won't be able to.",
@@ -468,16 +476,18 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         isMobile={isMobile}
         sectionData={{
           heading: (
-            <Typography.Text
+            <h2
               style={{
                 fontSize: FONT_SIZE.HEADING_1 * 2,
                 lineHeight: "100%",
+                margin: 0,
                 marginBottom: 16,
                 color: "white",
+                fontWeight: 300
               }}
             >
               The Most Data Backed Approach
-            </Typography.Text>
+            </h2>
           ),
           subHeading: (
             <Typography.Text
@@ -511,16 +521,17 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         sectionData={{
           heading: (
             <Flex style={{ width: "100%", maxWidth: 1000 }}>
-              <Typography.Text
+              <h2
                 style={{
                   fontSize: FONT_SIZE.HEADING_1 * 2,
                   lineHeight: "100%",
                   color: "white",
                   margin: 0,
+                  fontWeight: 300
                 }}
               >
                 How it Works ?
-              </Typography.Text>
+              </h2>
             </Flex>
           ),
           subHeading: (
@@ -574,11 +585,11 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         isMobile={isMobile}
         sectionData={{
           heading: (
-            <Typography.Text
-              style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: 200 }}
+            <h2
+              style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: 200, margin: 0}}
             >
               Frequently Asked Questions
-            </Typography.Text>
+            </h2>
           ),
           bgColor: "#fdf7f6",
           verticalPadding: isMobile ? 24 : 100,
