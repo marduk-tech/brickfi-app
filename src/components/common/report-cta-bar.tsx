@@ -48,7 +48,7 @@ const ReportCTABar: React.FC<ReportCTABarProps> = ({ msg, title, isMobile }) => 
           </Typography.Text>
         </Flex>
         <Typography.Text
-          style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500, width: isMobile ? "100%" : 500 }}
+          style={{ fontSize: FONT_SIZE.HEADING_3, lineHeight: "110%", fontWeight: 500, width: isMobile ? "100%" : 500 }}
         >
           {title || "Get a free Brick360 Report"}
         </Typography.Text>
