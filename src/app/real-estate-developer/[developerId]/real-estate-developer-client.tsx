@@ -375,7 +375,7 @@ export default function RealEstateDeveloperClient({
             >
               Experience The Difference in Home Buying with Brickfi Assist
             </Typography.Text>
-            <p>
+            <p style={{opacity: 0.8}}>
               Brickfi presents the new way to find your dream home. No hype, No
               manipulation, No pushing inventory. Only legitimate data and hard
               facts to ensure your interests are protected
