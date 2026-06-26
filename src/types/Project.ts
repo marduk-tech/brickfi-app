@@ -194,6 +194,7 @@ export interface IDriverPlace {
   status: PLACE_TIMELINE;
   distance?: number;
   duration: number;
+  comments: string;
   tags?: string[];
   features: any;
 }

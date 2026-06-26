@@ -349,6 +349,7 @@ const MapViewV2Inner = ({
                           setModalContent={openModal}
                           setInfoModalOpen={() => {}}
                           isDriverMatchingFilter={isDriverMatchingFilter}
+                          fetchTravelDurationElement={fetchTravelDurationElement}
                         />
                       )}
                       renderTransitDrivers={(bounds) => (

@@ -231,11 +231,10 @@ export const TransitDriversComponent = ({
                               ? fetchTravelDurationElement(
                                   driver.distance!,
                                   driver.duration,
-                                  "Nearest station "
+                                  driver.comments
                                 )
                               : "",
                           content: driver.details?.oneLiner || driver.details?.description || "",
-                          footerContent: getFooterContent(driver.details?.info),
                           tags: [
                             {
                               label: driverStatusLabel(driver.status),
@@ -279,12 +278,11 @@ export const TransitDriversComponent = ({
                             ? fetchTravelDurationElement(
                                 driver.distance!,
                                 driver.duration,
-                                "Nearest station "
+                               driver.comments
                               )
                             : "",
                         content: driver.details?.oneLiner || driver.details?.description || "",
 
-                        footerContent: getFooterContent(driver.details?.info),
                         tags: [
                           {
                             label:

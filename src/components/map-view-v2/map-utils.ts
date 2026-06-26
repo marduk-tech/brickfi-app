@@ -11,29 +11,38 @@ import { ISurroundingElement } from "../../types/Project";
 export const fetchTravelDurationElement = (
   distance: number,
   duration: number,
-  prefix?: string
+  prefix?: string,
 ) => {
   return React.createElement(
     Flex,
-    { vertical: true, style: { marginBottom: 16 } },
+    { vertical: true, style: { marginBottom: 16, marginTop: 4 } },
     [
       React.createElement(
         Flex,
-        { align: "center", gap: 4, key: "duration-info" },
+        { align: "flex-start", gap: 0, key: "duration-info", vertical: true },
         [
-          React.createElement(DynamicReactIcon, {
-            iconName: "PiClockCountdownDuotone",
-            iconSet: "pi",
-            size: 18,
-            color: COLORS.textColorDark,
-            key: "clock-icon",
-          }),
+          React.createElement(
+            Flex,
+            { align: "center", gap: 4, key: "timing-info" },
+            React.createElement(DynamicReactIcon, {
+              iconName: "PiClockCountdownDuotone",
+              iconSet: "pi",
+              size: 12,
+              color: COLORS.textColorDark,
+              key: "clock-icon",
+            }),
+            React.createElement(
+              Typography.Text,
+              { key: "duration-text", style: { fontSize: 12 } },
+              `${duration} mins (${distance.toFixed(1)} Kms)`,
+            ),
+          ),
           React.createElement(
             Typography.Text,
-            { key: "duration-text" },
-            `${prefix ? `${prefix} - ` : ""} ${duration} mins (${distance.toFixed(1)} Kms)`
+            { key: "duration-text", style: { fontSize: 12 } },
+            `${prefix && !/^nearest point$/i.test(prefix) ? `${prefix.startsWith("Nearest ") ? prefix : `Nearest ${prefix}`}` : ""} `,
           ),
-        ]
+        ],
       ),
       React.createElement(
         Typography.Text,
@@ -44,9 +53,9 @@ export const fetchTravelDurationElement = (
           },
           key: "disclaimer",
         },
-        "Average time considering peak/non peak hours. Can vary 10-20% based on real time traffic."
+        "Average time considering peak/non peak hours. Can vary 10-20% based on real time traffic.",
       ),
-    ]
+    ],
   );
 };
 
@@ -80,16 +89,15 @@ export const processPrimaryProjectBounds = (primaryProject?: any) => {
  * Validate if a project has required location data
  */
 export const hasValidLocationData = (project: any): boolean => {
-  return !!(
-    project?.info?.location?.lat &&
-    project?.info?.location?.lng
-  );
+  return !!(project?.info?.location?.lat && project?.info?.location?.lng);
 };
 
 /**
  * Extract coordinates from project data
  */
-export const getProjectCoordinates = (project: any): [number, number] | null => {
+export const getProjectCoordinates = (
+  project: any,
+): [number, number] | null => {
   if (!hasValidLocationData(project)) {
     return null;
   }
@@ -99,9 +107,11 @@ export const getProjectCoordinates = (project: any): [number, number] | null => 
 /**
  * Calculate map bounds for multiple projects
  */
-export const calculateBoundsForProjects = (projects: any[]): [[number, number], [number, number]] | null => {
+export const calculateBoundsForProjects = (
+  projects: any[],
+): [[number, number], [number, number]] | null => {
   const validProjects = projects.filter(hasValidLocationData);
-  
+
   if (validProjects.length === 0) {
     return null;
   }
@@ -122,13 +132,19 @@ export const calculateBoundsForProjects = (projects: any[]): [[number, number], 
     }
   });
 
-  return [[minLat, minLng], [maxLat, maxLng]];
+  return [
+    [minLat, minLng],
+    [maxLat, maxLng],
+  ];
 };
 
 /**
  * Format project name for display (truncate if too long)
  */
-export const formatProjectName = (name: string, maxLength: number = 20): string => {
+export const formatProjectName = (
+  name: string,
+  maxLength: number = 20,
+): string => {
   if (!name) return "";
   return name.length > maxLength ? `${name.substring(0, maxLength)}..` : name;
 };
@@ -172,9 +188,12 @@ export const sortDriversByDuration = (drivers: any[]): any[] => {
 /**
  * Filter drivers by category
  */
-export const filterDriversByCategory = (drivers: any[], category: string): any[] => {
+export const filterDriversByCategory = (
+  drivers: any[],
+  category: string,
+): any[] => {
   if (!category || !drivers) return drivers || [];
-  
+
   return drivers.filter((driver) => {
     return driver.category === category || driver.driver === category;
   });
@@ -185,15 +204,18 @@ export const filterDriversByCategory = (drivers: any[], category: string): any[]
  */
 export const groupDriversByType = (drivers: any[]): Record<string, any[]> => {
   if (!drivers) return {};
-  
-  return drivers.reduce((groups, driver) => {
-    const type = driver.driver || "unknown";
-    if (!groups[type]) {
-      groups[type] = [];
-    }
-    groups[type].push(driver);
-    return groups;
-  }, {} as Record<string, any[]>);
+
+  return drivers.reduce(
+    (groups, driver) => {
+      const type = driver.driver || "unknown";
+      if (!groups[type]) {
+        groups[type] = [];
+      }
+      groups[type].push(driver);
+      return groups;
+    },
+    {} as Record<string, any[]>,
+  );
 };
 
 /**
@@ -201,18 +223,20 @@ export const groupDriversByType = (drivers: any[]): Record<string, any[]> => {
  */
 export const isWithinBounds = (
   coordinates: [number, number],
-  bounds: [[number, number], [number, number]]
+  bounds: [[number, number], [number, number]],
 ): boolean => {
   const [lat, lng] = coordinates;
   const [[minLat, minLng], [maxLat, maxLng]] = bounds;
-  
+
   return lat >= minLat && lat <= maxLat && lng >= minLng && lng <= maxLng;
 };
 
 /**
  * Calculate center point of bounds
  */
-export const getBoundsCenter = (bounds: [[number, number], [number, number]]): [number, number] => {
+export const getBoundsCenter = (
+  bounds: [[number, number], [number, number]],
+): [number, number] => {
   const [[minLat, minLng], [maxLat, maxLng]] = bounds;
   return [(minLat + maxLat) / 2, (minLng + maxLng) / 2];
 };
@@ -229,18 +253,20 @@ export const isValidSurroundingElement = (element: any): boolean => {
  */
 export const getUniqueSurroundingElementTypes = (elements: any[]): string[] => {
   if (!elements) return [];
-  
+
   return Array.from(new Set(elements.map((e) => e.type).filter(Boolean)));
 };
 
 /**
  * Process surrounding element geometry into positions for map rendering
  */
-export const processSurroundingElementGeometry = (element: ISurroundingElement) => {
+export const processSurroundingElementGeometry = (
+  element: ISurroundingElement,
+) => {
   if (!element.geometry) {
     return null;
   }
-  
+
   const positions = element.geometry.map((g: any) => {
     if (Array.isArray(g)) {
       return g.map((subG) => [subG.lat, subG.lon]);
@@ -265,7 +291,10 @@ export const processSurroundingElementGeometry = (element: ISurroundingElement) 
 /**
  * Calculate center point of a surrounding element for icon placement
  */
-export const calculateSurroundingElementCenter = (polygonCoordinates: any[], isMulti: boolean) => {
+export const calculateSurroundingElementCenter = (
+  polygonCoordinates: any[],
+  isMulti: boolean,
+) => {
   try {
     const feature = isMulti
       ? turf.multiLineString(polygonCoordinates)
@@ -273,7 +302,7 @@ export const calculateSurroundingElementCenter = (polygonCoordinates: any[], isM
     const center = turf.pointOnFeature(feature);
     return center?.geometry.coordinates;
   } catch (error) {
-    console.error('Error calculating surrounding element center:', error);
+    console.error("Error calculating surrounding element center:", error);
     return null;
   }
 };
@@ -281,6 +310,8 @@ export const calculateSurroundingElementCenter = (polygonCoordinates: any[], isM
 /**
  * Validate if surrounding element has valid geometry data
  */
-export const isValidSurroundingElementGeometry = (element: ISurroundingElement): boolean => {
+export const isValidSurroundingElementGeometry = (
+  element: ISurroundingElement,
+): boolean => {
   return !!(element?.geometry && element.geometry.length > 0);
 };

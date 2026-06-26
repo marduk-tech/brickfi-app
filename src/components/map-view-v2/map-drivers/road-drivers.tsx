@@ -21,6 +21,7 @@ interface RoadDriversProps {
   setModalContent: (content: any) => void;
   setInfoModalOpen: (open: boolean) => void;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
+  fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
 }
 
 export const RoadDriversComponent = ({
@@ -34,6 +35,7 @@ export const RoadDriversComponent = ({
   setModalContent,
   setInfoModalOpen,
   isDriverMatchingFilter,
+  fetchTravelDurationElement
 }: RoadDriversProps) => {
   const map = useMap();
 
@@ -98,6 +100,14 @@ export const RoadDriversComponent = ({
                   ) : null}
                 </Flex>
               ),
+              subHeading:
+                            driver.distance && driver.duration
+                              ? fetchTravelDurationElement(
+                                  driver.distance!,
+                                  driver.duration,
+                                  driver.comments
+                                )
+                              : "",
               content:
                 driver.details?.oneLiner || driver.details?.description || "",
               tags: [
@@ -224,6 +234,14 @@ export const RoadDriversComponent = ({
                                 </Flex>
                               ),
                               content: "",
+                               subHeading:
+                            driver.distance && driver.duration
+                              ? fetchTravelDurationElement(
+                                  driver.distance!,
+                                  driver.duration,
+                                  driver.comments
+                                )
+                              : "",
                               tags: [
                                 {
                                   label: "Highway",

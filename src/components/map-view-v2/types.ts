@@ -49,4 +49,5 @@ export type RoadDriverPlace = IDriverPlace & {
 
 export type TransitDriverPlace = IDriverPlace & {
   features: GeoJSONFeature[];
+  comments: string;
 };
