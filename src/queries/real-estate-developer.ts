@@ -44,7 +44,7 @@ export const getDeveloperBySlug = async (slug: string, throwError = true) => {
     {
       cache: "no-store",
       headers: {
-        "x-api-key": apiKey || "",
+        "x-api-key": sitemapApiKey || apiKey || "",
       },
     },
   );
