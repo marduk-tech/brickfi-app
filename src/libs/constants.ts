@@ -376,7 +376,7 @@ export const Brick360DataPoints = {
     pricePoint: {
       label: "Price Point",
       prompts: ["Projects priced higher", "Price vs distance"],
-      note: "The final price may vary as per negotitation and other charges applied (usually 10-15% extra)",
+      note: "The final price may vary as per negotitation and other charges applied (usually 7-15% extra)",
     },
     rentalIncome: {
       label: "Rental Income",
