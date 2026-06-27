@@ -1,7 +1,6 @@
 "use client";
 
-import { Button, Flex, Form, Input, Modal, Select, Typography } from "antd";
-import PhoneInput from "antd-phone-input";
+import { Button, Flex, Form, Input, Select, Tag, Typography } from "antd";
 import { addDays, format, isSaturday, isSunday, isFriday } from "date-fns";
 
 import { useEffect, useState } from "react";
@@ -12,6 +11,8 @@ import {
   useUpdateUserMutation,
 } from "../../hooks/user-hooks";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
+import { LoginForm } from "../login-forms";
+import DynamicReactIcon from "./dynamic-react-icon";
 import LandingHeader from "@/custom-pages/landing/header";
 import { useDevice } from "@/hooks/use-device";
 import LandingFooter from "@/custom-pages/landing/footer";
@@ -84,20 +85,12 @@ export function BrickfiCallback() {
   const [selectedAsstVal, setSelectedAsstVal] = useState("");
 
   const [formLoading, setFormLoading] = useState(false);
+  const [verifiedUser, setVerifiedUser] = useState<any>(null);
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
 
   const nameValue = Form.useWatch("name", form);
-  const mobileValue = Form.useWatch("mobile", form);
-
   const isNameValid =
     !!user || (!!nameValue && /^[a-zA-Z\s]+$/.test(String(nameValue)));
-  const isMobileValid =
-    !!user ||
-    (!!mobileValue &&
-      /^\d+$/.test(
-        typeof mobileValue === "object"
-          ? `${mobileValue.areaCode || ""}${mobileValue.phoneNumber || ""}`
-          : String(mobileValue),
-      ));
 
   /**
    * Generates AntD Select options based on the current day's logic.
@@ -178,10 +171,7 @@ export function BrickfiCallback() {
 
   useEffect(() => {
     if (user) {
-      form.setFieldsValue({
-        name: user.profile.name,
-        mobile: { countryCode: 91, phoneNumber: user.mobile, isoCode: "in" },
-      });
+      form.setFieldsValue({ name: user.profile.name });
     }
     captureAnalyticsEvent("callback-form", {});
   }, [user, form]);
@@ -191,11 +181,10 @@ export function BrickfiCallback() {
     const searchParams = new URLSearchParams(window.location.search);
     const srcIntent = searchParams.get("srcIntent");
 
-    const mobileStr =
-      typeof values.mobile === "object"
-        ? `${values.mobile.areaCode || ""}${values.mobile.phoneNumber || ""}`
-        : values.mobile;
-    values = { ...values, mobile: mobileStr };
+    const mobileStr = user ? user.mobile : verifiedUser?.mobile;
+    const countryCodeStr = user
+      ? user.countryCode || "91"
+      : verifiedUser?.countryCode || "91";
 
     let userId = user?._id;
     const scheduledTime = values.time.value ? values.time.value : values.time;
@@ -230,7 +219,7 @@ export function BrickfiCallback() {
     } else {
       const newUser = await createUser.mutateAsync({
         userData: {
-          mobile: values.mobile,
+          mobile: mobileStr,
           status: "callback-request",
           profile: {
             name: values.name,
@@ -239,12 +228,12 @@ export function BrickfiCallback() {
             preferredCallbackTime: `${values.day}, ${scheduledTime}`,
             preferredCallbackTimestamp,
           },
-          countryCode: "91",
+          countryCode: countryCodeStr,
         },
       });
       userId = newUser._id;
       posthog.identify(userId, {
-        countryCode: "91",
+        countryCode: countryCodeStr,
         name: values.name,
       });
     }
@@ -255,11 +244,11 @@ export function BrickfiCallback() {
         emailType: "callback-request",
         params: {
           name: values.name,
-          mobile: values.mobile,
+          mobile: mobileStr,
           source: srcIntent || "",
           callbackCategory: values.assistance,
           callbackTime: `${values.day}, ${scheduledTime}`,
-          callbackTimestamp: preferredCallbackTimestamp
+          callbackTimestamp: preferredCallbackTimestamp,
         },
       });
     }
@@ -323,7 +312,7 @@ export function BrickfiCallback() {
                 style={{
                   fontSize: isMobile
                     ? FONT_SIZE.HEADING_1 * 1.2
-                    : FONT_SIZE.HEADING_1 * 1.5,
+                    : FONT_SIZE.HEADING_1 * 1.3,
                   lineHeight: "100%",
                 }}
               >
@@ -353,42 +342,6 @@ export function BrickfiCallback() {
                 }}
               >
                 <Form.Item
-                  label="Your Name"
-                  name="name"
-                  rules={[
-                    { required: true, message: "Please enter your name" },
-                    {
-                      pattern: /^[a-zA-Z\s]+$/,
-                      message: "Name can only contain letters",
-                    },
-                  ]}
-                >
-                  <Input disabled={!!user} />
-                </Form.Item>
-                <Form.Item
-                  label="Your Mobile or Whatsapp Number"
-                  name="mobile"
-                  rules={[
-                    { required: true, message: "Please enter your mobile number" },
-                    {
-                      validator: (_, value) => {
-                        if (!value) return Promise.resolve();
-                        const digits = `${value.areaCode || ""}${value.phoneNumber || ""}`;
-                        if (!/^\d*$/.test(digits))
-                          return Promise.reject("Only digits are allowed");
-                        return Promise.resolve();
-                      },
-                    },
-                  ]}
-                >
-                  <PhoneInput
-                    country="in"
-                    enableArrow
-                    disableParentheses
-                    disabled={!!user}
-                  />
-                </Form.Item>
-                <Form.Item
                   label="What kind of assistance do you need"
                   name="assistance"
                   rules={[{ required: true }]}
@@ -413,60 +366,109 @@ export function BrickfiCallback() {
                     ))}
                   </Select>
                 </Form.Item>
-                <Flex vertical={isMobile} gap={16}>
-                  <Form.Item
-                    label="What day works for you?"
-                    name="day"
-                    rules={[{ required: true }]}
-                  >
-                    <Select
-                      placeholder="Select an option"
-                      style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
-                      allowClear
-                      disabled={!selectedAsstVal}
-                      onChange={(value: any) => {
-                        setDayOption(value);
-                        form.setFieldsValue({
-                          time: getTimeOptions(value)[0],
-                        });
-                      }}
-                      optionLabelProp="label"
+                <Form.Item
+                  label="Your Name"
+                  name="name"
+                  rules={[
+                    { required: true, message: "Please enter your name" },
+                    {
+                      pattern: /^[a-zA-Z\s]+$/,
+                      message: "Name can only contain letters",
+                    },
+                  ]}
+                >
+                  <Input disabled={!!user} />
+                </Form.Item>
+                <Typography.Text style={{ marginBottom: 4 }}>
+                  Your Mobile or Whatsapp Number
+                </Typography.Text>
+                {user ? (
+                  <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
+                    <Tag style={{ fontSize: FONT_SIZE.HEADING_2, padding: "4px 8px" }}>
+                      +{user.countryCode} {user.mobile}
+                    </Tag>
+                    <DynamicReactIcon
+                      iconName="MdVerifiedUser"
+                      iconSet="md"
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                ) : isMobileVerified ? (
+                  <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
+                    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2 }}>
+                      +{verifiedUser?.countryCode} {verifiedUser?.mobile}
+                    </Typography.Text>
+                    <DynamicReactIcon
+                      iconName="MdVerifiedUser"
+                      iconSet="md"
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                ) : (
+                  <LoginForm
+                    onMobVerified={(updatedUser: any) => {
+                      setVerifiedUser(updatedUser);
+                      setIsMobileVerified(true);
+                    }}
+                  />
+                )}
+                {(user || isMobileVerified) && (
+                  <Flex vertical={isMobile} gap={16}>
+                    <Form.Item
+                      label="What day works for you?"
+                      name="day"
+                      rules={[{ required: true }]}
                     >
-                      {getPickerOptions().map((option) => (
-                        <Select.Option
-                          key={option.value}
-                          value={option.value}
-                          label={option.value}
-                        >
-                          {option.label}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                  <Form.Item
-                    label="What time works for you?"
-                    name="time"
-                    rules={[{ required: true }]}
-                  >
-                    <Select
-                      placeholder="Select an option"
-                      style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
-                      allowClear
-                      disabled={!dayOption}
-                      optionLabelProp="label"
+                      <Select
+                        placeholder="Select an option"
+                        style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
+                        allowClear
+                        disabled={!selectedAsstVal}
+                        onChange={(value: any) => {
+                          setDayOption(value);
+                          form.setFieldsValue({
+                            time: getTimeOptions(value)[0],
+                          });
+                        }}
+                        optionLabelProp="label"
+                      >
+                        {getPickerOptions().map((option) => (
+                          <Select.Option
+                            key={option.value}
+                            value={option.value}
+                            label={option.value}
+                          >
+                            {option.label}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      label="What time works for you?"
+                      name="time"
+                      rules={[{ required: true }]}
                     >
-                      {getTimeOptions(dayOption).map((option) => (
-                        <Select.Option
-                          key={option.value}
-                          value={option.value}
-                          label={option.value}
-                        >
-                          {option.label}
-                        </Select.Option>
-                      ))}
-                    </Select>
-                  </Form.Item>
-                </Flex>
+                      <Select
+                        placeholder="Select an option"
+                        style={{ width: "100%", fontSize: FONT_SIZE.HEADING_3 }}
+                        allowClear
+                        disabled={!dayOption}
+                        optionLabelProp="label"
+                      >
+                        {getTimeOptions(dayOption).map((option) => (
+                          <Select.Option
+                            key={option.value}
+                            value={option.value}
+                            label={option.value}
+                          >
+                            {option.label}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+                  </Flex>
+                )}
               </Form>
             </Flex>
 
@@ -486,7 +488,7 @@ export function BrickfiCallback() {
                   !selectedAsstVal ||
                   !dayOption ||
                   !isNameValid ||
-                  !isMobileValid
+                  !(user || isMobileVerified)
                 }
                 loading={formLoading}
                 style={{ width: 200 }}
