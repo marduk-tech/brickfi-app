@@ -43,6 +43,130 @@ import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
 const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
   ssr: false,
 });
+const ColumnChart = dynamic(
+  () => import("@ant-design/plots").then((m) => m.Column),
+  { ssr: false },
+);
+
+function getPercentile(sorted: number[], pct: number): number {
+  const idx = (pct / 100) * (sorted.length - 1);
+  const lo = Math.floor(idx);
+  const hi = Math.ceil(idx);
+  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
+}
+
+function PriceQuartileChart({
+  pricingData,
+}: {
+  pricingData: { projectName: string; sqftCost: number }[];
+}) {
+  if (pricingData.length < 2) return null;
+
+  const costs = pricingData.map((p) => p.sqftCost).sort((a, b) => a - b);
+  const q1 = getPercentile(costs, 25);
+  const q3 = getPercentile(costs, 75);
+
+  const fmtSqft = (v: number) => `${parseFloat((v / 1000).toFixed(1))}k`;
+
+  const STEP = 1000;
+  const bucketMap = new Map<number, { count: number; projects: string[] }>();
+  pricingData.forEach((p) => {
+    const bucket = Math.round(p.sqftCost / STEP) * STEP;
+    const existing = bucketMap.get(bucket) || { count: 0, projects: [] };
+    bucketMap.set(bucket, {
+      count: existing.count + 1,
+      projects: [
+        ...existing.projects,
+        `${p.projectName} (${fmtSqft(p.sqftCost)})`,
+      ],
+    });
+  });
+
+  const data = Array.from(bucketMap.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([bucket, { count, projects }]) => ({
+      label: `₹${bucket / 1000}k`,
+      count,
+      projects,
+      inRange: bucket <= q3 && bucket + STEP > q1,
+    }));
+
+  const config = {
+    data,
+    xField: "label",
+    yField: "count",
+    height: 160,
+    autoFit: true,
+    label: false as const,
+    axis: {
+      x: { label: { autoRotate: true, fontSize: 9 } },
+      y: { labelFormatter: () => "", tickCount: 4 },
+    },
+    tooltip: {
+      items: [
+        (datum: any) => ({
+          name: "Projects",
+          value: datum.count,
+          marker: false,
+          projects: datum.projects,
+          count: datum.count,
+        }),
+      ],
+    },
+    interaction: {
+      tooltip: {
+        render: (_event: any, { items, title }: any) => {
+          const item = items?.[0];
+          if (!item) return "";
+          const names: string[] = item.projects || [];
+          const tagStyle =
+            "display:inline-block;padding:0 7px;font-size:11px;line-height:20px;" +
+            "border:1px solid #d9d9d9;border-radius:4px;background:rgba(0,0,0,0.02);margin:2px 2px 0 0";
+          const tagsHtml = names
+            .slice(0, 5)
+            .map((n) => `<span style="${tagStyle}">${n}</span>`)
+            .join("");
+          const moreHtml =
+            names.length > 5
+              ? `<span style="${tagStyle}">+${names.length - 5} more</span>`
+              : "";
+          return `<div style="padding:8px 12px;min-width:160px">
+          <div style="margin-bottom:6px;font-weight:500; font-size: 24px;">${title}</div>
+            <div style="margin-bottom:6px;font-weight:500;color:#999;"> ${item.count} project${item.count !== 1 ? "s" : ""}</div>
+            <div style="display:flex;flex-wrap:wrap">${tagsHtml}${moreHtml}</div>
+          </div>`;
+        },
+      },
+    },
+    style: {
+      fill: (d: { inRange: boolean }) => (d.inRange ? "#1677ff" : "#bfbfbf"),
+      radius: 4,
+    },
+  };
+
+  return (
+    <Flex
+      vertical
+      style={{
+        maxWidth: 700,
+        backgroundColor: COLORS.LANDING.MEDIUM_PINK,
+        padding: "8px 8px 0 8px",
+        borderRadius: "0 8px",
+      }}
+    >
+      <Typography.Text
+        style={{
+          fontSize: 11,
+          color: "#8c8c8c",
+          marginBottom: 4,
+        }}
+      >
+        Price Point Distribution
+      </Typography.Text>
+      <ColumnChart {...(config as any)} />
+    </Flex>
+  );
+}
 
 const REPORT_ACCESS_DENIED_MESSAGE =
   "You don't have access to this report. Please request for one or reachout to Brickfi.";
@@ -83,14 +207,14 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
     const [surroundingElements, setSurroundingElements] =
       useState<ISurroundingElement[]>();
 
-  const [projectsNearby, setProjectsNearby] = useState<any[]>();
+    const [projectsNearby, setProjectsNearby] = useState<any[]>();
 
     const [mapVisible, setMapVisible] = useState<boolean>(false);
 
     const [mapCategories, setMapCategories] = useState<string[]>([]);
 
     const [currentSessionId, setCurrentSessionId] = useState<string>(() =>
-      uuidv4()
+      uuidv4(),
     );
     const [queryStreaming, setQueryStreaming] = useState<boolean>(false);
     const [queryStreamingText, setQueryStreaminText] = useState<string>();
@@ -127,7 +251,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
       setMapDrivers([]);
       setFollowupPrompts([]);
       setSurroundingElements([]);
-    setProjectsNearby([]);
+      setProjectsNearby([]);
       if (
         dataPointSelected &&
         dataPointSelected.selectedDataPointCategory &&
@@ -148,7 +272,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         setSources(
           (Brick360CategoryInfo as any)[
             dataPointSelected.selectedDataPointCategory
-          ].sources || []
+          ].sources || [],
         );
 
         setFollowupPrompts(prompts);
@@ -181,7 +305,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
             const categoryDrivers = categories.flatMap(
               (category) =>
                 DRIVER_CATEGORIES[category as keyof typeof DRIVER_CATEGORIES]
-                  ?.drivers || []
+                  ?.drivers || [],
             );
 
             setMapDrivers([
@@ -189,13 +313,13 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                 (d: any) =>
                   !!d &&
                   !!d.driverId &&
-                  categoryDrivers.includes(d.driverId.driver)
+                  categoryDrivers.includes(d.driverId.driver),
               ),
               ...lvnzyProject?.connectivity.drivers.filter(
                 (d: any) =>
                   !!d &&
                   !!d.driverId &&
-                  categoryDrivers.includes(d.driverId.driver)
+                  categoryDrivers.includes(d.driverId.driver),
               ),
             ]);
           } else if (
@@ -213,7 +337,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
               const categoryDrivers = categories.flatMap(
                 (category) =>
                   DRIVER_CATEGORIES[category as keyof typeof DRIVER_CATEGORIES]
-                    ?.drivers || []
+                    ?.drivers || [],
               );
 
               setMapDrivers([
@@ -221,23 +345,23 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   (d: any) =>
                     !!d &&
                     !!d.driverId &&
-                    categoryDrivers.includes(d.driverId.driver)
+                    categoryDrivers.includes(d.driverId.driver),
                 ),
                 ...lvnzyProject?.neighborhood.drivers.filter(
                   (d: any) =>
                     !!d &&
                     !!d.driverId &&
-                    categoryDrivers.includes(d.driverId.driver)
+                    categoryDrivers.includes(d.driverId.driver),
                 ),
               ]);
             } else if (
               dataPointSelected.selectedDataPointSubCategory === "pricePoint"
             ) {
               setMapVisible(true);
-            setProjectsNearby(
+              setProjectsNearby(
                 lvnzyProject?.investment?.corridorPricing?.filter(
-                  (p: any) => !!p.sqftCost
-                ) || []
+                  (p: any) => !!p.sqftCost,
+                ) || [],
               );
             }
           } else if (
@@ -280,19 +404,19 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
 
     const initiateQueryStreamingText = () => {
       setQueryStreaminText(
-        "<span class='progress-text'>Checking on this. Hold on !</span>"
+        "<span class='progress-text'>Checking on this. Hold on !</span>",
       );
       setTimeout(() => {
         setQueryStreaminText(
-          "<span class='progress-text'>Found relevant info...</span>"
+          "<span class='progress-text'>Found relevant info...</span>",
         );
         setTimeout(() => {
           setQueryStreaminText(
-            "<span class='progress-text'>Preparing the answer...</span>"
+            "<span class='progress-text'>Preparing the answer...</span>",
           );
           setTimeout(() => {
             setQueryStreaminText(
-              "<span class='progress-text'>Taking a bit longer...</span>"
+              "<span class='progress-text'>Taking a bit longer...</span>",
             );
           }, 5000);
         }, 3000);
@@ -469,7 +593,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   }}
                 />
                 <div
-                  dangerouslySetInnerHTML={{ __html: queryStreamingText || "" }}
+                  dangerouslySetInnerHTML={{ __html: (queryStreamingText || "").replace(/\n/g, '<br>') }}
                   className="reasoning"
                   style={{ fontSize: FONT_SIZE.HEADING_3, margin: 0 }}
                 ></div>
@@ -504,14 +628,14 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
               {" "}
               {/* Past Interactions */}
               {currentChat.map((thread) =>
-                renderQABlock(thread.question, thread.answer.answer, false)
+                renderQABlock(thread.question, thread.answer.answer, false),
               )}
               {/* Current Question & Answer (Only show while processing) */}
               {currentQuestion &&
                 renderQABlock(
                   currentQuestion,
                   currentAnswer?.answer || "",
-                  true
+                  true,
                 )}
             </>
           ) : null}
@@ -668,7 +792,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                       lvnzyProjectId={lvnzyProject?._id || ""}
                       projectId={lvnzyProject?.originalProjectId?._id}
                       corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
-                        (c: any) => c.corridorId
+                        (c: any) => c.corridorId,
                       )}
                       hideAllFilters={false}
                       surroundingElements={surroundingElements}
@@ -676,7 +800,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                         lvnzyProject?.originalProjectId?.info.rate
                           .minimumUnitCost /
                           lvnzyProject?.originalProjectId?.info.rate
-                            .minimumUnitSize
+                            .minimumUnitSize,
                       )}
                       projectsNearby={projectsNearby}
                       drivers={mapDrivers.map((d) => {
@@ -699,11 +823,11 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   vertical
                   style={{
                     border: `2px solid ${COLORS.bgColorBlue}`,
-                    padding: '0 8px',
+                    padding: "0 8px",
                     margin: "16px 0 8px 0",
                     borderRadius: 8,
                     maxWidth: 800,
-                    backgroundColor: COLORS.bgColorLightBlue
+                    backgroundColor: COLORS.bgColorLightBlue,
                   }}
                 >
                   {sources && sources.length ? (
@@ -731,7 +855,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                               borderRadius: 8,
                               color: COLORS.textColorDark,
                               fontSize: FONT_SIZE.PARA,
-                              backgroundColor: COLORS.bgColorBlue
+                              backgroundColor: COLORS.bgColorBlue,
                             }}
                           >
                             {s.label}
@@ -741,25 +865,36 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                     </Flex>
                   ) : null}
 
-                    <Flex
+                  <Flex
+                    style={{
+                      width: "100",
+                      display: "inline",
+                      margin: "8px 0",
+                    }}
+                  >
+                    <Typography.Text
                       style={{
+                        color: COLORS.textColorMedium,
+                        fontSize: FONT_SIZE.PARA,
                         width: "100",
-                        display: "inline",
-                        margin: "8px 0",
+                        textWrap: "initial",
                       }}
                     >
-                      <Typography.Text
-                        style={{
-                          color: COLORS.textColorMedium,
-                          fontSize: FONT_SIZE.PARA,
-                          width: "100",
-                          textWrap: "initial",
-                        }}
-                      >
-                        Brickfi always uses legit data sources for analysis. {note}
-                      </Typography.Text>
-                    </Flex>
+                      Brickfi always uses legit data sources for analysis.{" "}
+                      {note}
+                    </Typography.Text>
+                  </Flex>
                 </Flex>
+                {/* Price quartile chart for pricePoint data point */}
+                {/* {dataPointSelected?.selectedDataPointSubCategory ===
+                  "pricePoint" && (
+                  <PriceQuartileChart
+                    pricingData={(
+                      lvnzyProject?.investment?.corridorPricing || []
+                    ).filter((p: any) => !!p.sqftCost)}
+                  />
+                )} */}
+
                 {/* Data point selected content */}
                 {dataPointSelected && (
                   <Flex vertical style={{ paddingTop: 8 }}>
@@ -783,7 +918,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                                   ></div>
                                 </Flex>
                               );
-                            }
+                            },
                           )
                         : ""}
                     </Flex>
@@ -951,12 +1086,12 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
               lvnzyProjectId={lvnzyProject?._id || ""}
               hideAllFilters={false}
               corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
-                (c: any) => c.corridorId
+                (c: any) => c.corridorId,
               )}
               surroundingElements={surroundingElements}
               projectSqftPricing={Math.round(
                 lvnzyProject?.originalProjectId?.info.rate.minimumUnitCost /
-                  lvnzyProject?.originalProjectId?.info.rate.minimumUnitSize
+                  lvnzyProject?.originalProjectId?.info.rate.minimumUnitSize,
               )}
               projectsNearby={projectsNearby}
               drivers={mapDrivers.map((d) => {
@@ -977,7 +1112,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
         </Modal>
       </Drawer>
     );
-  }
+  },
 );
 
 export default Brick360Chat;
