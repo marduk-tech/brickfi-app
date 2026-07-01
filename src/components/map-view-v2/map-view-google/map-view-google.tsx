@@ -12,6 +12,7 @@ import { CategoryFilters } from "../map-filters/category-filters";
 import { DriverFilters } from "../map-filters/driver-filters";
 import { SurroundingFilters } from "../map-filters/surrounding-filters";
 import { MapModal } from "../map-modal";
+import { fetchTravelDurationElement } from "../map-utils";
 import {
   MapViewContextProvider,
   useMapFiltersContext,
@@ -246,6 +247,7 @@ function MapViewGoogleInner({
                 noCategoriesProvided={noCategoriesProvided}
                 isDriverMatchingFilter={isDriverMatchingFilter}
                 openModal={openModal}
+                fetchTravelDurationElement={fetchTravelDurationElement}
               />
               <RoadDrivers
                 drivers={drivers}
@@ -253,6 +255,7 @@ function MapViewGoogleInner({
                 noCategoriesProvided={noCategoriesProvided}
                 isDriverMatchingFilter={isDriverMatchingFilter}
                 openModal={openModal}
+                fetchTravelDurationElement={fetchTravelDurationElement}
               />
               <SimpleDrivers
                 drivers={drivers}

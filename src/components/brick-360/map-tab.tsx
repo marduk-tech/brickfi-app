@@ -80,7 +80,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
         )}
 
         {!isMapFullScreen && (
-          <MapViewV2
+          <MapViewWrapper
             fullSize={false}
             projectId={lvnzyProject?.originalProjectId._id}
             drivers={drivers}
@@ -127,7 +127,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             vertical
             gap={16}
           >
-            <MapViewV2
+            <MapViewWrapper
               projectId={lvnzyProject?.originalProjectId._id}
               drivers={drivers}
               lvnzyProjectId={lvnzyProject._id}

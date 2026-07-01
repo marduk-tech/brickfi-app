@@ -2,11 +2,12 @@
 
 import React, { useEffect } from "react";
 import * as turf from "@turf/turf";
+import { Flex, Tag, Typography } from "antd";
 import { AdvancedMarker, AdvancedMarkerAnchorPoint, useMap } from "@vis.gl/react-google-maps";
 import { useMapZoom } from "../use-map-zoom";
 import { DRIVER_CATEGORIES, PLACE_TIMELINE } from "../../../../libs/constants";
 import { capitalize, driverStatusLabel } from "../../../../libs/lvnzy-helper";
-import { COLORS } from "../../../../theme/style-constants";
+import { COLORS, FONT_SIZE } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
 import { RoadDriverPlace } from "../../types";
 import { MapModalContent } from "../../map-modal";
@@ -18,6 +19,7 @@ interface RoadDriversProps {
   noCategoriesProvided: boolean;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
   openModal: (content: MapModalContent) => void;
+  fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
 }
 
 function filterRoad(
@@ -46,7 +48,7 @@ function filterRoad(
 // ── Polylines drawn imperatively (google.maps.Polyline) ──────────────────────
 function RoadPolylines(props: RoadDriversProps) {
   const map = useMap();
-  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal } = props;
+  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal, fetchTravelDurationElement } = props;
 
   useEffect(() => {
     if (!map) return;
@@ -62,7 +64,22 @@ function RoadPolylines(props: RoadDriversProps) {
 
       const handleClick = (featureProps?: any) =>
         openModal({
-          title: driver.name,
+          title: (
+            <Flex vertical>
+              <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                {driver.name}
+              </Typography.Text>
+              {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
+                <Flex>
+                  <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
+                </Flex>
+              ) : null}
+            </Flex>
+          ),
+          subHeading:
+            driver.distance && driver.duration
+              ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+              : "",
           content: driver.details?.oneLiner || driver.details?.description || "",
           tags: [
             { label: "Highway", color: COLORS.primaryColor },
@@ -70,8 +87,8 @@ function RoadPolylines(props: RoadDriversProps) {
               label: driverStatusLabel(featureProps?.status || driver.status),
               color:
                 isDashed || featureProps?.status === "construction"
-                  ? COLORS.yellowIdentifier
-                  : COLORS.greenIdentifier,
+                  ? "warning"
+                  : "success",
             },
           ],
         });
@@ -166,7 +183,7 @@ function buildLabelCandidates(filtered: RoadDriverPlace[], zoom: number): LabelC
 }
 
 export function RoadDrivers(props: RoadDriversProps) {
-  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal } = props;
+  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal, fetchTravelDurationElement } = props;
   const filtered = filterRoad(drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter);
   const zoom = useMapZoom();
 
@@ -192,7 +209,17 @@ export function RoadDrivers(props: RoadDriversProps) {
           position={{ lat, lng }}
           onClick={() =>
             openModal({
-              title: driver.name,
+              title: (
+                <Flex vertical>
+                  <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                    {driver.name}
+                  </Typography.Text>
+                </Flex>
+              ),
+              subHeading:
+                driver.distance && driver.duration
+                  ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                  : "",
               content: "",
               tags: [
                 { label: "Highway", color: COLORS.primaryColor },
@@ -229,25 +256,40 @@ export function RoadDrivers(props: RoadDriversProps) {
           position={{ lat: coords[1], lng: coords[0] }}
           anchorPoint={AdvancedMarkerAnchorPoint.CENTER}
           zIndex={1000}
-          onClick={() =>
+          onClick={() => {
+            const featureProps = feature.properties;
+            const isDashed = ![
+              PLACE_TIMELINE.LAUNCHED,
+              PLACE_TIMELINE.POST_LAUNCH,
+              PLACE_TIMELINE.PARTIAL_LAUNCH,
+            ].includes(driver.status as PLACE_TIMELINE);
             openModal({
-              title: driver.name,
+              title: (
+                <Flex vertical>
+                  <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                    {driver.name}
+                  </Typography.Text>
+                  {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
+                    <Flex>
+                      <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
+                    </Flex>
+                  ) : null}
+                </Flex>
+              ),
+              subHeading:
+                driver.distance && driver.duration
+                  ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                  : "",
               content: driver.details?.oneLiner || driver.details?.description || "",
               tags: [
                 { label: "Highway", color: COLORS.primaryColor },
                 {
-                  label: driverStatusLabel(driver.status),
-                  color: ![
-                    PLACE_TIMELINE.LAUNCHED,
-                    PLACE_TIMELINE.POST_LAUNCH,
-                    PLACE_TIMELINE.PARTIAL_LAUNCH,
-                  ].includes(driver.status as PLACE_TIMELINE)
-                    ? COLORS.yellowIdentifier
-                    : COLORS.greenIdentifier,
+                  label: driverStatusLabel(featureProps?.status || driver.status),
+                  color: isDashed || featureProps?.status === "construction" ? "warning" : "success",
                 },
               ],
-            })
-          }
+            });
+          }}
         >
           <div
             style={{

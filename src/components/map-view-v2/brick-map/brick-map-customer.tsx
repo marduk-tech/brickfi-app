@@ -12,7 +12,6 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import moment from "moment";
 import { capitalize, getMinMaxPrices } from "@/libs/lvnzy-helper";
 const MapViewWrapper = dynamic(() => import("../map-view-google/map-view-wrapper"), { ssr: false });
-const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
 
 export function BrickMapCustomer({
   projectIds,
@@ -319,7 +318,7 @@ export function BrickMapCustomer({
                   : `${filteredProjects.length} projects`}
               </Typography.Text> */}
             </Flex>
-            <MapViewV2
+            <MapViewWrapper
               key="stable-map-view"
               drivers={filteredDrivers.map((p) => ({
                 ...p,

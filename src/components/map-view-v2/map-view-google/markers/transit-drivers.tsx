@@ -19,6 +19,7 @@ interface TransitDriversProps {
   noCategoriesProvided: boolean;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
   openModal: (content: MapModalContent) => void;
+  fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
 }
 
 function filterTransit(
@@ -47,7 +48,7 @@ function filterTransit(
 // ── Polylines drawn imperatively ─────────────────────────────────────────────
 function TransitPolylines(props: TransitDriversProps) {
   const map = useMap();
-  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal } = props;
+  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal, fetchTravelDurationElement } = props;
 
   useEffect(() => {
     if (!map) return;
@@ -64,10 +65,14 @@ function TransitPolylines(props: TransitDriversProps) {
       const handleClick = () =>
         openModal({
           title: driver.name,
+          subHeading:
+            driver.distance && driver.duration
+              ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+              : "",
           content: driver.details?.oneLiner || driver.details?.description || "",
           tags: [
-            { label: driverStatusLabel(driver.status), color: isDashed ? COLORS.yellowIdentifier : COLORS.greenIdentifier },
-            ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: COLORS.textColorDark })),
+            { label: driverStatusLabel(driver.status), color: isDashed ? "warning" : "success" },
+            ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: "info" })),
           ],
         });
 
@@ -181,7 +186,7 @@ function buildTransitLabelCandidates(filtered: TransitDriverPlace[], zoom: numbe
 
 // ── Main export ───────────────────────────────────────────────────────────────
 export function TransitDrivers(props: TransitDriversProps) {
-  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal } = props;
+  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal, fetchTravelDurationElement } = props;
   const filtered = filterTransit(drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter);
   const zoom = useMapZoom();
 
@@ -215,11 +220,15 @@ export function TransitDrivers(props: TransitDriversProps) {
           onClick={() =>
             openModal({
               title: driver.name,
+              subHeading:
+                driver.distance && driver.duration
+                  ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                  : "",
               content: driver.details?.oneLiner || driver.details?.description || "",
               tags: [
                 { label: `Station: ${stationName}`, color: COLORS.primaryColor },
-                { label: driverStatusLabel(driver.status), color: isDashed ? COLORS.yellowIdentifier : COLORS.greenIdentifier },
-                ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: COLORS.textColorDark })),
+                { label: driverStatusLabel(driver.status), color: isDashed ? "warning" : "success" },
+                ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: "info" })),
               ],
             })
           }
@@ -240,7 +249,13 @@ export function TransitDrivers(props: TransitDriversProps) {
   // ── Rotated transit-line name labels (matches OpenStreet zoom > 14 behaviour) ──
   const labelCandidates = buildTransitLabelCandidates(filtered, zoom);
   const labelMarkers: React.ReactNode[] = labelCandidates.map(
-    ({ coords, angle, labelColor, driver }, idx) => (
+    ({ coords, angle, labelColor, driver }, idx) => {
+      const isDashed = ![
+        PLACE_TIMELINE.LAUNCHED,
+        PLACE_TIMELINE.POST_LAUNCH,
+        PLACE_TIMELINE.PARTIAL_LAUNCH,
+      ].includes(driver.status as PLACE_TIMELINE);
+      return (
       <AdvancedMarker
         key={`transit-label-${driver._id}-${idx}`}
         position={{ lat: coords[1], lng: coords[0] }}
@@ -249,10 +264,14 @@ export function TransitDrivers(props: TransitDriversProps) {
         onClick={() =>
           openModal({
             title: driver.name,
+            subHeading:
+              driver.distance && driver.duration
+                ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                : "",
             content: driver.details?.oneLiner || driver.details?.description || "",
             tags: [
-              { label: driverStatusLabel(driver.status), color: COLORS.greenIdentifier },
-              ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: COLORS.textColorDark })),
+              { label: driverStatusLabel(driver.status), color: isDashed ? "warning" : "success" },
+              ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: "info" })),
             ],
           })
         }
@@ -277,7 +296,8 @@ export function TransitDrivers(props: TransitDriversProps) {
           {driver.name}
         </div>
       </AdvancedMarker>
-    )
+    );
+    }
   );
 
   return (
