@@ -352,7 +352,7 @@ export const Brick360DataPoints = {
       prompts: ["Nearest dining", "Largest mall nearby"],
     },
     transport: {
-      label: "Connectivity",
+      label: "Commute",
       prompts: ["Nearest metro", "Roads Nearby"],
     },
   },
