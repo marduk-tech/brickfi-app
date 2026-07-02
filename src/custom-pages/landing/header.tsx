@@ -6,14 +6,17 @@ import { useRouter } from "next/navigation";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LandingConstants } from "../../libs/constants";
 import DynamicReactIcon from "../../components/common/dynamic-react-icon";
+import { useDevice } from "../../hooks/use-device";
 
 const LandingHeader: React.FC<{
   bgColor?: string;
   color?: string;
   logo?: string;
-  isMobile: boolean;
-}> = ({ bgColor, color, logo, isMobile }) => {
+  isMobile?: boolean;
+}> = ({ bgColor, color, logo, isMobile: isMobileProp }) => {
   const router = useRouter();
+  const { isMobile: isMobileDetected } = useDevice();
+  const isMobile = isMobileProp ?? isMobileDetected;
   const navItems = [
     {
       link: "/",
