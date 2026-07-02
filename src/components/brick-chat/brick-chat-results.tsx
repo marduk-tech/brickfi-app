@@ -149,7 +149,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
   return (
     <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
-      {results.map((project) => (
+      {[...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0)).map((project) => (
         <Link
           key={project.projectId}
           href={`/app/brick360/${project.projectSlug || project.lvnzyProjectId}`}

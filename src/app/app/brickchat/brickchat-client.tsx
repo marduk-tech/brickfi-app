@@ -42,6 +42,7 @@ export interface ProjectResult {
   projectCorridor?: string;
   projectHomeTypes?: Array<string>;
   sizeBuiltupMin?: number;
+  rankScore: number;
   projectLocation: {
     lat: number;
     lng: number;
