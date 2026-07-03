@@ -730,7 +730,7 @@ export function BrickChatCore({
                 {renderQuestion(messageItem.question)}
 
                 <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                  {!messageItem.answer.directAnswer ? (
+                  {!messageItem.answer.directAnswer && !!messageItem.answer.projectsList.length ? (
                     <Typography.Text
                       style={{
                         fontSize: FONT_SIZE.SUB_TEXT,
@@ -780,7 +780,7 @@ export function BrickChatCore({
                         } solid ${COLORS.borderColor}`,
                       }}
                     >
-                      <Flex justify="flex-end">
+                      {messageItem.answer.projectsList && !!messageItem.answer.projectsList.length ? <Flex justify="flex-end">
                         <Button
                           size="small"
                           icon={
@@ -810,7 +810,8 @@ export function BrickChatCore({
                           }}
                           style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
                         ></Button>
-                      </Flex>
+                      </Flex>: null}
+                      
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
                       />
