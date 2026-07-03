@@ -53,6 +53,7 @@ interface ExploreAnswer {
   projectsList: ProjectResult[];
   summary: string;
   directAnswer: boolean;
+  nextSetCount?: number;
 }
 
 interface ChatMessage {
@@ -159,9 +160,10 @@ export function BrickChatCore({
   const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string>();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
-  const [loading, setLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false);
   const [threadsLoading, setThreadsLoading] = useState(false);
-  const [historyLoading, setHistoryLoading] = useState(false);
+  const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
+  const [showMobileMap, setShowMobileMap] = useState(false);
 
   const [projectResults, setProjectResults] = useState<
     ProjectResult[] | undefined
@@ -183,7 +185,7 @@ export function BrickChatCore({
     !activeThreadId &&
     !chatHistory.length &&
     !defaultProjectResults?.length &&
-    !historyLoading;
+    !threadyHistoryLoading;
 
   const syncThreadSearchParam = (threadId?: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -269,7 +271,7 @@ export function BrickChatCore({
     let cancelled = false;
 
     const loadThreadHistory = async () => {
-      setHistoryLoading(true);
+      setThreadyHistoryLoading(true);
 
       try {
         const history = await fetchThreadHistory(user._id, selectedThreadId);
@@ -298,11 +300,11 @@ export function BrickChatCore({
         setActiveThreadId(undefined);
         setChatHistory([]);
 
-        setHistoryLoading(false);
+        setThreadyHistoryLoading(false);
         router.replace(pathname, { scroll: false });
       } finally {
         if (!cancelled) {
-          setHistoryLoading(false);
+          setThreadyHistoryLoading(false);
         }
       }
     };
@@ -331,7 +333,7 @@ export function BrickChatCore({
     let cancelled = false;
 
     const loadSharedThread = async () => {
-      setHistoryLoading(true);
+      setThreadyHistoryLoading(true);
 
       try {
         const { history, threadId: newThreadId } = await openSharedThread(
@@ -360,7 +362,7 @@ export function BrickChatCore({
 
         await refreshChatThreads();
 
-        setHistoryLoading(false);
+        setThreadyHistoryLoading(false);
 
         // Drop sharedBy and point the URL at the user's own thread copy.
         router.replace(
@@ -377,11 +379,11 @@ export function BrickChatCore({
         setActiveThreadId(undefined);
         setChatHistory([]);
 
-        setHistoryLoading(false);
+        setThreadyHistoryLoading(false);
         router.replace(pathname, { scroll: false });
       } finally {
         if (!cancelled) {
-          setHistoryLoading(false);
+          setThreadyHistoryLoading(false);
         }
       }
     };
@@ -408,7 +410,7 @@ export function BrickChatCore({
     }
 
     setCurrentQuestion(question);
-    setLoading(true);
+    setChatLoading(true);
     form.resetFields();
 
     try {
@@ -449,7 +451,7 @@ export function BrickChatCore({
       message.error("Failed to search projects. Please try again.");
     } finally {
       setCurrentQuestion(undefined);
-      setLoading(false);
+      setChatLoading(false);
     }
   };
 
@@ -469,7 +471,7 @@ export function BrickChatCore({
     setChatHistory([]);
     setCurrentQuestion(undefined);
     setMapResultsIndex(undefined);
-    setHistoryLoading(false);
+    setThreadyHistoryLoading(false);
     syncThreadSearchParam();
   };
 
@@ -539,6 +541,7 @@ export function BrickChatCore({
           paddingBottom: 100,
           width: isMobile ? "100%" : "50%",
           height: "90vh",
+          display: isMobile && showMobileMap ? "none" : undefined,
         }}
       >
         <Flex
@@ -581,7 +584,7 @@ export function BrickChatCore({
                   <Flex align="center" gap={8}>
                     <Spin size="small" />
                     <Typography.Text type="secondary">
-                      Loading threads...
+                      Loading conversations...
                     </Typography.Text>
                   </Flex>
                 ) : chatThreads.length === 0 ? (
@@ -595,10 +598,10 @@ export function BrickChatCore({
                           backgroundColor: COLORS.textColorDark,
                           color: "white",
                           padding: "2px 8px",
-                          cursor: loading ? "not-allowed" : "pointer",
+                          cursor: chatLoading ? "not-allowed" : "pointer",
                         }}
                         onClick={() => {
-                          if (loading) {
+                          if (chatLoading) {
                             return;
                           }
 
@@ -712,11 +715,11 @@ export function BrickChatCore({
             </Flex>
           ) : null}
 
-          {historyLoading && !chatHistory.length ? (
+          {threadyHistoryLoading && !chatHistory.length ? (
             <Flex align="center" gap={12}>
               <Spin size="small" />
               <Typography.Text type="secondary">
-                Loading thread history...
+                Loading conversation...
               </Typography.Text>
             </Flex>
           ) : null}
@@ -811,13 +814,27 @@ export function BrickChatCore({
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
                       />
+                      { !chatLoading && (messageItem.answer.nextSetCount ?? 0) > 0 && index === chatHistory.length - 1 && (
+                        <Flex justify="flex-start">
+                          <Button
+                            size="small"
+                            style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
+                            onClick={() => {
+                              form.setFieldsValue({ question: "show me more" });
+                              form.submit();
+                            }}
+                          >
+                            Show me more
+                          </Button>
+                        </Flex>
+                      )}
                     </Flex>
                   ) : null}
                 </Flex>
               </Flex>
             ))}
 
-            {currentQuestion && loading && (
+            {currentQuestion && chatLoading && (
               <Flex vertical gap={12}>
                 {renderQuestion(currentQuestion)}
                 <Flex align="center" gap={12} style={{ marginTop: 8 }}>
@@ -919,13 +936,13 @@ export function BrickChatCore({
             <Input
               placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
               size="large"
-              disabled={loading || historyLoading}
+              disabled={chatLoading || threadyHistoryLoading}
               suffix={
                 <Button
                   type="text"
                   htmlType="submit"
                   icon={<BiSend size={20} />}
-                  disabled={loading || historyLoading}
+                  disabled={chatLoading || threadyHistoryLoading}
                   style={{ color: COLORS.primaryColor }}
                 />
               }
@@ -944,16 +961,20 @@ export function BrickChatCore({
         </Form>
       </Flex>
 
-      <Flex
-        style={{
-          width: isMobile ? "100%" : "47%",
-          minWidth: isMobile ? undefined : "47%",
-          padding: "0 1.5%",
-          flexShrink: 0,
-        }}
-      >
-        <BrickMapChat projects={projectResults || []} />
-      </Flex>
+      {(!isMobile || showMobileMap) && (
+        <Flex
+          style={{
+            width: isMobile ? "100%" : "47%",
+            minWidth: isMobile ? undefined : "47%",
+            height: isMobile ? "90vh" : undefined,
+            padding: "0 1.5%",
+            flexShrink: 0,
+            isolation: "isolate",
+          }}
+        >
+          <BrickMapChat projects={projectResults || []} />
+        </Flex>
+      )}
 
       <Modal
         open={shareModalOpen}
@@ -980,6 +1001,44 @@ export function BrickChatCore({
           </Flex>
         )}
       </Modal>
+
+      {isMobile && (
+        <Flex
+          justify="flex-end"
+          style={{
+            position: "fixed",
+            bottom: 124,
+            left: 0,
+            right: 24,
+            zIndex: 9999,
+            pointerEvents: "none",
+          }}
+        >
+          <Button
+            style={{
+              pointerEvents: "all",
+              borderRadius: 16,
+              paddingLeft: 16,
+              paddingRight: 16,
+              fontWeight: 600,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
+              backgroundColor: COLORS.textColorDark,
+              color: "white",
+              border: "none",
+            }}
+            icon={
+              <DynamicReactIcon
+                iconName="PiMapTrifold"
+                iconSet="pi"
+                color="white"
+                size={28}
+              />
+            }
+            onClick={() => setShowMobileMap((v) => !v)}
+          >
+          </Button>
+        </Flex>
+      )}
     </Flex>
   );
 }
