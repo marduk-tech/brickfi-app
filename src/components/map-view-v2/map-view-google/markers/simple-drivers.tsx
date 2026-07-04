@@ -1,7 +1,7 @@
 "use client";
 
-import React from "react";
-import { AdvancedMarker } from "@vis.gl/react-google-maps";
+import React, { useEffect, useState } from "react";
+import { AdvancedMarker, useMap } from "@vis.gl/react-google-maps";
 import {
   DRIVER_CATEGORIES,
   LivIndexDriversConfig,
@@ -28,6 +28,19 @@ export function SimpleDrivers({
   isDriverMatchingFilter,
   openModal,
 }: SimpleDriversProps) {
+  const map = useMap();
+  const [zoom, setZoom] = useState<number>(map?.getZoom() ?? 0);
+
+  useEffect(() => {
+    if (!map) return;
+    const listener = map.addListener("zoom_changed", () => {
+      setZoom(map.getZoom() ?? 0);
+    });
+    return () => listener.remove();
+  }, [map]);
+
+  const showDuration = zoom > 12;
+
   const filtered = (drivers ?? []).filter((d) => {
     if (!d.location?.lat || !d.location?.lng) return false;
     if (["highway", "transit", "micro-market"].includes(d.driver)) return false;
@@ -74,6 +87,7 @@ export function SimpleDrivers({
               iconBgColor="white"
               iconSize={18}
               isUnderConstruction={isDashed}
+              label={showDuration && driver.duration ? `${driver.duration} mins` : undefined}
             />
           </AdvancedMarker>
         );
