@@ -43,7 +43,7 @@ export function SimpleDrivers({
 
   const filtered = (drivers ?? []).filter((d) => {
     if (!d.location?.lat || !d.location?.lng) return false;
-    if (["highway", "transit", "micro-market"].includes(d.driver)) return false;
+    if (["highway", "transit"].includes(d.driver)) return false;
     const isAllowed = noCategoriesProvided
       ? true
       : (() => {
