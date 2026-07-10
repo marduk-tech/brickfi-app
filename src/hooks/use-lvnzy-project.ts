@@ -106,11 +106,16 @@ export const useFetchAccessibleLvnzyProjectBySlug = ({
  * @param {boolean} enabled - Whether to enable the query (should be true only for admin users)
  * @returns {UseQueryResult<LvnzyProject[], Error>} The result of the useQuery hook containing all lvnzy projects
  */
-export const useFetchAllLvnzyProjects = (enabled: boolean = false) => {
+export const useFetchAllLvnzyProjects = (
+  enabled: boolean = false,
+  basic: boolean = false,
+) => {
   return useQuery<LvnzyProject[], Error>({
-    queryKey: [queryKeys.getAllLvnzyProjects],
+    queryKey: [queryKeys.getAllLvnzyProjects, basic],
     queryFn: async () => {
-      const { data } = await axiosApiInstance.get(`/lvnzy-projects`);
+      const { data } = await axiosApiInstance.get(`/lvnzy-projects`, {
+        params: basic ? { basic: "true" } : undefined,
+      });
       return data as LvnzyProject[];
     },
     enabled,

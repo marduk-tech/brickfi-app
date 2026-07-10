@@ -1,60 +1,66 @@
 "use client";
 
-import {
-  MarketingProject,
-  useMarketingProjectSearch,
-} from "@/hooks/use-marketing-project-search";
+import { useFetchAllLvnzyProjects } from "@/hooks/use-lvnzy-project";
+import { LvnzyProject } from "@/types/LvnzyProject";
 import { COLORS } from "@/theme/style-constants";
 import { SearchOutlined } from "@ant-design/icons";
 import { Flex, Input, Table, Typography } from "antd";
 import { ColumnsType } from "antd/es/table";
 import { useMemo, useState } from "react";
 import { AdminGuard } from "@/components/auth/admin-guard";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 export default function Brk360sClient() {
   const [searchText, setSearchText] = useState("");
   const [pageSize, setPageSize] = useState(20);
 
-  const { projects, isLoading } = useMarketingProjectSearch();
+  const { data: projects = [], isLoading } = useFetchAllLvnzyProjects(
+    true,
+    true,
+  );
 
   const filteredProjects = useMemo(() => {
-
-    const filteredProjects = projects.filter(p => !!p.lvnzyProjectId);
-    if (!filteredProjects) return [];
-    if (!searchText.trim()) return filteredProjects;
-
-    return filteredProjects.filter((project) =>
-      project.projectName?.toLowerCase().includes(searchText.toLowerCase()),
+    if (!searchText.trim()) return projects;
+    return projects.filter((project) =>
+      project.meta?.projectName
+        ?.toLowerCase()
+        .includes(searchText.toLowerCase()),
     );
   }, [projects, searchText]);
 
-  const columns: ColumnsType<MarketingProject> = [
+  const columns: ColumnsType<LvnzyProject> = [
     {
       title: "Project Name",
-      dataIndex: "projectName",
+      dataIndex: ["meta", "projectName"],
       key: "projectName",
-      render: (name: string, record: MarketingProject) => {
-        if (!record.lvnzyProjectId) {
-          return <span>{name || "Unnamed Project"}</span>;
-        }
-        const url = `/app/brick360/${record.slug || record.lvnzyProjectId}`;
+      render: (name: string, record: LvnzyProject) => {
+        const url = `/app/brick360/${record.slug}`;
         return (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: COLORS.primaryColor }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {name || "Unnamed Project"}
-          </a>
+          <Flex gap={12} align="center">
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: COLORS.primaryColor }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {name || "Unnamed Project"}
+            </a>
+            {record.scoreExists ? <DynamicReactIcon
+              iconName="TbView360Number"
+              iconSet="tb"
+              size={18}
+              color={COLORS.primaryColor}
+            />: null}
+            
+          </Flex>
         );
       },
     },
   ];
 
   return (
-    <AdminGuard>
+    <AdminGuard allowedRoles={["analyst", "admin"]}>
       <Flex vertical gap={16} style={{ padding: 24 }}>
         <Typography.Title level={3}>Brick360 Reports</Typography.Title>
 
@@ -70,7 +76,7 @@ export default function Brk360sClient() {
         <Table
           dataSource={filteredProjects}
           columns={columns}
-          rowKey={(record) => record.lvnzyProjectId || record.projectName}
+          rowKey={(record) => record.slug || record._id}
           loading={isLoading}
           pagination={{
             pageSize,

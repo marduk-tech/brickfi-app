@@ -12,4 +12,5 @@ export interface LvnzyProject {
     [key: string]: any;
   } | null;
   score: any;
+  scoreExists?: boolean;
 }
