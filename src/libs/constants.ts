@@ -531,20 +531,24 @@ export const DRIVER_CATEGORIES: Record<string, DriverCategory> = {
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "est-infra") {
         return (
-          ["industrial-hitech", "transit", "micro-market"].includes(
+          (["industrial-hitech", "transit", "micro-market"].includes(
             driver.driver
           ) &&
           (driver.status === "post-launch" || driver.status === "launched") &&
-          (!driver.distance || driver.distance <= 30)
+          (!driver.distance || driver.distance <= 30)) ||
+          (["industrial-general", "highway", "transit"].includes(driver.driver) &&
+          (driver.status === "post-launch") && 
+            (!driver.distance || driver.distance <= 60))
         );
       }
       if (filter == "major-infra") {
         return (
           (["highway", "transit", "commercial"].includes(driver.driver) &&
             driver.status !== "post-launch" &&
-            (!driver.distance || driver.distance <= 15)) ||
+            (!driver.distance || driver.distance <= 25)) ||
           (["industrial-general"].includes(driver.driver) &&
-            (!driver.distance || driver.distance <= 20))
+          (driver.status !== "post-launch") &&
+            (!driver.distance || driver.distance <= 60))
         );
       }
       if (filter == "upcoming-tech") {
