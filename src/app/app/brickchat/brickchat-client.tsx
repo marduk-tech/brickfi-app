@@ -161,6 +161,8 @@ export function BrickChatCore({
   const [activeThreadId, setActiveThreadId] = useState<string>();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
   const [chatLoading, setChatLoading] = useState(false);
+  const [streamStatus, setStreamStatus] = useState<string>();
+  const [streamingSummary, setStreamingSummary] = useState<string>();
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
@@ -411,10 +413,12 @@ export function BrickChatCore({
 
     setCurrentQuestion(question);
     setChatLoading(true);
+    setStreamStatus(undefined);
+    setStreamingSummary(undefined);
     form.resetFields();
 
     try {
-      const res = await fetch(`${baseApiUrl}ai/explore-projects`, {
+      const res = await fetch(`${baseApiUrl}ai/explore-projects/stream`, {
         method: "POST",
         cache: "no-store",
         headers: {
@@ -429,16 +433,56 @@ export function BrickChatCore({
         }),
       });
 
-      if (!res.ok) throw new Error(`explore-projects ${res.status}`);
-      const json = await res.json();
-      const answer = json?.data as ExploreAnswer;
-      const resolvedThreadId = json?.meta?.threadId as string | undefined;
+      if (!res.ok || !res.body) throw new Error(`explore-projects ${res.status}`);
 
-      if (answer.projectsList && answer.projectsList.length) {
-        setProjectResults(answer.projectsList);
+      // parse SSE events: status/token while the agent runs, final at the end
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let answer: ExploreAnswer | undefined;
+      let resolvedThreadId: string | undefined;
+      let streamedText = "";
+
+      const handleEvent = (raw: string) => {
+        if (!raw.startsWith("data: ")) return;
+        let event;
+        try {
+          event = JSON.parse(raw.slice(6));
+        } catch {
+          return;
+        }
+        if (event.type === "status") {
+          setStreamStatus(event.message);
+        } else if (event.type === "token") {
+          streamedText += event.content;
+          setStreamingSummary(streamedText);
+        } else if (event.type === "final") {
+          answer = event.payload as ExploreAnswer;
+          resolvedThreadId = event.meta?.threadId;
+        } else if (event.type === "error") {
+          throw new Error(event.error || "stream error");
+        }
+      };
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx;
+        while ((idx = buffer.indexOf("\n\n")) !== -1) {
+          handleEvent(buffer.slice(0, idx));
+          buffer = buffer.slice(idx + 2);
+        }
+      }
+
+      if (!answer) throw new Error("stream ended without a result");
+      const finalAnswer: ExploreAnswer = answer;
+
+      if (finalAnswer.projectsList && finalAnswer.projectsList.length) {
+        setProjectResults(finalAnswer.projectsList);
         setMapResultsIndex(chatHistory.length);
       }
-      setChatHistory((prev) => [...prev, { question, answer }]);
+      setChatHistory((prev) => [...prev, { question, answer: finalAnswer }]);
 
       if (!activeThreadId && resolvedThreadId) {
         setActiveThreadId(resolvedThreadId);
@@ -452,6 +496,8 @@ export function BrickChatCore({
     } finally {
       setCurrentQuestion(undefined);
       setChatLoading(false);
+      setStreamStatus(undefined);
+      setStreamingSummary(undefined);
     }
   };
 
@@ -838,12 +884,21 @@ export function BrickChatCore({
             {currentQuestion && chatLoading && (
               <Flex vertical gap={12}>
                 {renderQuestion(currentQuestion)}
-                <Flex align="center" gap={12} style={{ marginTop: 8 }}>
-                  <Spin size="small" />
-                  <Typography.Text type="secondary">
-                    Searching for projects...
-                  </Typography.Text>
-                </Flex>
+                {streamingSummary ? (
+                  <Markdown
+                    className="bkchat-summary"
+                    remarkPlugins={[remarkGfm]}
+                  >
+                    {streamingSummary}
+                  </Markdown>
+                ) : (
+                  <Flex align="center" gap={12} style={{ marginTop: 8 }}>
+                    <Spin size="small" />
+                    <Typography.Text type="secondary">
+                      {streamStatus || "Searching for projects..."}
+                    </Typography.Text>
+                  </Flex>
+                )}
               </Flex>
             )}
           </Flex>
