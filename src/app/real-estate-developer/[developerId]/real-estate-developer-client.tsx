@@ -196,7 +196,7 @@ export default function RealEstateDeveloperClient({
           }}
         ></div>
 
-        <Flex vertical style={{ padding: "8px 0" }}>
+        <Flex vertical style={{ padding: "8px 0", height: 100, position: "relative" }}>
           <Text
             ellipsis={{ tooltip: project.name }}
             style={{
@@ -212,18 +212,24 @@ export default function RealEstateDeveloperClient({
               textWrap: "wrap",
               fontSize: FONT_SIZE.HEADING_4,
               lineHeight: "110%",
-              marginTop: "0",
+              marginTop: 8,
             }}
           >
             {capitalize(type)} {subType ? `| ${capitalize(subType)}` : ""}
           </Text>
-          <Flex gap={4} wrap style={{ marginTop: 16 }}>
+          <Flex gap={4} wrap style={{ marginTop: 4, position: 'absolute', bottom: 0 }}>
             {Array.from(
               new Set(
                 project.location
                   ?.split(",")
                   .map((s: string) => s.trim().split(" ")[0])
                   .filter(Boolean)
+                  .filter(
+                    (w: string) =>
+                      !["near", "pin", "where", "within"].includes(
+                        w.toLowerCase(),
+                      ),
+                  )
                   .map((w: string) =>
                     w.toLowerCase() === "bengaluru" ? "Bangalore" : w,
                   ),
