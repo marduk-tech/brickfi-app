@@ -43,6 +43,7 @@ const PROJECT_STATUS = {
   READY_TO_MOVE: "Ready to Move",
   PARTIALLY_READY: "Partially Ready",
   NEW_LAUNCH: "New Launch",
+  PRE_LAUNCH: "Launching Soon",
   UNDER_CONSTRUCTION: "Under Construction",
   NEAR_COMPLETION: "Near Completion",
 } as const;
@@ -63,6 +64,13 @@ const PROJECT_STATUS_CONFIG: Record<
     iconName: "TbProgressBolt",
     description:
       "The project is partially ready with one or more phases completed and others under construction or recently launched.",
+  },
+  [PROJECT_STATUS.PRE_LAUNCH]: {
+    color: COLORS.primaryColor,
+    iconSet: "gi",
+    iconName: "GiFallingStar",
+    description:
+      "The project is expected to launch soon and currerntly accepting expression of interest applications.",
   },
   [PROJECT_STATUS.NEW_LAUNCH]: {
     color: COLORS.primaryColor,
@@ -91,7 +99,9 @@ const getProjectStatus = (
   allCompletionDates: any[],
   allStartDates: any[],
 ): string | null => {
-  if (allCompletionDates.length === 0) return null;
+  if (allCompletionDates.length === 0 && !isPreLaunch) return null;
+    if (allCompletionDates.length === 0 && isPreLaunch) return PROJECT_STATUS.PRE_LAUNCH;
+
 
   const now = moment();
   const latestCompletionDate = moment.max(allCompletionDates);
@@ -169,7 +179,15 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     .map((ext: any) => moment(ext.startDate, "DD-MM-YYYY"))
     .filter((d: any) => d.isValid());
 
+  const expectedLaunchDate =
+    lvnzyProject?.originalProjectId?.info?.realTimeStatus?.expectedLaunchDate;
+  const isLaunchInFuture =
+    !!expectedLaunchDate &&
+    moment(expectedLaunchDate).isValid() &&
+    moment(expectedLaunchDate).isAfter(moment());
+
   const isPreLaunch =
+    isLaunchInFuture ||
     extensions.length === 0 ||
     (allStartDates.length > 0 &&
       allStartDates.every((d: any) => d.isAfter(moment())));
@@ -324,7 +342,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
                 size={16}
                 color={projectStatusConfig.color}
               />
-              <Typography.Text style={{ fontWeight: 600 }}>
+              <Typography.Text style={{ fontWeight: 600, color: projectStatusConfig.color }}>
                 {projectStatus}
               </Typography.Text>
             </Flex>
@@ -335,7 +353,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           </Typography.Text>
           <div style={{ marginTop: 12,lineHeight: "100%" }}>
             <Typography.Text style={{ lineHeight: .4, fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}>
-              * For a more real time status of the project, please{" "}
+              * For more details or for real time status, please{" "}
               <a href={ADVISOR_LINK} target="_blank" rel="noopener noreferrer" style={{color: COLORS.textColorDark, fontWeight: 500}}>
                 reach out to a brickfi advisor
               </a>{" "}
