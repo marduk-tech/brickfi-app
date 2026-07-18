@@ -124,7 +124,7 @@ const getProjectStatus = (
   ) {
     return PROJECT_STATUS.NEW_LAUNCH;
   }
-  if (latestCompletionDate.isAfter(now.clone().add(15, "months"))) {
+  if (latestCompletionDate.isAfter(now.clone().add(6, "months"))) {
     return PROJECT_STATUS.UNDER_CONSTRUCTION;
   }
   return PROJECT_STATUS.NEAR_COMPLETION;
