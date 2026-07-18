@@ -132,7 +132,7 @@ type LabelCandidate = {
 
 function buildLabelCandidates(filtered: RoadDriverPlace[], zoom: number): LabelCandidate[] {
   // Dedup threshold matches OpenStreet: 8 km at low zoom, tightens as user zooms in
-  const minLabelDistance = zoom < 13.5 ? 8 : zoom < 14.5 ? 4 : 2;
+  const minLabelDistance = zoom < 13.5 ? 3 : zoom < 14.5 ? 2 : 1.5;
   const all: LabelCandidate[] = [];
 
   for (const driver of filtered) {
