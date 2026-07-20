@@ -121,6 +121,8 @@ const normalizeUnitType = (c: any): { category: string; label: string } => {
   let label = raw;
   if (bhkMatch) {
     label = `${parseInt(bhkMatch[1])} BHK`;
+  } else if (lower.includes("studio")) {
+    label = "1 BHK";
   } else if (raw.includes("-")) {
     label = raw.split("-")[0].trim();
   }
