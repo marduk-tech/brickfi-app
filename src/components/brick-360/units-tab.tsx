@@ -114,7 +114,7 @@ const normalizeUnitType = (c: any): { category: string; label: string } => {
   else if (lower.includes("penthouse")) category = "Penthouses";
   else if (lower.includes("farmland")) category = "Farmlands";
   else if (lower.includes("plot")) category = "Plots";
-  else if (lower.includes("bhk") || lower.includes("apartment"))
+  else if (lower.includes("bhk") || lower.includes("apartment") || lower.includes("studio"))
     category = "Apartments";
 
   const bhkMatch = lower.match(/(\d+(?:\.\d+)?)\s*bhk/);
