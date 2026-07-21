@@ -240,10 +240,10 @@ const MapViewV2Inner = ({
           position: "relative",
         }}
       >
-        <MapStyleControls
+        {/* <MapStyleControls
           selectedStyle={mapStyle}
           onStyleChange={setMapStyle}
-        />
+        /> */}
         <MapContainer
           key={`map-v2`}
           center={[12.969999, 77.587841]}

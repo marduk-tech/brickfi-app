@@ -80,7 +80,7 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
   const [bounds, setBounds] = useState<MapBounds>();
   
   // Map style state
-  const [mapStyle, setMapStyleState] = useState<MapStyleType>("minimal");
+  const [mapStyle, setMapStyleState] = useState<MapStyleType>("street");
 
   // Use custom hooks for icons and filters
   const icons = useMapIcons(drivers, primaryProject, projectsNearby, projectSqftPricing);
