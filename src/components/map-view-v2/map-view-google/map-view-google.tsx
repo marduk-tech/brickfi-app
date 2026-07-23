@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { APIProvider, Map } from "@vis.gl/react-google-maps";
+import { APIProvider, InfoWindow, Map } from "@vis.gl/react-google-maps";
 
 import { useFetchCorridors } from "../../../hooks/use-corridors";
 import { useFetchLocalities } from "../../../hooks/use-localities";
@@ -11,7 +11,7 @@ import { ISurroundingElement } from "../../../types/Project";
 import { CategoryFilters } from "../map-filters/category-filters";
 import { DriverFilters } from "../map-filters/driver-filters";
 import { SurroundingFilters } from "../map-filters/surrounding-filters";
-import { MapModal } from "../map-modal";
+import { MapModalBody } from "../map-modal";
 import { fetchTravelDurationElement } from "../map-utils";
 import {
   MapViewContextProvider,
@@ -20,7 +20,7 @@ import {
 } from "../contexts/map-view-context";
 import { ProjectMarkerInput } from "../types";
 
-import { MapCenterer, MapReady } from "./map-camera";
+import { MapCenterer, MapFocusHandler, MapReady } from "./map-camera";
 import { CorridorMarkers } from "./markers/corridor-markers";
 import { LocalityMarkers } from "./markers/locality-markers";
 import { MicroMarketDrivers } from "./markers/micro-market-drivers";
@@ -36,6 +36,7 @@ export interface MapViewGoogleProps {
   drivers?: any[];
   projectId?: string;
   projects?: ProjectMarkerInput[];
+  focusedProjectId?: string | null;
   fullSize?: boolean;
   surroundingElements?: ISurroundingElement[];
   projectsNearby?: {
@@ -93,6 +94,7 @@ function MapViewGoogleInner({
   lvnzyProjectId,
   drivers,
   projects,
+  focusedProjectId,
   surroundingElements,
   projectsNearby,
   projectSqftPricing,
@@ -108,7 +110,7 @@ function MapViewGoogleInner({
   highlightedHomeTypes,
   primaryProject,
 }: MapViewGoogleProps & { primaryProject?: any }) {
-  const { isOpen, content: modalContent, openModal, closeModal } = useMapModal();
+  const { isOpen, content: modalContent, position: modalPosition, openModal, closeModal } = useMapModal();
 
   const {
     selectedCategory,
@@ -203,6 +205,11 @@ function MapViewGoogleInner({
             projects={projects}
             initialZoom={initialZoom}
           />
+          <MapFocusHandler
+            projects={projects}
+            focusedProjectId={focusedProjectId}
+            openModal={openModal}
+          />
           {onMapReady && <MapReady onMapReady={onMapReady} />}
 
           {/* ── Point markers ── */}
@@ -263,6 +270,8 @@ function MapViewGoogleInner({
                 noCategoriesProvided={noCategoriesProvided}
                 isDriverMatchingFilter={isDriverMatchingFilter}
                 openModal={openModal}
+                                fetchTravelDurationElement={fetchTravelDurationElement}
+
               />
               <DriverPolygons
                 drivers={drivers}
@@ -274,10 +283,19 @@ function MapViewGoogleInner({
               />
             </>
           )}
+
+          {isOpen && modalPosition && (
+            <InfoWindow
+              position={modalPosition}
+              onCloseClick={closeModal}
+              onClose={closeModal}
+              style={{ width: 320 }}
+            >
+              <MapModalBody content={modalContent} onClose={closeModal} />
+            </InfoWindow>
+          )}
         </Map>
       </div>
-
-      <MapModal isOpen={isOpen} onClose={closeModal} content={modalContent} />
     </div>
   );
 }

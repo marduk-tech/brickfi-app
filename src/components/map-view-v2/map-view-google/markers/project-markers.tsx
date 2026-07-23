@@ -5,7 +5,7 @@ import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import { capitalize, rupeeAmountFormat } from "../../../../libs/lvnzy-helper";
 import { HOME_TYPE_ICON, getPrimaryHomeType } from "../../../../libs/home-type-icons";
 import { COLORS } from "../../../../theme/style-constants";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { ProjectMarkerInput } from "../../types";
 import { MarkerIcon } from "../marker-icon";
 
@@ -20,7 +20,7 @@ interface ProjectMarkersProps {
   }[];
   projectSqftPricing?: number;
   highlightedHomeTypes?: string[];
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
 export function ProjectMarkers({
@@ -49,14 +49,18 @@ export function ProjectMarkers({
           position={{ lat: primaryLat, lng: primaryLng }}
           zIndex={600}
           onClick={() =>
-            openModal({
-              title: primaryProject.info.name,
-              content: primaryProject.info.description ?? "",
-              tags: (primaryProject.info.homeType ?? []).map((h: string) => ({
-                label: capitalize(h),
-                color: COLORS.textColorDark,
-              })),
-            })
+            openModal(
+              {
+                title: primaryProject.info.name,
+                content: primaryProject.info.description ?? "",
+                tags: (primaryProject.info.homeType ?? []).map((h: string) => ({
+                  label: capitalize(h),
+                  color: COLORS.textColorDark,
+                })),
+              },
+              // nudge north so the popup opens above the marker icon/label instead of on top of it
+              { lat: primaryLat + 0.0008, lng: primaryLng },
+            )
           }
         >
           <MarkerIcon
@@ -83,7 +87,9 @@ export function ProjectMarkers({
           <AdvancedMarker
             key={p.id}
             position={{ lat: p.location.lat, lng: p.location.lng }}
-            onClick={() => openModal(p.modalContent)}
+            onClick={() =>
+              openModal(p.modalContent, { lat: p.location.lat, lng: p.location.lng })
+            }
           >
             <MarkerIcon
               iconName={iconCfg.name}
@@ -116,11 +122,14 @@ export function ProjectMarkers({
               key={p.projectName}
               position={{ lat: p.projectLocation.lat, lng: p.projectLocation.lng }}
               onClick={() =>
-                openModal({
-                  title: p.projectName,
-                  content: "",
-                  tags: [{ label: capitalize(p.projectType ?? ""), color: COLORS.primaryColor }],
-                })
+                openModal(
+                  {
+                    title: p.projectName,
+                    content: "",
+                    tags: [{ label: capitalize(p.projectType ?? ""), color: COLORS.primaryColor }],
+                  },
+                  { lat: p.projectLocation.lat, lng: p.projectLocation.lng },
+                )
               }
             >
               <MarkerIcon

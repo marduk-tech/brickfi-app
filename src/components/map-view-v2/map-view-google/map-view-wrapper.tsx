@@ -41,6 +41,7 @@ interface MapViewWrapperProps {
   drivers?: any[];
   projectId?: string;
   projects?: ProjectMarkerInput[];
+  focusedProjectId?: string | null;
   fullSize: boolean;
   surroundingElements?: ISurroundingElement[];
   projectsNearby?: {

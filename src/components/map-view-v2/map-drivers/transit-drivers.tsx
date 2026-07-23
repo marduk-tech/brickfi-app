@@ -18,6 +18,7 @@ import { TransitDriverPlace, GeoJSONPointFeature } from "../types";
 import { processRoadFeatures } from "../utils";
 import { FlickerPolyline } from "../shapes/flicker-polyline";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
+import { MapModalGeoPosition } from "../map-modal";
 
 interface TransitDriversProps {
   bounds: L.LatLngBounds;
@@ -27,7 +28,7 @@ interface TransitDriversProps {
   noCategoriesProvided: boolean;
   categories?: string[];
   highlightedDrivers?: string[];
-  setModalContent: (content: any) => void;
+  setModalContent: (content: any, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
   fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
@@ -224,28 +225,31 @@ export const TransitDriversComponent = ({
                     zIndexOffset={1000}
                     eventHandlers={{
                       click: () => {
-                        setModalContent({
-                          title: driver.name,
-                          subHeading:
-                            driver.distance && driver.duration
-                              ? fetchTravelDurationElement(
-                                  driver.distance!,
-                                  driver.duration,
-                                  driver.comments
-                                )
-                              : "",
-                          content: driver.details?.oneLiner || driver.details?.description || "",
-                          tags: [
-                            {
-                              label: driverStatusLabel(driver.status),
-                              color: isDashed ? "warning" : "success",
-                            },
-                            ...(driver.tags || []).map((t: string) => ({
-                              label: capitalize(t),
-                              color: "info",
-                            })),
-                          ],
-                        });
+                        setModalContent(
+                          {
+                            title: driver.name,
+                            subHeading:
+                              driver.distance && driver.duration
+                                ? fetchTravelDurationElement(
+                                    driver.distance!,
+                                    driver.duration,
+                                    driver.comments
+                                  )
+                                : "",
+                            content: driver.details?.oneLiner || driver.details?.description || "",
+                            tags: [
+                              {
+                                label: driverStatusLabel(driver.status),
+                                color: isDashed ? "warning" : "success",
+                              },
+                              ...(driver.tags || []).map((t: string) => ({
+                                label: capitalize(t),
+                                color: "info",
+                              })),
+                            ],
+                          },
+                          { lat: coords[1], lng: coords[0] },
+                        );
                         setInfoModalOpen(true);
                       },
                     }}
@@ -271,38 +275,44 @@ export const TransitDriversComponent = ({
                   icon={transitStationIcon!}
                   eventHandlers={{
                     click: () => {
-                      setModalContent({
-                        title: driver.name,
-                        subHeading:
-                          driver.distance && driver.duration
-                            ? fetchTravelDurationElement(
-                                driver.distance!,
-                                driver.duration,
-                               driver.comments
-                              )
-                            : "",
-                        content: driver.details?.oneLiner || driver.details?.description || "",
+                      setModalContent(
+                        {
+                          title: driver.name,
+                          subHeading:
+                            driver.distance && driver.duration
+                              ? fetchTravelDurationElement(
+                                  driver.distance!,
+                                  driver.duration,
+                                 driver.comments
+                                )
+                              : "",
+                          content: driver.details?.oneLiner || driver.details?.description || "",
 
-                        tags: [
-                          {
-                            label:
-                              "Station: " +
-                              (feature.properties?.name ||
-                                feature.properties?.Name),
-                            color: COLORS.primaryColor,
-                          },
-                          {
-                            label: driverStatusLabel(driver.status),
-                            color: isDashed ? "warning" : "success",
-                          },
-                          ...(driver.tags || []).map((t: string) => {
-                            return {
-                              label: capitalize(t),
-                              color: "info",
-                            };
-                          }),
-                        ],
-                      });
+                          tags: [
+                            {
+                              label:
+                                "Station: " +
+                                (feature.properties?.name ||
+                                  feature.properties?.Name),
+                              color: COLORS.primaryColor,
+                            },
+                            {
+                              label: driverStatusLabel(driver.status),
+                              color: isDashed ? "warning" : "success",
+                            },
+                            ...(driver.tags || []).map((t: string) => {
+                              return {
+                                label: capitalize(t),
+                                color: "info",
+                              };
+                            }),
+                          ],
+                        },
+                        {
+                          lat: feature.geometry.coordinates[1],
+                          lng: feature.geometry.coordinates[0],
+                        },
+                      );
                       setInfoModalOpen(true);
                     },
                   }}

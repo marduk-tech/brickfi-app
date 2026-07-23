@@ -3,7 +3,7 @@ import L from "leaflet";
 import { Marker } from "react-leaflet";
 import { capitalize } from "../../../libs/lvnzy-helper";
 import { COLORS } from "../../../theme/style-constants";
-import { MapModalContent } from "../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../map-modal";
 import { ProjectMarkerInput } from "../types";
 
 interface ProjectMarkersProps {
@@ -13,7 +13,7 @@ interface ProjectMarkersProps {
   projectMarkerIcon?: L.DivIcon | null;
   projectMarkerIconsByHomeType?: Record<string, L.DivIcon>;
   highlightedHomeTypes?: string[];
-  setModalContent: (content: MapModalContent) => void;
+  setModalContent: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
 }
 
@@ -50,18 +50,25 @@ export const ProjectMarkers = ({
         icon={currentProjectMarkerIcon}
         eventHandlers={{
           click: () => {
-            setModalContent({
-              title: primaryProject.info.name,
-              content: primaryProject.info.description || "",
-              tags: [
-                ...primaryProject.info.homeType.map((h: string) => {
-                  return {
-                    label: capitalize(h),
-                    color: COLORS.textColorDark,
-                  };
-                }),
-              ],
-            });
+            setModalContent(
+              {
+                title: primaryProject.info.name,
+                content: primaryProject.info.description || "",
+                tags: [
+                  ...primaryProject.info.homeType.map((h: string) => {
+                    return {
+                      label: capitalize(h),
+                      color: COLORS.textColorDark,
+                    };
+                  }),
+                ],
+              },
+              {
+                // nudge north so the popup opens above the marker icon/label instead of on top of it
+                lat: primaryProject.info.location.lat + 0.0008,
+                lng: primaryProject.info.location.lng,
+              },
+            );
             setInfoModalOpen(true);
           },
         }}
@@ -94,7 +101,7 @@ export const ProjectMarkers = ({
           icon={markerIcon}
           eventHandlers={{
             click: () => {
-              setModalContent(p.modalContent);
+              setModalContent(p.modalContent, { lat: p.location.lat, lng: p.location.lng });
               setInfoModalOpen(true);
             },
           }}
@@ -116,7 +123,7 @@ interface ProjectsNearbyProps {
   projectsNearbyIcons: any[];
   projectSqftPricing?: number;
   primaryProject?: any;
-  setModalContent: (content: MapModalContent) => void;
+  setModalContent: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
 }
 
@@ -163,20 +170,26 @@ export const ProjectsNearbyMarkers = ({
               icon={projectIcon.icon}
               eventHandlers={{
                 click: () => {
-                  setModalContent({
-                    title: project.projectName,
-                    content: "",
-                    tags: [
-                      {
-                        label: `${capitalize(
-                          project
-                            ? project?.projectType || ""
-                            : ""
-                        )}`,
-                        color: COLORS.primaryColor,
-                      },
-                    ],
-                  });
+                  setModalContent(
+                    {
+                      title: project.projectName,
+                      content: "",
+                      tags: [
+                        {
+                          label: `${capitalize(
+                            project
+                              ? project?.projectType || ""
+                              : ""
+                          )}`,
+                          color: COLORS.primaryColor,
+                        },
+                      ],
+                    },
+                    {
+                      lat: project.projectLocation.lat,
+                      lng: project.projectLocation.lng,
+                    },
+                  );
                   setInfoModalOpen(true);
                 },
               }}

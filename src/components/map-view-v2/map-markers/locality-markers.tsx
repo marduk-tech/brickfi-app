@@ -3,12 +3,12 @@ import L from "leaflet";
 import { renderToString } from "react-dom/server";
 import { Marker } from "react-leaflet";
 import { COLORS } from "../../../theme/style-constants";
-import { MapModalContent } from "../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../map-modal";
 import { LocalityMarkerIcon } from "../locality-marker-icon";
 
 interface LocalityMarkersProps {
   localities?: any[];
-  setModalContent: (content: MapModalContent) => void;
+  setModalContent: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
 }
 
@@ -40,13 +40,16 @@ export const LocalityMarkers = ({
               position={[locality.location.lat, locality.location.lng]}
               eventHandlers={{
                 click: () => {
-                  setModalContent({
-                    title: locality.name,
-                    content: "",
-                    tags: [
-                      { label: "Growth corridor", color: COLORS.textColorDark },
-                    ],
-                  });
+                  setModalContent(
+                    {
+                      title: locality.name,
+                      content: "",
+                      tags: [
+                        { label: "Growth corridor", color: COLORS.textColorDark },
+                      ],
+                    },
+                    { lat: locality.location.lat, lng: locality.location.lng },
+                  );
                   setInfoModalOpen(true);
                 },
               }}

@@ -45,3 +45,18 @@ a {
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
+/* Google Maps InfoWindow (map-view-google): strip default padding/close button so
+   MapModalBody is the only visible surface inside it. The tail arrow is kept since
+   it usefully points at the geo anchor the modal was opened against. */
+.gm-style-iw-c {
+  padding: 16px !important;
+  border-radius: 8px !important;
+}
+.gm-style-iw-d {
+  overflow: visible !important;
+  padding: 0 !important;
+}
+.gm-style-iw-c .gm-ui-hover-effect {
+  display: none !important;
+}

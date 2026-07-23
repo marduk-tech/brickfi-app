@@ -1,7 +1,7 @@
 "use client";
 
 import { AdminGuard } from "@/components/auth/admin-guard";
-import BrickChatResults from "@/components/brick-chat/brick-chat-results";
+import BrickChatResults from "@/app/app/brickchat/brick-chat-results";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { useDevice } from "@/hooks/use-device";
 import { useUser } from "@/hooks/use-user";
@@ -36,6 +36,7 @@ export interface ProjectResult {
   projectSlug?: string;
   projectStatus?: string;
   projectImage?: string;
+  projectImages?: string[];
   lvnzyProjectId?: string;
   projectUnitTypes?: Array<number>;
   projectAvgSquareFootPrice?: number;
@@ -169,6 +170,9 @@ export function BrickChatCore({
     ProjectResult[] | undefined
   >(defaultProjectResults);
   const [mapResultsIndex, setMapResultsIndex] = useState<number | undefined>();
+  const [focusedProjectId, setFocusedProjectId] = useState<string | null>(
+    null,
+  );
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareLink, setShareLink] = useState<string>();
@@ -711,7 +715,10 @@ export function BrickChatCore({
                   </Typography.Text>
                 </Flex>
               )}
-              <BrickChatResults results={defaultProjectResults} />
+              <BrickChatResults
+                results={defaultProjectResults}
+                onLocateProject={setFocusedProjectId}
+              />
             </Flex>
           ) : null}
 
@@ -814,6 +821,7 @@ export function BrickChatCore({
                       
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
+                        onLocateProject={setFocusedProjectId}
                       />
                       { !chatLoading && (messageItem.answer.nextSetCount ?? 0) > 0 && index === chatHistory.length - 1 && (
                         <Flex justify="flex-start">
@@ -973,7 +981,10 @@ export function BrickChatCore({
             isolation: "isolate",
           }}
         >
-          <BrickMapChat projects={projectResults || []} />
+          <BrickMapChat
+            projects={projectResults || []}
+            focusedProjectId={focusedProjectId}
+          />
         </Flex>
       )}
 

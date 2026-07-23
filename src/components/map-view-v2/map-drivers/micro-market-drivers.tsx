@@ -3,13 +3,14 @@ import { Polygon } from "react-leaflet";
 import { DRIVER_CATEGORIES } from "../../../libs/constants";
 import { COLORS } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
+import { MapModalGeoPosition } from "../map-modal";
 
 interface MicroMarketDriversProps {
   drivers?: IDriverPlace[];
   currentSelectedCategory: string;
   noCategoriesProvided: boolean;
   categories?: string[];
-  setModalContent: (content: any) => void;
+  setModalContent: (content: any, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
   fetchTravelDurationElement: (distance: number, duration: number) => React.ReactNode;
@@ -55,18 +56,21 @@ export const MicroMarketDriversComponent = ({
               ([lng, lat]: [number, number]) => [lat, lng] as [number, number]
             )}
             eventHandlers={{
-              click: () => {
-                setModalContent({
-                  title: d.name,
-                  subHeading: d.distance && d.duration ? fetchTravelDurationElement(d.distance, d.duration) : undefined,
-                  content: d.details?.oneLiner || d.details?.description || "",
-                  tags: [
-                    {
-                      label: "Micro Market",
-                      color: COLORS.primaryColor,
-                    },
-                  ],
-                });
+              click: (e) => {
+                setModalContent(
+                  {
+                    title: d.name,
+                    subHeading: d.distance && d.duration ? fetchTravelDurationElement(d.distance, d.duration) : undefined,
+                    content: d.details?.oneLiner || d.details?.description || "",
+                    tags: [
+                      {
+                        label: "Micro Market",
+                        color: COLORS.primaryColor,
+                      },
+                    ],
+                  },
+                  { lat: e.latlng.lat, lng: e.latlng.lng },
+                );
                 setInfoModalOpen(true);
               },
             }}

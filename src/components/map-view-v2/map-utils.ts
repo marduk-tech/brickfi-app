@@ -39,7 +39,7 @@ export const fetchTravelDurationElement = (
           ),
           React.createElement(
             Typography.Text,
-            { key: "duration-text", style: { fontSize: 12 } },
+            { key: "duration-text", style: { fontSize: 12, fontWeight: 400 } },
             `${prefix && !/^nearest point$/i.test(prefix) ? `${prefix.startsWith("Nearest ") ? prefix : `Nearest ${prefix}`}` : ""} `,
           ),
         ],
@@ -49,6 +49,7 @@ export const fetchTravelDurationElement = (
         {
           style: {
             fontSize: FONT_SIZE.SUB_TEXT,
+            lineHeight: "100%",
             color: COLORS.textColorLight,
           },
           key: "disclaimer",

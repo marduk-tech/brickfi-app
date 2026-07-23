@@ -3,12 +3,12 @@
 import React from "react";
 import { AdvancedMarker } from "@vis.gl/react-google-maps";
 import { COLORS } from "../../../../theme/style-constants";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { LocalityMarkerIcon } from "../../locality-marker-icon";
 
 interface LocalityMarkersProps {
   localities?: any[];
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
 export function LocalityMarkers({ localities, openModal }: LocalityMarkersProps) {
@@ -21,11 +21,14 @@ export function LocalityMarkers({ localities, openModal }: LocalityMarkersProps)
             key={`locality-${locality._id}`}
             position={{ lat: locality.location.lat, lng: locality.location.lng }}
             onClick={() =>
-              openModal({
-                title: locality.name,
-                content: "",
-                tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
-              })
+              openModal(
+                {
+                  title: locality.name,
+                  content: "",
+                  tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
+                },
+                { lat: locality.location.lat, lng: locality.location.lng },
+              )
             }
           >
             <LocalityMarkerIcon />

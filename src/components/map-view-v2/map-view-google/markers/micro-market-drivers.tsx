@@ -5,14 +5,14 @@ import { useMap } from "@vis.gl/react-google-maps";
 import { DRIVER_CATEGORIES } from "../../../../libs/constants";
 import { COLORS } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 
 interface MicroMarketDriversProps {
   drivers?: IDriverPlace[];
   currentSelectedCategory: string;
   noCategoriesProvided: boolean;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
 export function MicroMarketDrivers({
@@ -47,12 +47,15 @@ export function MicroMarketDrivers({
         fillColor: COLORS.yellowIdentifier,
         fillOpacity: 0.2,
       });
-      poly.addListener("click", () =>
-        openModal({
-          title: driver.name,
-          content: driver.details?.oneLiner || driver.details?.description || "",
-          tags: [{ label: "Micro Market", color: COLORS.primaryColor }],
-        })
+      poly.addListener("click", (e: google.maps.PolyMouseEvent) =>
+        openModal(
+          {
+            title: driver.name,
+            content: driver.details?.oneLiner || driver.details?.description || "",
+            tags: [{ label: "Micro Market", color: COLORS.primaryColor }],
+          },
+          e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
+        )
       );
       polys.push(poly);
     }

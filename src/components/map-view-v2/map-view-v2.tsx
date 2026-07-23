@@ -7,6 +7,7 @@ import {
   MapContainer,
   Marker,
   Polyline,
+  Popup,
   TileLayer,
   useMap,
   ZoomControl,
@@ -47,12 +48,13 @@ import {
   ProjectsNearbyMarkers,
 } from "./map-markers/project-markers";
 import { SurroundingMarkers } from "./map-markers/surrounding-markers";
-import { MapModal } from "./map-modal";
+import { MapModalBody } from "./map-modal";
 import { MapStyleControls } from "./map-style-switcher/map-style-controls";
 import { MapStyleType } from "./map-style-switcher/map-style-dialog";
 import { BoundsAwareDrivers } from "./map-utils/bounds-aware-drivers";
 import {
   MapCenterHandler,
+  MapFocusHandler,
   MapInstanceCapture,
   MapResizeHandler,
 } from "./map-utils/map-handlers";
@@ -79,6 +81,7 @@ interface MapViewV2Props {
   drivers?: any[];
   projectId?: string;
   projects?: ProjectMarkerInput[];
+  focusedProjectId?: string | null;
   fullSize: boolean;
   surroundingElements?: ISurroundingElement[];
   projectsNearby?: {
@@ -104,6 +107,7 @@ const MapViewV2Inner = ({
   lvnzyProjectId,
   projectId,
   projects,
+  focusedProjectId,
   fullSize,
   surroundingElements,
   projectsNearby,
@@ -123,6 +127,7 @@ const MapViewV2Inner = ({
   const {
     isOpen: infoModalOpen,
     content: modalContent,
+    position: modalPosition,
     openModal,
     closeModal,
   } = useMapModal();
@@ -259,6 +264,11 @@ const MapViewV2Inner = ({
           <ZoomControl position="bottomright" />
           <MapResizeHandler />
           <MapCenterHandler projectData={primaryProject} projects={projects} initialZoom={initialZoom} />
+          <MapFocusHandler
+            projects={projects}
+            focusedProjectId={focusedProjectId}
+            openModal={openModal}
+          />
           {onMapReady && <MapInstanceCapture onMapReady={onMapReady} />}
           <TileLayer key={mapStyle} url={getTileUrl(mapStyle)} attribution="" />
           {/* Process and render polygon data */}
@@ -401,15 +411,18 @@ const MapViewV2Inner = ({
               </>
             );
           })()}
+
+          {infoModalOpen && modalPosition && (
+            <Popup
+              position={[modalPosition.lat, modalPosition.lng]}
+              maxWidth={320}
+              eventHandlers={{ remove: closeModal }}
+            >
+              <MapModalBody content={modalContent} onClose={closeModal} />
+            </Popup>
+          )}
         </MapContainer>
       </div>
-
-      {/* Map info modal */}
-      <MapModal
-        isOpen={infoModalOpen}
-        onClose={closeModal}
-        content={modalContent}
-      />
     </div>
   );
 };
