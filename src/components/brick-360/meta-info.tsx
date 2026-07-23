@@ -98,6 +98,7 @@ const getProjectStatus = (
   isPreLaunch: boolean,
   allCompletionDates: any[],
   allStartDates: any[],
+  hasMultiplePhases: boolean,
 ): string | null => {
   if (allCompletionDates.length === 0 && !isPreLaunch) return null;
     if (allCompletionDates.length === 0 && isPreLaunch) return PROJECT_STATUS.PRE_LAUNCH;
@@ -110,7 +111,11 @@ const getProjectStatus = (
     return PROJECT_STATUS.READY_TO_MOVE;
   }
   if (
+    hasMultiplePhases &&
     allCompletionDates.some((d: any) =>
+      d.isSameOrBefore(now.clone().subtract(6, "months")),
+    ) &&
+    !allCompletionDates.every((d: any) =>
       d.isSameOrBefore(now.clone().subtract(6, "months")),
     )
   ) {
@@ -205,6 +210,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     isPreLaunch,
     allCompletionDates,
     allStartDates,
+    extensions.length > 1,
   );
 
   const projectStatusConfig = projectStatus
