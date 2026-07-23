@@ -21,6 +21,8 @@ import styles from "./brick-chat-results.module.css";
 interface BrickChatResultsProps {
   results: ProjectResult[];
   onLocateProject?: (projectId: string) => void;
+  /** Whether this results list is the one currently plotted on the map — controls locate-pin visibility. */
+  isShownOnMap?: boolean;
 }
 
 // Pull the ids of projects already in the user's default collection
@@ -67,6 +69,7 @@ const getProjectMetadata = (project: ProjectResult): string => {
 export default function BrickChatResults({
   results,
   onLocateProject,
+  isShownOnMap,
 }: BrickChatResultsProps) {
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
@@ -270,7 +273,7 @@ export default function BrickChatResults({
                 </Typography.Paragraph>
               )}
               <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
-                 {project.projectLocation?.lat && project.projectLocation?.lng && (
+                 {isShownOnMap && project.projectLocation?.lat && project.projectLocation?.lng && (
                   <Flex
                     align="center"
                     justify="center"
@@ -288,13 +291,13 @@ export default function BrickChatResults({
                     <DynamicReactIcon
                       iconName="IoLocateOutline"
                       iconSet="io5"
-                      size={14}
+                      size={18}
                       color={COLORS.primaryColor}
                     />
                   </Flex>
                 )}
 
-                {project.lvnzyProjectId && (
+                {/* {project.lvnzyProjectId && (
                   <Flex
                     align="center"
                     justify="center"
@@ -320,7 +323,7 @@ export default function BrickChatResults({
                       color={COLORS.primaryColor}
                     />
                   </Flex>
-                )}
+                )} */}
                 <Link
                   href={`/app/brick360/${project.projectSlug}`}
                   prefetch={false}
@@ -336,22 +339,21 @@ export default function BrickChatResults({
                  <Flex
                     align="center"
                     justify="center"
-                    onClick={(e) => handleToggleSave(e, project)}
                     style={{
                       width: 24,
                       height: 24,
                       flexShrink: 0,
                       borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      backgroundColor: project.projectStatus === "report-verified" ? COLORS.primaryColor : "rgba(255, 255, 255, 0.9)",
                       boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
                       cursor: "pointer",
                     }}
                   >
                     <DynamicReactIcon
-                      iconName="BiDetail"
-                      iconSet="bi"
-                      size={14}
-                      color={COLORS.primaryColor}
+                      iconName={project.projectStatus === "report-verified" ? "TbView360Number": "BiDetail"}
+                      iconSet={project.projectStatus === "report-verified" ? "tb": "bi"}
+                      size={18}
+                      color={project.projectStatus === "report-verified" ? "white": COLORS.primaryColor}
                     />
                   </Flex>
                 </Link>

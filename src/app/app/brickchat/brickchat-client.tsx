@@ -718,6 +718,7 @@ export function BrickChatCore({
               <BrickChatResults
                 results={defaultProjectResults}
                 onLocateProject={setFocusedProjectId}
+                isShownOnMap={mapResultsIndex === undefined}
               />
             </Flex>
           ) : null}
@@ -816,12 +817,13 @@ export function BrickChatCore({
                             }
                           }}
                           style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
-                        ></Button>
+                        >{mapResultsIndex === index ? '': 'See on Map'}</Button>
                       </Flex>: null}
                       
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
                         onLocateProject={setFocusedProjectId}
+                        isShownOnMap={mapResultsIndex === index}
                       />
                       { !chatLoading && (messageItem.answer.nextSetCount ?? 0) > 0 && index === chatHistory.length - 1 && (
                         <Flex justify="flex-start">

@@ -80,7 +80,6 @@ export function MapFocusHandler({ projects, focusedProjectId, openModal }: MapFo
     }
 
     map.panTo({ lat: project.location.lat, lng: project.location.lng });
-    map.setZoom(FOCUS_ZOOM);
     openModal(project.modalContent, {
       lat: project.location.lat,
       lng: project.location.lng,

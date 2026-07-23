@@ -289,6 +289,7 @@ function MapViewGoogleInner({
               position={modalPosition}
               onCloseClick={closeModal}
               onClose={closeModal}
+              pixelOffset={[0, -10]}
               style={{ width: 320 }}
             >
               <MapModalBody content={modalContent} onClose={closeModal} />

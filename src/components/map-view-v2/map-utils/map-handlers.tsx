@@ -72,7 +72,7 @@ export const MapFocusHandler = ({ projects, focusedProjectId, openModal }: MapFo
       };
     }
 
-    map.setView([project.location.lat, project.location.lng], FOCUS_ZOOM);
+    map.setView([project.location.lat, project.location.lng]);
     openModal(project.modalContent, {
       lat: project.location.lat,
       lng: project.location.lng,

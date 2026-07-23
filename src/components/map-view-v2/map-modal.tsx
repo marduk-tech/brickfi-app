@@ -183,7 +183,7 @@ export const MapModal = ({
     );
 
     // Center vertically on the click, clamped to stay within the container.
-    let top = position.y - panelRect.height / 2;
+    let top = position.y - panelRect.height / 2 - 10;
     top = Math.max(
       EDGE_PADDING,
       Math.min(top, containerHeight - panelRect.height - EDGE_PADDING),
