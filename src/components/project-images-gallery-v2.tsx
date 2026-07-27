@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import "../theme/gallery.css";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
 import { IMedia } from "../types/Project";
+import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 // fixed order for tags
 const TAGS_ORDER = [
@@ -28,7 +29,7 @@ export const ProjectGalleryV2 = ({
       (item) =>
         item.type === "video" &&
         item.video &&
-        (item.video.youtubeUrl || item.video.bunnyLibraryId)
+        (item.video.youtubeUrl || item.video.bunnyLibraryId),
     );
 
     media.forEach((item) => {
@@ -71,7 +72,7 @@ export const ProjectGalleryV2 = ({
         item.type === "video" &&
         item.video &&
         (item.video.youtubeUrl || item.video.bunnyLibraryId) &&
-        (!item.video.tags || !item.video.tags.includes("na"))
+        (!item.video.tags || !item.video.tags.includes("na")),
     );
     const imageMedia = media
       .filter(
@@ -80,7 +81,7 @@ export const ProjectGalleryV2 = ({
           item.image &&
           (!item.image.tags ||
             !item.image.tags.length ||
-            !item.image.tags.find((t) => !TAGS_ORDER.includes(t)))
+            !item.image.tags.find((t) => !TAGS_ORDER.includes(t))),
       )
       .sort((a: any, b: any) => {
         const seqA = TAGS_ORDER.indexOf(a.image.tags[0]);
@@ -93,10 +94,10 @@ export const ProjectGalleryV2 = ({
     allMedia.forEach((item) => {
       const tags = item.type === "image" ? item.image?.tags : item.video?.tags;
       if (tags && tags.length > 0) {
-          if (!result[tags[0]]) {
-            result[tags[0]] = [];
-          }
-          result[tags[0]].push(item);
+        if (!result[tags[0]]) {
+          result[tags[0]] = [];
+        }
+        result[tags[0]].push(item);
       }
       // Media without tags will only appear when "all" is selected
       // They won't be grouped under any specific tag
@@ -115,7 +116,7 @@ export const ProjectGalleryV2 = ({
     if (selectedImageId) {
       Object.keys(result).forEach((tag) => {
         const selectedIndex = result[tag].findIndex(
-          (img) => img._id === selectedImageId
+          (img) => img._id === selectedImageId,
         );
         if (selectedIndex > -1) {
           const [selected] = result[tag].splice(selectedIndex, 1);
@@ -161,7 +162,7 @@ export const ProjectGalleryV2 = ({
         (item) =>
           item.type === "video" &&
           item.video &&
-          (!item.video.tags || !item.video.tags.includes("na"))
+          (!item.video.tags || !item.video.tags.includes("na")),
       );
       return [["Videos", videoMedia]];
     }
@@ -207,10 +208,15 @@ export const ProjectGalleryV2 = ({
               color: selectedTag === tag ? "white" : COLORS.textColorMedium,
             }}
           >
-            {tag == "layout" ? "Masterplan": tag}
+            {tag == "layout"
+              ? "masterplan"
+              : tag == "construction"
+                ? "Actual Site"
+                : tag}
           </Tag.CheckableTag>
         ))}
       </Flex>
+      
 
       {filteredImages.length > 0 ? (
         <Image.PreviewGroup preview={true}>
@@ -224,8 +230,36 @@ export const ProjectGalleryV2 = ({
                     textTransform: "capitalize",
                   }}
                 >
-                  {tag == "layout" ? "masterplan": tag}
+                  {tag == "layout"
+                    ? "masterplan"
+                    : tag == "construction"
+                      ? "Actual Site"
+                      : tag}
                 </Typography.Text>
+                {tag == "construction" ? <Flex
+                    style={{
+                      width: "100",
+                      display: "inline",
+                      marginTop: 16,
+                      marginBottom: 16
+                    }}
+                  >
+                    <Tag
+                      style={{
+                        lineHeight: "120%",
+                        padding: "4px 8px",
+                        borderRadius: 8,
+                        color: COLORS.textColorDark,
+                        fontSize: FONT_SIZE.PARA,
+                        width: "100",
+                        textWrap: "initial",
+                      }}
+                      icon={<ExclamationCircleOutlined />}
+                      color="warning"
+                    >
+                     Please note that current site conditions may vary from the pictures shown below.
+                    </Tag>
+                  </Flex>: null} 
 
                 <div className="gallery-grid">
                   {images.map((item, index) => {
@@ -242,7 +276,7 @@ export const ProjectGalleryV2 = ({
                             <iframe
                               src={item.video.youtubeUrl?.replace(
                                 "watch?v=",
-                                "embed/"
+                                "embed/",
                               )}
                               style={{
                                 width: "100%",
