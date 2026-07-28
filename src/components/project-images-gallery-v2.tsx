@@ -29,7 +29,9 @@ export const ProjectGalleryV2 = ({
       (item) =>
         item.type === "video" &&
         item.video &&
-        (item.video.youtubeUrl || item.video.bunnyLibraryId),
+        (item.video.youtubeUrl ||
+          item.video.vimeoUrl ||
+          item.video.bunnyLibraryId),
     );
 
     media.forEach((item) => {
@@ -52,15 +54,17 @@ export const ProjectGalleryV2 = ({
     });
 
     const tagArray = ["all"];
-    if (hasVideos) {
-      tagArray.push("Videos");
-    }
 
     TAGS_ORDER.forEach((tag) => {
       if (tags.has(tag)) {
         tagArray.push(tag);
       }
     });
+
+    // Keep "Videos" as the last tag
+    if (hasVideos) {
+      tagArray.push("Videos");
+    }
 
     return tagArray;
   }, [media]);
@@ -71,7 +75,9 @@ export const ProjectGalleryV2 = ({
       (item) =>
         item.type === "video" &&
         item.video &&
-        (item.video.youtubeUrl || item.video.bunnyLibraryId) &&
+        (item.video.youtubeUrl ||
+          item.video.vimeoUrl ||
+          item.video.bunnyLibraryId) &&
         (!item.video.tags || !item.video.tags.includes("na")),
     );
     const imageMedia = media
@@ -103,6 +109,11 @@ export const ProjectGalleryV2 = ({
       // They won't be grouped under any specific tag
     });
 
+    // Keep "Videos" as the last group
+    if (videoMedia.length > 0) {
+      result["Videos"] = videoMedia;
+    }
+
     // Sort videos first, then images
     Object.keys(result).forEach((tag) => {
       result[tag].sort((a, b) => {
@@ -132,45 +143,13 @@ export const ProjectGalleryV2 = ({
     if (selectedTag === "all") {
       const result = Object.entries(groupedImages);
 
-      // Add media without tags to the result when "all" is selected
-      const mediaWithoutTags = media.filter((item) => {
-        const tags =
-          item.type === "image" ? item.image?.tags : item.video?.tags;
-        return (
-          (!tags ||
-            tags.length === 0 ||
-            (tags.length === 1 && tags[0] === "na")) &&
-          ((item.type === "image" && item.image) ||
-            (item.type === "video" &&
-              item.video &&
-              (item.video.youtubeUrl || item.video.bunnyLibraryId)))
-        );
-      });
-
-      // if (mediaWithoutTags.length > 0 && result.length > 0) {
-      //   // Add untagged media to the first existing category
-      //   result[0][1] = [...result[0][1], ...mediaWithoutTags];
-      // } else if (mediaWithoutTags.length > 0) {
-      //   // If no other categories exist, create a general category
-      //   result.push(["Media", mediaWithoutTags]);
-      // }
-
       return result;
-    }
-    if (selectedTag === "Videos") {
-      const videoMedia = media.filter(
-        (item) =>
-          item.type === "video" &&
-          item.video &&
-          (!item.video.tags || !item.video.tags.includes("na")),
-      );
-      return [["Videos", videoMedia]];
     }
     if (groupedImages[selectedTag]) {
       return [[selectedTag, groupedImages[selectedTag]]];
     }
     return [];
-  }, [selectedTag, groupedImages, media]);
+  }, [selectedTag, groupedImages]);
 
   return (
     <Flex vertical gap={16}>
@@ -269,7 +248,7 @@ export const ProjectGalleryV2 = ({
                         key={`${tag}-${item._id}`}
                         className={`gallery-item ${
                           isFirstInSection ? "gallery-item-large" : ""
-                        }`}
+                        } ${item.type === "video" ? "gallery-item-video" : ""}`}
                       >
                         {item.type === "video" ? (
                           item.video?.isYoutube ? (
@@ -278,26 +257,23 @@ export const ProjectGalleryV2 = ({
                                 "watch?v=",
                                 "embed/",
                               )}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                border: "1px solid",
-                                borderColor: COLORS.borderColorMedium,
-                                borderRadius: "8px",
-                              }}
+                              className="gallery-video-frame"
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          ) : item.video?.isVimeo ? (
+                            <iframe
+                              src={`https://player.vimeo.com/video/${item.video.vimeoUrl?.match(
+                                /\/(\d+)/,
+                              )?.[1]}`}
+                              className="gallery-video-frame"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               allowFullScreen
                             />
                           ) : (
                             <iframe
                               src={`https://iframe.mediadelivery.net/embed/${item.video?.bunnyLibraryId}/${item.video?.bunnyVideoId}?autoplay=false&loop=false&muted=false&preload=true&responsive=true`}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                border: "1px solid",
-                                borderColor: COLORS.borderColorMedium,
-                                borderRadius: "8px",
-                              }}
+                              className="gallery-video-frame"
                               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                               allowFullScreen
                             />
