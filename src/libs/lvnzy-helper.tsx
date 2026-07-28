@@ -39,11 +39,49 @@ export const getMinMaxPrices = (prices: number[]) => {
     ? rupeeAmountFormat(min)
     : `${rupeeAmountFormat(min)} - ${rupeeAmountFormat(max)}`;
 };
+const toRoman = (num: number) => {
+  const romanMap: [number, string][] = [
+    [1000, "M"],
+    [900, "CM"],
+    [500, "D"],
+    [400, "CD"],
+    [100, "C"],
+    [90, "XC"],
+    [50, "L"],
+    [40, "XL"],
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"],
+  ];
+  let result = "";
+  for (const [value, symbol] of romanMap) {
+    while (num >= value) {
+      result += symbol;
+      num -= value;
+    }
+  }
+  return result;
+};
+
+// covers phase/block numbering (e.g. "Phase II"); real project names don't
+// go past this range, kept small to avoid false positives on ordinary words
+// that happen to be spelled with roman numeral letters (e.g. "mix", "civil")
+const ROMAN_NUMERALS = new Set(
+  Array.from({ length: 49 }, (_, i) => toRoman(i + 1)),
+);
+
 export const capitalize = (input: string) => {
   if (!input) {
     return "";
   }
-  return input.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+  return input.toLowerCase().replace(/\b\w+\b/g, (word) => {
+    const upper = word.toUpperCase();
+    return ROMAN_NUMERALS.has(upper)
+      ? upper
+      : word.charAt(0).toUpperCase() + word.slice(1);
+  });
 };
 
 export const driverStatusLabel = (status: string) => {
