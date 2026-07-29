@@ -312,8 +312,10 @@ export const Brick360CategoryInfo: Record<
 
 export const Brick360DataPoints = {
   property: {
-    noDataPlaceholder:
+    futureProjectNoDataPlaceholder:
       "Property assessment is currently not available since the project is yet to be launched. Full assessment will be available on launch.",
+    oldProjectNoDataPlaceholder:
+      "Property assessment is not available since the project is pre-RERA i.e was completed before RERA.",
     amenities: {
       label: "Amenities",
       note: "The amenities list here are as marketed by the developer and should be reviewed in agreement.",

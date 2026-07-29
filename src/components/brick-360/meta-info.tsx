@@ -99,8 +99,18 @@ const getProjectStatus = (
   allCompletionDates: any[],
   allStartDates: any[],
   hasMultiplePhases: boolean,
+  expectedLaunchDate?: string,
 ): string | null => {
-  if (allCompletionDates.length === 0 && !isPreLaunch) return null;
+  if (allCompletionDates.length === 0 && !isPreLaunch) {
+    // No RERA timeline data to go on (e.g. pre-RERA projects) — fall back to
+    // expectedLaunchDate: if it's already in the past, the project has
+    // presumably launched and is ready to move.
+    const hasPastLaunchDate =
+      !!expectedLaunchDate &&
+      moment(expectedLaunchDate).isValid() &&
+      moment(expectedLaunchDate).isBefore(moment());
+    return hasPastLaunchDate ? PROJECT_STATUS.READY_TO_MOVE : null;
+  }
     if (allCompletionDates.length === 0 && isPreLaunch) return PROJECT_STATUS.PRE_LAUNCH;
 
 
@@ -193,7 +203,6 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
 
   const isPreLaunch =
     isLaunchInFuture ||
-    extensions.length === 0 ||
     (allStartDates.length > 0 &&
       allStartDates.every((d: any) => d.isAfter(moment())));
 
@@ -201,16 +210,12 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     .map((ext: any) => moment(ext.completionDate, "DD-MM-YYYY"))
     .filter((d: any) => d.isValid());
 
-  const latestCompletionDate =
-    allCompletionDates.length > 0
-      ? moment.max(allCompletionDates).format("MMM YYYY")
-      : "";
-
   const projectStatus = getProjectStatus(
     isPreLaunch,
     allCompletionDates,
     allStartDates,
     extensions.length > 1,
+    expectedLaunchDate,
   );
 
   const projectStatusConfig = projectStatus
