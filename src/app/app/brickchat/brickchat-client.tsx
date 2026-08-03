@@ -1059,7 +1059,7 @@ export function BrickChatCore({
 
 export default function BrickChatClient() {
   return (
-    <AdminGuard allowedRoles={["admin", "member", "user"]}>
+    <AdminGuard allowedRoles={["admin", "member"]}>
       <BrickChatCore />
     </AdminGuard>
   );
