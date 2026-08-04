@@ -151,20 +151,21 @@ export default function RealEstateDeveloperClient({
 
   const renderProject = (project: any, index: number) => {
     const regex = /\b(plot|apartment|villa|rowhouse)(?=s?\b)/gi;
+    const typeLower = project.type ? project.type.toLowerCase() : "";
     let subType = project.subType ? project.subType.match(regex) : "";
     if (!subType) {
       subType =
-        `${project.type.toLowerCase()}, ${project.unitVariations.toLowerCase()}`.match(
+        typeLower ? `${typeLower}, ${project.unitVariations ? project.unitVariations.toLowerCase() : ""}`.match(
           regex,
-        );
+        ) : "";
       subType = subType && subType.length ? subType[0] : "";
     } else {
       subType = subType.length ? subType[0] : subType;
     }
     const type =
-      project.type.toLowerCase() == "residential"
+      project.type ? typeLower == "residential"
         ? "Residential Community"
-        : project.type;
+        : project.type : "";
 
     return (
       <Flex
@@ -181,8 +182,7 @@ export default function RealEstateDeveloperClient({
         <div
           style={{
             backgroundImage: `url(/images/builder-page/${
-              project.type.toLowerCase() == "residential" ||
-              project.type.toLowerCase().includes("residential")
+              typeLower == "residential" || typeLower.includes("residential")
                 ? subType
                   ? subType.toLowerCase()
                   : "apartment"
@@ -211,6 +211,7 @@ export default function RealEstateDeveloperClient({
           >
             {project.name}
           </Text>
+          {project.type ?
           <Text
             style={{
               textWrap: "wrap",
@@ -220,7 +221,7 @@ export default function RealEstateDeveloperClient({
             }}
           >
             {capitalize(type)} {subType ? `| ${capitalize(subType)}` : ""}
-          </Text>
+          </Text>: null}
           <Flex
             gap={4}
             wrap
