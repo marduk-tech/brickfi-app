@@ -251,7 +251,7 @@ export function BrickMapAdmin() {
               projectId={selectedProjectId || undefined}
               fullSize={false}
               showLocalities={true}
-              showCorridors={false}
+              showCorridors={true}
             />
           </>
         </Flex>
