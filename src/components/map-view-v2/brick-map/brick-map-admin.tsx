@@ -242,7 +242,7 @@ export function BrickMapAdmin() {
                   : `${filteredProjects.length} projects`}
               </Typography.Text>
             </Flex>
-            <MapViewWrapper
+            <MapViewV2
               key="stable-map-view"
               drivers={filteredDrivers.map((p) => ({
                 ...p,
