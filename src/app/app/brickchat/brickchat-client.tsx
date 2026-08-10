@@ -534,7 +534,7 @@ export function BrickChatCore({
     const items = (imagesGroups || []).flatMap((group) =>
       group.images.map((image) => ({
         ...image,
-        caption: group.projectName,
+        caption: `${group.projectName}: ${image.caption}`,
       })),
     );
 
