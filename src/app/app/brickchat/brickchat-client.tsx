@@ -14,6 +14,7 @@ import {
   Empty,
   Flex,
   Form,
+  Image,
   Input,
   Modal,
   Spin,
@@ -28,6 +29,7 @@ import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { BrickMapChat } from "./brick-map-chat";
+import styles from "./brick-chat-results.module.css";
 
 export interface ProjectResult {
   projectId: string;
@@ -50,11 +52,24 @@ export interface ProjectResult {
   };
 }
 
+interface ExploreImageItem {
+  url: string;
+  caption?: string | null;
+  tags?: string[];
+}
+
+interface ExploreImagesGroup {
+  projectName: string;
+  projectId: string;
+  images: ExploreImageItem[];
+}
+
 interface ExploreAnswer {
   projectsList: ProjectResult[];
   summary: string;
   directAnswer: boolean;
   nextSetCount?: number;
+  images?: ExploreImagesGroup[];
 }
 
 interface ChatMessage {
@@ -225,7 +240,7 @@ export function BrickChatCore({
   };
 
   useEffect(() => {
-    if (!user?._id) {
+  if (!user?._id) {
       return;
     }
 
@@ -515,6 +530,60 @@ export function BrickChatCore({
     }
   };
 
+  const renderImages = (imagesGroups?: ExploreImagesGroup[]) => {
+    const items = (imagesGroups || []).flatMap((group) =>
+      group.images.map((image) => ({
+        ...image,
+        caption: group.projectName,
+      })),
+    );
+
+    if (!items.length) {
+      return null;
+    }
+
+    return (
+      <Image.PreviewGroup>
+        <Flex className={styles.scrollContainer} gap={12} style={{ marginTop: 8 }}>
+          {items.map((image, index) => (
+            <Flex
+              key={`${image.url}-${index}`}
+              vertical
+              gap={4}
+              style={{
+                width: 160,
+                flexShrink: 0,
+              }}
+            >
+              <Image
+                src={image.url}
+                alt={image.caption || ""}
+                width={160}
+                height={120}
+                style={{
+                  objectFit: "cover",
+                  borderRadius: 12,
+                  border: `1px solid ${COLORS.borderColor}`,
+                }}
+              />
+              {image.caption ? (
+                <Typography.Text
+                  ellipsis
+                  style={{
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  {image.caption}
+                </Typography.Text>
+              ) : null}
+            </Flex>
+          ))}
+        </Flex>
+      </Image.PreviewGroup>
+    );
+  };
+
   const renderQuestion = (question: string) => (
     <Flex>
       <Typography.Text
@@ -771,6 +840,7 @@ export function BrickChatCore({
                   >
                     {messageItem.answer.summary}
                   </Markdown>
+                  {renderImages(messageItem.answer.images)}
                   {!messageItem.answer.directAnswer ? (
                     <Flex
                       vertical
