@@ -103,7 +103,13 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
       link: "/aboutus",
       icon: { name: "RiTeamFill", set: "ri" },
     },
-
+    {
+      key: "chat",
+      title: "Brick Chat",
+      disabled: !user || user.role !== "admin" ,
+      link: "/app/brickchat",
+      icon: { name: "MdChat", set: "md" },
+    },
     {
       key: "chat-history",
       title: "Chat History",
