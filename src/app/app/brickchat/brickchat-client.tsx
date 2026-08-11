@@ -2,6 +2,9 @@
 
 import { AdminGuard } from "@/components/auth/admin-guard";
 import BrickChatResults from "@/components/brick-chat/brick-chat-results";
+import ChatTimeline, {
+  TimelineStep,
+} from "@/components/brick-chat/chat-timeline";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { useDevice } from "@/hooks/use-device";
 import { useUser } from "@/hooks/use-user";
@@ -59,6 +62,8 @@ interface ExploreAnswer {
 interface ChatMessage {
   question: string;
   answer: ExploreAnswer;
+  steps?: TimelineStep[];
+  durationMs?: number;
 }
 
 const SAMPLE_PROMPTS = [
@@ -161,7 +166,7 @@ export function BrickChatCore({
   const [activeThreadId, setActiveThreadId] = useState<string>();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
   const [chatLoading, setChatLoading] = useState(false);
-  const [streamStatus, setStreamStatus] = useState<string>();
+  const [steps, setSteps] = useState<TimelineStep[]>([]);
   const [streamingSummary, setStreamingSummary] = useState<string>();
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
@@ -413,9 +418,11 @@ export function BrickChatCore({
 
     setCurrentQuestion(question);
     setChatLoading(true);
-    setStreamStatus(undefined);
+    setSteps([]);
     setStreamingSummary(undefined);
     form.resetFields();
+
+    const runStartedAt = Date.now();
 
     try {
       const res = await fetch(`${baseApiUrl}ai/explore-projects/stream`, {
@@ -433,7 +440,8 @@ export function BrickChatCore({
         }),
       });
 
-      if (!res.ok || !res.body) throw new Error(`explore-projects ${res.status}`);
+      if (!res.ok || !res.body)
+        throw new Error(`explore-projects ${res.status}`);
 
       // parse SSE events: status/token while the agent runs, final at the end
       const reader = res.body.getReader();
@@ -443,6 +451,43 @@ export function BrickChatCore({
       let resolvedThreadId: string | undefined;
       let streamedText = "";
 
+      let stepList: TimelineStep[] = [];
+
+      const upsertStep = (incoming: {
+        id: string;
+        label?: string;
+        detail?: string;
+        status: "active" | "done";
+      }) => {
+        const i = stepList.findIndex((s) => s.id === incoming.id);
+        if (i === -1) {
+          if (incoming.status === "done") return;
+          stepList = [
+            ...stepList,
+            {
+              id: incoming.id,
+              label: incoming.label || incoming.id,
+              detail: incoming.detail,
+              status: incoming.status,
+              startedAt: Date.now(),
+            },
+          ];
+        } else {
+          stepList = [...stepList];
+          stepList[i] = {
+            ...stepList[i],
+            label: incoming.label ?? stepList[i].label,
+            detail: incoming.detail ?? stepList[i].detail,
+            status: incoming.status,
+            endedAt:
+              incoming.status === "done"
+                ? (stepList[i].endedAt ?? Date.now())
+                : stepList[i].endedAt,
+          };
+        }
+        setSteps(stepList);
+      };
+
       const handleEvent = (raw: string) => {
         if (!raw.startsWith("data: ")) return;
         let event;
@@ -451,8 +496,19 @@ export function BrickChatCore({
         } catch {
           return;
         }
-        if (event.type === "status") {
-          setStreamStatus(event.message);
+        if (event.type === "step") {
+          upsertStep(event);
+        } else if (event.type === "status") {
+          stepList = stepList.map((s) =>
+            s.status === "active"
+              ? { ...s, status: "done" as const, endedAt: Date.now() }
+              : s,
+          );
+          upsertStep({
+            id: event.node || event.message,
+            label: event.message,
+            status: "active",
+          });
         } else if (event.type === "token") {
           streamedText += event.content;
           setStreamingSummary(streamedText);
@@ -482,7 +538,21 @@ export function BrickChatCore({
         setProjectResults(finalAnswer.projectsList);
         setMapResultsIndex(chatHistory.length);
       }
-      setChatHistory((prev) => [...prev, { question, answer: finalAnswer }]);
+
+      const completedSteps = stepList.map((s) =>
+        s.status === "active"
+          ? { ...s, status: "done" as const, endedAt: s.endedAt ?? Date.now() }
+          : s,
+      );
+      setChatHistory((prev) => [
+        ...prev,
+        {
+          question,
+          answer: finalAnswer,
+          steps: completedSteps,
+          durationMs: Date.now() - runStartedAt,
+        },
+      ]);
 
       if (!activeThreadId && resolvedThreadId) {
         setActiveThreadId(resolvedThreadId);
@@ -496,7 +566,7 @@ export function BrickChatCore({
     } finally {
       setCurrentQuestion(undefined);
       setChatLoading(false);
-      setStreamStatus(undefined);
+      setSteps([]);
       setStreamingSummary(undefined);
     }
   };
@@ -775,8 +845,17 @@ export function BrickChatCore({
               <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
                 {renderQuestion(messageItem.question)}
 
+                {messageItem.steps?.length ? (
+                  <ChatTimeline
+                    steps={messageItem.steps}
+                    running={false}
+                    totalMs={messageItem.durationMs}
+                  />
+                ) : null}
+
                 <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                  {!messageItem.answer.directAnswer && !!messageItem.answer.projectsList.length ? (
+                  {!messageItem.answer.directAnswer &&
+                  !!messageItem.answer.projectsList.length ? (
                     <Typography.Text
                       style={{
                         fontSize: FONT_SIZE.SUB_TEXT,
@@ -826,55 +905,62 @@ export function BrickChatCore({
                         } solid ${COLORS.borderColor}`,
                       }}
                     >
-                      {messageItem.answer.projectsList && !!messageItem.answer.projectsList.length ? <Flex justify="flex-end">
-                        <Button
-                          size="small"
-                          icon={
-                            <DynamicReactIcon
-                              iconName="FaMapMarkedAlt"
-                              iconSet="fa"
-                              size={16}
-                              color={
-                                mapResultsIndex === index
-                                  ? "white"
-                                  : COLORS.primaryColor
-                              }
-                            ></DynamicReactIcon>
-                          }
-                          type={
-                            mapResultsIndex === index ? "primary" : "default"
-                          }
-                          onClick={() => {
-                            if (mapResultsIndex === index) {
-                              setMapResultsIndex(undefined);
-                            } else {
-                              setMapResultsIndex(index);
-                              setProjectResults(
-                                messageItem.answer.projectsList,
-                              );
+                      {messageItem.answer.projectsList &&
+                      !!messageItem.answer.projectsList.length ? (
+                        <Flex justify="flex-end">
+                          <Button
+                            size="small"
+                            icon={
+                              <DynamicReactIcon
+                                iconName="FaMapMarkedAlt"
+                                iconSet="fa"
+                                size={16}
+                                color={
+                                  mapResultsIndex === index
+                                    ? "white"
+                                    : COLORS.primaryColor
+                                }
+                              ></DynamicReactIcon>
                             }
-                          }}
-                          style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
-                        ></Button>
-                      </Flex>: null}
-                      
+                            type={
+                              mapResultsIndex === index ? "primary" : "default"
+                            }
+                            onClick={() => {
+                              if (mapResultsIndex === index) {
+                                setMapResultsIndex(undefined);
+                              } else {
+                                setMapResultsIndex(index);
+                                setProjectResults(
+                                  messageItem.answer.projectsList,
+                                );
+                              }
+                            }}
+                            style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
+                          ></Button>
+                        </Flex>
+                      ) : null}
+
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
                       />
-                      { !chatLoading && (messageItem.answer.nextSetCount ?? 0) > 0 && index === chatHistory.length - 1 && (
-                        <Flex justify="flex-start">
-                          <Button
-                            size="small"
-                            style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
-                            onClick={() => {
-                              form.setFieldsValue({ question: "show me more" });
-                              form.submit();
-                            }}
-                          >
-                            Show me more
-                          </Button>
-                        </Flex>
-                      )}
+                      {!chatLoading &&
+                        (messageItem.answer.nextSetCount ?? 0) > 0 &&
+                        index === chatHistory.length - 1 && (
+                          <Flex justify="flex-start">
+                            <Button
+                              size="small"
+                              style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
+                              onClick={() => {
+                                form.setFieldsValue({
+                                  question: "show me more",
+                                });
+                                form.submit();
+                              }}
+                            >
+                              Show me more
+                            </Button>
+                          </Flex>
+                        )}
                     </Flex>
                   ) : null}
                 </Flex>
@@ -884,6 +970,7 @@ export function BrickChatCore({
             {currentQuestion && chatLoading && (
               <Flex vertical gap={12}>
                 {renderQuestion(currentQuestion)}
+                <ChatTimeline steps={steps} running />
                 {streamingSummary ? (
                   <Markdown
                     className="bkchat-summary"
@@ -891,14 +978,7 @@ export function BrickChatCore({
                   >
                     {streamingSummary}
                   </Markdown>
-                ) : (
-                  <Flex align="center" gap={12} style={{ marginTop: 8 }}>
-                    <Spin size="small" />
-                    <Typography.Text type="secondary">
-                      {streamStatus || "Searching for projects..."}
-                    </Typography.Text>
-                  </Flex>
-                )}
+                ) : null}
               </Flex>
             )}
           </Flex>
@@ -1091,8 +1171,7 @@ export function BrickChatCore({
               />
             }
             onClick={() => setShowMobileMap((v) => !v)}
-          >
-          </Button>
+          ></Button>
         </Flex>
       )}
     </Flex>

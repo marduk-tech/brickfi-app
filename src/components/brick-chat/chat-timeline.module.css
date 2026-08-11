@@ -1,0 +1,82 @@
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+}
+
+.elapsed {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.detail {
+  margin-left: 24px;
+  margin-top: -2px;
+  word-break: break-word;
+}
+
+.step {
+  animation: slideIn 0.25s ease-out;
+}
+
+.summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  background: none;
+  border: none;
+  padding: 0;
+  align-self: flex-start;
+}
+
+.caret {
+  display: inline-flex;
+  transition: transform 0.2s ease;
+}
+
+.caretOpen {
+  transform: rotate(90deg);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step {
+    animation: none;
+  }
+  .caret {
+    transition: none;
+  }
+}
