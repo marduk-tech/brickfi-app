@@ -4,7 +4,7 @@ import L from "leaflet";
 import { ISurroundingElement } from "../../../types/Project";
 import { SurroundingElementLabels } from "../../../libs/constants";
 import { COLORS } from "../../../theme/style-constants";
-import { MapModalContent } from "../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../map-modal";
 import {
   processSurroundingElementGeometry,
   calculateSurroundingElementCenter,
@@ -15,7 +15,7 @@ export interface SurroundingMarkersProps {
   surroundingElements?: ISurroundingElement[];
   surroundingElementIcons: Array<{ type: string; icon: L.DivIcon }>;
   selectedSurroundingElementType?: string;
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
 export const SurroundingMarkers = ({
@@ -78,22 +78,25 @@ export const SurroundingMarkers = ({
             return null;
           }
 
-          const handleElementClick = () => {
+          const handleElementClick = (position: MapModalGeoPosition) => {
             const typeLabel = (SurroundingElementLabels as any)[element.type]
               ? (SurroundingElementLabels as any)[element.type].label
               : "";
-            openModal({
-              title: element.description || typeLabel || "",
-              content: element.approxDistanceMeters ? `(Approximately ${Math.round(element.approxDistanceMeters / 25) * 25} mtrs away)`: '' ,
-              tags: [
-                {
-                  label: typeLabel || "",
-                  color: COLORS.primaryColor,
-                },
-              ],
-            });
+            openModal(
+              {
+                title: element.description || typeLabel || "",
+                content: element.approxDistanceMeters ? `(Approximately ${Math.round(element.approxDistanceMeters / 25) * 25} mtrs away)`: '' ,
+                tags: [
+                  {
+                    label: typeLabel || "",
+                    color: COLORS.primaryColor,
+                  },
+                ],
+              },
+              position,
+            );
           };
-          
+
           return (
             <React.Fragment key={`surrounding-${index}`}>
               <Polyline
@@ -108,7 +111,7 @@ export const SurroundingMarkers = ({
                   opacity: 0.8,
                 }}
                 eventHandlers={{
-                  click: handleElementClick,
+                  click: (e) => handleElementClick({ lat: e.latlng.lat, lng: e.latlng.lng }),
                 }}
               />
               <Marker
@@ -116,7 +119,11 @@ export const SurroundingMarkers = ({
                 position={[centerCoordinates[1], centerCoordinates[0]]}
                 icon={iconData.icon}
                 eventHandlers={{
-                  click: handleElementClick,
+                  click: () =>
+                    handleElementClick({
+                      lat: centerCoordinates[1],
+                      lng: centerCoordinates[0],
+                    }),
                 }}
               />
             </React.Fragment>

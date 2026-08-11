@@ -10,6 +10,7 @@ import { capitalize, driverStatusLabel } from "../../../libs/lvnzy-helper";
 import { COLORS } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 import { getIcon } from "../utils";
+import { MapModalGeoPosition } from "../map-modal";
 
 interface SimpleDriversProps {
   bounds: L.LatLngBounds;
@@ -17,7 +18,7 @@ interface SimpleDriversProps {
   simpleDriverMarkerIcons: any[];
   currentSelectedCategory: string;
   noCategoriesProvided: boolean;
-  setModalContent: (content: any) => void;
+  setModalContent: (content: any, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
   fetchTravelDurationElement: (
@@ -133,43 +134,38 @@ export const SimpleDriversRenderer = ({
             icon={markerIcon}
             eventHandlers={{
               click: () => {
-                setModalContent({
-                  title: driver.name,
-                  subHeading: (driver.distance && driver.duration)
-                    ? fetchTravelDurationElement(
-                        driver.distance,
-                        driver.duration
-                      )
-                    : undefined,
-                  content: driver.details?.oneLiner || driver.details?.description || "",
-                  tags: [
-                    {
-                      label: (LivIndexDriversConfig as any)[driver.driver]
-                        .label,
-                      color: COLORS.primaryColor,
-                    },
-                    {
-                      label: driverStatusLabel(driver.status),
-                      color: isDashed
-                        ? COLORS.yellowIdentifier
-                        : COLORS.greenIdentifier,
-                    },
-                    ...(projectSpecificDetails?.duration
-                      ? [
-                          {
-                            label: `${projectSpecificDetails.duration} mins`,
-                            color: COLORS.textColorDark,
-                          },
-                        ]
-                      : []),
-                    ...(driver.tags || []).map((t: string) => {
-                      return {
-                        label: capitalize(t),
-                        color: COLORS.textColorDark,
-                      };
-                    }),
-                  ],
-                });
+                setModalContent(
+                  {
+                    title: driver.name,
+                    subHeading: (projectSpecificDetails?.distance && projectSpecificDetails?.duration)
+                      ? fetchTravelDurationElement(
+                          projectSpecificDetails.distance,
+                          projectSpecificDetails.duration
+                        )
+                      : undefined,
+                    content: driver.details?.oneLiner || driver.details?.description || "",
+                    tags: [
+                      {
+                        label: (LivIndexDriversConfig as any)[driver.driver]
+                          .label,
+                        color: COLORS.primaryColor,
+                      },
+                      {
+                        label: driverStatusLabel(driver.status),
+                        color: isDashed
+                          ? COLORS.yellowIdentifier
+                          : COLORS.greenIdentifier,
+                      },
+                      ...(driver.tags || []).map((t: string) => {
+                        return {
+                          label: capitalize(t),
+                          color: COLORS.textColorDark,
+                        };
+                      }),
+                    ],
+                  },
+                  { lat: driver.location!.lat, lng: driver.location!.lng },
+                );
                 setInfoModalOpen(true);
               },
             }}

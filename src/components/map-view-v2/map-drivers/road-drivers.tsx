@@ -9,6 +9,7 @@ import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 import { RoadDriverPlace } from "../types";
 import { processRoadFeatures } from "../utils";
+import { MapModalGeoPosition } from "../map-modal";
 
 interface RoadDriversProps {
   bounds: L.LatLngBounds;
@@ -18,7 +19,7 @@ interface RoadDriversProps {
   noCategoriesProvided: boolean;
   categories?: string[];
   selectedDriverFilter?: string;
-  setModalContent: (content: any) => void;
+  setModalContent: (content: any, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
   fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
@@ -75,8 +76,13 @@ export const RoadDriversComponent = ({
             PLACE_TIMELINE.PARTIAL_LAUNCH,
           ].includes(driver.status as PLACE_TIMELINE);
 
-          const handleRoadDriverClick = (driver: any, feature?: any) => {
-            setModalContent({
+          const handleRoadDriverClick = (
+            driver: any,
+            feature: any,
+            position: MapModalGeoPosition,
+          ) => {
+            setModalContent(
+              {
               title: (
                 <Flex vertical>
                   <Typography.Text
@@ -130,7 +136,9 @@ export const RoadDriversComponent = ({
                       : "success",
                 },
               ],
-            });
+              },
+              position,
+            );
             setInfoModalOpen(true);
           };
 
@@ -219,40 +227,43 @@ export const RoadDriversComponent = ({
                         radius={10}
                         eventHandlers={{
                           click: () => {
-                            setModalContent({
-                              title: (
-                                <Flex vertical>
-                                  <Typography.Text
-                                    style={{
-                                      fontSize: FONT_SIZE.HEADING_2,
-                                      fontWeight: 500,
-                                    }}
-                                  >
-                                    {driver.name}
-                                  </Typography.Text>
+                            setModalContent(
+                              {
+                                title: (
+                                  <Flex vertical>
+                                    <Typography.Text
+                                      style={{
+                                        fontSize: FONT_SIZE.HEADING_2,
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      {driver.name}
+                                    </Typography.Text>
 
-                                </Flex>
-                              ),
-                              content: "",
-                               subHeading:
-                            driver.distance && driver.duration
-                              ? fetchTravelDurationElement(
-                                  driver.distance!,
-                                  driver.duration,
-                                  driver.comments
-                                )
-                              : "",
-                              tags: [
-                                {
-                                  label: "Highway",
-                                  color: COLORS.primaryColor,
-                                },
-                                {
-                                  label: capitalize(name),
-                                  color: COLORS.textColorDark
-                                }
-                              ],
-                            });
+                                  </Flex>
+                                ),
+                                content: "",
+                                 subHeading:
+                              driver.distance && driver.duration
+                                ? fetchTravelDurationElement(
+                                    driver.distance!,
+                                    driver.duration,
+                                    driver.comments
+                                  )
+                                : "",
+                                tags: [
+                                  {
+                                    label: "Highway",
+                                    color: COLORS.primaryColor,
+                                  },
+                                  {
+                                    label: capitalize(name),
+                                    color: COLORS.textColorDark
+                                  }
+                                ],
+                              },
+                              { lat, lng },
+                            );
                             setInfoModalOpen(true);
                           },
                         }}
@@ -287,7 +298,11 @@ export const RoadDriversComponent = ({
                         : undefined,
                   }}
                   eventHandlers={{
-                    click: handleRoadDriverClick,
+                    click: (e) =>
+                      handleRoadDriverClick(driver, feature, {
+                        lat: e.latlng.lat,
+                        lng: e.latlng.lng,
+                      }),
                   }}
                 />
               );
@@ -325,7 +340,11 @@ export const RoadDriversComponent = ({
                         icon={labelIcon}
                         zIndexOffset={1000}
                         eventHandlers={{
-                          click: () => handleRoadDriverClick(driver, feature),
+                          click: () =>
+                            handleRoadDriverClick(driver, feature, {
+                              lat: coords[1],
+                              lng: coords[0],
+                            }),
                         }}
                       />
                     );

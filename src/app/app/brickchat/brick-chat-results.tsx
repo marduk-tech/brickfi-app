@@ -14,11 +14,15 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Card, Flex, message, Tag, Typography } from "antd";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import DynamicReactIcon from "../common/dynamic-react-icon";
+import DynamicReactIcon from "../../../components/common/dynamic-react-icon";
+import ProjectImageCarousel from "./project-image-carousel";
 import styles from "./brick-chat-results.module.css";
 
 interface BrickChatResultsProps {
   results: ProjectResult[];
+  onLocateProject?: (projectId: string) => void;
+  /** Whether this results list is the one currently plotted on the map — controls locate-pin visibility. */
+  isShownOnMap?: boolean;
 }
 
 // Pull the ids of projects already in the user's default collection
@@ -62,7 +66,11 @@ const getProjectMetadata = (project: ProjectResult): string => {
   return parts.join(" · ");
 };
 
-export default function BrickChatResults({ results }: BrickChatResultsProps) {
+export default function BrickChatResults({
+  results,
+  onLocateProject,
+  isShownOnMap,
+}: BrickChatResultsProps) {
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const [messageApi, contextHolder] = message.useMessage();
@@ -138,6 +146,14 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
     }
   };
 
+  const handleLocateOnMap = (e: React.MouseEvent, project: ProjectResult) => {
+    // cards are wrapped in a Link - don't navigate on icon click
+    e.preventDefault();
+    e.stopPropagation();
+
+    onLocateProject?.(project.projectId);
+  };
+
   if (!results || results.length === 0) {
     return (
       <Typography.Text type="secondary">
@@ -168,14 +184,19 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
             cover={
               <div
                 style={{
-                  height: 125,
+                  height: 150,
                   width: "100%",
                   backgroundColor: COLORS.bgColor,
                   position: "relative",
                   overflow: "hidden",
                 }}
               >
-                {project.projectImage ? (
+                {project.projectImages?.length ? (
+                  <ProjectImageCarousel
+                    images={project.projectImages}
+                    alt={project.projectName}
+                  />
+                ) : project.projectImage ? (
                   <img
                     src={project.projectImage}
                     alt={project.projectName}
@@ -195,35 +216,7 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                   </Flex>
                 )}
 
-                {project.lvnzyProjectId && (
-                  <Flex
-                    align="center"
-                    justify="center"
-                    onClick={(e) => handleToggleSave(e, project)}
-                    style={{
-                      position: "absolute",
-                      top: 8,
-                      right: 8,
-                      width: 32,
-                      height: 32,
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName={
-                        savedIds.includes(project.lvnzyProjectId)
-                          ? "IoBookmark"
-                          : "IoBookmarkOutline"
-                      }
-                      iconSet="io5"
-                      size={18}
-                      color={COLORS.primaryColor}
-                    />
-                  </Flex>
-                )}
+               
               </div>
             }
           >
@@ -279,7 +272,58 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                   {project.oneLiner}
                 </Typography.Paragraph>
               )}
-              <Flex style={{ width: "100%", marginTop: 8 }}>
+              <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
+                 {isShownOnMap && project.projectLocation?.lat && project.projectLocation?.lng && (
+                  <Flex
+                    align="center"
+                    justify="center"
+                    onClick={(e) => handleLocateOnMap(e, project)}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      flexShrink: 0,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <DynamicReactIcon
+                      iconName="IoLocateOutline"
+                      iconSet="io5"
+                      size={18}
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                )}
+
+                {/* {project.lvnzyProjectId && (
+                  <Flex
+                    align="center"
+                    justify="center"
+                    onClick={(e) => handleToggleSave(e, project)}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      flexShrink: 0,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <DynamicReactIcon
+                      iconName={
+                        savedIds.includes(project.lvnzyProjectId)
+                          ? "IoBookmark"
+                          : "IoBookmarkOutline"
+                      }
+                      iconSet="io5"
+                      size={14}
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                )} */}
                 <Link
                   href={`/app/brick360/${project.projectSlug}`}
                   prefetch={false}
@@ -287,34 +331,30 @@ export default function BrickChatResults({ results }: BrickChatResultsProps) {
                     textDecoration: "none",
                     color: "inherit",
                     width: "100%",
-                    border: `1px solid ${COLORS.borderColorMedium}`,
                     borderRadius: 8,
                     textAlign: "center",
                   }}
                   target="_blank"
                 >
-                  <Flex
+                 <Flex
                     align="center"
                     justify="center"
-                    gap={6}
-                    style={{ padding: "4px 0" }}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      flexShrink: 0,
+                      borderRadius: "50%",
+                      backgroundColor: project.projectStatus === "report-verified" ? COLORS.primaryColor : "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                    }}
                   >
-                    <Typography.Text
-                      style={{
-                        fontSize: FONT_SIZE.PARA,
-                        color: COLORS.textColorDark,
-                      }}
-                    >
-                      {"See Details"}
-                    </Typography.Text>
-                    {project.projectStatus === "report-verified" && (
-                      <DynamicReactIcon
-                        iconName="TbView360Number"
-                        iconSet="tb"
-                        size={18}
-                        color={COLORS.primaryColor}
-                      />
-                    )}
+                    <DynamicReactIcon
+                      iconName={project.projectStatus === "report-verified" ? "TbView360Number": "BiDetail"}
+                      iconSet={project.projectStatus === "report-verified" ? "tb": "bi"}
+                      size={18}
+                      color={project.projectStatus === "report-verified" ? "white": COLORS.primaryColor}
+                    />
                   </Flex>
                 </Link>
               </Flex>

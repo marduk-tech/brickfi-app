@@ -56,6 +56,26 @@
   min-height: 150px;
 }
 
+.gallery-item-video {
+  min-height: 225px;
+  container-type: size;
+  border: 1px solid #ddd;
+}
+
+/* Scale the 16:9 embed up and center-crop it so it fills the tile
+   edge-to-edge instead of letterboxing, regardless of tile aspect ratio. */
+.gallery-video-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100cqw;
+  height: 56.25cqw;
+  min-width: 177.78cqh;
+  min-height: 100cqh;
+  transform: translate(-50%, -50%);
+  border: none;
+}
+
 .gallery-image {
   width: 100%;
   height: 100%;

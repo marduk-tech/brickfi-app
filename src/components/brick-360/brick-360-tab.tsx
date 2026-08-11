@@ -1,4 +1,5 @@
 import { Alert, Button, Flex, List, Modal, Typography } from "antd";
+import moment from "moment";
 import { forwardRef, ReactNode, useState } from "react";
 import { BRICK360_CATEGORY, Brick360DataPoints } from "../../libs/constants";
 import {
@@ -29,6 +30,22 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
       useState<ReactNode>("");
     const [reportRequestDialogOpen, setReportRequestDialogOpen] =
       useState(false);
+
+    function getNoDataPlaceholder(categoryKey: string) {
+      if (categoryKey === BRICK360_CATEGORY.property) {
+        const expectedLaunchDate =
+          lvnzyProject?.originalProjectId?.info?.realTimeStatus
+            ?.expectedLaunchDate;
+        const isLaunchInFuture =
+          !!expectedLaunchDate &&
+          moment(expectedLaunchDate).isValid() &&
+          moment(expectedLaunchDate).isAfter(moment());
+        return isLaunchInFuture
+          ? Brick360DataPoints.property.futureProjectNoDataPlaceholder
+          : Brick360DataPoints.property.oldProjectNoDataPlaceholder;
+      }
+      return (Brick360DataPoints as any)[categoryKey]?.noDataPlaceholder;
+    }
 
     function handleReportRequest() {
       // TODO: integrate report generation request API
@@ -305,7 +322,7 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                     ) : (
                       <Flex style={{marginTop: 16}}>
                       <Alert
-                        message={(Brick360DataPoints as any)[sc.key]?.noDataPlaceholder}
+                        message={getNoDataPlaceholder(sc.key)}
                         type="warning"
                       />
                       </Flex>

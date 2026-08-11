@@ -7,23 +7,32 @@ import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { ISurroundingElement } from "../../../types/Project";
 import { ProjectMarkerInput } from "../types";
 import { MapViewGoogle } from "./map-view-google";
+import MapViewV2 from "../map-view-v2";
+import { useDevice } from "@/hooks/use-device";
 
 const { Text } = Typography;
 
 type GoogleMapType = "roadmap" | "hybrid";
+type MapDisplayType = GoogleMapType | "street";
 
-const MAP_TYPE_OPTIONS: { key: GoogleMapType; label: string; description: string; icon: string }[] = [
+const MAP_TYPE_OPTIONS: { key: MapDisplayType; label: string; description: string; icon: string }[] = [
   {
     key: "roadmap",
     label: "Default",
-    description: "Standard road map with labels",
+    description: "Standard google map",
     icon: "LuMap",
   },
   {
     key: "hybrid",
     label: "Satellite",
-    description: "Aerial imagery with road labels",
+    description: "Sattelite view",
     icon: "LuGlobe",
+  },
+  {
+    key: "street",
+    label: "Street Detail",
+    description: "Street level detailed map",
+    icon: "LuSignpost",
   },
 ];
 
@@ -32,6 +41,7 @@ interface MapViewWrapperProps {
   drivers?: any[];
   projectId?: string;
   projects?: ProjectMarkerInput[];
+  focusedProjectId?: string | null;
   fullSize: boolean;
   surroundingElements?: ISurroundingElement[];
   projectsNearby?: {
@@ -55,15 +65,20 @@ interface MapViewWrapperProps {
 }
 
 export function MapViewWrapper({ defaultMode: _defaultMode, ...props }: MapViewWrapperProps) {
-  const [mapType, setMapType] = useState<GoogleMapType>("roadmap");
+  const [mapType, setMapType] = useState<MapDisplayType>("roadmap");
   const [dialogOpen, setDialogOpen] = useState(false);
+  const {isMobile} = useDevice();
 
   return (
     <div style={{ width: "100%", height: "100%", position: "relative" }}>
-      <MapViewGoogle {...props} mapTypeId={mapType} />
+      {mapType === "street" ? (
+        <MapViewV2 {...props} />
+      ) : (
+        <MapViewGoogle {...props} mapTypeId={mapType} />
+      )}
 
       {/* Map type toggle button */}
-      <div style={{ position: "absolute", bottom: 80, right: 16, zIndex: 2000 }}>
+      <div style={{ position: "absolute", bottom: mapType == "street" ? 100: 80, right: 12, zIndex: 2000 }}>
         <Button
           type="link"
           onClick={() => setDialogOpen(true)}
@@ -94,11 +109,11 @@ export function MapViewWrapper({ defaultMode: _defaultMode, ...props }: MapViewW
         open={dialogOpen}
         onCancel={() => setDialogOpen(false)}
         footer={null}
-        width={340}
+        width={isMobile ? "100%": 750}
         zIndex={3000}
         closeIcon={<></>}
       >
-        <Flex gap={12} style={{ marginTop: 8 }}>
+        <Flex vertical={isMobile} gap={12} style={{ marginTop: 8 }} align="center">
           {MAP_TYPE_OPTIONS.map((option) => {
             const isSelected = mapType === option.key;
             return (
@@ -112,6 +127,7 @@ export function MapViewWrapper({ defaultMode: _defaultMode, ...props }: MapViewW
                   borderWidth: isSelected ? 2 : 1,
                   cursor: "pointer",
                   boxShadow: "none",
+                  width: 225
                 }}
               >
                 <Flex vertical align="center" gap={10}>

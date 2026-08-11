@@ -3,7 +3,7 @@
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Spin, Typography } from "antd";
 import { useEffect, useState } from "react";
-import DynamicReactIcon from "../common/dynamic-react-icon";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import styles from "./chat-timeline.module.css";
 
 export interface TimelineStep {

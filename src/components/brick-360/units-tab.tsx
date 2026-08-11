@@ -6,6 +6,7 @@ import { useDevice } from "../../hooks/use-device";
 import { fetchPmtPlan, rupeeAmountFormat, thsndFormat } from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "../common/dynamic-react-icon";
+import { HOME_TYPE_ICON } from "../../libs/home-type-icons";
 import { ScrollableContainer } from "../scrollable-container";
 
 interface UnitsTabProps {
@@ -79,20 +80,60 @@ const getMinMaxSize = (configs: any[]) => {
   return null;
 };
 
-const getBhkType = (config: string) => {
-  const splits = config.split("-");
-  if (
-    splits &&
-    splits.length > 1 &&
-    splits[0].toLowerCase().indexOf("bhk") > -1
-  ) {
-    return `${parseInt(splits[0])} BHK`;
+const CATEGORY_ORDER = [
+  "Apartments",
+  "Villas",
+  "Villaments",
+  "Rowhouses",
+  "Plots",
+  "Penthouses",
+  "Farmlands",
+  "Other",
+];
+
+const CATEGORY_HOME_TYPE_KEY: Record<string, string> = {
+  Apartments: "apartment",
+  Villas: "villa",
+  Villaments: "villament",
+  Rowhouses: "rowhouse",
+  Plots: "plot",
+  Penthouses: "penthouse",
+};
+
+// Normalizes freeform unit `type`/`config` text (e.g. "2BHK", "2 BHK", "2 BHK Apartment")
+// into a home-type category and a deduped sub-type label ("2 BHK").
+const normalizeUnitType = (c: any): { category: string; label: string } => {
+  const raw = (c.type || c.config || "").toString().trim();
+  const lower = raw.toLowerCase();
+
+  let category = "Other";
+  if (lower.includes("villament")) category = "Villaments";
+  else if (lower.includes("villa")) category = "Villas";
+  else if (lower.includes("rowhouse") || lower.includes("row house"))
+    category = "Rowhouses";
+  else if (lower.includes("penthouse")) category = "Penthouses";
+  else if (lower.includes("farmland")) category = "Farmlands";
+  else if (lower.includes("plot")) category = "Plots";
+  else if (lower.includes("bhk") || lower.includes("apartment") || lower.includes("studio"))
+    category = "Apartments";
+
+  const bhkMatch = lower.match(/(\d+(?:\.\d+)?)\s*bhk/);
+  let label = raw;
+  if (bhkMatch) {
+    label = `${parseInt(bhkMatch[1])} BHK`;
+  } else if (lower.includes("studio")) {
+    label = "1 BHK";
+  } else if (raw.includes("-")) {
+    label = raw.split("-")[0].trim();
   }
-  return "";
+
+  return { category, label: label || category };
 };
 
 export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
   const { isMobile } = useDevice();
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>();
   const [configFilters, setConfigFilters] = useState<string[]>([]);
   const [selectedConfigFilter, setSelectedConfigFilter] = useState<string>();
   const [isPmtPlanModalOpen, setIsPmtPlanModalOpen] = useState(false);
@@ -106,28 +147,60 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
   }, [lvnzyProject]);
 
   useEffect(() => {
-    if (
-      lvnzyProject?.originalProjectId.info.homeType.includes("plot") ||
-      !lvnzyProject?.originalProjectId.info.unitConfigWithPricing ||
-      lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length < 5
-    ) {
+    const configs = lvnzyProject?.originalProjectId.info.unitConfigWithPricing;
+    if (!configs || !configs.length) {
       return;
     }
-    let filters: string[] = [];
-    lvnzyProject?.originalProjectId.info.unitConfigWithPricing.forEach(
-      (unitConfig: any) => {
-        const bhkType = unitConfig.type
-          ? unitConfig.type
-          : getBhkType(unitConfig.config);
-        if (!filters.includes(bhkType)) {
-          filters.push(bhkType);
-        }
-      }
+    const categorySet = new Set<string>();
+    configs.forEach((c: any) => {
+      categorySet.add(normalizeUnitType(c).category);
+    });
+    const sortedCategories = CATEGORY_ORDER.filter((cat) =>
+      categorySet.has(cat)
     );
-    filters = filters.sort((a: string, b: string) => parseInt(a) - parseInt(b));
+    setCategories(sortedCategories);
+    setSelectedCategory(sortedCategories[0]);
+  }, [lvnzyProject]);
+
+  useEffect(() => {
+    const configs = lvnzyProject?.originalProjectId.info.unitConfigWithPricing;
+    if (
+      !configs ||
+      !configs.length ||
+      configs.length < 5 ||
+      selectedCategory === "Plots"
+    ) {
+      setConfigFilters([]);
+      setSelectedConfigFilter(undefined);
+      return;
+    }
+    const inCategory = selectedCategory
+      ? configs.filter(
+          (c: any) => normalizeUnitType(c).category === selectedCategory
+        )
+      : configs;
+    let filters: string[] = [];
+    inCategory.forEach((c: any) => {
+      const { label } = normalizeUnitType(c);
+      if (!filters.includes(label)) {
+        filters.push(label);
+      }
+    });
+    // Skip filters entirely if every filter would only have a single entry
+    if (filters.length === inCategory.length) {
+      filters = [];
+    }
+    filters = filters.sort((a: string, b: string) => {
+      const na = parseInt(a);
+      const nb = parseInt(b);
+      if (!isNaN(na) && !isNaN(nb) && na !== nb) {
+        return na - nb;
+      }
+      return a.localeCompare(b);
+    });
     setConfigFilters(filters);
     setSelectedConfigFilter(filters[0]);
-  }, [lvnzyProject]);
+  }, [lvnzyProject, selectedCategory]);
 
   return (
     <ScrollableContainer>
@@ -280,14 +353,67 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
             </Flex>
           ) : null}
 
-          {configFilters &&
-          configFilters.length &&
-          configFilters.length <
-            lvnzyProject?.originalProjectId.info.unitConfigWithPricing.length -
-              2 ? (
+          {categories && categories.length > 1 ? (
             <Flex
+              gap={4}
               style={{
                 marginTop: 24,
+                width: "100%",
+                overflowX: "scroll",
+                whiteSpace: "nowrap",
+                scrollbarWidth: "none",
+                marginBottom: 16
+              }}
+            >
+              {categories.map((category: string) => {
+                const isSelected = selectedCategory === category;
+                const tagColor = isSelected
+                  ? COLORS.primaryColor
+                  : COLORS.textColorMedium;
+                const icon = HOME_TYPE_ICON[CATEGORY_HOME_TYPE_KEY[category]];
+                return (
+                  <Tag
+                    key={`category-${category}`}
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_3,
+                      padding: "4px 8px",
+                      color: tagColor,
+                      borderRadius: 0,
+                      cursor: "pointer",
+                      border: 0,
+                      borderBottomStyle: "solid",
+                      borderBottomWidth: isSelected ? 1 : 0,
+                      backgroundColor: "transparent",
+                      borderBottomColor: isSelected
+                        ? COLORS.primaryColor
+                        : "transparent",
+                    }}
+                    onClick={() => {
+                      setSelectedCategory(category);
+                    }}
+                  >
+                    <Flex align="center" gap={4} style={{ display: "inline-flex" }}>
+                      {icon ? (
+                        <DynamicReactIcon
+                          iconSet={icon.set}
+                          iconName={icon.name}
+                          size={FONT_SIZE.HEADING_3}
+                          color={tagColor}
+                        />
+                      ) : null}
+                      {category}
+                    </Flex>
+                  </Tag>
+                );
+              })}
+            </Flex>
+          ) : null}
+
+          {configFilters && configFilters.length > 1 ? (
+            <Flex
+              gap={4}
+              style={{
+                marginTop: 16,
                 width: "100%",
                 overflowX: "scroll",
                 whiteSpace: "nowrap",
@@ -297,6 +423,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
               {configFilters?.map((filter: string) => {
                 return (
                   <Tag
+                    key={`filter-${filter}`}
                     color={
                       filter == selectedConfigFilter
                         ? COLORS.primaryColor
@@ -331,16 +458,20 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
           >
             <Image.PreviewGroup preview={true}>
               {lvnzyProject?.originalProjectId.info.unitConfigWithPricing
-                .filter(
-                  (c: any) =>
-                    !configFilters ||
-                    !configFilters.length ||
-                    configFilters.length >=
-                      lvnzyProject?.originalProjectId.info.unitConfigWithPricing
-                        .length -
-                        2 ||
-                    (c.type || getBhkType(c.config)) == selectedConfigFilter
-                )
+                .filter((c: any) => {
+                  const { category, label } = normalizeUnitType(c);
+                  if (selectedCategory && category !== selectedCategory) {
+                    return false;
+                  }
+                  if (
+                    configFilters &&
+                    configFilters.length > 1 &&
+                    label !== selectedConfigFilter
+                  ) {
+                    return false;
+                  }
+                  return true;
+                })
                 .sort((a: any, b: any) => a.price - b.price)
                 .map((c: any, index: number) => {
                   return (

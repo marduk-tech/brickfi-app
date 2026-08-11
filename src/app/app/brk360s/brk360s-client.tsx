@@ -17,6 +17,7 @@ export default function Brk360sClient() {
   const { data: projects = [], isLoading } = useFetchAllLvnzyProjects(
     true,
     true,
+    false,
   );
 
   const filteredProjects = useMemo(() => {

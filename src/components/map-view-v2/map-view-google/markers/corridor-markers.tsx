@@ -3,12 +3,12 @@
 import React, { useEffect } from "react";
 import { AdvancedMarker, useMap } from "@vis.gl/react-google-maps";
 import { COLORS } from "../../../../theme/style-constants";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { MarkerIcon } from "../marker-icon";
 
 interface CorridorMarkersProps {
   corridors?: any[];
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
 function CorridorPolygons({ corridors, openModal }: CorridorMarkersProps) {
@@ -30,12 +30,15 @@ function CorridorPolygons({ corridors, openModal }: CorridorMarkersProps) {
         fillColor: COLORS.textColorDark,
         fillOpacity: 0.1,
       });
-      poly.addListener("click", () =>
-        openModal({
-          title: corridor.name,
-          content: corridor.description ?? "",
-          tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
-        })
+      poly.addListener("click", (e: google.maps.PolyMouseEvent) =>
+        openModal(
+          {
+            title: corridor.name,
+            content: corridor.description ?? "",
+            tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
+          },
+          e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
+        )
       );
       polys.push(poly);
     }
@@ -58,11 +61,14 @@ export function CorridorMarkers({ corridors, openModal }: CorridorMarkersProps) 
             position={{ lat: c.location.lat, lng: c.location.lng }}
             zIndex={100}
             onClick={() =>
-              openModal({
-                title: c.name,
-                content: c.description ?? "",
-                tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
-              })
+              openModal(
+                {
+                  title: c.name,
+                  content: c.description ?? "",
+                  tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
+                },
+                { lat: c.location.lat, lng: c.location.lng },
+              )
             }
           >
             <MarkerIcon

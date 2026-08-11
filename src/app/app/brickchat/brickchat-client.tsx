@@ -1,10 +1,8 @@
 "use client";
 
 import { AdminGuard } from "@/components/auth/admin-guard";
-import BrickChatResults from "@/components/brick-chat/brick-chat-results";
-import ChatTimeline, {
-  TimelineStep,
-} from "@/components/brick-chat/chat-timeline";
+import BrickChatResults from "@/app/app/brickchat/brick-chat-results";
+import ChatTimeline, { TimelineStep } from "@/app/app/brickchat/chat-timeline";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { useDevice } from "@/hooks/use-device";
 import { useUser } from "@/hooks/use-user";
@@ -17,6 +15,7 @@ import {
   Empty,
   Flex,
   Form,
+  Image,
   Input,
   Modal,
   Spin,
@@ -31,6 +30,7 @@ import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { BrickMapChat } from "./brick-map-chat";
+import styles from "./brick-chat-results.module.css";
 
 export interface ProjectResult {
   projectId: string;
@@ -39,6 +39,7 @@ export interface ProjectResult {
   projectSlug?: string;
   projectStatus?: string;
   projectImage?: string;
+  projectImages?: string[];
   lvnzyProjectId?: string;
   projectUnitTypes?: Array<number>;
   projectAvgSquareFootPrice?: number;
@@ -52,11 +53,24 @@ export interface ProjectResult {
   };
 }
 
+interface ExploreImageItem {
+  url: string;
+  caption?: string | null;
+  tags?: string[];
+}
+
+interface ExploreImagesGroup {
+  projectName: string;
+  projectId: string;
+  images: ExploreImageItem[];
+}
+
 interface ExploreAnswer {
   projectsList: ProjectResult[];
   summary: string;
   directAnswer: boolean;
   nextSetCount?: number;
+  images?: ExploreImagesGroup[];
 }
 
 interface ChatMessage {
@@ -176,6 +190,9 @@ export function BrickChatCore({
     ProjectResult[] | undefined
   >(defaultProjectResults);
   const [mapResultsIndex, setMapResultsIndex] = useState<number | undefined>();
+  const [focusedProjectId, setFocusedProjectId] = useState<string | null>(
+    null,
+  );
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareLink, setShareLink] = useState<string>();
@@ -228,7 +245,7 @@ export function BrickChatCore({
   };
 
   useEffect(() => {
-    if (!user?._id) {
+  if (!user?._id) {
       return;
     }
 
@@ -627,6 +644,60 @@ export function BrickChatCore({
     }
   };
 
+  const renderImages = (imagesGroups?: ExploreImagesGroup[]) => {
+    const items = (imagesGroups || []).flatMap((group) =>
+      group.images.map((image) => ({
+        ...image,
+        caption: `${group.projectName}: ${image.caption}`,
+      })),
+    );
+
+    if (!items.length) {
+      return null;
+    }
+
+    return (
+      <Image.PreviewGroup>
+        <Flex className={styles.scrollContainer} gap={12} style={{ marginTop: 8 }}>
+          {items.map((image, index) => (
+            <Flex
+              key={`${image.url}-${index}`}
+              vertical
+              gap={4}
+              style={{
+                width: 160,
+                flexShrink: 0,
+              }}
+            >
+              <Image
+                src={image.url}
+                alt={image.caption || ""}
+                width={160}
+                height={120}
+                style={{
+                  objectFit: "cover",
+                  borderRadius: 12,
+                  border: `1px solid ${COLORS.borderColor}`,
+                }}
+              />
+              {image.caption ? (
+                <Typography.Text
+                  ellipsis
+                  style={{
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  {image.caption}
+                </Typography.Text>
+              ) : null}
+            </Flex>
+          ))}
+        </Flex>
+      </Image.PreviewGroup>
+    );
+  };
+
   const renderQuestion = (question: string) => (
     <Flex>
       <Typography.Text
@@ -827,7 +898,11 @@ export function BrickChatCore({
                   </Typography.Text>
                 </Flex>
               )}
-              <BrickChatResults results={defaultProjectResults} />
+              <BrickChatResults
+                results={defaultProjectResults}
+                onLocateProject={setFocusedProjectId}
+                isShownOnMap={mapResultsIndex === undefined}
+              />
             </Flex>
           ) : null}
 
@@ -888,6 +963,7 @@ export function BrickChatCore({
                   >
                     {messageItem.answer.summary}
                   </Markdown>
+                  {renderImages(messageItem.answer.images)}
                   {!messageItem.answer.directAnswer ? (
                     <Flex
                       vertical
@@ -936,12 +1012,16 @@ export function BrickChatCore({
                               }
                             }}
                             style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
-                          ></Button>
+                          >
+                            {mapResultsIndex === index ? "" : "See on Map"}
+                          </Button>
                         </Flex>
                       ) : null}
 
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
+                        onLocateProject={setFocusedProjectId}
+                        isShownOnMap={mapResultsIndex === index}
                       />
                       {!chatLoading &&
                         (messageItem.answer.nextSetCount ?? 0) > 0 &&
@@ -1108,7 +1188,10 @@ export function BrickChatCore({
             isolation: "isolate",
           }}
         >
-          <BrickMapChat projects={projectResults || []} />
+          <BrickMapChat
+            projects={projectResults || []}
+            focusedProjectId={focusedProjectId}
+          />
         </Flex>
       )}
 
@@ -1180,7 +1263,7 @@ export function BrickChatCore({
 
 export default function BrickChatClient() {
   return (
-    <AdminGuard allowedRoles={["admin", "member", "user"]}>
+    <AdminGuard allowedRoles={["admin", "member"]}>
       <BrickChatCore />
     </AdminGuard>
   );

@@ -24,9 +24,10 @@ const EXCLUDED_CATEGORIES = ["surroundings", "conveniences", "growth potential"]
 
 interface BrickMapChatProps {
   projects: ProjectResult[];
+  focusedProjectId?: string | null;
 }
 
-export function BrickMapChat({ projects }: BrickMapChatProps) {
+export function BrickMapChat({ projects, focusedProjectId }: BrickMapChatProps) {
   const { data: livindexPlaces, isLoading: livindexPlacesLoading } =
     useFetchAllLivindexPlaces();
 
@@ -80,13 +81,14 @@ export function BrickMapChat({ projects }: BrickMapChatProps) {
 
   return (
     <Flex vertical style={{ height: "100%", width: "100%" }}>
-      <MapViewV2
+      <MapViewWrapper
         key="brick-map-chat"
         drivers={filteredDrivers.map((p) => ({
           ...p,
           duration: p.distance ? Math.round(p.distance / 60) : 0,
         }))}
         projects={projectMarkers}
+        focusedProjectId={focusedProjectId}
         fullSize={false}
         showLocalities={false}
         showCorridors={false}

@@ -13,6 +13,7 @@ import {
   Tabs,
   TabsProps,
   Tag,
+  Tooltip,
   Typography,
 } from "antd";
 import React, { useEffect, useState } from "react";
@@ -150,20 +151,21 @@ export default function RealEstateDeveloperClient({
 
   const renderProject = (project: any, index: number) => {
     const regex = /\b(plot|apartment|villa|rowhouse)(?=s?\b)/gi;
+    const typeLower = project.type ? project.type.toLowerCase() : "";
     let subType = project.subType ? project.subType.match(regex) : "";
     if (!subType) {
       subType =
-        `${project.type.toLowerCase()}, ${project.unitVariations.toLowerCase()}`.match(
+        typeLower ? `${typeLower}, ${project.unitVariations ? project.unitVariations.toLowerCase() : ""}`.match(
           regex,
-        );
+        ) : "";
       subType = subType && subType.length ? subType[0] : "";
     } else {
       subType = subType.length ? subType[0] : subType;
     }
     const type =
-      project.type.toLowerCase() == "residential"
+      project.type ? typeLower == "residential"
         ? "Residential Community"
-        : project.type;
+        : project.type : "";
 
     return (
       <Flex
@@ -180,8 +182,7 @@ export default function RealEstateDeveloperClient({
         <div
           style={{
             backgroundImage: `url(/images/builder-page/${
-              project.type.toLowerCase() == "residential" ||
-              project.type.toLowerCase().includes("residential")
+              typeLower == "residential" || typeLower.includes("residential")
                 ? subType
                   ? subType.toLowerCase()
                   : "apartment"
@@ -196,7 +197,10 @@ export default function RealEstateDeveloperClient({
           }}
         ></div>
 
-        <Flex vertical style={{ padding: "8px 0" }}>
+        <Flex
+          vertical
+          style={{ padding: "8px 0", height: 100, position: "relative" }}
+        >
           <Text
             ellipsis={{ tooltip: project.name }}
             style={{
@@ -207,36 +211,57 @@ export default function RealEstateDeveloperClient({
           >
             {project.name}
           </Text>
+          {project.type ?
           <Text
             style={{
               textWrap: "wrap",
               fontSize: FONT_SIZE.HEADING_4,
               lineHeight: "110%",
-              marginTop: "0",
+              marginTop: 8,
             }}
           >
             {capitalize(type)} {subType ? `| ${capitalize(subType)}` : ""}
-          </Text>
-          <Flex gap={4} wrap style={{ marginTop: 16 }}>
+          </Text>: null}
+          <Flex
+            gap={4}
+            wrap
+            style={{ marginTop: 4, position: "absolute", bottom: 0 }}
+          >
             {Array.from(
               new Set(
                 project.location
                   ?.split(",")
                   .map((s: string) => s.trim().split(" ")[0])
                   .filter(Boolean)
+                  .filter(
+                    (w: string) =>
+                      !["near", "pin", "where", "within"].includes(
+                        w.toLowerCase(),
+                      ),
+                  )
                   .map((w: string) =>
                     w.toLowerCase() === "bengaluru" ? "Bangalore" : w,
                   ),
               ),
-            ).map((word) => (
-              <Tag
-                color={COLORS.textColorDark}
-                key={word as string}
-                style={{ fontSize: FONT_SIZE.SUB_TEXT, margin: 0 }}
-              >
-                {word as string}
-              </Tag>
-            ))}
+            )
+              .slice(0, 2)
+              .map((word) => {
+                const fullWord = word as string;
+                const truncated =
+                  fullWord.length > 10
+                    ? `${fullWord.slice(0, 10)}..`
+                    : fullWord;
+                return (
+                  <Tooltip key={fullWord} title={fullWord}>
+                    <Tag
+                      color={COLORS.textColorDark}
+                      style={{ fontSize: FONT_SIZE.SUB_TEXT, margin: 0 }}
+                    >
+                      {truncated}
+                    </Tag>
+                  </Tooltip>
+                );
+              })}
           </Flex>
         </Flex>
       </Flex>
@@ -248,7 +273,14 @@ export default function RealEstateDeveloperClient({
       return {
         key: `${index + 1}`,
         label: (
-          <p style={{ fontWeight: 600, margin: 0, marginTop: 2, fontSize: FONT_SIZE.HEADING_3 }}>
+          <p
+            style={{
+              fontWeight: 600,
+              margin: 0,
+              marginTop: 2,
+              fontSize: FONT_SIZE.HEADING_3,
+            }}
+          >
             {qa.question}
           </p>
         ),
@@ -300,7 +332,7 @@ export default function RealEstateDeveloperClient({
           vertical
           justify="center"
           align="flex-start"
-          style={{ width: isMobile ? "96%" : "auto"}}
+          style={{ width: isMobile ? "96%" : "auto" }}
         >
           <Text
             style={{ color: COLORS.textColorMedium, wordBreak: "break-word" }}
@@ -375,7 +407,7 @@ export default function RealEstateDeveloperClient({
             >
               Experience The Difference in Home Buying with Brickfi Assist
             </Typography.Text>
-            <p style={{opacity: 0.8}}>
+            <p style={{ opacity: 0.8 }}>
               Brickfi presents the new way to find your dream home. No hype, No
               manipulation, No pushing inventory. Only legitimate data and hard
               facts to ensure your interests are protected

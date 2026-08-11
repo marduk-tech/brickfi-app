@@ -5,7 +5,7 @@ import { AdvancedMarker, useMap } from "@vis.gl/react-google-maps";
 import { SurroundingElementLabels } from "../../../../libs/constants";
 import { COLORS } from "../../../../theme/style-constants";
 import { ISurroundingElement } from "../../../../types/Project";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import {
   calculateSurroundingElementCenter,
   isValidSurroundingElementGeometry,
@@ -16,7 +16,7 @@ import { MarkerIcon } from "../marker-icon";
 interface SurroundingMarkersProps {
   surroundingElements?: ISurroundingElement[];
   selectedSurroundingElementType?: string;
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
 function SurroundingPolylines({ surroundingElements, selectedSurroundingElementType, openModal }: SurroundingMarkersProps) {
@@ -39,14 +39,17 @@ function SurroundingPolylines({ surroundingElements, selectedSurroundingElementT
         ? (rawPositions as [number, number][][])
         : [rawPositions as [number, number][]];
 
-      const handleClick = () =>
-        openModal({
-          title: el.description || typeLabel,
-          content: el.approxDistanceMeters
-            ? `(Approximately ${Math.round(el.approxDistanceMeters / 25) * 25} mtrs away)`
-            : "",
-          tags: [{ label: typeLabel, color: COLORS.primaryColor }],
-        });
+      const handleClick = (e: google.maps.PolyMouseEvent) =>
+        openModal(
+          {
+            title: el.description || typeLabel,
+            content: el.approxDistanceMeters
+              ? `Approximately ${Math.round(el.approxDistanceMeters / 25) * 25} mtrs away`
+              : "",
+            tags: [{ label: typeLabel, color: COLORS.primaryColor }],
+          },
+          e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
+        );
 
       for (const seg of segments) {
         const line = new google.maps.Polyline({
@@ -89,13 +92,16 @@ export function SurroundingMarkers(props: SurroundingMarkersProps) {
         key={`surr-${el.type}-${center[0]}-${center[1]}`}
         position={{ lat: center[1], lng: center[0] }}
         onClick={() =>
-          openModal({
-            title: el.description || typeLabel,
-            content: el.approxDistanceMeters
-              ? `(Approximately ${Math.round(el.approxDistanceMeters / 25) * 25} mtrs away)`
-              : "",
-            tags: [{ label: typeLabel, color: COLORS.primaryColor }],
-          })
+          openModal(
+            {
+              title: el.description || typeLabel,
+              content: el.approxDistanceMeters
+                ? `Approximately ${Math.round(el.approxDistanceMeters / 25) * 25} mtrs away`
+                : "",
+              tags: [{ label: typeLabel, color: COLORS.primaryColor }],
+            },
+            { lat: center[1], lng: center[0] },
+          )
         }
       >
         <MarkerIcon

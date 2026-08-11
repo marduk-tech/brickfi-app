@@ -37,8 +37,8 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
     }
     setDrivers(
       [
-        ...lvnzyProject.connectivity.drivers,
-        ...lvnzyProject.neighborhood.drivers,
+        ...(lvnzyProject.connectivity?.drivers || []),
+        ...(lvnzyProject.neighborhood?.drivers || []),
       ].map((d) => {
         return {
           ...d.driverId,

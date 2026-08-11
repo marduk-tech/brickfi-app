@@ -5,7 +5,7 @@ import { useMap } from "@vis.gl/react-google-maps";
 import { CATEGORY_COLORS, DRIVER_TYPE_COLORS } from "../../../../libs/constants";
 import { COLORS } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { PolygonData } from "../../map-polygons";
 import { processDriversToPolygons } from "../../utils";
 
@@ -14,7 +14,7 @@ interface DriverPolygonsProps {
   currentSelectedCategory: string;
   noCategoriesProvided: boolean;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   selectedDriverFilter?: string;
 }
 
@@ -81,14 +81,17 @@ export function DriverPolygons({
           fillOpacity: 0.3,
         });
 
-        gPoly.addListener("click", () =>
-          openModal({
-            title: poly.name,
-            content: poly.description || "",
-            tags: [
-              ...(poly.driverType ? [{ label: poly.driverType, color: COLORS.primaryColor }] : []),
-            ],
-          })
+        gPoly.addListener("click", (e: google.maps.PolyMouseEvent) =>
+          openModal(
+            {
+              title: poly.name,
+              content: poly.description || "",
+              tags: [
+                ...(poly.driverType ? [{ label: poly.driverType, color: COLORS.primaryColor }] : []),
+              ],
+            },
+            e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
+          )
         );
 
         gPolys.push(gPoly);

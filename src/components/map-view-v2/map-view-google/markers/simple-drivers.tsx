@@ -10,15 +10,18 @@ import {
 import { capitalize, driverStatusLabel } from "../../../../libs/lvnzy-helper";
 import { COLORS } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { MarkerIcon } from "../marker-icon";
+import { fetchTravelDurationElement } from "../../map-utils";
 
 interface SimpleDriversProps {
   drivers?: IDriverPlace[];
   currentSelectedCategory: string;
   noCategoriesProvided: boolean;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
+    fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
+  
 }
 
 export function SimpleDrivers({
@@ -69,16 +72,22 @@ export function SimpleDrivers({
             key={driver._id}
             position={{ lat: driver.location!.lat, lng: driver.location!.lng }}
             onClick={() =>
-              openModal({
-                title: driver.name,
-                content: driver.details?.oneLiner || driver.details?.description || "",
-                tags: [
-                  { label: cfg?.label ?? capitalize(driver.driver), color: COLORS.primaryColor },
-                  { label: driverStatusLabel(driver.status), color: isDashed ? COLORS.yellowIdentifier : COLORS.greenIdentifier },
-                  ...(driver.duration ? [{ label: `${driver.duration} mins`, color: COLORS.textColorDark }] : []),
-                  ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: COLORS.textColorDark })),
-                ],
-              })
+              openModal(
+                {
+                  title: driver.name,
+                  content: driver.details?.oneLiner || driver.details?.description || "",
+                  subHeading:
+              driver.distance && driver.duration
+                ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                : "",
+                  tags: [
+                    { label: cfg?.label ?? capitalize(driver.driver), color: COLORS.primaryColor },
+                    { label: driverStatusLabel(driver.status), color: isDashed ? COLORS.yellowIdentifier : COLORS.greenIdentifier },
+                    ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: COLORS.textColorDark })),
+                  ],
+                },
+                { lat: driver.location!.lat, lng: driver.location!.lng },
+              )
             }
           >
             <MarkerIcon

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Marker, Polygon } from "react-leaflet";
 import { COLORS } from "../../../theme/style-constants";
-import { MapModalContent } from "../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../map-modal";
 import { getIcon } from "../utils";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
 
 interface CorridorMarkersProps {
   corridors?: any[];
-  setModalContent: (content: MapModalContent) => void;
+  setModalContent: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
 }
 
@@ -41,25 +41,28 @@ export const CorridorMarkers = ({
             }
           );
 
-          function corridorClickHandler() {
-            setModalContent({
-              title: c.name,
-              content: c.description || "",
-              titleIcon: (
-                <DynamicReactIcon
-                  iconName="LuMilestone"
-                  iconSet="lu"
-                  size={20}
-                  color={COLORS.textColorDark}
-                />
-              ),
-              tags: [
-                {
-                  label: "Growth corridor",
-                  color: COLORS.textColorDark,
-                },
-              ],
-            });
+          function corridorClickHandler(position: MapModalGeoPosition) {
+            setModalContent(
+              {
+                title: c.name,
+                content: c.description || "",
+                titleIcon: (
+                  <DynamicReactIcon
+                    iconName="LuMilestone"
+                    iconSet="lu"
+                    size={20}
+                    color={COLORS.textColorDark}
+                  />
+                ),
+                tags: [
+                  {
+                    label: "Growth corridor",
+                    color: COLORS.textColorDark,
+                  },
+                ],
+              },
+              position,
+            );
             setInfoModalOpen(true);
           }
 
@@ -71,7 +74,8 @@ export const CorridorMarkers = ({
                 zIndexOffset={100}
                 position={[c.location.lat, c.location.lng]}
                 eventHandlers={{
-                  click: corridorClickHandler,
+                  click: () =>
+                    corridorClickHandler({ lat: c.location.lat, lng: c.location.lng }),
                 }}
               />
               {c.geoJson ? (
@@ -82,7 +86,8 @@ export const CorridorMarkers = ({
                       [lat, lng] as [number, number]
                   )}
                   eventHandlers={{
-                    click: corridorClickHandler,
+                    click: (e) =>
+                      corridorClickHandler({ lat: e.latlng.lat, lng: e.latlng.lng }),
                   }}
                   pathOptions={{
                     color: COLORS.textColorMedium,

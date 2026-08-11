@@ -3,6 +3,7 @@ import * as turf from "@turf/turf";
 import { LatLngTuple } from "leaflet";
 import { useMap } from "react-leaflet";
 import { ProjectMarkerInput } from "../types";
+import { MapModalContent, MapModalGeoPosition } from "../map-modal";
 
 interface MapCenterHandlerProps {
   projectData: any;
@@ -34,6 +35,50 @@ export const MapCenterHandler = ({ projectData, projects, initialZoom }: MapCent
       map.setView(center.geometry.coordinates.reverse() as LatLngTuple, 12);
     }
   }, [projectData, map, projects, initialZoom]);
+
+  return null;
+};
+
+interface MapFocusHandlerProps {
+  projects?: ProjectMarkerInput[];
+  focusedProjectId?: string | null;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
+}
+
+const FOCUS_ZOOM = 15;
+
+export const MapFocusHandler = ({ projects, focusedProjectId, openModal }: MapFocusHandlerProps) => {
+  const map = useMap();
+  const previousViewRef = useRef<{ center: LatLngTuple; zoom: number } | null>(null);
+
+  useEffect(() => {
+    if (!focusedProjectId) {
+      const previousView = previousViewRef.current;
+      if (previousView) {
+        map.setView(previousView.center, previousView.zoom);
+        previousViewRef.current = null;
+      }
+      return;
+    }
+
+    const project = projects?.find((p) => p.id === focusedProjectId);
+    if (!project?.location?.lat || !project?.location?.lng) return;
+
+    if (!previousViewRef.current) {
+      const center = map.getCenter();
+      previousViewRef.current = {
+        center: [center.lat, center.lng],
+        zoom: map.getZoom(),
+      };
+    }
+
+    map.setView([project.location.lat, project.location.lng]);
+    openModal(project.modalContent, {
+      lat: project.location.lat,
+      lng: project.location.lng,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [map, focusedProjectId, projects]);
 
   return null;
 };

@@ -109,12 +109,17 @@ export const useFetchAccessibleLvnzyProjectBySlug = ({
 export const useFetchAllLvnzyProjects = (
   enabled: boolean = false,
   basic: boolean = false,
+  onlyVerifiedReports: boolean = false,
 ) => {
   return useQuery<LvnzyProject[], Error>({
-    queryKey: [queryKeys.getAllLvnzyProjects, basic],
+    queryKey: [queryKeys.getAllLvnzyProjects, basic, onlyVerifiedReports],
     queryFn: async () => {
+      const params: Record<string, string> = {};
+      if (basic) params.basic = "true";
+      if (onlyVerifiedReports) params.onlyVerifiedReports = "true";
+
       const { data } = await axiosApiInstance.get(`/lvnzy-projects`, {
-        params: basic ? { basic: "true" } : undefined,
+        params: Object.keys(params).length ? params : undefined,
       });
       return data as LvnzyProject[];
     },

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
-import { MapModalContent } from "../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../map-modal";
 import { useMapIcons, UseMapIconsReturn } from "../use-map-icons";
 import { useMapFilters, UseMapFiltersReturn } from "../use-map-filters";
 import { IDriverPlace, ISurroundingElement } from "../../../types/Project";
@@ -17,6 +17,8 @@ export interface MapBounds {
 export interface ModalState {
   infoModalOpen: boolean;
   modalContent?: MapModalContent;
+  /** Geo anchor the modal was opened against (Google map path only). */
+  modalPosition?: MapModalGeoPosition;
 }
 
 // Complete context state interface
@@ -37,7 +39,7 @@ export interface MapViewContextState {
   mapStyle: MapStyleType;
   
   // Actions
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   closeModal: () => void;
   updateBounds: (bounds: MapBounds) => void;
   setMapStyle: (style: MapStyleType) => void;
@@ -75,26 +77,29 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
   // Modal state
   const [infoModalOpen, setInfoModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<MapModalContent>();
+  const [modalPosition, setModalPosition] = useState<MapModalGeoPosition>();
   
   // Bounds state
   const [bounds, setBounds] = useState<MapBounds>();
   
   // Map style state
-  const [mapStyle, setMapStyleState] = useState<MapStyleType>("minimal");
+  const [mapStyle, setMapStyleState] = useState<MapStyleType>("street");
 
   // Use custom hooks for icons and filters
   const icons = useMapIcons(drivers, primaryProject, projectsNearby, projectSqftPricing);
   const filters = useMapFilters(drivers, categories, surroundingElements);
 
   // Modal actions
-  const openModal = useCallback((content: MapModalContent) => {
+  const openModal = useCallback((content: MapModalContent, position?: MapModalGeoPosition) => {
     setModalContent(content);
+    setModalPosition(position);
     setInfoModalOpen(true);
   }, []);
 
   const closeModal = useCallback(() => {
     setInfoModalOpen(false);
     setModalContent(undefined);
+    setModalPosition(undefined);
   }, []);
 
   // Bounds actions
@@ -112,6 +117,7 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
     modal: {
       infoModalOpen,
       modalContent,
+      modalPosition,
     },
     icons,
     filters,
@@ -145,6 +151,7 @@ export const useMapModal = () => {
   return {
     isOpen: modal.infoModalOpen,
     content: modal.modalContent,
+    position: modal.modalPosition,
     openModal,
     closeModal,
   };

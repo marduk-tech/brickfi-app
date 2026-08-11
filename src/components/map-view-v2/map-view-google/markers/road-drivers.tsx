@@ -10,7 +10,7 @@ import { capitalize, driverStatusLabel } from "../../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
 import { RoadDriverPlace } from "../../types";
-import { MapModalContent } from "../../map-modal";
+import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { processRoadFeatures } from "../../utils";
 
 interface RoadDriversProps {
@@ -18,7 +18,7 @@ interface RoadDriversProps {
   currentSelectedCategory: string;
   noCategoriesProvided: boolean;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
-  openModal: (content: MapModalContent) => void;
+  openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
 }
 
@@ -62,36 +62,39 @@ function RoadPolylines(props: RoadDriversProps) {
         PLACE_TIMELINE.PARTIAL_LAUNCH,
       ].includes(driver.status as PLACE_TIMELINE);
 
-      const handleClick = (featureProps?: any) =>
-        openModal({
-          title: (
-            <Flex vertical>
-              <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
-                {driver.name}
-              </Typography.Text>
-              {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
-                <Flex>
-                  <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
-                </Flex>
-              ) : null}
-            </Flex>
-          ),
-          subHeading:
-            driver.distance && driver.duration
-              ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
-              : "",
-          content: driver.details?.oneLiner || driver.details?.description || "",
-          tags: [
-            { label: "Highway", color: COLORS.primaryColor },
-            {
-              label: driverStatusLabel(featureProps?.status || driver.status),
-              color:
-                isDashed || featureProps?.status === "construction"
-                  ? "warning"
-                  : "success",
-            },
-          ],
-        });
+      const handleClick = (featureProps?: any, latLng?: google.maps.LatLng | null) =>
+        openModal(
+          {
+            title: (
+              <Flex vertical>
+                <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                  {driver.name}
+                </Typography.Text>
+                {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
+                  <Flex>
+                    <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
+                  </Flex>
+                ) : null}
+              </Flex>
+            ),
+            subHeading:
+              driver.distance && driver.duration
+                ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                : "",
+            content: driver.details?.oneLiner || driver.details?.description || "",
+            tags: [
+              { label: "Highway", color: COLORS.primaryColor },
+              {
+                label: driverStatusLabel(featureProps?.status || driver.status),
+                color:
+                  isDashed || featureProps?.status === "construction"
+                    ? "warning"
+                    : "success",
+              },
+            ],
+          },
+          latLng ? { lat: latLng.lat(), lng: latLng.lng() } : undefined,
+        );
 
       const features = processRoadFeatures(
         driver.features.filter(
@@ -111,7 +114,9 @@ function RoadPolylines(props: RoadDriversProps) {
             ? [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 1, scale: 3, strokeColor: "#FFFFFF" }, offset: "0", repeat: "16px" }]
             : undefined,
         });
-        line.addListener("click", () => handleClick(feature.properties));
+        line.addListener("click", (e: google.maps.PolyMouseEvent) =>
+          handleClick(feature.properties, e.latLng),
+        );
         lines.push(line);
       }
     }
@@ -132,7 +137,7 @@ type LabelCandidate = {
 
 function buildLabelCandidates(filtered: RoadDriverPlace[], zoom: number): LabelCandidate[] {
   // Dedup threshold matches OpenStreet: 8 km at low zoom, tightens as user zooms in
-  const minLabelDistance = zoom < 13.5 ? 8 : zoom < 14.5 ? 4 : 2;
+  const minLabelDistance = zoom < 13.5 ? 3 : zoom < 14.5 ? 2 : 1.5;
   const all: LabelCandidate[] = [];
 
   for (const driver of filtered) {
@@ -208,24 +213,27 @@ export function RoadDrivers(props: RoadDriversProps) {
           key={`road-entry-${driver._id}-${lng}-${lat}`}
           position={{ lat, lng }}
           onClick={() =>
-            openModal({
-              title: (
-                <Flex vertical>
-                  <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
-                    {driver.name}
-                  </Typography.Text>
-                </Flex>
-              ),
-              subHeading:
-                driver.distance && driver.duration
-                  ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
-                  : "",
-              content: "",
-              tags: [
-                { label: "Highway", color: COLORS.primaryColor },
-                { label: capitalize(name), color: COLORS.textColorDark },
-              ],
-            })
+            openModal(
+              {
+                title: (
+                  <Flex vertical>
+                    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                      {driver.name}
+                    </Typography.Text>
+                  </Flex>
+                ),
+                subHeading:
+                  driver.distance && driver.duration
+                    ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                    : "",
+                content: "",
+                tags: [
+                  { label: "Highway", color: COLORS.primaryColor },
+                  { label: capitalize(name), color: COLORS.textColorDark },
+                ],
+              },
+              { lat, lng },
+            )
           }
         >
           {/* Filled blue circle — matches Leaflet CircleMarker fillColor/color */}
@@ -263,32 +271,35 @@ export function RoadDrivers(props: RoadDriversProps) {
               PLACE_TIMELINE.POST_LAUNCH,
               PLACE_TIMELINE.PARTIAL_LAUNCH,
             ].includes(driver.status as PLACE_TIMELINE);
-            openModal({
-              title: (
-                <Flex vertical>
-                  <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
-                    {driver.name}
-                  </Typography.Text>
-                  {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
-                    <Flex>
-                      <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
-                    </Flex>
-                  ) : null}
-                </Flex>
-              ),
-              subHeading:
-                driver.distance && driver.duration
-                  ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
-                  : "",
-              content: driver.details?.oneLiner || driver.details?.description || "",
-              tags: [
-                { label: "Highway", color: COLORS.primaryColor },
-                {
-                  label: driverStatusLabel(featureProps?.status || driver.status),
-                  color: isDashed || featureProps?.status === "construction" ? "warning" : "success",
-                },
-              ],
-            });
+            openModal(
+              {
+                title: (
+                  <Flex vertical>
+                    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                      {driver.name}
+                    </Typography.Text>
+                    {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
+                      <Flex>
+                        <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
+                      </Flex>
+                    ) : null}
+                  </Flex>
+                ),
+                subHeading:
+                  driver.distance && driver.duration
+                    ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                    : "",
+                content: driver.details?.oneLiner || driver.details?.description || "",
+                tags: [
+                  { label: "Highway", color: COLORS.primaryColor },
+                  {
+                    label: driverStatusLabel(featureProps?.status || driver.status),
+                    color: isDashed || featureProps?.status === "construction" ? "warning" : "success",
+                  },
+                ],
+              },
+              { lat: coords[1], lng: coords[0] },
+            );
           }}
         >
           <div
