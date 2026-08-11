@@ -5,6 +5,7 @@ import DynamicReactIcon, { IconSetKey } from "../common/dynamic-react-icon";
 import { capitalize, getMinMaxPrices } from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LvnzyProject } from "../../types/LvnzyProject";
+import { useDevice } from "@/hooks/use-device";
 
 type MetaInfoProps = {
   lvnzyProject: LvnzyProject;
