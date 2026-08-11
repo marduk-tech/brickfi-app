@@ -151,6 +151,8 @@ const ADVISOR_LINK =
 const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
 
+  const {isMobile} = useDevice();
+
   const renderText = (text: string, color?: string) => {
     return (
       <Typography.Text
@@ -272,7 +274,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
             />
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_4,
+                fontSize: isMobile ? FONT_SIZE.PARA: FONT_SIZE.HEADING_4,
                 margin: 0,
                 color: COLORS.textColorMedium,
               }}
@@ -296,7 +298,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
             />
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_4,
+                fontSize: isMobile ? FONT_SIZE.PARA: FONT_SIZE.HEADING_4,
                 margin: 0,
                 color: COLORS.textColorMedium,
               }}
@@ -329,7 +331,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
               />
               <Typography.Text
                 style={{
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: 500,
                   color: projectStatusConfig.color,
                 }}
