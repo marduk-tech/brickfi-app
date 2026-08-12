@@ -72,7 +72,7 @@ const ChatTimeline = ({ steps, running, totalMs }: ChatTimelineProps) => {
                 {formatSecs(elapsed)}
               </Typography.Text>
             </div>
-            {step.detail ? (
+            {/* {step.detail ? (
               <Typography.Text
                 type="secondary"
                 className={styles.detail}
@@ -80,7 +80,7 @@ const ChatTimeline = ({ steps, running, totalMs }: ChatTimelineProps) => {
               >
                 → {step.detail}
               </Typography.Text>
-            ) : null}
+            ) : null} */}
           </div>
         );
       })}
