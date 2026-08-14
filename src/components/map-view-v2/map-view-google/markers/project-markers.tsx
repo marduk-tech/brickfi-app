@@ -37,9 +37,7 @@ export function ProjectMarkers({
 
   const primaryLabel = hasNearby
     ? `₹${rupeeAmountFormat(`${projectSqftPricing}`)} /sqft`
-    : primaryProject?.info?.name?.length > 20
-      ? `${primaryProject.info.name.substring(0, 20)}..`
-      : primaryProject?.info?.name;
+    : "";
 
   return (
     <>
@@ -70,7 +68,7 @@ export function ProjectMarkers({
             iconBgColor={COLORS.primaryColor}
             iconColor="white"
             borderColor="white"
-            containerWidth={hasNearby ? 80 : 135}
+            containerWidth={hasNearby ? 80 : 30}
             iconSize={hasNearby ? 18 : 16}
             bounce={true}
           />

@@ -40,6 +40,42 @@ interface MapModalProps {
 const PANEL_WIDTH = 320;
 const CLICK_OFFSET = 14;
 const EDGE_PADDING = 8;
+const CONTENT_WORD_LIMIT = 40;
+
+/** Breaks long plain-text content into paragraphs of ~CONTENT_WORD_LIMIT words each, splitting at the nearest sentence-ending full stop so line breaks never land mid-sentence. */
+const splitContentIntoParagraphs = (text: string, wordLimit = CONTENT_WORD_LIMIT) => {
+  const totalWords = text.trim().split(/\s+/).filter(Boolean).length;
+  if (totalWords <= wordLimit) {
+    return text;
+  }
+
+  // Split on whitespace that follows a sentence-ending punctuation mark, rather than
+  // matching sentences outright — match() silently drops any text it can't match (e.g.
+  // abbreviations like "e.g." break a naive sentence regex), whereas split() can't lose
+  // characters since every part of the string ends up in some chunk.
+  const sentences = text.trim().split(/(?<=[.!?])\s+/);
+
+  const paragraphs: string[] = [];
+  let current: string[] = [];
+  let currentWordCount = 0;
+
+  for (const sentence of sentences) {
+    const sentenceWordCount = sentence.split(/\s+/).filter(Boolean).length;
+    if (currentWordCount > 0 && currentWordCount + sentenceWordCount > wordLimit) {
+      paragraphs.push(current.join(" "));
+      current = [sentence];
+      currentWordCount = sentenceWordCount;
+    } else {
+      current.push(sentence);
+      currentWordCount += sentenceWordCount;
+    }
+  }
+  if (current.length) {
+    paragraphs.push(current.join(" "));
+  }
+
+  return paragraphs.join("\n\n");
+};
 
 interface MapModalBodyProps {
   content?: MapModalContent;
@@ -141,7 +177,7 @@ export const MapModalBody = ({ content, onClose }: MapModalBodyProps) => {
 
         {content && content.content && typeof content.content == "string" ? (
           <Markdown remarkPlugins={[remarkGfm]} className="liviq-content">
-            {content.content}
+            {splitContentIntoParagraphs(content.content)}
           </Markdown>
         ) : (
           <>{content && content.content ? content?.content : ""}</>

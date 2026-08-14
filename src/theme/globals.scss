@@ -41,7 +41,8 @@ body {
 
 .liviq-content {
   font-size: 14px;
-  line-height: "120%"
+  line-height: "120%";
+  font-weight: 300;
 
   img {
     max-width: 250px;
@@ -52,7 +53,7 @@ body {
   }
 
   p {
-    margin: 0 !important;
+    margin: 8px 0 !important;
   }
   /* Markdown table styling */
   table {

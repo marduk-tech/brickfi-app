@@ -70,7 +70,7 @@ const MAP_STYLES: google.maps.MapTypeStyle[] = [
   // ── Remove individual business POIs entirely (icon + label + geometry) ────
   // Restaurants, grocery stores, hospitals, pharmacies, shops, etc.
   // `elementType: "all"` removes the coloured pin icons as well as text labels.
-  { featureType: "poi.business", elementType: "all", stylers: [{ visibility: "off" }] },
+  { featureType: "poi.business", elementType: "all", stylers: [{ visibility: "on" }] },
   { featureType: "poi.medical",  elementType: "all", stylers: [{ visibility: "off" }] },
   { featureType: "poi.attraction", elementType: "all", stylers: [{ visibility: "off" }] },
   { featureType: "poi.government", elementType: "all", stylers: [{ visibility: "off" }] },
