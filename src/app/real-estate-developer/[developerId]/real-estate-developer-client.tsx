@@ -154,18 +154,20 @@ export default function RealEstateDeveloperClient({
     const typeLower = project.type ? project.type.toLowerCase() : "";
     let subType = project.subType ? project.subType.match(regex) : "";
     if (!subType) {
-      subType =
-        typeLower ? `${typeLower}, ${project.unitVariations ? project.unitVariations.toLowerCase() : ""}`.match(
-          regex,
-        ) : "";
+      subType = typeLower
+        ? `${typeLower}, ${project.unitVariations ? project.unitVariations.toLowerCase() : ""}`.match(
+            regex,
+          )
+        : "";
       subType = subType && subType.length ? subType[0] : "";
     } else {
       subType = subType.length ? subType[0] : subType;
     }
-    const type =
-      project.type ? typeLower == "residential"
+    const type = project.type
+      ? typeLower == "residential"
         ? "Residential Community"
-        : project.type : "";
+        : project.type
+      : "";
 
     return (
       <Flex
@@ -211,57 +213,38 @@ export default function RealEstateDeveloperClient({
           >
             {project.name}
           </Text>
-          {project.type ?
-          <Text
-            style={{
-              textWrap: "wrap",
-              fontSize: FONT_SIZE.HEADING_4,
-              lineHeight: "110%",
-              marginTop: 8,
-            }}
-          >
-            {capitalize(type)} {subType ? `| ${capitalize(subType)}` : ""}
-          </Text>: null}
+          {project.type ? (
+            <Text
+              style={{
+                textWrap: "wrap",
+                fontSize: FONT_SIZE.HEADING_4,
+                lineHeight: "110%",
+                marginTop: 8,
+                color: COLORS.textColorLight
+              }}
+            >
+              {project.location}
+            </Text>
+          ) : null}
           <Flex
             gap={4}
             wrap
             style={{ marginTop: 4, position: "absolute", bottom: 0 }}
           >
-            {Array.from(
-              new Set(
-                project.location
-                  ?.split(",")
-                  .map((s: string) => s.trim().split(" ")[0])
-                  .filter(Boolean)
-                  .filter(
-                    (w: string) =>
-                      !["near", "pin", "where", "within"].includes(
-                        w.toLowerCase(),
-                      ),
-                  )
-                  .map((w: string) =>
-                    w.toLowerCase() === "bengaluru" ? "Bangalore" : w,
-                  ),
-              ),
-            )
-              .slice(0, 2)
-              .map((word) => {
-                const fullWord = word as string;
-                const truncated =
-                  fullWord.length > 10
-                    ? `${fullWord.slice(0, 10)}..`
-                    : fullWord;
-                return (
-                  <Tooltip key={fullWord} title={fullWord}>
-                    <Tag
-                      color={COLORS.textColorDark}
-                      style={{ fontSize: FONT_SIZE.SUB_TEXT, margin: 0 }}
-                    >
-                      {truncated}
-                    </Tag>
-                  </Tooltip>
-                );
-              })}
+            <Tag
+              color={COLORS.textColorDark}
+              style={{ fontSize: FONT_SIZE.SUB_TEXT, margin: 0 }}
+            >
+              {capitalize(type)}
+            </Tag>
+            {subType && (
+              <Tag
+                color={COLORS.textColorDark}
+                style={{ fontSize: FONT_SIZE.SUB_TEXT, margin: 0 }}
+              >
+                {capitalize(subType)}
+              </Tag>
+            )}
           </Flex>
         </Flex>
       </Flex>
