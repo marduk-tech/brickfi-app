@@ -38,7 +38,7 @@ export const CategoryFilters = ({
         scrollbarWidth: "none",
         flexShrink: 0,
         position: "absolute",
-        top: 8,
+        top: isMobile ? 24: 8,
         zIndex: 1000,
         left: 8,
         width: "100%",

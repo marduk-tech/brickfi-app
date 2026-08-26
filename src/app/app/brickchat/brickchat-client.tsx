@@ -243,9 +243,15 @@ export function BrickChatCore({
     ProjectResult[] | undefined
   >(defaultProjectResults);
   const [mapResultsIndex, setMapResultsIndex] = useState<number | undefined>();
-  const [focusedProjectId, setFocusedProjectId] = useState<string | null>(
-    null,
-  );
+  const [focusedProjectId, setFocusedProjectId] = useState<string | null>(null);
+
+  const handleLocateProject = (projectId: string) => {
+    if (isMobile) setShowMobileMap(true);
+    setTimeout(() => {
+          setFocusedProjectId(projectId);
+
+    }, isMobile ? 300: 10);
+  };
 
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareLink, setShareLink] = useState<string>();
@@ -298,7 +304,7 @@ export function BrickChatCore({
   };
 
   useEffect(() => {
-  if (!user?._id) {
+    if (!user?._id) {
       return;
     }
 
@@ -711,7 +717,11 @@ export function BrickChatCore({
 
     return (
       <Image.PreviewGroup>
-        <Flex className={styles.scrollContainer} gap={12} style={{ marginTop: 8 }}>
+        <Flex
+          className={styles.scrollContainer}
+          gap={12}
+          style={{ marginTop: 8 }}
+        >
           {items.map((image, index) => (
             <Flex
               key={`${image.url}-${index}`}
@@ -768,6 +778,10 @@ export function BrickChatCore({
     </Flex>
   );
 
+  const mobileDrawerHeight =
+    dragHeight ??
+    (showMobileMap ? getMobileMapExpandedHeight() : MOBILE_MAP_COLLAPSED_HEIGHT);
+
   return (
     <Flex
       vertical={isMobile}
@@ -783,18 +797,134 @@ export function BrickChatCore({
           height: "90vh",
         }}
       >
+         <Form
+          form={form}
+          onFinish={handleSearch}
+          style={{
+            marginTop: 8,
+            position: "absolute",
+            bottom: isMobile ? mobileDrawerHeight : 8,
+            width: "100%",
+            backgroundColor: "white"
+          }}
+        >
+          <Flex justify="flex-end" style={{ marginBottom: 2 }}>
+            {(activeThreadId || selectedThreadId) && (
+              <Tooltip title="Share chat">
+                <Button
+                  type="text"
+                  style={{
+                    padding: "8px 0",
+                    height: "auto",
+                    width: 32,
+                    lineHeight: 1,
+                  }}
+                  icon={
+                    <DynamicReactIcon
+                      iconName="IoIosShareAlt"
+                      iconSet="io"
+                      color={COLORS.textColorMedium}
+                      size={18}
+                    />
+                  }
+                  onClick={handleShare}
+                />
+              </Tooltip>
+            )}
+            {(activeThreadId || selectedThreadId) && (
+              <Tooltip title="View in LangSmith">
+                <Button
+                  type="text"
+                  style={{
+                    padding: "8px 0",
+                    height: "auto",
+                    width: 32,
+                    lineHeight: 1,
+                  }}
+                  icon={
+                    <DynamicReactIcon
+                      iconName="LuUnlink"
+                      iconSet="lu"
+                      color={COLORS.textColorMedium}
+                      size={16}
+                    />
+                  }
+                  onClick={() => {
+                    const threadId = activeThreadId || selectedThreadId;
+                    window.open(
+                      `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
+                      "_blank",
+                    );
+                  }}
+                />
+              </Tooltip>
+            )}
+            <Tooltip title="New chat">
+              <Button
+                type="text"
+                style={{
+                  padding: "8px 0",
+                  height: "auto",
+                  width: 32,
+                  lineHeight: 1,
+                }}
+                icon={
+                  <DynamicReactIcon
+                    iconName="RiChatAiFill"
+                    iconSet="ri"
+                    color={COLORS.textColorMedium}
+                    size={16}
+                  />
+                }
+                onClick={() => {
+                  window.location.href = window.location.pathname;
+                }}
+              />
+            </Tooltip>
+          </Flex>
+          <Form.Item name="question" style={{ marginBottom: 0 }}>
+            <Input
+              placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
+              size="large"
+              disabled={chatLoading || threadyHistoryLoading}
+              suffix={
+                <Button
+                  type="text"
+                  htmlType="submit"
+                  icon={<BiSend size={20} />}
+                  disabled={chatLoading || threadyHistoryLoading}
+                  style={{ color: COLORS.primaryColor }}
+                />
+              }
+              style={{
+                boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                height: 50,
+                backgroundColor: "white",
+                border: "1px solid",
+                borderColor: COLORS.borderColorMedium,
+                borderRadius: 16,
+                fontSize: FONT_SIZE.HEADING_4,
+              }}
+              onPressEnter={() => form.submit()}
+            />
+          </Form.Item>
+        </Form>
         <Flex
           vertical
           gap={24}
           style={{
-            height: "80vh",
+            height: isMobile
+              ? `calc(100% - ${mobileDrawerHeight}px)`
+              : "100%",
             overflowY: "scroll",
             scrollbarWidth: "none",
             paddingRight: 8,
           }}
         >
           {showWelcome ? (
-            <Flex vertical>
+            <Flex
+              vertical
+            >
               <Flex vertical>
                 <Typography.Text
                   style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
@@ -924,7 +1054,10 @@ export function BrickChatCore({
               </Flex>
             </Flex>
           ) : defaultProjectResults?.length ? (
-            <Flex vertical gap={12}>
+            <Flex
+              vertical
+              gap={12}
+            >
               {defaultProjectsDescription && (
                 <Flex vertical>
                   <Typography.Text
@@ -952,7 +1085,7 @@ export function BrickChatCore({
               )}
               <BrickChatResults
                 results={defaultProjectResults}
-                onLocateProject={setFocusedProjectId}
+                onLocateProject={handleLocateProject}
                 isShownOnMap={mapResultsIndex === undefined}
               />
             </Flex>
@@ -1054,13 +1187,13 @@ export function BrickChatCore({
                               mapResultsIndex === index ? "primary" : "default"
                             }
                             onClick={() => {
-                              if (mapResultsIndex === index) {
-                                setMapResultsIndex(undefined);
-                              } else {
+                              if (mapResultsIndex !== index) {
                                 setMapResultsIndex(index);
                                 setProjectResults(
                                   messageItem.answer.projectsList,
                                 );
+                                    if (isMobile) setShowMobileMap(true);
+
                               }
                             }}
                             style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
@@ -1072,7 +1205,7 @@ export function BrickChatCore({
 
                       <BrickChatResults
                         results={messageItem.answer.projectsList}
-                        onLocateProject={setFocusedProjectId}
+                        onLocateProject={handleLocateProject}
                         isShownOnMap={mapResultsIndex === index}
                       />
                       {!chatLoading &&
@@ -1116,117 +1249,7 @@ export function BrickChatCore({
           </Flex>
         </Flex>
 
-        <Form
-          form={form}
-          onFinish={handleSearch}
-          style={{
-            marginTop: 8,
-            position: "absolute",
-            bottom: 8,
-            width: "100%",
-          }}
-        >
-          <Flex justify="flex-end" style={{ marginBottom: 2 }}>
-            {(activeThreadId || selectedThreadId) && (
-              <Tooltip title="Share chat">
-                <Button
-                  type="text"
-                  style={{
-                    padding: "8px 0",
-                    height: "auto",
-                    width: 32,
-                    lineHeight: 1,
-                  }}
-                  icon={
-                    <DynamicReactIcon
-                      iconName="IoIosShareAlt"
-                      iconSet="io"
-                      color={COLORS.textColorMedium}
-                      size={18}
-                    />
-                  }
-                  onClick={handleShare}
-                />
-              </Tooltip>
-            )}
-            {(activeThreadId || selectedThreadId) && (
-              <Tooltip title="View in LangSmith">
-                <Button
-                  type="text"
-                  style={{
-                    padding: "8px 0",
-                    height: "auto",
-                    width: 32,
-                    lineHeight: 1,
-                  }}
-                  icon={
-                    <DynamicReactIcon
-                      iconName="LuUnlink"
-                      iconSet="lu"
-                      color={COLORS.textColorMedium}
-                      size={16}
-                    />
-                  }
-                  onClick={() => {
-                    const threadId = activeThreadId || selectedThreadId;
-                    window.open(
-                      `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
-                      "_blank",
-                    );
-                  }}
-                />
-              </Tooltip>
-            )}
-            <Tooltip title="New chat">
-              <Button
-                type="text"
-                style={{
-                  padding: "8px 0",
-                  height: "auto",
-                  width: 32,
-                  lineHeight: 1,
-                }}
-                icon={
-                  <DynamicReactIcon
-                    iconName="RiChatAiFill"
-                    iconSet="ri"
-                    color={COLORS.textColorMedium}
-                    size={16}
-                  />
-                }
-                onClick={() => {
-                  window.location.href = window.location.pathname;
-                }}
-              />
-            </Tooltip>
-          </Flex>
-          <Form.Item name="question" style={{ marginBottom: 0 }}>
-            <Input
-              placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
-              size="large"
-              disabled={chatLoading || threadyHistoryLoading}
-              suffix={
-                <Button
-                  type="text"
-                  htmlType="submit"
-                  icon={<BiSend size={20} />}
-                  disabled={chatLoading || threadyHistoryLoading}
-                  style={{ color: COLORS.primaryColor }}
-                />
-              }
-              style={{
-                boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-                height: 50,
-                backgroundColor: "white",
-                border: "1px solid",
-                borderColor: COLORS.borderColorMedium,
-                borderRadius: 16,
-                fontSize: FONT_SIZE.HEADING_4,
-              }}
-              onPressEnter={() => form.submit()}
-            />
-          </Form.Item>
-        </Form>
+       
       </Flex>
 
       {!isMobile && (
@@ -1252,33 +1275,41 @@ export function BrickChatCore({
           open
           mask={false}
           closable={false}
-          height={
-            dragHeight ??
-            (showMobileMap
-              ? getMobileMapExpandedHeight()
-              : MOBILE_MAP_COLLAPSED_HEIGHT)
-          }
+          height={mobileDrawerHeight}
           styles={{
             header: { display: "none" },
-            body: { padding: 0, display: "flex", flexDirection: "column" },
+            body: { padding: 0, position: "relative", overflow: "hidden" },
             content: {
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
-              boxShadow: "0 -4px 16px rgba(0,0,0,0.15)",
             },
             wrapper: {
-              transition:
-                dragHeight === null ? "height 0.25s ease" : "none",
+              transition: dragHeight === null ? "height 0.25s ease" : "none",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              borderTop: `1px solid ${COLORS.borderColorMedium}`
             },
           }}
         >
+          <Flex vertical style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+            <BrickMapChat
+              projects={projectResults || []}
+              focusedProjectId={focusedProjectId}
+              hideAllFilters={!showMobileMap}
+            />
+          </Flex>
+
           <Flex
-            vertical
-            align="center"
+            justify="center"
             style={{
-              padding: "10px 0 12px",
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              padding: "10px 0",
               cursor: "grab",
               touchAction: "none",
+              zIndex: 10,
             }}
             onPointerDown={(e) => {
               e.currentTarget.setPointerCapture(e.pointerId);
@@ -1292,32 +1323,14 @@ export function BrickChatCore({
           >
             <div
               style={{
-                width: 40,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: COLORS.borderColorMedium,
-                marginBottom: 12,
+                width: 50,
+                height: 8,
+                borderRadius: 4,
+                backgroundColor: "black",
+                boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
               }}
             />
-            <Typography.Text strong style={{ fontSize: FONT_SIZE.HEADING_4 }}>
-              {showMobileMap
-                ? "Hide map"
-                : projectResults?.length
-                  ? `View ${projectResults.length} homes on map`
-                  : "View on map"}
-            </Typography.Text>
           </Flex>
-
-          {(showMobileMap ||
-            (dragHeight !== null &&
-              dragHeight > MOBILE_MAP_COLLAPSED_HEIGHT + 10)) && (
-            <Flex vertical style={{ flex: 1, overflow: "hidden" }}>
-              <BrickMapChat
-                projects={projectResults || []}
-                focusedProjectId={focusedProjectId}
-              />
-            </Flex>
-          )}
         </Drawer>
       )}
 

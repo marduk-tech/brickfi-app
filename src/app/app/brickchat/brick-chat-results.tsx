@@ -166,17 +166,13 @@ export default function BrickChatResults({
     <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
       {[...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0)).map((project) => (
-        <Link
-          key={project.projectId}
-          href={`/app/brick360/${project.projectSlug || project.lvnzyProjectId}`}
-          style={{ textDecoration: "none" }}
-          target="_blank"
-        >
+       <Flex style={{width: 225}}>
           <Card
             hoverable
             style={{
               width: 225,
               borderRadius: 12,
+              display: "block",
               overflow: "hidden",
               border: `1px solid ${COLORS.borderColor}`,
             }}
@@ -360,7 +356,7 @@ export default function BrickChatResults({
               </Flex>
             </Flex>
           </Card>
-        </Link>
+          </Flex>
       ))}
     </Flex>
   );
