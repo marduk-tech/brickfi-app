@@ -12,6 +12,7 @@ import { ChatThread } from "@/types/User";
 import {
   Button,
   Collapse,
+  Drawer,
   Empty,
   Flex,
   Form,
@@ -25,7 +26,7 @@ import {
   message,
 } from "antd";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -185,6 +186,58 @@ export function BrickChatCore({
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
+  const [dragHeight, setDragHeight] = useState<number | null>(null);
+  const dragStateRef = useRef<{
+    startY: number;
+    startHeight: number;
+    moved: boolean;
+  } | null>(null);
+
+  const MOBILE_MAP_COLLAPSED_HEIGHT = 100;
+  const getMobileMapExpandedHeight = () =>
+    typeof window !== "undefined" ? window.innerHeight * 0.7 : 500;
+
+  const handleMapHandleDragStart = (clientY: number) => {
+    dragStateRef.current = {
+      startY: clientY,
+      startHeight: showMobileMap
+        ? getMobileMapExpandedHeight()
+        : MOBILE_MAP_COLLAPSED_HEIGHT,
+      moved: false,
+    };
+  };
+
+  const handleMapHandleDragMove = (clientY: number) => {
+    if (!dragStateRef.current) return;
+    const delta = dragStateRef.current.startY - clientY;
+    if (Math.abs(delta) > 5) dragStateRef.current.moved = true;
+    const maxHeight = getMobileMapExpandedHeight();
+    const newHeight = Math.min(
+      maxHeight,
+      Math.max(
+        MOBILE_MAP_COLLAPSED_HEIGHT,
+        dragStateRef.current.startHeight + delta,
+      ),
+    );
+    setDragHeight(newHeight);
+  };
+
+  const handleMapHandleDragEnd = () => {
+    const dragState = dragStateRef.current;
+    if (!dragState) return;
+
+    if (!dragState.moved) {
+      setShowMobileMap((v) => !v);
+    } else {
+      const maxHeight = getMobileMapExpandedHeight();
+      const finalHeight = dragHeight ?? dragState.startHeight;
+      const midpoint = (MOBILE_MAP_COLLAPSED_HEIGHT + maxHeight) / 2;
+      setShowMobileMap(finalHeight > midpoint);
+    }
+
+    dragStateRef.current = null;
+    setDragHeight(null);
+  };
 
   const [projectResults, setProjectResults] = useState<
     ProjectResult[] | undefined
@@ -728,7 +781,6 @@ export function BrickChatCore({
           paddingBottom: 100,
           width: isMobile ? "100%" : "50%",
           height: "90vh",
-          display: isMobile && showMobileMap ? "none" : undefined,
         }}
       >
         <Flex
@@ -1177,12 +1229,11 @@ export function BrickChatCore({
         </Form>
       </Flex>
 
-      {(!isMobile || showMobileMap) && (
+      {!isMobile && (
         <Flex
           style={{
-            width: isMobile ? "100%" : "47%",
-            minWidth: isMobile ? undefined : "47%",
-            height: isMobile ? "90vh" : undefined,
+            width: "47%",
+            minWidth: "47%",
             padding: "0 1.5%",
             flexShrink: 0,
             isolation: "isolate",
@@ -1193,6 +1244,81 @@ export function BrickChatCore({
             focusedProjectId={focusedProjectId}
           />
         </Flex>
+      )}
+
+      {isMobile && (
+        <Drawer
+          placement="bottom"
+          open
+          mask={false}
+          closable={false}
+          height={
+            dragHeight ??
+            (showMobileMap
+              ? getMobileMapExpandedHeight()
+              : MOBILE_MAP_COLLAPSED_HEIGHT)
+          }
+          styles={{
+            header: { display: "none" },
+            body: { padding: 0, display: "flex", flexDirection: "column" },
+            content: {
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              boxShadow: "0 -4px 16px rgba(0,0,0,0.15)",
+            },
+            wrapper: {
+              transition:
+                dragHeight === null ? "height 0.25s ease" : "none",
+            },
+          }}
+        >
+          <Flex
+            vertical
+            align="center"
+            style={{
+              padding: "10px 0 12px",
+              cursor: "grab",
+              touchAction: "none",
+            }}
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              handleMapHandleDragStart(e.clientY);
+            }}
+            onPointerMove={(e) => {
+              if (dragStateRef.current) handleMapHandleDragMove(e.clientY);
+            }}
+            onPointerUp={handleMapHandleDragEnd}
+            onPointerCancel={handleMapHandleDragEnd}
+          >
+            <div
+              style={{
+                width: 40,
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: COLORS.borderColorMedium,
+                marginBottom: 12,
+              }}
+            />
+            <Typography.Text strong style={{ fontSize: FONT_SIZE.HEADING_4 }}>
+              {showMobileMap
+                ? "Hide map"
+                : projectResults?.length
+                  ? `View ${projectResults.length} homes on map`
+                  : "View on map"}
+            </Typography.Text>
+          </Flex>
+
+          {(showMobileMap ||
+            (dragHeight !== null &&
+              dragHeight > MOBILE_MAP_COLLAPSED_HEIGHT + 10)) && (
+            <Flex vertical style={{ flex: 1, overflow: "hidden" }}>
+              <BrickMapChat
+                projects={projectResults || []}
+                focusedProjectId={focusedProjectId}
+              />
+            </Flex>
+          )}
+        </Drawer>
       )}
 
       <Modal
@@ -1220,43 +1346,6 @@ export function BrickChatCore({
           </Flex>
         )}
       </Modal>
-
-      {isMobile && (
-        <Flex
-          justify="flex-end"
-          style={{
-            position: "fixed",
-            bottom: 124,
-            left: 0,
-            right: 24,
-            zIndex: 9999,
-            pointerEvents: "none",
-          }}
-        >
-          <Button
-            style={{
-              pointerEvents: "all",
-              borderRadius: 16,
-              paddingLeft: 16,
-              paddingRight: 16,
-              fontWeight: 600,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.18)",
-              backgroundColor: COLORS.textColorDark,
-              color: "white",
-              border: "none",
-            }}
-            icon={
-              <DynamicReactIcon
-                iconName="PiMapTrifold"
-                iconSet="pi"
-                color="white"
-                size={28}
-              />
-            }
-            onClick={() => setShowMobileMap((v) => !v)}
-          ></Button>
-        </Flex>
-      )}
     </Flex>
   );
 }
