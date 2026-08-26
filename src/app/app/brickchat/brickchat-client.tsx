@@ -193,7 +193,7 @@ export function BrickChatCore({
     moved: boolean;
   } | null>(null);
 
-  const MOBILE_MAP_COLLAPSED_HEIGHT = 100;
+  const MOBILE_MAP_COLLAPSED_HEIGHT = 50;
   const getMobileMapExpandedHeight = () =>
     typeof window !== "undefined" ? window.innerHeight * 0.7 : 500;
 
@@ -792,12 +792,12 @@ export function BrickChatCore({
         style={{
           margin: "0 auto",
           position: "relative",
-          paddingBottom: 100,
+          paddingBottom: isMobile && showMobileMap ? 0 : 100,
           width: isMobile ? "100%" : "50%",
-          height: "90vh",
+          height: "calc(100vh - 60px)",
         }}
       >
-         <Form
+         {!showMobileMap ? <Form
           form={form}
           onFinish={handleSearch}
           style={{
@@ -805,7 +805,8 @@ export function BrickChatCore({
             position: "absolute",
             bottom: isMobile ? mobileDrawerHeight : 8,
             width: "100%",
-            backgroundColor: "white"
+            backgroundColor: "white",
+            zIndex: 1001,
           }}
         >
           <Flex justify="flex-end" style={{ marginBottom: 2 }}>
@@ -908,7 +909,7 @@ export function BrickChatCore({
               onPressEnter={() => form.submit()}
             />
           </Form.Item>
-        </Form>
+        </Form> : null}
         <Flex
           vertical
           gap={24}
@@ -1287,7 +1288,7 @@ export function BrickChatCore({
               transition: dragHeight === null ? "height 0.25s ease" : "none",
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,
-              borderTop: `1px solid ${COLORS.borderColorMedium}`
+              borderTop: `1px solid ${COLORS.textColorMedium}`,
             },
           }}
         >
