@@ -886,14 +886,14 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   </Flex>
                 </Flex>
                 {/* Price quartile chart for pricePoint data point */}
-                {/* {dataPointSelected?.selectedDataPointSubCategory ===
+                 {dataPointSelected?.selectedDataPointSubCategory ===
                   "pricePoint" && (
                   <PriceQuartileChart
                     pricingData={(
                       lvnzyProject?.investment?.corridorPricing || []
                     ).filter((p: any) => !!p.sqftCost)}
                   />
-                )} */}
+                )} 
 
                 {/* Data point selected content */}
                 {dataPointSelected && (
