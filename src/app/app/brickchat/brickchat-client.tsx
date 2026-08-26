@@ -785,7 +785,7 @@ export function BrickChatCore({
   return (
     <Flex
       vertical={isMobile}
-      style={{ width: "100%", maxWidth: 2000, padding: 8, overflowY: "scroll" }}
+      style={{ width: "100%", maxWidth: 2000, height: "100%", padding: 8, overflowY: "scroll" }}
     >
       <Flex
         vertical
@@ -794,7 +794,7 @@ export function BrickChatCore({
           position: "relative",
           paddingBottom: isMobile && showMobileMap ? 0 : 100,
           width: isMobile ? "100%" : "50%",
-          height: "calc(100vh - 60px)",
+          height: "100%"
         }}
       >
          {!showMobileMap ? <Form
