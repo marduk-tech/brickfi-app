@@ -293,6 +293,28 @@ export default function BrickChatResults({
                   </Flex>
                 )}
 
+                {project.isDeveloperPartner && (
+                  <Flex
+                    align="center"
+                    justify="center"
+                    style={{
+                      width: 24,
+                      height: 24,
+                      flexShrink: 0,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                    }}
+                  >
+                    <DynamicReactIcon
+                      iconName="FaPeopleArrows"
+                      iconSet="fa6"
+                      size={14}
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                )}
+
                 {/* {project.lvnzyProjectId && (
                   <Flex
                     align="center"

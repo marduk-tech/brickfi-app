@@ -48,6 +48,7 @@ export interface ProjectResult {
   projectHomeTypes?: Array<string>;
   sizeBuiltupMin?: number;
   rankScore: number;
+  isDeveloperPartner?: boolean;
   projectLocation: {
     lat: number;
     lng: number;
