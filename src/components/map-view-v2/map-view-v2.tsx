@@ -60,6 +60,10 @@ import {
 } from "./map-utils/map-handlers";
 import { ProjectMarkerInput } from "./types";
 import { processDriversToPolygons } from "./utils";
+import { RentalLocalityAnchor } from "@/types/Rental";
+import { RentalSurfaceLayer } from "./map-layers/rental-surface-layer";
+import { RentalLocalityMarkers } from "./map-markers/rental-locality-markers";
+import { RentalLegend } from "./map-utils/rental-legend";
 
 export type { ProjectMarkerInput } from "./types";
 
@@ -100,6 +104,7 @@ interface MapViewV2Props {
   hideAllFilters?: boolean;
   corridorIds?: string[];
   highlightedHomeTypes?: string[];
+  rentalLocalities?: RentalLocalityAnchor[];
 }
 
 const MapViewV2Inner = ({
@@ -122,7 +127,9 @@ const MapViewV2Inner = ({
   primaryProject,
   corridorIds,
   highlightedHomeTypes,
+  rentalLocalities,
 }: MapViewV2Props & { primaryProject?: any }) => {
+  const showRentals = !!rentalLocalities?.length;
   // Use context hooks instead of local state
   const {
     isOpen: infoModalOpen,
@@ -263,7 +270,13 @@ const MapViewV2Inner = ({
         >
           <ZoomControl position="bottomright" />
           <MapResizeHandler />
-          <MapCenterHandler projectData={primaryProject} projects={projects} initialZoom={initialZoom} />
+          <MapCenterHandler
+            projectData={primaryProject}
+            projects={projects}
+            initialZoom={initialZoom}
+            fitPoints={showRentals ? rentalLocalities : undefined}
+          />
+          {showRentals && <RentalSurfaceLayer anchors={rentalLocalities!} />}
           <MapFocusHandler
             projects={projects}
             focusedProjectId={focusedProjectId}
@@ -307,7 +320,8 @@ const MapViewV2Inner = ({
                   />
                 ) : null}
                 {/* {renderSurroundings()} */}
-                {showCorridors && (
+                {/* corridor pills sit on top of the rental dots, so skip them there */}
+                {showCorridors && !showRentals && (
                   <CorridorMarkers
                     corridors={corridorIds ? corridors?.filter(c => corridorIds.includes(c._id)): corridors}
                     setModalContent={openModal}
@@ -335,6 +349,12 @@ const MapViewV2Inner = ({
                   isDriverMatchingFilter={isDriverMatchingFilter}
                   fetchTravelDurationElement={fetchTravelDurationElement}
                 />
+                {showRentals && (
+                  <RentalLocalityMarkers
+                    anchors={rentalLocalities!}
+                    openModal={openModal}
+                  />
+                )}
                 {projectsNearby?.length && projectsNearbyIcons?.length ? (
                   <ProjectsNearbyMarkers
                     projectsNearby={projectsNearby}
@@ -422,6 +442,7 @@ const MapViewV2Inner = ({
             </Popup>
           )}
         </MapContainer>
+        {showRentals && <RentalLegend anchors={rentalLocalities!} />}
       </div>
     </div>
   );

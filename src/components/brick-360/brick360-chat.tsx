@@ -16,6 +16,7 @@ import {
   forwardRef,
   useEffect,
   useImperativeHandle,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -40,133 +41,18 @@ import DynamicReactIcon from "../common/dynamic-react-icon";
 import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import dynamic from "next/dynamic";
 import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
+import {
+  buildRentalAnchors,
+  buildRentalListings,
+  filterListingsByBhk,
+} from "@/libs/rental-helper";
+import { BhkFilter } from "@/types/Rental";
+import { QuartileHistogram } from "./quartile-histogram";
 const MapViewV2 = dynamic(() => import("../map-view-v2/map-view-v2"), {
   ssr: false,
 });
-const ColumnChart = dynamic(
-  () => import("@ant-design/plots").then((m) => m.Column),
-  { ssr: false },
-);
 
-function getPercentile(sorted: number[], pct: number): number {
-  const idx = (pct / 100) * (sorted.length - 1);
-  const lo = Math.floor(idx);
-  const hi = Math.ceil(idx);
-  return sorted[lo] + (sorted[hi] - sorted[lo]) * (idx - lo);
-}
-
-function PriceQuartileChart({
-  pricingData,
-}: {
-  pricingData: { projectName: string; sqftCost: number }[];
-}) {
-  if (pricingData.length < 2) return null;
-
-  const costs = pricingData.map((p) => p.sqftCost).sort((a, b) => a - b);
-  const q1 = getPercentile(costs, 25);
-  const q3 = getPercentile(costs, 75);
-
-  const fmtSqft = (v: number) => `${parseFloat((v / 1000).toFixed(1))}k`;
-
-  const STEP = 1000;
-  const bucketMap = new Map<number, { count: number; projects: string[] }>();
-  pricingData.forEach((p) => {
-    const bucket = Math.round(p.sqftCost / STEP) * STEP;
-    const existing = bucketMap.get(bucket) || { count: 0, projects: [] };
-    bucketMap.set(bucket, {
-      count: existing.count + 1,
-      projects: [
-        ...existing.projects,
-        `${p.projectName} (${fmtSqft(p.sqftCost)})`,
-      ],
-    });
-  });
-
-  const data = Array.from(bucketMap.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([bucket, { count, projects }]) => ({
-      label: `₹${bucket / 1000}k`,
-      count,
-      projects,
-      inRange: bucket <= q3 && bucket + STEP > q1,
-    }));
-
-  const config = {
-    data,
-    xField: "label",
-    yField: "count",
-    height: 160,
-    autoFit: true,
-    label: false as const,
-    axis: {
-      x: { label: { autoRotate: true, fontSize: 9 } },
-      y: { labelFormatter: () => "", tickCount: 4 },
-    },
-    tooltip: {
-      items: [
-        (datum: any) => ({
-          name: "Projects",
-          value: datum.count,
-          marker: false,
-          projects: datum.projects,
-          count: datum.count,
-        }),
-      ],
-    },
-    interaction: {
-      tooltip: {
-        render: (_event: any, { items, title }: any) => {
-          const item = items?.[0];
-          if (!item) return "";
-          const names: string[] = item.projects || [];
-          const tagStyle =
-            "display:inline-block;padding:0 7px;font-size:11px;line-height:20px;" +
-            "border:1px solid #d9d9d9;border-radius:4px;background:rgba(0,0,0,0.02);margin:2px 2px 0 0";
-          const tagsHtml = names
-            .slice(0, 5)
-            .map((n) => `<span style="${tagStyle}">${n}</span>`)
-            .join("");
-          const moreHtml =
-            names.length > 5
-              ? `<span style="${tagStyle}">+${names.length - 5} more</span>`
-              : "";
-          return `<div style="padding:8px 12px;min-width:160px">
-          <div style="margin-bottom:6px;font-weight:500; font-size: 24px;">${title}</div>
-            <div style="margin-bottom:6px;font-weight:500;color:#999;"> ${item.count} project${item.count !== 1 ? "s" : ""}</div>
-            <div style="display:flex;flex-wrap:wrap">${tagsHtml}${moreHtml}</div>
-          </div>`;
-        },
-      },
-    },
-    style: {
-      fill: (d: { inRange: boolean }) => (d.inRange ? "#1677ff" : "#bfbfbf"),
-      radius: 4,
-    },
-  };
-
-  return (
-    <Flex
-      vertical
-      style={{
-        maxWidth: 700,
-        backgroundColor: COLORS.LANDING.MEDIUM_PINK,
-        padding: "8px 8px 0 8px",
-        borderRadius: "0 8px",
-      }}
-    >
-      <Typography.Text
-        style={{
-          fontSize: 11,
-          color: "#8c8c8c",
-          marginBottom: 4,
-        }}
-      >
-        Price Point Distribution
-      </Typography.Text>
-      <ColumnChart {...(config as any)} />
-    </Flex>
-  );
-}
+const BHK_OPTIONS: BhkFilter[] = ["all", 1, 2, 3, "4+"];
 
 const REPORT_ACCESS_DENIED_MESSAGE =
   "You don't have access to this report. Please request for one or reachout to Brickfi.";
@@ -211,6 +97,38 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
 
     const [mapVisible, setMapVisible] = useState<boolean>(false);
 
+    const [rentalBhk, setRentalBhk] = useState<BhkFilter>("all");
+    const rentalListings = useMemo(
+      () => buildRentalListings(lvnzyProject),
+      [lvnzyProject],
+    );
+    const allRentalAnchors = useMemo(
+      () => buildRentalAnchors(rentalListings, lvnzyProject),
+      [rentalListings, lvnzyProject],
+    );
+    const filteredRentalListings = useMemo(
+      () => filterListingsByBhk(rentalListings, rentalBhk),
+      [rentalListings, rentalBhk],
+    );
+    const rentalAnchors = useMemo(
+      () =>
+        rentalBhk === "all"
+          ? allRentalAnchors
+          : buildRentalAnchors(filteredRentalListings, lvnzyProject),
+      [rentalBhk, allRentalAnchors, filteredRentalListings, lvnzyProject],
+    );
+    const bhkCounts = useMemo(() => {
+      const counts = new Map<BhkFilter, number>([["all", rentalListings.length]]);
+      rentalListings.forEach((l) => {
+        if (l.bhk) counts.set(l.bhk, (counts.get(l.bhk) || 0) + 1);
+      });
+      return counts;
+    }, [rentalListings]);
+    const isRentalIncome =
+      dataPointSelected?.selectedDataPointSubCategory === "rentalIncome";
+    // keep the same array identity so the map doesn't redraw on every render
+    const rentalMapLocalities = isRentalIncome ? rentalAnchors : undefined;
+
     const [mapCategories, setMapCategories] = useState<string[]>([]);
 
     const [currentSessionId, setCurrentSessionId] = useState<string>(() =>
@@ -252,6 +170,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
       setFollowupPrompts([]);
       setSurroundingElements([]);
       setProjectsNearby([]);
+      setRentalBhk("all");
       if (
         dataPointSelected &&
         dataPointSelected.selectedDataPointCategory &&
@@ -363,6 +282,11 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   (p: any) => !!p.sqftCost,
                 ) || [],
               );
+            } else if (
+              dataPointSelected.selectedDataPointSubCategory === "rentalIncome"
+            ) {
+              // older reports have no localityId on rentals, so no map for them
+              setMapVisible(allRentalAnchors.length > 0);
             }
           } else if (
             dataPointSelected.selectedDataPointCategory === "property" &&
@@ -764,6 +688,27 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   </Flex>
                 )}
 
+                {/* BHK filter for the rental map + chart */}
+                {isRentalIncome && rentalListings.length ? (
+                  <Flex wrap gap={4} style={{ marginBottom: 8 }}>
+                    {BHK_OPTIONS.filter((b) => bhkCounts.get(b)).map((b) => (
+                      <Tag.CheckableTag
+                        key={String(b)}
+                        checked={rentalBhk === b}
+                        onChange={() => setRentalBhk(b)}
+                        style={{
+                          borderRadius: 8,
+                          border: `1px solid ${COLORS.borderColor}`,
+                          fontSize: FONT_SIZE.HEADING_4,
+                          padding: "2px 8px",
+                        }}
+                      >
+                        {b === "all" ? "All" : `${b} BHK`} · {bhkCounts.get(b)}
+                      </Tag.CheckableTag>
+                    ))}
+                  </Flex>
+                ) : null}
+
                 {/* Map view including expand button and drawer close icon button */}
                 {mapVisible ? (
                   <Flex
@@ -803,6 +748,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                             .minimumUnitSize,
                       )}
                       projectsNearby={projectsNearby}
+                      rentalLocalities={rentalMapLocalities}
                       drivers={mapDrivers.map((d) => {
                         return {
                           ...d.driverId,
@@ -886,14 +832,33 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   </Flex>
                 </Flex>
                 {/* Price quartile chart for pricePoint data point */}
-                 {dataPointSelected?.selectedDataPointSubCategory ===
+                {dataPointSelected?.selectedDataPointSubCategory ===
                   "pricePoint" && (
-                  <PriceQuartileChart
-                    pricingData={(
-                      lvnzyProject?.investment?.corridorPricing || []
-                    ).filter((p: any) => !!p.sqftCost)}
+                  <QuartileHistogram
+                    values={(lvnzyProject?.investment?.corridorPricing || [])
+                      .filter((p: any) => !!p.sqftCost)
+                      .map((p: any) => ({
+                        value: p.sqftCost,
+                        label: `${p.projectName} (${parseFloat((p.sqftCost / 1000).toFixed(1))}k)`,
+                      }))}
+                    step={1000}
+                    formatBucket={(b) => `₹${b / 1000}k`}
+                    title="Price Point Distribution"
+                    unitNoun="project"
                   />
-                )} 
+                )}
+                {isRentalIncome && (
+                  <QuartileHistogram
+                    values={filteredRentalListings.map((l) => ({
+                      value: l.psf,
+                      label: `${l.society} (₹${Math.round(l.psf)})`,
+                    }))}
+                    step={5}
+                    formatBucket={(b) => `₹${b}`}
+                    title="Rent per sqft distribution"
+                    unitNoun="listing"
+                  />
+                )}
 
                 {/* Data point selected content */}
                 {dataPointSelected && (
@@ -1094,6 +1059,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                   lvnzyProject?.originalProjectId?.info.rate.minimumUnitSize,
               )}
               projectsNearby={projectsNearby}
+              rentalLocalities={rentalMapLocalities}
               drivers={mapDrivers.map((d) => {
                 return {
                   ...d.driverId,

@@ -1,40 +1,77 @@
-import React, { useCallback, useEffect, useRef } from "react";
 import * as turf from "@turf/turf";
 import { LatLngTuple } from "leaflet";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
-import { ProjectMarkerInput } from "../types";
 import { MapModalContent, MapModalGeoPosition } from "../map-modal";
+import { ProjectMarkerInput } from "../types";
 
 interface MapCenterHandlerProps {
   projectData: any;
   projects?: ProjectMarkerInput[];
   initialZoom?: number;
+  fitPoints?: { lat: number; lng: number }[];
 }
 
-export const MapCenterHandler = ({ projectData, projects, initialZoom }: MapCenterHandlerProps) => {
+export const MapCenterHandler = ({
+  projectData,
+  projects,
+  initialZoom,
+  fitPoints,
+}: MapCenterHandlerProps) => {
   const map = useMap();
 
   useEffect(() => {
-    if (
+    if (fitPoints?.length) {
+      const points: LatLngTuple[] = fitPoints.map((p) => [p.lat, p.lng]);
+      if (
+        projectData?.info?.location?.lat &&
+        projectData?.info?.location?.lng
+      ) {
+        points.push([
+          projectData.info.location.lat,
+          projectData.info.location.lng,
+        ]);
+      }
+      // no animation: MapResizeHandler's setView on layeradd would cut an animated pan short
+      const fit = () =>
+        map.fitBounds(points, { padding: [24, 24], animate: false });
+      const hasSize = () => {
+        const size = map.invalidateSize().getSize();
+        return size.x > 0 && size.y > 0;
+      };
+
+      if (!hasSize()) {
+        const onResize = () => {
+          if (!hasSize()) return;
+          map.off("resize", onResize);
+          fit();
+        };
+        map.on("resize", onResize);
+        return () => {
+          map.off("resize", onResize);
+        };
+      }
+      fit();
+    } else if (
       projectData &&
       projectData?.info?.location?.lat &&
       projectData?.info?.location?.lng
     ) {
       map.setView(
         [projectData.info.location.lat, projectData.info.location.lng],
-        initialZoom || 12
+        initialZoom || 12,
       );
     } else if (projects && projects.length && projects.length < 10) {
       const projectsLoc = turf.points(
         projects
           .filter((p) => !!p.location?.lat && !!p.location?.lng)
-          .map((p) => [p.location.lng, p.location.lat])
+          .map((p) => [p.location.lng, p.location.lat]),
       );
 
       const center = turf.center(projectsLoc);
       map.setView(center.geometry.coordinates.reverse() as LatLngTuple, 12);
     }
-  }, [projectData, map, projects, initialZoom]);
+  }, [projectData, map, projects, initialZoom, fitPoints]);
 
   return null;
 };
@@ -47,9 +84,15 @@ interface MapFocusHandlerProps {
 
 const FOCUS_ZOOM = 15;
 
-export const MapFocusHandler = ({ projects, focusedProjectId, openModal }: MapFocusHandlerProps) => {
+export const MapFocusHandler = ({
+  projects,
+  focusedProjectId,
+  openModal,
+}: MapFocusHandlerProps) => {
   const map = useMap();
-  const previousViewRef = useRef<{ center: LatLngTuple; zoom: number } | null>(null);
+  const previousViewRef = useRef<{ center: LatLngTuple; zoom: number } | null>(
+    null,
+  );
 
   useEffect(() => {
     if (!focusedProjectId) {
