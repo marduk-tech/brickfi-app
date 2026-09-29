@@ -20,11 +20,13 @@ export const getAllLivIndexPlaces = async (
 
 export function useFetchAllLivindexPlaces(
   driverIds?: string[],
-  driverTypes?: string[]
+  driverTypes?: string[],
+  enabled: boolean = true
 ) {
   return useQuery<IDriverPlace[]>({
     queryKey: [queryKeys.getAllPlaces, driverTypes || "", driverIds || ""],
     queryFn: () => getAllLivIndexPlaces(driverIds, driverTypes),
     refetchOnWindowFocus: false,
+    enabled,
   });
 }

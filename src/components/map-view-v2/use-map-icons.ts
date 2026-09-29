@@ -152,15 +152,13 @@ export const useMapIcons = (
         true,
         projectsNearby && projectsNearby.length
           ? `₹${rupeeAmountFormat(`${projectSqftPricing}`)} /sqft`
-          : primaryProject?.info.name.length > 20
-            ? `${primaryProject?.info.name.substring(0, 20)}..`
-            : primaryProject?.info.name,
+          : "",
         undefined,
         {
           iconBgColor: COLORS.primaryColor,
           iconColor: "white",
           borderColor: "white",
-          containerWidth: projectsNearby && projectsNearby.length ? 80 : 135,
+          containerWidth: projectsNearby && projectsNearby.length ? 80 : 30,
           iconSize: projectsNearby && projectsNearby.length ? 18 : 16,
         },
       );

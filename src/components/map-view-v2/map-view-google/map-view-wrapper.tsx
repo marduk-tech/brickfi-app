@@ -54,6 +54,7 @@ interface MapViewWrapperProps {
   showLocalities?: boolean;
   onMapReady?: (map: any) => void;
   showCorridors?: boolean;
+  showMicroPockets?: boolean;
   minMapZoom?: number;
   initialZoom?: number;
   categories?: string[];

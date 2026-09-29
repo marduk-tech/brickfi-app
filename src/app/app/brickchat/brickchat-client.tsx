@@ -3,8 +3,12 @@
 import { AdminGuard } from "@/components/auth/admin-guard";
 import BrickChatResults from "@/app/app/brickchat/brick-chat-results";
 import ChatTimeline, { TimelineStep } from "@/app/app/brickchat/chat-timeline";
+import { PillarMapConfig } from "@/components/brick-360/brick360-pillar";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
+import { Loader } from "@/components/common/loader";
 import { useDevice } from "@/hooks/use-device";
+import { useFetchAllLivindexPlaces } from "@/hooks/use-livindex-places";
+import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
 import { apiKey, baseApiUrl } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
@@ -30,7 +34,10 @@ import { useEffect, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Brick360Inline } from "./brick360-inline";
 import { BrickMapChat } from "./brick-map-chat";
+import DriverChips from "./driver-chips";
+import PinnedProjectResults from "./pinned-project-results";
 import styles from "./brick-chat-results.module.css";
 
 export interface ProjectResult {
@@ -73,6 +80,8 @@ interface ExploreAnswer {
   directAnswer: boolean;
   nextSetCount?: number;
   images?: ExploreImagesGroup[];
+  /** brickfiId(s) of driver/infra records (schools, transit, tech parks etc) the answer discussed - see synthesize.js. */
+  brickfiDriverIds?: string[];
 }
 
 interface ChatMessage {
@@ -164,11 +173,48 @@ const openSharedThread = async (
 interface BrickChatCoreProps {
   defaultProjectResults?: ProjectResult[];
   defaultProjectsDescription?: string;
+  /**
+   * When set and there's no thread already open (no ?threadId=, no history),
+   * automatically submits this question on mount instead of waiting for the
+   * user to type - e.g. an initial "compare my saved projects" query.
+   */
+  autoStartQuestion?: string;
+  /**
+   * Saved LvnzyProject ids to ground the auto-started query in (sent
+   * alongside the question on that first request only) - the backend
+   * resolves these to canonical project names and grounds the comparison
+   * in exactly them (see resolveExploreRequest/groundQueryInSeedProjects
+   * in ai.route.js).
+   */
+  seedProjectIds?: string[];
+  /** Fires once, the first time a new thread id is assigned to this conversation. */
+  onThreadCreated?: (threadId: string) => void;
+  /**
+   * Fires when the thread named by ?threadId= (from defaultProjectResults'
+   * caller, e.g. a stored compareThreadId) fails to load - e.g. it expired
+   * or was deleted server-side. Lets the caller stop re-syncing that same
+   * dead id back into the URL, which would otherwise loop forever against
+   * the url-clearing this component already does on failure.
+   */
+  onThreadLoadError?: (threadId: string) => void;
+  /**
+   * Hides the question bubble for the thread's first turn - for a seeded
+   * entry point (autoStartQuestion) where that turn is always the
+   * auto-generated question, not something the user typed. Applies whether
+   * that first turn is currently streaming or was loaded from history on a
+   * resumed thread.
+   */
+  hideFirstQuestion?: boolean;
 }
 
 export function BrickChatCore({
   defaultProjectResults,
   defaultProjectsDescription,
+  autoStartQuestion,
+  seedProjectIds,
+  onThreadCreated,
+  onThreadLoadError,
+  hideFirstQuestion,
 }: BrickChatCoreProps) {
   const [form] = Form.useForm();
   const { user } = useUser();
@@ -187,58 +233,9 @@ export function BrickChatCore({
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
-  const [dragHeight, setDragHeight] = useState<number | null>(null);
-  const dragStateRef = useRef<{
-    startY: number;
-    startHeight: number;
-    moved: boolean;
-  } | null>(null);
 
-  const MOBILE_MAP_COLLAPSED_HEIGHT = 50;
-  const getMobileMapExpandedHeight = () =>
-    typeof window !== "undefined" ? window.innerHeight * 0.7 : 500;
-
-  const handleMapHandleDragStart = (clientY: number) => {
-    dragStateRef.current = {
-      startY: clientY,
-      startHeight: showMobileMap
-        ? getMobileMapExpandedHeight()
-        : MOBILE_MAP_COLLAPSED_HEIGHT,
-      moved: false,
-    };
-  };
-
-  const handleMapHandleDragMove = (clientY: number) => {
-    if (!dragStateRef.current) return;
-    const delta = dragStateRef.current.startY - clientY;
-    if (Math.abs(delta) > 5) dragStateRef.current.moved = true;
-    const maxHeight = getMobileMapExpandedHeight();
-    const newHeight = Math.min(
-      maxHeight,
-      Math.max(
-        MOBILE_MAP_COLLAPSED_HEIGHT,
-        dragStateRef.current.startHeight + delta,
-      ),
-    );
-    setDragHeight(newHeight);
-  };
-
-  const handleMapHandleDragEnd = () => {
-    const dragState = dragStateRef.current;
-    if (!dragState) return;
-
-    if (!dragState.moved) {
-      setShowMobileMap((v) => !v);
-    } else {
-      const maxHeight = getMobileMapExpandedHeight();
-      const finalHeight = dragHeight ?? dragState.startHeight;
-      const midpoint = (MOBILE_MAP_COLLAPSED_HEIGHT + maxHeight) / 2;
-      setShowMobileMap(finalHeight > midpoint);
-    }
-
-    dragStateRef.current = null;
-    setDragHeight(null);
-  };
+  const getMobileMapDrawerWidth = () =>
+    typeof window !== "undefined" ? Math.round(window.innerWidth * 0.85) : 320;
 
   const [projectResults, setProjectResults] = useState<
     ProjectResult[] | undefined
@@ -254,6 +251,82 @@ export function BrickChatCore({
     }, isMobile ? 300: 10);
   };
 
+  // A chat answer's brickfiDriverIds chip, clicked (see DriverChips) - plots
+  // just that one driver on the map (BrickMapChat has no default "every
+  // driver" fetch of its own). Single-select: clicking the already-selected
+  // chip again clears it back to showing none.
+  const [focusedDriverIds, setFocusedDriverIds] = useState<string[] | null>(
+    null,
+  );
+  const { data: focusedDrivers } = useFetchAllLivindexPlaces(
+    focusedDriverIds || undefined,
+    undefined,
+    !!focusedDriverIds?.length,
+  );
+  const handleToggleDriverFocus = (driverId: string) => {
+    if (isMobile) setShowMobileMap(true);
+    setFocusedDriverIds((prev) =>
+      prev?.length === 1 && prev[0] === driverId ? null : [driverId],
+    );
+  };
+
+  // Set by the "project-details" button on a project card (see
+  // brick-chat-results.tsx) - swaps the chat panel for Brick360Inline and
+  // switches the already-mounted map to that project's detail view instead
+  // of the multi-project search-results view.
+  const [selectedProject, setSelectedProject] = useState<ProjectResult | null>(
+    null,
+  );
+  const {
+    data: selectedLvnzyProject,
+    isLoading: selectedLvnzyProjectLoading,
+  } = useFetchLvnzyProjectBySlug(
+    selectedProject?.projectSlug || "",
+    !!selectedProject?.projectSlug,
+  );
+  const handleSelectProject = (project: ProjectResult) => {
+    setSelectedProject(project);
+    setPillarMapConfig(null);
+  };
+
+  // Reported by Brick360Pillar (via Brick360Inline) when a data-point panel
+  // is expanded/collapsed - narrows the primary map to just that pillar's
+  // relevant drivers/surroundings/nearby-pricing instead of the whole
+  // project's connectivity. See brick-map-chat.tsx.
+  const [pillarMapConfig, setPillarMapConfig] = useState<PillarMapConfig | null>(
+    null,
+  );
+
+  // Keeps the conversation panel pinned to its latest content - new Q&A
+  // pairs, in-flight streaming tokens, and the loader/Brick360Inline that
+  // appear after selecting a project all land at the bottom of this list, so
+  // scroll there whenever any of them change instead of requiring the user
+  // to scroll down manually. Debounced because streamingSummary updates on
+  // every token - calling scrollIntoView("smooth") that often restarts the
+  // animation each time and looks like stutter rather than a scroll.
+  const scrollBottomRef = useRef<HTMLDivElement | null>(null);
+  const scrollDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current);
+    scrollDebounceRef.current = setTimeout(() => {
+      scrollBottomRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }, 80);
+    return () => {
+      if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current);
+    };
+  }, [
+    chatHistory.length,
+    currentQuestion,
+    chatLoading,
+    streamingSummary,
+    selectedProject,
+    selectedLvnzyProjectLoading,
+    selectedLvnzyProject,
+  ]);
+
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareLink, setShareLink] = useState<string>();
   const [sharePreparing, setSharePreparing] = useState(false);
@@ -261,6 +334,9 @@ export function BrickChatCore({
   useEffect(() => {
     if (defaultProjectResults?.length) setProjectResults(defaultProjectResults);
   }, [defaultProjectResults]);
+
+  const pendingSeedProjectIdsRef = useRef<string[] | undefined>(undefined);
+  const autoStartFiredRef = useRef(false);
 
   const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
   const sharedBy = searchParams.get("sharedBy")?.trim() || undefined;
@@ -270,6 +346,31 @@ export function BrickChatCore({
     !chatHistory.length &&
     !defaultProjectResults?.length &&
     !threadyHistoryLoading;
+
+  // Auto-submit autoStartQuestion once, only when landing fresh (no thread
+  // selected/active/loading and no history yet) - e.g. the initial
+  // "compare my saved projects" query on the account page.
+  useEffect(() => {
+    if (autoStartFiredRef.current) return;
+    if (!autoStartQuestion || !user?._id) return;
+    if (selectedThreadId || activeThreadId || chatHistory.length || threadyHistoryLoading) {
+      return;
+    }
+
+    autoStartFiredRef.current = true;
+    pendingSeedProjectIdsRef.current = seedProjectIds;
+    form.setFieldsValue({ question: autoStartQuestion });
+    form.submit();
+  }, [
+    autoStartQuestion,
+    seedProjectIds,
+    user?._id,
+    selectedThreadId,
+    activeThreadId,
+    chatHistory.length,
+    threadyHistoryLoading,
+    form,
+  ]);
 
   const syncThreadSearchParam = (threadId?: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -385,6 +486,7 @@ export function BrickChatCore({
         setChatHistory([]);
 
         setThreadyHistoryLoading(false);
+        onThreadLoadError?.(selectedThreadId);
         router.replace(pathname, { scroll: false });
       } finally {
         if (!cancelled) {
@@ -401,6 +503,7 @@ export function BrickChatCore({
   }, [
     activeThreadId,
     chatHistory.length,
+    onThreadLoadError,
     pathname,
     router,
     selectedThreadId,
@@ -500,6 +603,8 @@ export function BrickChatCore({
     form.resetFields();
 
     const runStartedAt = Date.now();
+    const seedProjectIdsForThisRequest = pendingSeedProjectIdsRef.current;
+    pendingSeedProjectIdsRef.current = undefined;
 
     try {
       const res = await fetch(`${baseApiUrl}ai/explore-projects/stream`, {
@@ -514,6 +619,12 @@ export function BrickChatCore({
           limit: 10,
           userId: user._id,
           threadId: activeThreadId,
+          // only meaningful on a brand new thread - the backend grounds the
+          // comparison in these exact projects instead of the free-text
+          // question alone (see groundQueryInSeedProjects in ai.route.js).
+          ...(seedProjectIdsForThisRequest?.length
+            ? { seedProjectIds: seedProjectIdsForThisRequest }
+            : {}),
         }),
       });
 
@@ -634,6 +745,7 @@ export function BrickChatCore({
       if (!activeThreadId && resolvedThreadId) {
         setActiveThreadId(resolvedThreadId);
         syncThreadSearchParam(resolvedThreadId);
+        onThreadCreated?.(resolvedThreadId);
       }
 
       await refreshChatThreads();
@@ -779,21 +891,19 @@ export function BrickChatCore({
     </Flex>
   );
 
-  const mobileDrawerHeight =
-    dragHeight ??
-    (showMobileMap ? getMobileMapExpandedHeight() : MOBILE_MAP_COLLAPSED_HEIGHT);
+  const mobileDrawerWidth = getMobileMapDrawerWidth();
 
   return (
     <Flex
       vertical={isMobile}
-      style={{ width: "100%", maxWidth: 2000, height: "100%", padding: 8, overflowY: "scroll" }}
+      style={{ width: "100%", maxWidth: 2000, height: "calc(100vh - 50px)", padding: 8, overflowY: "scroll" }}
     >
       <Flex
         vertical
         style={{
           margin: "0 auto",
           position: "relative",
-          paddingBottom: isMobile && showMobileMap ? 0 : 100,
+          paddingBottom: 100,
           width: isMobile ? "100%" : "50%",
           height: "100%"
         }}
@@ -804,7 +914,7 @@ export function BrickChatCore({
           style={{
             marginTop: 8,
             position: "absolute",
-            bottom: isMobile ? mobileDrawerHeight : 8,
+            bottom: 8,
             width: "100%",
             backgroundColor: "white",
             zIndex: 1001,
@@ -915,9 +1025,7 @@ export function BrickChatCore({
           vertical
           gap={24}
           style={{
-            height: isMobile
-              ? `calc(100% - ${mobileDrawerHeight}px)`
-              : "100%",
+            height: "100%",
             overflowY: "scroll",
             scrollbarWidth: "none",
             paddingRight: 8,
@@ -1056,41 +1164,14 @@ export function BrickChatCore({
               </Flex>
             </Flex>
           ) : defaultProjectResults?.length ? (
-            <Flex
-              vertical
-              gap={12}
-            >
-              {defaultProjectsDescription && (
-                <Flex vertical>
-                  <Typography.Text
-                    style={{
-                      color: "white",
-                      fontSize: FONT_SIZE.HEADING_3,
-                      backgroundColor: COLORS.textColorDark,
-                      borderRadius: 16,
-                      padding: "8px 16px",
-                    }}
-                  >
-                    {defaultProjectsDescription}
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.PARA,
-                      color: COLORS.textColorLight,
-                      marginLeft: 8,
-                      marginTop: 16,
-                    }}
-                  >
-                    Curated by your Brickfi Advisor
-                  </Typography.Text>
-                </Flex>
-              )}
-              <BrickChatResults
-                results={defaultProjectResults}
-                onLocateProject={handleLocateProject}
-                isShownOnMap={mapResultsIndex === undefined}
-              />
-            </Flex>
+            <PinnedProjectResults
+              results={defaultProjectResults}
+              description={defaultProjectsDescription}
+              hasChatStarted={!!chatHistory.length}
+              onLocateProject={handleLocateProject}
+              isShownOnMap={mapResultsIndex === undefined}
+              onSelectProject={handleSelectProject}
+            />
           ) : null}
 
           {threadyHistoryLoading && !chatHistory.length ? (
@@ -1105,7 +1186,9 @@ export function BrickChatCore({
           <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
             {chatHistory.map((messageItem, index) => (
               <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
-                {renderQuestion(messageItem.question)}
+                {hideFirstQuestion && index === 0
+                  ? null
+                  : renderQuestion(messageItem.question)}
 
                 {messageItem.steps?.length ? (
                   <ChatTimeline
@@ -1151,6 +1234,13 @@ export function BrickChatCore({
                     {messageItem.answer.summary}
                   </Markdown>
                   {renderImages(messageItem.answer.images)}
+                  {messageItem.answer.brickfiDriverIds?.length ? (
+                    <DriverChips
+                      driverIds={messageItem.answer.brickfiDriverIds}
+                      selectedDriverId={focusedDriverIds?.[0] ?? null}
+                      onToggle={handleToggleDriverFocus}
+                    />
+                  ) : null}
                   {!messageItem.answer.directAnswer ? (
                     <Flex
                       vertical
@@ -1209,6 +1299,7 @@ export function BrickChatCore({
                         results={messageItem.answer.projectsList}
                         onLocateProject={handleLocateProject}
                         isShownOnMap={mapResultsIndex === index}
+                        onSelectProject={handleSelectProject}
                       />
                       {!chatLoading &&
                         (messageItem.answer.nextSetCount ?? 0) > 0 &&
@@ -1236,7 +1327,9 @@ export function BrickChatCore({
 
             {currentQuestion && chatLoading && (
               <Flex vertical gap={12}>
-                {renderQuestion(currentQuestion)}
+                {hideFirstQuestion && !chatHistory.length
+                  ? null
+                  : renderQuestion(currentQuestion)}
                 <ChatTimeline steps={steps} running />
                 {streamingSummary ? (
                   <Markdown
@@ -1248,10 +1341,24 @@ export function BrickChatCore({
                 ) : null}
               </Flex>
             )}
+
+            {selectedProject && selectedLvnzyProjectLoading ? (
+              <Loader />
+            ) : selectedProject && selectedLvnzyProject ? (
+              <Brick360Inline
+                key={selectedProject.projectId}
+                slug={selectedProject.projectSlug || ""}
+                projectData={selectedLvnzyProject}
+                onClose={() => {
+                  setSelectedProject(null);
+                  setPillarMapConfig(null);
+                }}
+                onMapConfigChange={setPillarMapConfig}
+              />
+            ) : null}
+            <div ref={scrollBottomRef} />
           </Flex>
         </Flex>
-
-       
       </Flex>
 
       {!isMobile && (
@@ -1267,73 +1374,84 @@ export function BrickChatCore({
           <BrickMapChat
             projects={projectResults || []}
             focusedProjectId={focusedProjectId}
+            hideAllFilters={true}
+            detailedProject={selectedProject ? selectedLvnzyProject : undefined}
+            pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
+            focusedDrivers={selectedProject ? undefined : focusedDrivers}
           />
         </Flex>
       )}
 
       {isMobile && (
-        <Drawer
-          placement="bottom"
-          open
-          mask={false}
-          closable={false}
-          height={mobileDrawerHeight}
-          styles={{
-            header: { display: "none" },
-            body: { padding: 0, position: "relative", overflow: "hidden" },
-            content: {
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-            },
-            wrapper: {
-              transition: dragHeight === null ? "height 0.25s ease" : "none",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              borderTop: `1px solid ${COLORS.textColorMedium}`,
-            },
-          }}
-        >
-          <Flex vertical style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-            <BrickMapChat
-              projects={projectResults || []}
-              focusedProjectId={focusedProjectId}
-              hideAllFilters={!showMobileMap}
-            />
-          </Flex>
-
+        <>
           <Flex
             justify="center"
+            align="center"
+            onClick={() => setShowMobileMap((v) => !v)}
             style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              padding: "10px 0",
-              cursor: "grab",
-              touchAction: "none",
-              zIndex: 10,
+              position: "fixed",
+              top: "50%",
+              right: showMobileMap ? mobileDrawerWidth : 0,
+              transform: "translateY(-50%)",
+              width: 48,
+              height: 48,
+              backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
+              border: `1px solid ${showMobileMap ? COLORS.primaryColor: COLORS.textColorMedium}`,
+              borderRight: showMobileMap ? undefined : "none",
+              borderTopLeftRadius: 12,
+              borderBottomLeftRadius: 12,
+              cursor: "pointer",
+              touchAction: "manipulation",
+              zIndex: 1000,
+              transition: "right 0.25s ease",
+              boxShadow: "-2px 0 6px rgba(0,0,0,0.15)",
             }}
-            onPointerDown={(e) => {
-              e.currentTarget.setPointerCapture(e.pointerId);
-              handleMapHandleDragStart(e.clientY);
-            }}
-            onPointerMove={(e) => {
-              if (dragStateRef.current) handleMapHandleDragMove(e.clientY);
-            }}
-            onPointerUp={handleMapHandleDragEnd}
-            onPointerCancel={handleMapHandleDragEnd}
           >
-            <div
+            {/* <div
               style={{
-                width: 50,
-                height: 8,
+                width: 8,
+                height: 50,
                 borderRadius: 4,
                 backgroundColor: "black",
                 boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
               }}
-            />
+            /> */}
+            <DynamicReactIcon color={showMobileMap ? "white": COLORS.textColorDark} iconName="FaMapLocationDot" iconSet="fa6" size={28}></DynamicReactIcon>
           </Flex>
-        </Drawer>
+
+          <Drawer
+            placement="right"
+            open={showMobileMap}
+            onClose={() => setShowMobileMap(false)}
+            mask={false}
+            closable={false}
+            width={mobileDrawerWidth}
+            styles={{
+              header: { display: "none" },
+              body: { padding: 0, position: "relative", overflow: "hidden" },
+              content: {
+                borderTopLeftRadius: 20,
+                borderBottomLeftRadius: 20,
+              },
+              wrapper: {
+                borderTopLeftRadius: 20,
+                borderBottomLeftRadius: 20,
+                borderLeft: `1px solid ${COLORS.textColorMedium}`,
+              },
+            }}
+          >
+            <Flex vertical style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+              <BrickMapChat
+                projects={projectResults || []}
+                focusedProjectId={focusedProjectId}
+                hideAllFilters={!showMobileMap}
+                detailedProject={selectedProject ? selectedLvnzyProject : undefined}
+                pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
+                focusedDrivers={selectedProject ? undefined : focusedDrivers}
+              />
+            </Flex>
+          </Drawer>
+        </>
       )}
 
       <Modal

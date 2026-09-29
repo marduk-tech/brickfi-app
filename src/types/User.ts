@@ -13,6 +13,15 @@ export interface ChatThread {
   sharedFromThreadId?: string;
 }
 
+export interface SavedLvnzyProjectCollection {
+  _id?: string;
+  collectionName: string;
+  collectionDescription?: string;
+  projects: any[];
+  compareThreadId?: string;
+  compareThreadProjectIds?: string[];
+}
+
 export interface UtmEntry {
   utm_source?: string;
   utm_medium?: string;

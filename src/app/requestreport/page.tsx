@@ -1,4 +1,4 @@
-import { NewReportRequestForm } from "@/components/common/new-report-request-form";
+import { NewReportRequestForm } from "@/components/request-report/new-report-request-form";
 import { Metadata } from "next";
 
 const META_DESCR = "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";

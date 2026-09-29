@@ -9,19 +9,23 @@ import { Project } from "../types/Project";
  * Custom hook to fetch all projects
  * @returns {UseQueryResult<Project[], Error>} The result of the useQuery hook containing an array of projects
  */
-export const useFetchProjects = (params: {
-  homeType?: string | string[];
-  statusFilter?: string;
-  searchKeyword?: string;
-  projectIds?: string;
-  limit?: number;
-  sortBy?: string;
-}) => {
+export const useFetchProjects = (
+  params: {
+    homeType?: string | string[];
+    statusFilter?: string;
+    searchKeyword?: string;
+    projectIds?: string;
+    limit?: number;
+    sortBy?: string;
+  },
+  options?: { enabled?: boolean }
+) => {
   const homeTypeValue = Array.isArray(params.homeType)
     ? params.homeType.join(",")
     : params.homeType;
 
   return useQuery<Project[], Error>({
+    enabled: options?.enabled,
     refetchOnWindowFocus: false, // Disable refetch on window focus
     refetchOnReconnect: false, // Disable refetch on network reconnect
     staleTime: Infinity, // Data will never be marked as stale

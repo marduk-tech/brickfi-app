@@ -21,9 +21,9 @@ const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
     // Define color stops
     const colors = [
       { stop: 0, color: [255, 76, 5] }, // Red-Orange
-      { stop: 25, color: [255, 149, 107] }, // Orange-Yellow
-      { stop: 50, color: [248, 237, 140] }, // Yellow Greenish
-      { stop: 75, color: [144, 198, 124] }, // Greenish
+      { stop: 25, color: [255, 120, 5] }, // Orange-Yellow
+      { stop: 50, color: [255, 149, 107] }, // Yellow Greenish
+      { stop: 75, color: [248, 237, 140] }, // Greenish
       { stop: 100, color: [50, 142, 110] }, // Dark Green
     ];
 

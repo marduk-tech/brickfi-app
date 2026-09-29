@@ -6,20 +6,20 @@ import { COLORS } from "../../../../theme/style-constants";
 import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { MarkerIcon } from "../marker-icon";
 
-const CORRIDOR_MAX_ZOOM = 13;
+const MICROPOCKET_MAX_ZOOM = 13.5;
 
-interface CorridorMarkersProps {
-  corridors?: any[];
+interface MicroPocketMarkersProps {
+  microPockets?: any[];
   openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
-function useIsBelowCorridorZoom() {
+function useIsBelowMicroPocketZoom() {
   const map = useMap();
   const [isBelow, setIsBelow] = useState(true);
 
   useEffect(() => {
     if (!map) return;
-    const update = () => setIsBelow((map.getZoom() ?? 0) < CORRIDOR_MAX_ZOOM);
+    const update = () => setIsBelow((map.getZoom() ?? 0) < MICROPOCKET_MAX_ZOOM);
     update();
     const listener = map.addListener("zoom_changed", update);
     return () => listener.remove();
@@ -28,31 +28,31 @@ function useIsBelowCorridorZoom() {
   return isBelow;
 }
 
-function CorridorPolygons({ corridors, openModal }: CorridorMarkersProps) {
+function MicroPocketPolygons({ microPockets, openModal }: MicroPocketMarkersProps) {
   const map = useMap();
 
   useEffect(() => {
-    if (!map || !corridors?.length) return;
+    if (!map || !microPockets?.length) return;
     const polys: google.maps.Polygon[] = [];
 
-    for (const corridor of corridors) {
-      if (!corridor.geoJson?.features?.[0]?.geometry?.coordinates) continue;
-      const rawCoords: [number, number][] = corridor.geoJson.features[0].geometry.coordinates;
+    for (const microPocket of microPockets) {
+      if (!microPocket.geoJson?.features?.[0]?.geometry?.coordinates) continue;
+      const rawCoords: [number, number][] = microPocket.geoJson.features[0].geometry.coordinates;
       const poly = new google.maps.Polygon({
         map,
         paths: rawCoords.map(([lng, lat]) => ({ lat, lng })),
         strokeColor: COLORS.textColorMedium,
         strokeWeight: 1,
         strokeOpacity: 1,
-        fillColor: COLORS.textColorDark,
+        fillColor: COLORS.textColorMedium,
         fillOpacity: 0.1,
       });
       poly.addListener("click", (e: google.maps.PolyMouseEvent) =>
         openModal(
           {
-            title: corridor.name,
-            content: corridor.description ?? "",
-            tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
+            title: microPocket.name,
+            content: microPocket.description ?? "",
+            tags: [{ label: "Micro pocket", color: COLORS.textColorMedium }],
           },
           e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
         )
@@ -61,44 +61,44 @@ function CorridorPolygons({ corridors, openModal }: CorridorMarkersProps) {
     }
 
     return () => { polys.forEach((p) => p.setMap(null)); };
-  }, [map, corridors, openModal]);
+  }, [map, microPockets, openModal]);
 
   return null;
 }
 
-export function CorridorMarkers({ corridors, openModal }: CorridorMarkersProps) {
-  const isBelowCorridorZoom = useIsBelowCorridorZoom();
+export function MicroPocketMarkers({ microPockets, openModal }: MicroPocketMarkersProps) {
+  const isBelowMicroPocketZoom = useIsBelowMicroPocketZoom();
 
-  if (!isBelowCorridorZoom) return null;
+  if (!isBelowMicroPocketZoom) return null;
 
   return (
     <>
-      <CorridorPolygons corridors={corridors} openModal={openModal} />
-      {corridors?.map((c) => {
-        if (!c.location?.lat || !c.location?.lng) return null;
+      <MicroPocketPolygons microPockets={microPockets} openModal={openModal} />
+      {microPockets?.map((m) => {
+        if (!m.location?.lat || !m.location?.lng) return null;
         return (
           <AdvancedMarker
-            key={`corr-${c._id}`}
-            position={{ lat: c.location.lat, lng: c.location.lng }}
+            key={`mp-${m._id}`}
+            position={{ lat: m.location.lat, lng: m.location.lng }}
             zIndex={100}
             onClick={() =>
               openModal(
                 {
-                  title: c.name,
-                  content: c.description ?? "",
-                  tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
+                  title: m.name,
+                  content: m.description ?? "",
+                  tags: [{ label: "Micro pocket", color: COLORS.textColorMedium }],
                 },
-                { lat: c.location.lat, lng: c.location.lng },
+                { lat: m.location.lat, lng: m.location.lng },
               )
             }
           >
             <MarkerIcon
-              iconName="LuMilestone"
+              iconName="LuMapPinned"
               iconSet="lu"
-              label={c.name}
-              iconBgColor={COLORS.bgColorDark}
+              label={m.name}
+              iconBgColor={COLORS.textColorMedium}
               iconColor="white"
-              borderColor={COLORS.bgColorDark}
+              borderColor={COLORS.textColorMedium}
               containerWidth={125}
             />
           </AdvancedMarker>

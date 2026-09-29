@@ -797,7 +797,7 @@ export default function Brick360() {
                               color:
                                 (item as any)[1].rating > 0
                                   ? COLORS.textColorDark
-                                  : COLORS.textColorLight,
+                                  : COL ORS.textColorLight,
                             }}
                           >
                             {capitalize(

@@ -2,12 +2,11 @@
 
 import LandingFooter from "@/custom-pages/landing/footer";
 import LandingHeader from "@/custom-pages/landing/header";
-import { useDevice } from "@/hooks/use-device";
 import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Typography } from "antd";
 import { Metadata } from "next";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const metadata: Metadata = {
   title: "Brickfi | Advisor Callback",
@@ -18,8 +17,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BrickfiCallbackSuccess() {
-  const { isMobile } = useDevice();
+export default function BrickfiCallbackSuccess({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
+  const [isMobile, setIsMobile] = useState(initialIsMobile);
+
+  useEffect(() => {
+    const detect = () => {
+      const el = document.createElement("div");
+      el.className = "mobile-only";
+      el.style.cssText = "position:absolute;visibility:hidden";
+      document.body.appendChild(el);
+      const detected = window.getComputedStyle(el).display === "block";
+      document.body.removeChild(el);
+      setIsMobile(detected);
+    };
+    detect();
+    window.addEventListener("resize", detect);
+    return () => window.removeEventListener("resize", detect);
+  }, []);
+
   useEffect(() => {
     captureAnalyticsEvent("callback-form-success", {});
   });

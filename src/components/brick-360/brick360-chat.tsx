@@ -67,6 +67,15 @@ export interface Brick360Props {
   lvnzyProject?: LvnzyProject;
   dataPoint?: any;
   userProjects?: { name: string; id: string }[];
+  /**
+   * Hides this widget's own floating question input - used when it's
+   * embedded somewhere that already has its own search/input bar (e.g.
+   * Brick360Inline inside brickchat-client) so there's only one input on
+   * screen. Everything else (auto-triggered data-point explanations,
+   * expandChat) keeps working; the user just can't type a fresh question
+   * into this widget directly.
+   */
+  hideInput?: boolean;
 }
 interface Brick360ChatRef {
   expandChat: () => void;
@@ -77,7 +86,7 @@ export interface Brick360Answer {
 }
 
 export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
-  ({ dataPoint, lvnzyProject, userProjects }, ref) => {
+  ({ dataPoint, lvnzyProject, userProjects, hideInput }, ref) => {
     const { height } = useWindowDimensions();
     const [currentQuestion, setCurrentQuestion] = useState<string>();
     const [currentAnswer, setCurrentAnswer] = useState<
@@ -941,6 +950,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
               </Flex>
             )}
             {/* Input */}
+            {!hideInput && (
             <Flex
               vertical
               style={{
@@ -1007,6 +1017,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                 </Form.Item>
               </Form>
             </Flex>
+            )}
           </Flex>
         </Flex>
         <Modal

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Collapse, CollapseProps, Flex, Typography } from "antd";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 import { safeWindow } from "../../libs/browser-utils";
 import { FAQ_360, LandingConstants } from "../../libs/constants";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -11,6 +11,7 @@ import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
 import { captureAnalyticsEvent, txtToId } from "@/libs/lvnzy-helper";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
+import { ProjectSelectStep, ProjectSelectStepState } from "@/components/request-report/project-select-step";
 
 export default function ReportLanding({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
   const [isMobile, setIsMobile] = useState(initialIsMobile);
@@ -126,6 +127,22 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
     </Flex>
   );
 
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
+
+  const handleProjectChange = useCallback((state: ProjectSelectStepState) => {
+    setSelectedProjectIds(
+      state.selectedProjects
+        .map((p) => p.reraNumber || p.lvnzyProjectId)
+        .filter((id): id is string => !!id),
+    );
+  }, []);
+
+  const handleProjectSubmit = useCallback(() => {
+    if (selectedProjectIds.length > 0) {
+      safeWindow.location.href = `/requestreport?projectIds=${selectedProjectIds.join(",")}`;
+    }
+  }, [selectedProjectIds]);
+
   return (
     <Flex
       vertical
@@ -186,13 +203,11 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
             </Flex>
           ),
           subHeading:
-            "Get an independent, data-backed property report with builder history, surroundings, pricing, growth potential & more. Powered by 100% verified government and public data.",
+            <Flex vertical><Typography.Text>Get an independent, data-backed property report with builder history, surroundings, pricing, growth potential & more. Powered by 100% verified government and public data.</Typography.Text>
+            <ProjectSelectStep onChange={handleProjectChange} onSubmit={handleProjectSubmit} />
+            </Flex>,
           mediaUrl: "/images/landing/demo-landing.mp4?v=1",
           bgColor: "#fdf7f6",
-          btn: {
-            link: "/requestreport",
-            txt: "Get a Free Report",
-          },
           imageContainerWidth: 50,
           primaryImageSize: "100%",
           fullHeight: true,

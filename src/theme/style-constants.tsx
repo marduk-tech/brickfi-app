@@ -37,6 +37,7 @@ export const FONTS = {
 
 const isMobile = safeWindow.matchMedia("(max-width: 576px)").matches;
 export const FONT_SIZE = {
+  NOTE: 10,
   SUB_TEXT: 12,
   PARA: 14,
   HEADING_1: isMobile ? 30 : 32,

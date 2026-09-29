@@ -2,7 +2,7 @@
 
 import { Flex, Typography } from "antd";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Brick360v2 } from "../components/brick-360/brick360-v2";
 import { Loader } from "../components/common/loader";
 import { NoProjectsFound } from "../components/common/no-projects-found";
@@ -28,12 +28,33 @@ const BrickfiHome: React.FC = () => {
 
   const [lvnzyProjects, setLvnzyProjects] = useState<any[]>([]);
   const [projectsLoading, setProjectsLoading] = useState(true);
+  // Guards the "no saved projects yet" retry below so it fires at most once
+  // per mount instead of looping every time refetchUser() resolves.
+  const retriedMissingProjectsRef = useRef(false);
+  // Curated collections (ids below) are static regardless of user data, so
+  // this only needs to run once per collectionId - not on every `user`
+  // refetch (see fetch guard below).
+  const fetchedCuratedCollectionRef = useRef<string | undefined>(undefined);
+
+  // Replacing `lvnzyProjects` with a fresh array on every render that carries
+  // the same underlying projects (e.g. after an incidental refetch of
+  // `user`) gives UserProjects/BrickChatCore a new prop reference for no
+  // reason, which re-fires their own effects (including the one that syncs
+  // ?threadId= into the URL) on a loop. Keep the existing reference when the
+  // project id set hasn't actually changed.
+  const setLvnzyProjectsIfChanged = (next: any[]) => {
+    setLvnzyProjects((prev) => {
+      const prevIds = prev.map((p: any) => p._id).join(",");
+      const nextIds = (next || []).map((p: any) => p._id).join(",");
+      return prevIds === nextIds ? prev : next || [];
+    });
+  };
 
   const fetchLvnzyProjectsByIds = async (ids: string) => {
     const { data } = await axiosApiInstance.post(`/lvnzy-projects/${ids}`, {
       ids,
     });
-    setLvnzyProjects(data);
+    setLvnzyProjectsIfChanged(data);
     setProjectsLoading(false);
   };
   useEffect(() => {
@@ -65,30 +86,34 @@ const BrickfiHome: React.FC = () => {
       return;
     }
 
-    if (collectionId === "inv-friendly") {
-      fetchLvnzyProjectsByIds(
-        "67f0f60f3ef53b74b67d12f5,67e83fe1a06e471b3d14b6b5,687b4d291541e1a0ecb321ca,687b401e8a68a0900797180b,67f0046ca58ac2b37e530f2b,6870af1904ec49de98b9b1fa,680736af3ff1a71676450fbb,68073ba59f670b1afc3f03f4",
-      );
-    } else if (collectionId === "yellow-line") {
-      fetchLvnzyProjectsByIds(
-        "6870af1904ec49de98b9b1fa,68930f117f715b3ee58ca9d5,6879e74423db3840fc951225",
-      );
+    if (collectionId === "inv-friendly" || collectionId === "yellow-line") {
+      if (fetchedCuratedCollectionRef.current !== collectionId) {
+        fetchedCuratedCollectionRef.current = collectionId;
+        fetchLvnzyProjectsByIds(
+          collectionId === "inv-friendly"
+            ? "67f0f60f3ef53b74b67d12f5,67e83fe1a06e471b3d14b6b5,687b4d291541e1a0ecb321ca,687b401e8a68a0900797180b,67f0046ca58ac2b37e530f2b,6870af1904ec49de98b9b1fa,680736af3ff1a71676450fbb,68073ba59f670b1afc3f03f4"
+            : "6870af1904ec49de98b9b1fa,68930f117f715b3ee58ca9d5,6879e74423db3840fc951225",
+        );
+      }
     } else {
       // Existing logic for regular users
       if (!user.savedLvnzyProjects || user.savedLvnzyProjects.length === 0) {
-        setLvnzyProjects([]);
-        setTimeout(() => {
-          refetchUser();
-          setTimeout(() => {
-            if (projectsLoading) {
-              setProjectsLoading(false);
-            }
-          }, 300);
-        }, 4000);
+        setLvnzyProjectsIfChanged([]);
 
+        if (retriedMissingProjectsRef.current) {
+          // Already retried once - stop looping and just show "no projects".
+          setProjectsLoading(false);
+          return;
+        }
+
+        retriedMissingProjectsRef.current = true;
         setProjectsLoading(true);
+        const timer = setTimeout(() => {
+          refetchUser();
+        }, 4000);
+        return () => clearTimeout(timer);
       } else {
-        setLvnzyProjects(user.savedLvnzyProjects[0].projects);
+        setLvnzyProjectsIfChanged(user.savedLvnzyProjects[0].projects);
         setProjectsLoading(false);
       }
     }

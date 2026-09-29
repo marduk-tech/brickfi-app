@@ -1,6 +1,5 @@
 import { useMemo } from "react";
 import { ProjectGalleryV2 } from "../project-images-gallery-v2";
-import { ScrollableContainer } from "../scrollable-container";
 
 interface MediaTabProps {
   lvnzyProject: any;
@@ -39,9 +38,5 @@ export const MediaTab = ({ lvnzyProject }: MediaTabProps) => {
     return [...nonFloorplanMedia, ...unitConfigFloorplans];
   }, [lvnzyProject]);
 
-  return (
-    <ScrollableContainer>
-      <ProjectGalleryV2 media={filteredMedia} selectedImageId={null} />
-    </ScrollableContainer>
-  );
+  return <ProjectGalleryV2 media={filteredMedia} selectedImageId={null} />;
 };

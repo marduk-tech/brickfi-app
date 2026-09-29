@@ -23,6 +23,12 @@ interface BrickChatResultsProps {
   onLocateProject?: (projectId: string) => void;
   /** Whether this results list is the one currently plotted on the map — controls locate-pin visibility. */
   isShownOnMap?: boolean;
+  /**
+   * When provided, the "project-details" button sets this project as the
+   * brickchat-client's inline selection instead of navigating to the
+   * standalone brick360 page in a new tab.
+   */
+  onSelectProject?: (project: ProjectResult) => void;
 }
 
 // Pull the ids of projects already in the user's default collection
@@ -70,6 +76,7 @@ export default function BrickChatResults({
   results,
   onLocateProject,
   isShownOnMap,
+  onSelectProject,
 }: BrickChatResultsProps) {
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
@@ -166,21 +173,21 @@ export default function BrickChatResults({
     <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
       {[...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0)).map((project) => (
-       <Flex style={{width: 225}}>
+       <Flex style={{width: 200}}>
           <Card
             hoverable
             style={{
-              width: 225,
+              width: 200,
               borderRadius: 12,
               display: "block",
               overflow: "hidden",
               border: `1px solid ${COLORS.borderColor}`,
             }}
-            styles={{ body: { padding: 12 } }}
+            styles={{ body: { padding: 0 } }}
             cover={
               <div
                 style={{
-                  height: 150,
+                  height: 105,
                   width: "100%",
                   backgroundColor: COLORS.bgColor,
                   position: "relative",
@@ -216,7 +223,8 @@ export default function BrickChatResults({
               </div>
             }
           >
-            <Flex vertical gap={2}>
+            <Flex  vertical gap={2}>
+              <Flex style={{padding: 8}} gap={2} vertical>
               <Typography.Text
                 strong
                 style={{
@@ -342,21 +350,17 @@ export default function BrickChatResults({
                     />
                   </Flex>
                 )} */}
-                <Link
-                  href={`/app/brick360/${project.projectSlug}`}
-                  prefetch={false}
-                  style={{
-                    textDecoration: "none",
-                    color: "inherit",
-                    width: "100%",
-                    borderRadius: 8,
-                    textAlign: "center",
-                  }}
-                  target="_blank"
-                >
-                 <Flex
+                {/* {onSelectProject && (
+                  <Flex
+                    id="project-details"
                     align="center"
                     justify="center"
+                    onClick={(e) => {
+                      // cards are wrapped in a Link - don't navigate on icon click
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onSelectProject(project);
+                    }}
                     style={{
                       width: 24,
                       height: 24,
@@ -374,8 +378,29 @@ export default function BrickChatResults({
                       color={project.projectStatus === "report-verified" ? "white": COLORS.primaryColor}
                     />
                   </Flex>
-                </Link>
+                )} */}
               </Flex>
+              </Flex>
+              {onSelectProject && (
+                  <Flex
+                    id="project-details"
+                    align="center"
+                    justify="center"
+                    onClick={(e) => {
+                      // cards are wrapped in a Link - don't navigate on icon click
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onSelectProject(project);
+                    }}
+                    style={{
+                      width: "100%",
+                      backgroundColor: project.projectStatus === "report-verified" ? COLORS.primaryColor : "rgba(255, 255, 255, 0.9)",
+                      cursor: "pointer",
+                    }}
+                  >
+                   <Typography.Text style={{color: "white"}}>View 360 Analysis</Typography.Text>
+                  </Flex>
+                )}
             </Flex>
           </Card>
           </Flex>

@@ -32,7 +32,7 @@ import { capitalize } from "../../libs/lvnzy-helper";
 import { queryClient } from "../../libs/query-client";
 import LandingHeader from "../../custom-pages/landing/header";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
-import DynamicReactIcon from "./dynamic-react-icon";
+import DynamicReactIcon from "../common/dynamic-react-icon";
 import LandingFooter from "@/custom-pages/landing/footer";
 import { LoginForm } from "../login-forms";
 const { Paragraph } = Typography;

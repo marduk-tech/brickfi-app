@@ -1,0 +1,10 @@
+/* Removes antd Tabs' full-width bottom border line under the whole tab bar,
+   and the ink-bar underline below the active tab - active state is instead
+   conveyed purely by the tab label/icon switching to COLORS.primaryColor. */
+.tabsNoNavBorder :global(.ant-tabs-nav::before) {
+  border-bottom: none !important;
+}
+
+.tabsNoNavBorder :global(.ant-tabs-ink-bar) {
+  display: none !important;
+}

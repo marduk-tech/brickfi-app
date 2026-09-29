@@ -22,7 +22,11 @@ interface RoadDriversProps {
   setModalContent: (content: any, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
-  fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
+  fetchTravelDurationElement: (
+    distance: number,
+    duration: number,
+    prefix?: string,
+  ) => React.ReactNode;
 }
 
 export const RoadDriversComponent = ({
@@ -36,7 +40,7 @@ export const RoadDriversComponent = ({
   setModalContent,
   setInfoModalOpen,
   isDriverMatchingFilter,
-  fetchTravelDurationElement
+  fetchTravelDurationElement,
 }: RoadDriversProps) => {
   const map = useMap();
 
@@ -83,59 +87,59 @@ export const RoadDriversComponent = ({
           ) => {
             setModalContent(
               {
-              title: (
-                <Flex vertical>
-                  <Typography.Text
-                    style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
-                  >
-                    {driver.name}
-                  </Typography.Text>
-                  {feature.properties &&
-                  feature.properties.name &&
-                  feature.properties.name.toLowerCase() !=
-                    driver.name.toLowerCase() ? (
-                    <Flex style={{}}>
-                      <Tag
-                        style={{
-                          fontSize: FONT_SIZE.HEADING_4,
-                        }}
-                      >
-                        {capitalize(feature.properties.name)}
-                      </Tag>
-                    </Flex>
-                  ) : null}
-                </Flex>
-              ),
-              subHeading:
-                            driver.distance && driver.duration
-                              ? fetchTravelDurationElement(
-                                  driver.distance!,
-                                  driver.duration,
-                                  driver.comments
-                                )
-                              : "",
-              content:
-                driver.details?.oneLiner || driver.details?.description || "",
-              tags: [
-                {
-                  label: "Highway",
-                  color: COLORS.primaryColor,
-                },
-                {
-                  label: driverStatusLabel(
-                    feature.properties
-                      ? feature.properties.status || driver.status
-                      : driver.status,
-                  ),
-                  color:
-                    isDashed ||
-                    (feature.properties &&
-                      feature.properties.status &&
-                      feature.properties.status == "construction")
-                      ? "warning"
-                      : "success",
-                },
-              ],
+                title: (
+                  <Flex vertical>
+                    <Typography.Text
+                      style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
+                    >
+                      {driver.name}
+                    </Typography.Text>
+                    {feature.properties &&
+                    feature.properties.name &&
+                    feature.properties.name.toLowerCase() !=
+                      driver.name.toLowerCase() ? (
+                      <Flex style={{}}>
+                        <Tag
+                          style={{
+                            fontSize: FONT_SIZE.HEADING_4,
+                          }}
+                        >
+                          {capitalize(feature.properties.name)}
+                        </Tag>
+                      </Flex>
+                    ) : null}
+                  </Flex>
+                ),
+                subHeading:
+                  driver.distance && driver.duration
+                    ? fetchTravelDurationElement(
+                        driver.distance!,
+                        driver.duration,
+                        driver.comments,
+                      )
+                    : "",
+                content:
+                  driver.details?.oneLiner || driver.details?.description || "",
+                tags: [
+                  {
+                    label: "Highway",
+                    color: COLORS.primaryColor,
+                  },
+                  {
+                    label: driverStatusLabel(
+                      feature.properties
+                        ? feature.properties.status || driver.status
+                        : driver.status,
+                    ),
+                    color:
+                      isDashed ||
+                      (feature.properties &&
+                        feature.properties.status &&
+                        feature.properties.status == "construction")
+                        ? "warning"
+                        : "success",
+                  },
+                ],
               },
               position,
             );
@@ -206,16 +210,20 @@ export const RoadDriversComponent = ({
           const entryExitMarkers =
             map.getZoom() > 12.5
               ? driver.features
-                  .filter(
-                    (f: any) =>
+                  .filter((f: any) => {
+                    const featureType = f.properties?.type || f.properties?.Type;
+                    return (
                       f.type === "Feature" &&
                       f.geometry?.type === "Point" &&
-                      f.properties?.type === "entry_exit" &&
+                      featureType &&
+                      (featureType.toLowerCase().includes("entry") ||
+                        featureType.toLowerCase().includes("exit")) &&
                       bounds.contains([
                         f.geometry.coordinates[1],
                         f.geometry.coordinates[0],
-                      ]),
-                  )
+                      ])
+                    );
+                  })
                   .map((f: any, idx: number) => {
                     const [lng, lat] = f.geometry.coordinates;
                     const name =
@@ -239,18 +247,17 @@ export const RoadDriversComponent = ({
                                     >
                                       {driver.name}
                                     </Typography.Text>
-
                                   </Flex>
                                 ),
                                 content: "",
-                                 subHeading:
-                              driver.distance && driver.duration
-                                ? fetchTravelDurationElement(
-                                    driver.distance!,
-                                    driver.duration,
-                                    driver.comments
-                                  )
-                                : "",
+                                subHeading:
+                                  driver.distance && driver.duration
+                                    ? fetchTravelDurationElement(
+                                        driver.distance!,
+                                        driver.duration,
+                                        driver.comments,
+                                      )
+                                    : "",
                                 tags: [
                                   {
                                     label: "Highway",
@@ -258,8 +265,8 @@ export const RoadDriversComponent = ({
                                   },
                                   {
                                     label: capitalize(name),
-                                    color: COLORS.textColorDark
-                                  }
+                                    color: COLORS.textColorDark,
+                                  },
                                 ],
                               },
                               { lat, lng },

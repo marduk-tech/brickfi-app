@@ -15,6 +15,7 @@ export const queryKeys = {
   projectsMapView: "projectsMapView",
   getAllPlaces: "getAllPlaces",
   getAllCorridors: "getAllCorridors",
+  getAllMicroPockets: "getAllMicroPockets",
   getAllLocalities: "getAllLocalities",
   user: "user",
   paymentById: "paymentById",
@@ -313,7 +314,7 @@ export const Brick360CategoryInfo: Record<
 export const Brick360DataPoints = {
   property: {
     futureProjectNoDataPlaceholder:
-      "Property assessment is currently not available since the project is yet to be launched. Full assessment will be available on launch.",
+      "Property assessment is currently not available since the project is yet to be registered on RERA.",
     oldProjectNoDataPlaceholder:
       "Property assessment is not available since the project is pre-RERA i.e was completed before RERA.",
     amenities: {
@@ -346,7 +347,7 @@ export const Brick360DataPoints = {
     noDataPlaceholder:
       "Insufficient data is available to rate the area and connectivity for this project.",
     schoolsOffices: {
-      label: "Schools/Offices",
+      label: "Schools/Workplace",
       prompts: ["International schools", "Type of companies"],
     },
     conveniences: {

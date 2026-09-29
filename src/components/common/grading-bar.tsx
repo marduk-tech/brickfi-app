@@ -21,9 +21,9 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
     // Define color stops
     const colors = [
       { stop: 0, color: [255, 76, 5] }, // Red-Orange
-      { stop: 40, color: [251, 151, 12] }, // Orange-Yellow
-      { stop: 65, color: [209, 223, 1] }, // Yellow Greenish
-      { stop: 85, color: [81, 191, 41] }, // Greenish
+      { stop: 40, color: [251, 120, 5] }, // Orange-Yellow
+      { stop: 65, color: [251, 151, 12] }, // Yellow Greenish
+      { stop: 80, color: [209, 223, 1] }, // Greenish
       { stop: 100, color: [50, 142, 110] }, // Dark Green
     ];
 
@@ -51,7 +51,7 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
     let iconName = "FaRegLaugh",
       iconSet: any = "fa",
       color = getGradientColor(value);
-    size = size || 22;
+    size = size ? size * 1 : 22;
 
     if (value >= 85) {
       iconName = "FaRegGrinStars";
@@ -92,23 +92,23 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
           color: COLORS.textColorDark,
           backgroundColor: COLORS.bgColor,
           borderRadius: 6,
-          padding: "2px 4px",
-          border: `1px solid ${COLORS.borderColor}`,
+          padding: "1px 4px",
         }}
         gap={4}
         align="center"
       >
        
-        {getSmileyIcon(value, 18)}
+        
          <Typography.Text
           style={{
-            fontWeight: 300,
+            fontWeight: 400,
             fontSize: FONT_SIZE.PARA,
             color: value ? COLORS.textColorDark: COLORS.textColorLight,
           }}
         >
           {value ? Math.round(value * 5) / 100 : "X X"}
         </Typography.Text>
+        {getSmileyIcon(value, 18)}
       </Flex>
     );
   }

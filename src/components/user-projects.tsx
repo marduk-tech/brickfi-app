@@ -1,322 +1,158 @@
 "use client";
 
-import { Button, Flex, Tag, Tooltip, Typography } from "antd";
-import moment from "moment";
-import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import { useWindowDimensions } from "../hooks/use-browser-safe";
-import { useDevice } from "../hooks/use-device";
+import { Flex, Typography } from "antd";
+import { usePathname, useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
+import {
+  BrickChatCore,
+  ProjectResult,
+} from "../app/app/brickchat/brickchat-client";
 import { useUser } from "../hooks/use-user";
-import { BRICK360_CATEGORY, Brick360CategoryInfo } from "../libs/constants";
-import {
-  capitalize,
-  captureAnalyticsEvent,
-  fetchPmtPlan,
-  getCategoryScore,
-  rupeeAmountFormat,
-} from "../libs/lvnzy-helper";
-import {
-  COLORS,
-  FONT_SIZE,
-  HORIZONTAL_PADDING,
-} from "../theme/style-constants";
+import { useUpdateUserMutation } from "../hooks/user-hooks";
+import { captureAnalyticsEvent, mapLvnzyProjectToResult } from "../libs/lvnzy-helper";
 import { LvnzyProject } from "../types/LvnzyProject";
-import Brick360Chat from "./brick-360/brick360-chat";
-import DynamicReactIcon from "./common/dynamic-react-icon";
-import GradientBar from "./common/grading-bar";
+import { SavedLvnzyProjectCollection } from "../types/User";
 import { Loader } from "./common/loader";
-import { BrickMapCustomer } from "./map-view-v2/brick-map/brick-map-customer";
-const { Paragraph } = Typography;
+
+// These routes serve a curated, non-personal project list (see brickfi-home.tsx) -
+// there's no real savedLvnzyProjects collection to attach a compare thread to.
+const CURATED_COLLECTION_IDS = new Set(["inv-friendly", "yellow-line"]);
+
+const projectIdsKey = (results: ProjectResult[]) =>
+  [...results.map((p) => p.lvnzyProjectId || p.projectId)].sort().join(",");
+
+const buildCompareQuestion = (results: ProjectResult[]) => {
+  const names = results.map((p) => p.projectName).filter(Boolean);
+  return `Compare my saved projects — ${names.join(", ")} — across location, pricing, developer track record, and construction quality, and tell me which one stands out and why.`;
+};
 
 export function UserProjects({
   lvnzyProjects,
 }: {
   lvnzyProjects: LvnzyProject[];
 }) {
-  const { user } = useUser();
-  const { width } = useWindowDimensions();
-  const [selectedViewType, setSelectedViewType] = useState<string>("list");
-  const brick360ChatRef = useRef<{
-    expandChat: () => void;
-  } | null>(null);
-
-  const { isMobile } = useDevice();
+  const { user, refetch } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const params = useParams<{ collectionId?: string }>();
+  const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
 
   useEffect(() => {
     if (user && user.mobile) {
       captureAnalyticsEvent("account-view", {});
     }
   }, [user]);
-  const renderLvnzyProject = (itemInfo: any) => {
-    // skip entries that haven't been populated into full project docs yet
-    if (!itemInfo || (!itemInfo.meta && !itemInfo.reraNumber && !itemInfo.reraId)) {
-      return null;
+
+  const projectResults = useMemo<ProjectResult[]>(() => {
+    return (lvnzyProjects || [])
+      .map((lp, i) => mapLvnzyProjectToResult(lp, lvnzyProjects.length - i))
+      .filter((p): p is ProjectResult => !!p);
+  }, [lvnzyProjects]);
+
+  const isCuratedCollection =
+    !!params?.collectionId && CURATED_COLLECTION_IDS.has(params.collectionId);
+
+  // The genuine saved collection this comparison thread should persist against -
+  // undefined for the hardcoded curated routes above.
+  const collection: SavedLvnzyProjectCollection | undefined = isCuratedCollection
+    ? undefined
+    : (user?.savedLvnzyProjects || [])[0];
+
+  const currentIdsKey = useMemo(
+    () => projectIdsKey(projectResults),
+    [projectResults],
+  );
+
+  // A stored thread is only reused if it still covers exactly today's saved set -
+  // otherwise it's stale (a project was added/removed since) and we regenerate.
+  const storedThreadIsFresh =
+    !!collection?.compareThreadId &&
+    [...(collection.compareThreadProjectIds || [])].sort().join(",") ===
+      currentIdsKey;
+
+  // Thread ids BrickChatCore has told us failed to load (e.g. expired
+  // server-side) - never re-synced back into the URL, otherwise this effect
+  // and BrickChatCore's own "clear the url on load failure" logic fight
+  // forever: we set ?threadId=, it fails to load and strips it, we set it
+  // right back.
+  const failedThreadIdsRef = useRef<Set<string>>(new Set());
+
+  // Reopen a fresh stored thread by putting its id in the URL - BrickChatCore
+  // picks up ?threadId= itself and fetches history instead of starting fresh.
+  useEffect(() => {
+    if (!storedThreadIsFresh || !collection?.compareThreadId) return;
+    if (failedThreadIdsRef.current.has(collection.compareThreadId)) return;
+    if (searchParams.get("threadId") === collection.compareThreadId) return;
+
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.set("threadId", collection.compareThreadId);
+    router.replace(`${pathname}?${nextParams.toString()}`, { scroll: false });
+  }, [storedThreadIsFresh, collection?.compareThreadId, pathname, router, searchParams]);
+
+  const clearedStaleThreadRef = useRef(false);
+
+  // The stored compareThreadId turned out to be dead (deleted/expired
+  // server-side) - stop retrying it and drop it from the saved collection so
+  // a fresh compare thread gets created instead of failing forever.
+  const handleThreadLoadError = (threadId: string) => {
+    failedThreadIdsRef.current.add(threadId);
+
+    if (
+      clearedStaleThreadRef.current ||
+      !collection ||
+      collection.compareThreadId !== threadId ||
+      !user
+    ) {
+      return;
     }
-    if (itemInfo.reraNumber || itemInfo.reraId) {
-      return (
-        <Flex
-          style={{
-            marginBottom: 8,
-            cursor: "pointer",
-            backgroundColor: "white",
-            minHeight: 130,
-            border: `1px solid ${COLORS.borderColor}`,
-            borderRadius: 8,
-            width: isMobile ? "100%" : width - 50 * 2 - HORIZONTAL_PADDING * 2,
-          }}
-          vertical
-        >
-          <div
-            style={{
-              width: "100%",
-              height: isMobile ? 200 : 175,
-              borderRadius: 12,
-              backgroundImage: `url(images/placeholder-pending-report.png)`,
-              backgroundSize: "auto 90%",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
-          ></div>
-          <Flex vertical style={{ padding: "8px 16px" }}>
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_2,
-                color: COLORS.textColorLight,
-              }}
-            >
-              {itemInfo.projectName}
-            </Typography.Text>
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_4,
-                color: COLORS.textColorLight,
-              }}
-            >
-              Report Pending
-            </Typography.Text>
-          </Flex>
-        </Flex>
+    clearedStaleThreadRef.current = true;
+
+    const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
+    if (savedLvnzyProjects[0]) {
+      savedLvnzyProjects[0] = {
+        ...savedLvnzyProjects[0],
+        compareThreadId: undefined,
+        compareThreadProjectIds: undefined,
+      };
+    }
+    updateUser
+      .mutateAsync({ userData: { savedLvnzyProjects } })
+      .then(() => refetch())
+      .catch((err) =>
+        console.error("Failed to clear stale compare thread id:", err),
       );
+  };
+
+  const persistedRef = useRef(false);
+
+  const handleThreadCreated = async (threadId: string) => {
+    if (!collection || persistedRef.current || !user) return;
+    persistedRef.current = true;
+
+    const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
+    if (savedLvnzyProjects[0]) {
+      savedLvnzyProjects[0] = {
+        ...savedLvnzyProjects[0],
+        compareThreadId: threadId,
+        compareThreadProjectIds: projectResults.map(
+          (p) => p.lvnzyProjectId || p.projectId,
+        ),
+      };
     }
-    const imgs = itemInfo?.originalProjectId?.media
-      ? itemInfo.originalProjectId.media.filter((m: any) => m.type == "image")
-      : [];
-    let previewImage =
-      imgs && imgs.length
-        ? imgs.find((i: any) => i.isPreview) ||
-          imgs.find(
-            (i: any) =>
-              i.image && i.image.tags && i.image.tags.includes("exterior"),
-          ) ||
-          imgs.find(
-            (i: any) => i.image && i.image.tags && !i.image.tags.includes("na"),
-          )
-        : null;
-    if (previewImage && previewImage.image) {
-      previewImage = previewImage.image.url;
+
+    try {
+      // POST /user/:id replaces top-level fields wholesale (see
+      // updateUser in user.controller.js) rather than deep-merging, so we
+      // always send the full array with only this collection's entry
+      // touched - same pattern brick-chat-results.tsx already uses for
+      // save/unsave.
+      await updateUser.mutateAsync({ userData: { savedLvnzyProjects } });
+      refetch();
+    } catch (err) {
+      console.error("Failed to persist compare thread id:", err);
+      persistedRef.current = false;
     }
-
-    const primaryCorridor =
-      Array.isArray(itemInfo.meta.projectCorridors) &&
-      itemInfo.meta.projectCorridors.length
-        ? itemInfo.meta.projectCorridors.sort(
-            (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms,
-          )[0]?.corridorName || "Unknown"
-        : "Unknown";
-    const pmtPlan = fetchPmtPlan(
-      itemInfo.originalProjectId?.info?.financialPlan,
-    );
-    return (
-      <Flex
-        style={{
-          marginBottom: 8,
-          cursor: "pointer",
-          backgroundColor: "white",
-          width: isMobile
-            ? "100%"
-            : (width - 50 * 3 - HORIZONTAL_PADDING * 2) / 4,
-        }}
-      >
-        <Flex vertical style={{ width: "100%" }}>
-          <div
-            style={{
-              width: "100%",
-              height: isMobile ? 175 : 150,
-              borderRadius: 12,
-              backgroundImage: `url(${previewImage})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-              position: "relative",
-            }}
-          >
-            <Flex style={{ position: "absolute", bottom: 8, right: 0 }} gap={0}>
-              {itemInfo.meta.projectUnitTypes.split(",").map((u: string) => (
-                <Tag style={{ fontSize: FONT_SIZE.SUB_TEXT, padding: "0 2px" }}>
-                  {capitalize(u)}
-                </Tag>
-              ))}
-            </Flex>
-          </div>
-          {/* <ProjectGallery
-            media={itemInfo.originalProjectId.media}
-          ></ProjectGallery> */}
-
-          <Tooltip title={itemInfo.meta.projectName}>
-            <Paragraph
-              style={{
-                fontSize: FONT_SIZE.HEADING_2,
-                width: "100%",
-                padding: "4px",
-                paddingBottom: 0,
-                marginBottom: 0,
-                fontWeight: 500,
-              }}
-              ellipsis={{
-                rows: 1,
-                expandable: false,
-                symbol: "..",
-              }}
-            >
-              {itemInfo.meta.projectName}
-            </Paragraph>
-          </Tooltip>
-          <Flex vertical style={{ marginTop: "auto", padding: "0 4px" }}>
-            <Paragraph
-              style={{
-                fontSize: FONT_SIZE.PARA,
-                color: COLORS.textColorLight,
-                marginBottom: 0,
-              }}
-              ellipsis={{
-                rows: 1,
-                expandable: false,
-                symbol: "..",
-              }}
-            >
-              {/* {capitalize(itemInfo.meta.projectUnitTypes.split(",")[0])} · ₹ */}
-              {primaryCorridor} ·{" "}
-              {itemInfo?.meta.projectTimelines && itemInfo?.meta.projectTimelines.length ? moment(
-                itemInfo?.meta.projectTimelines[
-                  itemInfo?.meta.projectTimelines.length - 1
-                ].completionDate,
-                "DD-MM-YYYY",
-              ).format("MMM YYYY"): null}{" "}
-              · ₹
-              {rupeeAmountFormat(
-                itemInfo?.originalProjectId?.info?.rate?.minimumUnitCost || 0,
-              )}
-              -{itemInfo?.originalProjectId?.info?.rate?.minimumUnitSize || 0}
-              sq.ft
-            </Paragraph>
-            {/* <Paragraph
-              style={{
-                fontSize: FONT_SIZE.HEADING_4,
-                color: COLORS.textColorMedium,
-                marginBottom: 0,
-              }}
-              ellipsis={{
-                rows: 1,
-                expandable: false,
-                symbol: "..",
-              }}
-            >
-              
-            </Paragraph> */}
-
-            {/* {pmtPlan ? (
-              <Flex
-                style={{
-                  width: "fit-content",
-                  borderRadius: 4,
-                  marginTop: 8,
-                }}
-                align="center"
-                gap={4}
-              >
-                <DynamicReactIcon
-                  iconName="RiDiscountPercentFill"
-                  iconSet="ri"
-                  size={18}
-                  color={COLORS.primaryColor}
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.HEADING_4,
-                    color: COLORS.primaryColor,
-                  }}
-                >
-                  {pmtPlan}
-                </Typography.Text>{" "}
-              </Flex>
-            ) : (
-              <Typography.Text>&nbsp;</Typography.Text>
-            )} */}
-            <Flex
-              style={{
-                paddingTop: 8,
-                borderTopColor: COLORS.borderColor,
-                justifyContent: "space-between",
-                width: "100%",
-              }}
-            >
-              {Object.keys(BRICK360_CATEGORY).map((item, index) => (
-                <Flex
-                  style={{
-                    borderColor: COLORS.borderColor,
-                    borderRadius: 8,
-                  }}
-                >
-                  <Flex vertical style={{ width: "100%" }} justify="flex-start">
-                    <Flex justify="center" align="center">
-                      <GradientBar
-                        value={getCategoryScore(itemInfo.score?.[item])}
-                        showBadgeOnly={true}
-                      ></GradientBar>
-                    </Flex>
-                    <Typography.Text
-                      style={{
-                        fontSize: isMobile
-                          ? FONT_SIZE.PARA
-                          : FONT_SIZE.SUB_TEXT,
-                        color: COLORS.textColorLight,
-                        textAlign: "center",
-                      }}
-                    >
-                      {(Brick360CategoryInfo as any)[item].title}
-                    </Typography.Text>
-                  </Flex>
-                </Flex>
-              ))}
-            </Flex>
-            <Flex style={{ width: "100%", marginTop: 8 }}>
-              <Link
-                href={`/app/brick360/${itemInfo.slug || itemInfo._id}`}
-                prefetch={false}
-                style={{
-                  textDecoration: "none",
-                  color: "inherit",
-                  width: "100%",
-                  border: `1px solid ${COLORS.primaryColor}`,
-                  borderRadius: 8,
-                  textAlign: "center",
-                }}
-              >
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.PARA,
-                    color: COLORS.primaryColor,
-                    width: "100%",
-                  }}
-                >
-                  View 360 Report
-                </Typography.Text>
-              </Link>
-            </Flex>
-          </Flex>
-        </Flex>
-      </Flex>
-    );
   };
 
   if (!user) {
@@ -336,123 +172,17 @@ export function UserProjects({
   }
 
   return (
-    <Flex
-      style={{
-        width: "100%",
-        padding: 0,
-        paddingBottom: 100,
-        border: 0,
-      }}
-      vertical
-    >
-      <Flex
-        style={{
-          padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
-          marginLeft: "auto",
-          marginRight: 25,
-        }}
-      >
-        <Flex
-          style={{
-            backgroundColor: "white",
-            borderRadius: 8,
-            marginTop: 8,
-            border: `1px solid ${COLORS.borderColorMedium}`,
-            cursor: "pointer",
-            marginBottom: 8,
-          }}
-        >
-          <Flex
-            style={{
-              backgroundColor:
-                selectedViewType == "list" ? COLORS.textColorDark : "white",
-              borderTopLeftRadius: 8,
-              borderBottomLeftRadius: 8,
-              padding: "8px 16px",
-              cursor: "pointer",
-            }}
-            onClick={() => {
-              setSelectedViewType("list");
-            }}
-          >
-            <DynamicReactIcon
-              iconName="FaRegListAlt"
-              iconSet="fa"
-              size={16}
-              color={
-                selectedViewType == "list" ? "white" : COLORS.textColorDark
-              }
-            ></DynamicReactIcon>
-          </Flex>
-          <Flex
-            style={{
-              backgroundColor:
-                selectedViewType == "map" ? COLORS.textColorDark : "white",
-              borderTopRightRadius: 8,
-              borderBottomRightRadius: 8,
-              padding: "8px 16px",
-            }}
-            onClick={() => {
-              setSelectedViewType("map");
-            }}
-          >
-            <DynamicReactIcon
-              iconName="FaMapMarked"
-              iconSet="fa"
-              size={16}
-              color={selectedViewType == "map" ? "white" : COLORS.textColorDark}
-            ></DynamicReactIcon>
-          </Flex>
-        </Flex>
-      </Flex>
-
-      {selectedViewType == "list" ? (
-        <Flex
-          style={{
-            width: "100%",
-            flexWrap: "wrap",
-            marginTop: 16,
-            padding: isMobile ? `0 16px` : `0 ${HORIZONTAL_PADDING}px`,
-          }}
-          gap={32}
-        >
-          {lvnzyProjects
-            .sort((a: any, b: any) =>
-              a.meta && b.meta
-                ? a.meta.projectName > b.meta.projectName
-                  ? 1
-                  : -1
-                : 0,
-            )
-            .map((p: any) => renderLvnzyProject(p))}
-        </Flex>
-      ) : null}
-
-      {selectedViewType == "map" ? (
-        <Flex
-          style={{
-            padding: isMobile ? `0 8px` : `0 ${HORIZONTAL_PADDING}px`,
-          }}
-        >
-          <BrickMapCustomer
-            projectIds={lvnzyProjects.map((p) => p.originalProjectId?._id)}
-            excludeMapCategories={[
-              "surroundings",
-              "conveniences",
-              "growth potential",
-            ]}
-          ></BrickMapCustomer>
-        </Flex>
-      ) : null}
-      {/* <Brick360Chat
-        userProjects={lvnzyProjects.map((p) => {
-          return {
-            name: p.meta.projectName as string,
-            id: p._id as string,
-          };
-        })}
-        ref={brick360ChatRef}
-      /> */}
+    <Flex style={{ width: "100%" }} vertical>
+      <BrickChatCore
+        defaultProjectResults={projectResults}
+        autoStartQuestion={
+          storedThreadIsFresh ? undefined : buildCompareQuestion(projectResults)
+        }
+        seedProjectIds={projectResults.map((p) => p.lvnzyProjectId || p.projectId)}
+        onThreadCreated={handleThreadCreated}
+        onThreadLoadError={handleThreadLoadError}
+        hideFirstQuestion
+      />
     </Flex>
   );
 }

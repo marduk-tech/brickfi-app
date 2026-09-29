@@ -20,7 +20,11 @@ export const fetchTravelDurationElement = (
       React.createElement(
         Flex,
         { align: "flex-start", gap: 0, key: "duration-info", vertical: true },
-        [
+        [ React.createElement(
+              Typography.Text,
+              { key: "duration-text", style: { fontSize: FONT_SIZE.NOTE, color: COLORS.primaryColor } },
+              `PROXIMITY TO PROJECT`,
+            ),
           React.createElement(
             Flex,
             { align: "center", gap: 4, key: "timing-info" },
@@ -33,13 +37,13 @@ export const fetchTravelDurationElement = (
             }),
             React.createElement(
               Typography.Text,
-              { key: "duration-text", style: { fontSize: 12 } },
+              { key: "duration-text", style: { fontSize: FONT_SIZE.PARA, fontWeight: 500 } },
               `${duration} mins (${distance.toFixed(1)} Kms)`,
             ),
           ),
           React.createElement(
             Typography.Text,
-            { key: "duration-text", style: { fontSize: 12, fontWeight: 400 } },
+            { key: "duration-text", style: { fontSize: FONT_SIZE.NOTE, fontWeight: 400 } },
             `${prefix && !/^nearest point$/i.test(prefix) ? `${prefix.startsWith("Nearest ") ? prefix : `Nearest ${prefix}`}` : ""} `,
           ),
         ],
@@ -48,7 +52,7 @@ export const fetchTravelDurationElement = (
         Typography.Text,
         {
           style: {
-            fontSize: FONT_SIZE.SUB_TEXT,
+            fontSize: FONT_SIZE.NOTE,
             lineHeight: "100%",
             color: COLORS.textColorLight,
           },

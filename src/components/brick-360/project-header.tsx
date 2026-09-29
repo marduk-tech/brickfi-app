@@ -35,8 +35,8 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
               style={{
                 margin: "0",
                 lineHeight: "100%",
-                fontSize: FONT_SIZE.HEADING_1,
-                fontWeight: 500,
+                fontSize: FONT_SIZE.HEADING_2,
+                fontWeight: 600,
               }}
             >
               {lvnzyProject?.meta.projectName}

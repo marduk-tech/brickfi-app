@@ -15,6 +15,7 @@ import {
 
 import { useFetchCorridors } from "../../hooks/use-corridors";
 import { useFetchLocalities } from "../../hooks/use-localities";
+import { useFetchMicroPockets } from "../../hooks/use-micro-pockets";
 import { useFetchProjectById } from "../../hooks/use-project";
 import { SurroundingElementLabels } from "../../libs/constants";
 import { COLORS } from "../../theme/style-constants";
@@ -43,6 +44,7 @@ import { DriverFilters } from "./map-filters/driver-filters";
 import { SurroundingFilters } from "./map-filters/surrounding-filters";
 import { CorridorMarkers } from "./map-markers/corridor-markers";
 import { LocalityMarkers } from "./map-markers/locality-markers";
+import { MicroPocketMarkers } from "./map-markers/micro-pocket-markers";
 import {
   ProjectMarkers,
   ProjectsNearbyMarkers,
@@ -98,6 +100,7 @@ interface MapViewV2Props {
   showLocalities?: boolean;
   onMapReady?: (map: any) => void;
   showCorridors?: boolean;
+  showMicroPockets?: boolean;
   minMapZoom?: number;
   initialZoom?: number;
   categories?: string[];
@@ -120,6 +123,7 @@ const MapViewV2Inner = ({
   showLocalities,
   onMapReady,
   showCorridors = true,
+  showMicroPockets = false,
   minMapZoom,
   initialZoom,
   categories,
@@ -167,6 +171,7 @@ const MapViewV2Inner = ({
 
   // Keep only non-state related hooks
   const { data: corridors } = useFetchCorridors();
+  const { data: microPockets } = useFetchMicroPockets(showMicroPockets);
   const { data: localities } = useFetchLocalities();
   const currentSelectedCategory = selectedCategory;
 
@@ -324,6 +329,13 @@ const MapViewV2Inner = ({
                 {showCorridors && !showRentals && (
                   <CorridorMarkers
                     corridors={corridorIds ? corridors?.filter(c => corridorIds.includes(c._id)): corridors}
+                    setModalContent={openModal}
+                    setInfoModalOpen={() => {}}
+                  />
+                )}
+                {showMicroPockets && (
+                  <MicroPocketMarkers
+                    microPockets={microPockets}
                     setModalContent={openModal}
                     setInfoModalOpen={() => {}}
                   />

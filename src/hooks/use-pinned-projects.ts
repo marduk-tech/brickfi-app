@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useUser } from "./use-user";
 import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
+import { mapLvnzyProjectToResult } from "@/libs/lvnzy-helper";
 
 interface UsePinnedProjectsResult {
   defaultProjectResults: ProjectResult[] | undefined;
@@ -32,34 +33,8 @@ export function usePinnedProjects(): UsePinnedProjectsResult {
     }
 
     const mapped: ProjectResult[] = projects
-      .map((lp: any) => {
-        const minCost = lp.meta?.costingDetails?.minimumUnitCost;
-        const minSize = lp.meta?.costingDetails?.minimumUnitSize;
-        const corridors: any[] = lp.meta?.projectCorridors || [];
-        const nearestCorridor = corridors.length
-          ? corridors.reduce((a: any, b: any) =>
-              (a.approxDistanceInKms ?? Infinity) <= (b.approxDistanceInKms ?? Infinity) ? a : b
-            )
-          : undefined;
-
-        return {
-          projectId: lp.originalProjectId?._id || "",
-          projectName: lp.meta?.projectName || "",
-          lvnzyProjectId: lp._id,
-          projectSlug: lp.slug,
-          projectLocation: lp.originalProjectId?.info?.location || { lat: 0, lng: 0 },
-          projectImage: (
-            lp.originalProjectId?.media?.find((m: any) => m.type === "image" && m.isPreview) ||
-            lp.originalProjectId?.media?.find((m: any) => m.type === "image" && m.image.tags.includes("exterior")) ||
-            lp.originalProjectId?.media?.find((m: any) => m.type === "image" && m.image.tags.includes("amenity"))
-          )?.image.url,
-          projectHomeTypes: lp.originalProjectId?.info?.homeType,
-          sizeBuiltupMin: minSize || undefined,
-          projectAvgSquareFootPrice: minCost && minSize ? Math.round(minCost / minSize) : undefined,
-          projectCorridor: nearestCorridor.corridorName,
-        };
-      })
-      .filter((p: ProjectResult) => p.projectName);
+      .map((lp: any) => mapLvnzyProjectToResult(lp))
+      .filter((p: ProjectResult | null): p is ProjectResult => !!p?.projectName);
 
     setDefaultProjectResults(mapped);
 

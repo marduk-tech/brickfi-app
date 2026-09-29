@@ -5,6 +5,7 @@ import { APIProvider, InfoWindow, Map } from "@vis.gl/react-google-maps";
 
 import { useFetchCorridors } from "../../../hooks/use-corridors";
 import { useFetchLocalities } from "../../../hooks/use-localities";
+import { useFetchMicroPockets } from "../../../hooks/use-micro-pockets";
 import { useFetchProjectById } from "../../../hooks/use-project";
 import { COLORS } from "../../../theme/style-constants";
 import { ISurroundingElement } from "../../../types/Project";
@@ -24,6 +25,7 @@ import { MapCenterer, MapFocusHandler, MapReady } from "./map-camera";
 import { CorridorMarkers } from "./markers/corridor-markers";
 import { LocalityMarkers } from "./markers/locality-markers";
 import { MicroMarketDrivers } from "./markers/micro-market-drivers";
+import { MicroPocketMarkers } from "./markers/micro-pocket-markers";
 import { ProjectMarkers } from "./markers/project-markers";
 import { DriverPolygons } from "./markers/driver-polygons";
 import { RoadDrivers } from "./markers/road-drivers";
@@ -49,6 +51,7 @@ export interface MapViewGoogleProps {
   showLocalities?: boolean;
   onMapReady?: (map: google.maps.Map) => void;
   showCorridors?: boolean;
+  showMicroPockets?: boolean;
   minMapZoom?: number;
   initialZoom?: number;
   categories?: string[];
@@ -101,6 +104,7 @@ function MapViewGoogleInner({
   showLocalities,
   onMapReady,
   showCorridors = true,
+  showMicroPockets = false,
   minMapZoom,
   initialZoom,
   categories,
@@ -129,6 +133,7 @@ function MapViewGoogleInner({
 
   const { data: corridors } = useFetchCorridors();
   const { data: localities } = useFetchLocalities();
+  const { data: microPockets } = useFetchMicroPockets(showMicroPockets);
 
   const filteredCorridors = corridorIds
     ? corridors?.filter((c) => corridorIds.includes(c._id))
@@ -228,6 +233,10 @@ function MapViewGoogleInner({
 
           {showCorridors && (
             <CorridorMarkers corridors={filteredCorridors} openModal={openModal} />
+          )}
+
+          {showMicroPockets && (
+            <MicroPocketMarkers microPockets={microPockets} openModal={openModal} />
           )}
 
           {showSurroundings && (

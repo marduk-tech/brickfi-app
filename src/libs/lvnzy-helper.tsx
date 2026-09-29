@@ -4,6 +4,8 @@ import posthog from "posthog-js";
 import { env, PLACE_TIMELINE } from "./constants";
 import { useSearchParams } from "next/navigation";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
+import { LvnzyProject } from "../types/LvnzyProject";
+import { ProjectResult } from "../app/app/brickchat/brickchat-client";
 
 export const nestedPropertyAccessor = (
   record: any,
@@ -196,6 +198,62 @@ export const renderCitations = (citations: any) => {
         </a>
       );
     });
+};
+
+// Maps a saved LvnzyProject (as returned in a user's savedLvnzyProjects
+// collection) into the ProjectResult shape BrickChatResults/BrickMapChat
+// render. Returns null for entries that haven't been populated into a full
+// project doc yet (report still pending) - mirrors the guard previously
+// inlined in UserProjects' renderLvnzyProject.
+export const mapLvnzyProjectToResult = (
+  lp: LvnzyProject,
+  rankScore = 0,
+): ProjectResult | null => {
+  if (!lp || (!lp.meta && !(lp as any).reraNumber && !(lp as any).reraId)) {
+    return null;
+  }
+  if (!lp.meta?.projectName) {
+    return null;
+  }
+
+  const minCost = lp.meta?.costingDetails?.minimumUnitCost;
+  const minSize = lp.meta?.costingDetails?.minimumUnitSize;
+  const corridors: any[] = lp.meta?.projectCorridors || [];
+  const nearestCorridor = corridors.length
+    ? corridors.reduce((a: any, b: any) =>
+        (a.approxDistanceInKms ?? Infinity) <= (b.approxDistanceInKms ?? Infinity)
+          ? a
+          : b,
+      )
+    : undefined;
+
+  return {
+    projectId: lp.originalProjectId?._id || "",
+    projectName: lp.meta.projectName,
+    oneLiner: "",
+    lvnzyProjectId: lp._id,
+    projectSlug: lp.slug,
+    projectStatus: lp.originalProjectId?.info.status,
+    projectLocation: lp.originalProjectId?.info?.location || { lat: 0, lng: 0 },
+    projectImage: (
+      lp.originalProjectId?.media?.find(
+        (m: any) => m.type === "image" && m.isPreview,
+      ) ||
+      lp.originalProjectId?.media?.find(
+        (m: any) => m.type === "image" && m.image?.tags?.includes("exterior"),
+      ) ||
+      lp.originalProjectId?.media?.find(
+        (m: any) => m.type === "image" && m.image?.tags?.includes("amenity"),
+      )
+    )?.image?.url,
+    isDeveloperPartner:  !!lp.originalProjectId?.info?.developerId?.brkfiStatus?.isPartner,
+    projectHomeTypes: lp.originalProjectId?.info?.homeType,
+    sizeBuiltupMin: minSize || undefined,
+    projectAvgSquareFootPrice:
+      minCost && minSize ? Math.round(minCost / minSize) : undefined,
+    projectCorridor: nearestCorridor?.corridorName,
+    rankScore,
+  };
 };
 
 // Dedupe a list of ids and put newId at the front

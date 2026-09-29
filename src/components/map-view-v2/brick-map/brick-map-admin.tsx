@@ -17,8 +17,10 @@ import { IDriverPlace } from "../../../types/Project";
 import { Loader } from "../../common/loader";
 import dynamic from "next/dynamic";
 import type { ProjectMarkerInput } from "../map-view-v2";
-import MapViewWrapper from "../map-view-google/map-view-wrapper";
-const MapViewV2 = dynamic(() => import("../map-view-v2"), { ssr: false });
+const MapViewWrapper = dynamic(
+  () => import("../map-view-google/map-view-wrapper"),
+  { ssr: false }
+);
 
 export function BrickMapAdmin() {
   const [homeTypeFilter, setHomeTypeFilter] = useState("");
@@ -37,7 +39,8 @@ export function BrickMapAdmin() {
     {
       homeType: homeTypeFilter,
       searchKeyword: searchValue,
-    }
+    },
+    { enabled: !!homeTypeFilter }
   );
 
   const [driverFilters, setDriverFilters] = useState<string[]>([
@@ -177,7 +180,8 @@ export function BrickMapAdmin() {
             placeholder="Search for project name..."
           />
           <Select
-            value={homeTypeFilter}
+            value={homeTypeFilter || undefined}
+            placeholder="Select home type"
             style={{ width: 200 }}
             loading={allProjectsLoading}
             disabled={isSearchMode}
@@ -235,14 +239,16 @@ export function BrickMapAdmin() {
                   marginLeft: "auto",
                 }}
               >
-                {allProjects
+                {!homeTypeFilter
+                  ? "Select a home type to load projects"
+                  : allProjectsLoading
                   ? "Loading projects..."
                   : isSearchMode
                   ? `Showing search result: ${filteredProjects.length} project`
                   : `${filteredProjects.length} projects`}
               </Typography.Text>
             </Flex>
-            <MapViewV2
+            <MapViewWrapper
               key="stable-map-view"
               drivers={filteredDrivers.map((p) => ({
                 ...p,
@@ -252,7 +258,8 @@ export function BrickMapAdmin() {
               projectId={selectedProjectId || undefined}
               fullSize={false}
               showLocalities={true}
-              showCorridors={true}
+              showCorridors={false}
+              showMicroPockets={true}
             />
           </>
         </Flex>

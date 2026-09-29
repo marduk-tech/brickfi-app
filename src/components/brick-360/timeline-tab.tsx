@@ -46,7 +46,6 @@ const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
           }),
         ];
       });
-      console.log(timelines);
 
       // Step 1: Find final completion date per phase
       const phaseCompletionMap: Record<string, moment.Moment> = {};

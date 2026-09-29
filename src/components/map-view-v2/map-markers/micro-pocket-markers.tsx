@@ -5,64 +5,64 @@ import { MapModalContent, MapModalGeoPosition } from "../map-modal";
 import { getIcon } from "../utils";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
 
-const CORRIDOR_MAX_ZOOM = 12.5;
+const MICROPOCKET_MAX_ZOOM = 13.5;
 
-interface CorridorMarkersProps {
-  corridors?: any[];
+interface MicroPocketMarkersProps {
+  microPockets?: any[];
   setModalContent: (content: MapModalContent, position?: MapModalGeoPosition) => void;
   setInfoModalOpen: (open: boolean) => void;
 }
 
-function useIsBelowCorridorZoom() {
+function useIsBelowMicroPocketZoom() {
   const map = useMap();
-  const [isBelow, setIsBelow] = useState(map.getZoom() < CORRIDOR_MAX_ZOOM);
+  const [isBelow, setIsBelow] = useState(map.getZoom() < MICROPOCKET_MAX_ZOOM);
 
   useMapEvent("zoomend", () => {
-    setIsBelow(map.getZoom() < CORRIDOR_MAX_ZOOM);
+    setIsBelow(map.getZoom() < MICROPOCKET_MAX_ZOOM);
   });
 
   return isBelow;
 }
 
-export const CorridorMarkers = ({
-  corridors,
+export const MicroPocketMarkers = ({
+  microPockets,
   setModalContent,
   setInfoModalOpen,
-}: CorridorMarkersProps) => {
-  const [corridorsElements, setCorridorElements] =
+}: MicroPocketMarkersProps) => {
+  const [microPocketElements, setMicroPocketElements] =
     useState<React.ReactNode[]>();
-  const isBelowCorridorZoom = useIsBelowCorridorZoom();
+  const isBelowMicroPocketZoom = useIsBelowMicroPocketZoom();
 
   useEffect(() => {
-    if (!corridors) {
+    if (!microPockets) {
       return;
     }
 
-    const renderCorridorElements = async () => {
+    const renderMicroPocketElements = async () => {
       const elements = await Promise.all(
-        corridors.map(async (c) => {
-          const CorridorIcon = await getIcon(
-            "LuMilestone",
+        microPockets.map(async (m) => {
+          const MicroPocketIcon = await getIcon(
+            "LuMapPinned",
             "lu",
             false,
-            c.name,
+            m.name,
             undefined,
             {
               iconColor: "white",
-              borderColor: COLORS.bgColorDark,
-              iconBgColor: COLORS.bgColorDark,
+              borderColor: COLORS.textColorMedium,
+              iconBgColor: COLORS.textColorMedium,
               containerWidth: 125,
             }
           );
 
-          function corridorClickHandler(position: MapModalGeoPosition) {
+          function microPocketClickHandler(position: MapModalGeoPosition) {
             setModalContent(
               {
-                title: c.name,
-                content: c.description || "",
+                title: m.name,
+                content: m.description || "",
                 titleIcon: (
                   <DynamicReactIcon
-                    iconName="LuMilestone"
+                    iconName="LuMapPinned"
                     iconSet="lu"
                     size={20}
                     color={COLORS.textColorDark}
@@ -70,8 +70,8 @@ export const CorridorMarkers = ({
                 ),
                 tags: [
                   {
-                    label: "Growth corridor",
-                    color: COLORS.textColorDark,
+                    label: "Micro pocket",
+                    color: COLORS.textColorMedium,
                   },
                 ],
               },
@@ -83,31 +83,31 @@ export const CorridorMarkers = ({
           return (
             <>
               <Marker
-                key={`corridor-${c._id}`}
-                icon={CorridorIcon!}
+                key={`micro-pocket-${m._id}`}
+                icon={MicroPocketIcon!}
                 zIndexOffset={100}
-                position={[c.location.lat, c.location.lng]}
+                position={[m.location.lat, m.location.lng]}
                 eventHandlers={{
                   click: () =>
-                    corridorClickHandler({ lat: c.location.lat, lng: c.location.lng }),
+                    microPocketClickHandler({ lat: m.location.lat, lng: m.location.lng }),
                 }}
               />
-              {c.geoJson ? (
+              {m.geoJson ? (
                 <Polygon
-                  key={`corr-${c.name.toLowerCase().replaceAll(" ", "-")}`}
-                  positions={c.geoJson.features[0].geometry.coordinates.map(
+                  key={`mp-${m.name.toLowerCase().replaceAll(" ", "-")}`}
+                  positions={m.geoJson.features[0].geometry.coordinates.map(
                     ([lng, lat]: [number, number]) =>
                       [lat, lng] as [number, number]
                   )}
                   eventHandlers={{
                     click: (e) =>
-                      corridorClickHandler({ lat: e.latlng.lat, lng: e.latlng.lng }),
+                      microPocketClickHandler({ lat: e.latlng.lat, lng: e.latlng.lng }),
                   }}
                   pathOptions={{
                     color: COLORS.textColorMedium,
                     weight: 1,
                     fillOpacity: 0.1,
-                    fillColor: COLORS.textColorDark,
+                    fillColor: COLORS.textColorMedium,
                   }}
                 />
               ) : null}
@@ -116,15 +116,15 @@ export const CorridorMarkers = ({
         })
       );
 
-      setCorridorElements(elements);
+      setMicroPocketElements(elements);
     };
 
-    renderCorridorElements();
-  }, [corridors, setModalContent, setInfoModalOpen]);
+    renderMicroPocketElements();
+  }, [microPockets, setModalContent, setInfoModalOpen]);
 
-  if (!corridors || !isBelowCorridorZoom) {
+  if (!microPockets || !isBelowMicroPocketZoom) {
     return null;
   }
 
-  return <>{corridorsElements || null}</>;
+  return <>{microPocketElements || null}</>;
 };

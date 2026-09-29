@@ -1,84 +1,18 @@
-import { Flex, Image, Modal, Tag, Typography } from "antd";
+import { ExclamationCircleFilled } from "@ant-design/icons";
+import { Alert, Flex, Image, Modal, Tag, Typography } from "antd";
 import { useEffect, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useDevice } from "../../hooks/use-device";
-import { fetchPmtPlan, rupeeAmountFormat, thsndFormat } from "../../libs/lvnzy-helper";
+import { fetchPmtPlan, rupeeAmountFormat } from "../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import { HOME_TYPE_ICON } from "../../libs/home-type-icons";
-import { ScrollableContainer } from "../scrollable-container";
+import { computeProjectStatus, PROJECT_STATUS } from "../../libs/project-status";
 
 interface UnitsTabProps {
   lvnzyProject: any;
 }
-
-const getTotalFloors = (lvnzyProject: any) => {
-  const towers = lvnzyProject?.meta?.projectConfigurations?.towers;
-  if (!towers || !Array.isArray(towers) || towers.length === 0) {
-    return "";
-  }
-
-  const floorCounts = towers
-    .map((t: any) => t.totalFloors)
-    .filter((floors: any) => typeof floors === "number");
-  if (floorCounts.length === 0) {
-    return null;
-  }
-
-  const minFloors = Math.min(...floorCounts);
-  const maxFloors = Math.max(...floorCounts);
-
-  if (minFloors && maxFloors) {
-    let totalFloors = "";
-    if (minFloors == maxFloors) {
-      totalFloors = `${minFloors}`;
-    } else {
-      totalFloors = `${minFloors}-${maxFloors}`;
-    }
-    return (
-      <Typography.Text
-        style={{
-          fontSize: FONT_SIZE.HEADING_4,
-          marginLeft: 4,
-          color: COLORS.textColorMedium,
-        }}
-      >
-        · {totalFloors} Floors
-      </Typography.Text>
-    );
-  }
-
-  return null;
-};
-
-const getMinMaxSize = (configs: any[]) => {
-  let sizes: number[] = [];
-  configs.forEach((c: any) => {
-    if (c.sizeBuiltup) {
-      sizes.push(c.sizeBuiltup);
-    } else if (c.config) {
-      const split = c.config.split("-");
-      if (split.length > 1) {
-        sizes.push(parseInt(split[1]));
-      }
-    }
-  });
-  if (sizes.length) {
-    sizes = sizes.sort((a, b) => a - b);
-    return (
-      <Typography.Text
-        style={{ fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium }}
-      >
-        {sizes[0] == sizes[sizes.length - 1]
-          ? sizes[0]
-          : `${sizes[0]} - ${sizes[sizes.length - 1]}`}{" "}
-        sq.ft
-      </Typography.Text>
-    );
-  }
-  return null;
-};
 
 const CATEGORY_ORDER = [
   "Apartments",
@@ -132,6 +66,8 @@ const normalizeUnitType = (c: any): { category: string; label: string } => {
 
 export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
   const { isMobile } = useDevice();
+  const isPreLaunch =
+    computeProjectStatus(lvnzyProject) === PROJECT_STATUS.PRE_LAUNCH;
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [configFilters, setConfigFilters] = useState<string[]>([]);
@@ -203,7 +139,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
   }, [lvnzyProject, selectedCategory]);
 
   return (
-    <ScrollableContainer>
+    <>
       <Flex
         vertical
         style={{
@@ -212,119 +148,6 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
         }}
       >
         <Flex vertical style={{ marginBottom: 8, paddingBottom: 80 }}>
-          {/* Sqft & Configs */}
-
-          <Flex gap={8} align="center">
-            <Flex align="flex-start">
-              {lvnzyProject?.meta.costingDetails && (
-                <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_1 }}>
-                  ₹
-                  {thsndFormat(
-                    `${Math.round(
-                      (lvnzyProject?.originalProjectId.info.rate
-                        .minimumUnitCost /
-                        lvnzyProject?.originalProjectId.info.rate
-                          .minimumUnitSize) / 25
-                    ) * 25}`
-                  )}{" "}
-                </Typography.Text>
-              )}
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_4,
-                  color: COLORS.textColorDark,
-                  marginTop: 4,
-                  marginLeft: 2,
-                }}
-              >
-                per sq.ft
-              </Typography.Text>
-            </Flex>
-            {pmtPlan ? (
-              <Flex
-                align="center"
-                style={{
-                  padding: "2px 8px",
-                  borderRadius: 8,
-                  backgroundColor: COLORS.textColorDark,
-                  border: `1px solid ${COLORS.textColorDark}`,
-                }}
-                gap={2}
-              >
-                <DynamicReactIcon
-                  iconName="RiDiscountPercentFill"
-                  iconSet="ri"
-                  size={20}
-                  color="white"
-                ></DynamicReactIcon>
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
-
-                    color: "white",
-                  }}
-                  onClick={() => {
-                    setIsPmtPlanModalOpen(true);
-                  }}
-                >
-                  {pmtPlan}
-                </Typography.Text>
-              </Flex>
-            ) : null}
-          </Flex>
-          <Flex
-            gap={4}
-            style={{
-              color: COLORS.textColorMedium,
-              overflowX: "scroll",
-              whiteSpace: "nowrap",
-              scrollbarWidth: "none",
-            }}
-          >
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_4,
-                color: COLORS.textColorMedium,
-              }}
-            >
-              {Math.round(
-                lvnzyProject?.property.layout.totalLandArea / 404.68564
-              ) / 10}{" "}
-              Acre
-            </Typography.Text>{" "}
-            ·
-            {lvnzyProject?.property.layout.totalUnits && (
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_4,
-                  marginRight: 4,
-                  color: COLORS.textColorMedium,
-                }}
-              >
-                {lvnzyProject?.property.layout.totalUnits} Units
-              </Typography.Text>
-            )}{" "}
-            ·
-            {getMinMaxSize(
-              lvnzyProject?.originalProjectId.info.unitConfigWithPricing
-            )}
-            {lvnzyProject?.originalProjectId.info.unitConfigWithPricing &&
-            lvnzyProject!.meta.projectConfigurations.unitsBreakup
-              ? getTotalFloors(lvnzyProject)
-              : null}
-            {lvnzyProject?.property.layout.totalPhases &&
-            lvnzyProject?.property.layout.totalPhases > 1 ? (
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_4,
-                  color: COLORS.textColorMedium,
-                  marginLeft: 4,
-                }}
-              >
-                · {lvnzyProject?.property.layout.totalPhases} Phases
-              </Typography.Text>
-            ) : null}
-          </Flex>
           {lvnzyProject?.property.layout.totalPhases &&
           lvnzyProject?.property.layout.totalPhases > 1 ? (
             <Flex
@@ -375,7 +198,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                   <Tag
                     key={`category-${category}`}
                     style={{
-                      fontSize: FONT_SIZE.HEADING_3,
+                      fontSize: FONT_SIZE.HEADING_4,
                       padding: "4px 8px",
                       color: tagColor,
                       borderRadius: 0,
@@ -397,7 +220,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                         <DynamicReactIcon
                           iconSet={icon.set}
                           iconName={icon.name}
-                          size={FONT_SIZE.HEADING_3}
+                          size={FONT_SIZE.HEADING_4}
                           color={tagColor}
                         />
                       ) : null}
@@ -430,7 +253,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                         : "default"
                     }
                     style={{
-                      fontSize: FONT_SIZE.HEADING_3,
+                      fontSize: FONT_SIZE.HEADING_4,
                       padding: "4px 8px",
                       borderRadius: 8,
                       cursor: "pointer",
@@ -444,6 +267,35 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                 );
               })}
             </Flex>
+          ) : null}
+
+          {isPreLaunch ? (
+            <Alert
+              type="warning"
+              showIcon
+              icon={<ExclamationCircleFilled style={{ fontSize: 18 }} />}
+              message={
+                <>
+                  Limited property and layout details available as the
+                  project remains in pre-launch stage.{" "}<br></br>
+                  <a
+                    href="https://www.brickfi.in/callback-request?srcIntent=brick360-report"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Reach out to a Brickfi advisor
+                  </a>{" "}
+                  for real time details.
+                </>
+              }
+              style={{
+                fontSize: FONT_SIZE.PARA,
+                marginTop: 16,
+                maxWidth: 700,
+                lineHeight: "120%",
+                alignItems: "flex-start",
+              }}
+            />
           ) : null}
 
           <Flex
@@ -496,7 +348,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
                         <Flex vertical style={{ marginBottom: 8 }}>
                           <Typography.Text
                             style={{
-                              fontSize: FONT_SIZE.HEADING_3,
+                              fontSize: FONT_SIZE.HEADING_4,
                               color: COLORS.primaryColor,
                             }}
                           >
@@ -596,28 +448,7 @@ export const UnitsTab = ({ lvnzyProject }: UnitsTabProps) => {
           </Flex>
         </Flex>
       </Flex>
-      <Modal
-        open={isPmtPlanModalOpen}
-        footer={null}
-        closable={true}
-        onCancel={() => {
-          setIsPmtPlanModalOpen(false);
-        }}
-      >
-        <Flex
-          style={{
-            height: 600,
-            overflowY: "scroll",
-            scrollbarWidth: "none",
-            paddingTop: 32,
-          }}
-        >
-          <Markdown remarkPlugins={[remarkGfm]} className="liviq-content">
-            {lvnzyProject.originalProjectId?.info?.financialPlan ||
-              "No financial plan available"}
-          </Markdown>
-        </Flex>
-      </Modal>
-    </ScrollableContainer>
+     
+    </>
   );
 };

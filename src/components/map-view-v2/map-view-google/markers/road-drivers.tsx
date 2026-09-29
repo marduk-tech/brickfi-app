@@ -3,7 +3,11 @@
 import React, { useEffect } from "react";
 import * as turf from "@turf/turf";
 import { Flex, Tag, Typography } from "antd";
-import { AdvancedMarker, AdvancedMarkerAnchorPoint, useMap } from "@vis.gl/react-google-maps";
+import {
+  AdvancedMarker,
+  AdvancedMarkerAnchorPoint,
+  useMap,
+} from "@vis.gl/react-google-maps";
 import { useMapZoom } from "../use-map-zoom";
 import { DRIVER_CATEGORIES, PLACE_TIMELINE } from "../../../../libs/constants";
 import { capitalize, driverStatusLabel } from "../../../../libs/lvnzy-helper";
@@ -19,20 +23,25 @@ interface RoadDriversProps {
   noCategoriesProvided: boolean;
   isDriverMatchingFilter: (driver: IDriverPlace) => boolean;
   openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
-  fetchTravelDurationElement: (distance: number, duration: number, prefix?: string) => React.ReactNode;
+  fetchTravelDurationElement: (
+    distance: number,
+    duration: number,
+    prefix?: string,
+  ) => React.ReactNode;
 }
 
 function filterRoad(
   drivers: IDriverPlace[] | undefined,
   currentSelectedCategory: string,
   noCategoriesProvided: boolean,
-  isDriverMatchingFilter: (d: IDriverPlace) => boolean
+  isDriverMatchingFilter: (d: IDriverPlace) => boolean,
 ): RoadDriverPlace[] {
   return (drivers ?? []).filter((d): d is RoadDriverPlace => {
     const isAllowed = noCategoriesProvided
       ? true
       : (() => {
-          const cats = (DRIVER_CATEGORIES as any)[currentSelectedCategory]?.drivers ?? [];
+          const cats =
+            (DRIVER_CATEGORIES as any)[currentSelectedCategory]?.drivers ?? [];
           return Array.isArray(cats) && cats.includes(d.driver);
         })();
     return (
@@ -48,12 +57,24 @@ function filterRoad(
 // ── Polylines drawn imperatively (google.maps.Polyline) ──────────────────────
 function RoadPolylines(props: RoadDriversProps) {
   const map = useMap();
-  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal, fetchTravelDurationElement } = props;
+  const {
+    drivers,
+    currentSelectedCategory,
+    noCategoriesProvided,
+    isDriverMatchingFilter,
+    openModal,
+    fetchTravelDurationElement,
+  } = props;
 
   useEffect(() => {
     if (!map) return;
     const lines: google.maps.Polyline[] = [];
-    const filtered = filterRoad(drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter);
+    const filtered = filterRoad(
+      drivers,
+      currentSelectedCategory,
+      noCategoriesProvided,
+      isDriverMatchingFilter,
+    );
 
     for (const driver of filtered) {
       const isDashed = ![
@@ -62,26 +83,40 @@ function RoadPolylines(props: RoadDriversProps) {
         PLACE_TIMELINE.PARTIAL_LAUNCH,
       ].includes(driver.status as PLACE_TIMELINE);
 
-      const handleClick = (featureProps?: any, latLng?: google.maps.LatLng | null) =>
+      const handleClick = (
+        featureProps?: any,
+        latLng?: google.maps.LatLng | null,
+      ) =>
         openModal(
           {
             title: (
               <Flex vertical>
-                <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                <Typography.Text
+                  style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
+                >
                   {driver.name}
                 </Typography.Text>
-                {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
+                {featureProps?.name &&
+                featureProps.name.toLowerCase() !==
+                  driver.name.toLowerCase() ? (
                   <Flex>
-                    <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
+                    <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>
+                      {capitalize(featureProps.name)}
+                    </Tag>
                   </Flex>
                 ) : null}
               </Flex>
             ),
             subHeading:
               driver.distance && driver.duration
-                ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                ? fetchTravelDurationElement(
+                    driver.distance,
+                    driver.duration,
+                    driver.comments,
+                  )
                 : "",
-            content: driver.details?.oneLiner || driver.details?.description || "",
+            content:
+              driver.details?.oneLiner || driver.details?.description || "",
             tags: [
               { label: "Highway", color: COLORS.primaryColor },
               {
@@ -98,12 +133,13 @@ function RoadPolylines(props: RoadDriversProps) {
 
       const features = processRoadFeatures(
         driver.features.filter(
-          (f: any) => f.type === "Feature" && f.geometry?.type !== "Point"
-        )
+          (f: any) => f.type === "Feature" && f.geometry?.type !== "Point",
+        ),
       );
 
       for (const feature of features) {
-        const isFeatureDashed = isDashed || feature.properties?.status === "construction";
+        const isFeatureDashed =
+          isDashed || feature.properties?.status === "construction";
         const line = new google.maps.Polyline({
           map,
           path: feature.coordinates.map(([lng, lat]) => ({ lat, lng })),
@@ -111,7 +147,18 @@ function RoadPolylines(props: RoadDriversProps) {
           strokeWeight: 5,
           strokeOpacity: 1,
           icons: isFeatureDashed
-            ? [{ icon: { path: "M 0,-1 0,1", strokeOpacity: 1, scale: 3, strokeColor: "#FFFFFF" }, offset: "0", repeat: "16px" }]
+            ? [
+                {
+                  icon: {
+                    path: "M 0,-1 0,1",
+                    strokeOpacity: 1,
+                    scale: 3,
+                    strokeColor: "#FFFFFF",
+                  },
+                  offset: "0",
+                  repeat: "16px",
+                },
+              ]
             : undefined,
         });
         line.addListener("click", (e: google.maps.PolyMouseEvent) =>
@@ -121,8 +168,17 @@ function RoadPolylines(props: RoadDriversProps) {
       }
     }
 
-    return () => { lines.forEach((l) => l.setMap(null)); };
-  }, [map, drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal]);
+    return () => {
+      lines.forEach((l) => l.setMap(null));
+    };
+  }, [
+    map,
+    drivers,
+    currentSelectedCategory,
+    noCategoriesProvided,
+    isDriverMatchingFilter,
+    openModal,
+  ]);
 
   return null;
 }
@@ -135,7 +191,10 @@ type LabelCandidate = {
   feature: ReturnType<typeof processRoadFeatures>[0];
 };
 
-function buildLabelCandidates(filtered: RoadDriverPlace[], zoom: number): LabelCandidate[] {
+function buildLabelCandidates(
+  filtered: RoadDriverPlace[],
+  zoom: number,
+): LabelCandidate[] {
   // Dedup threshold matches OpenStreet: 8 km at low zoom, tightens as user zooms in
   const minLabelDistance = zoom < 13.5 ? 3 : zoom < 14.5 ? 2 : 1.5;
   const all: LabelCandidate[] = [];
@@ -143,8 +202,8 @@ function buildLabelCandidates(filtered: RoadDriverPlace[], zoom: number): LabelC
   for (const driver of filtered) {
     const features = processRoadFeatures(
       driver.features.filter(
-        (f: any) => f.type === "Feature" && f.geometry?.type !== "Point"
-      )
+        (f: any) => f.type === "Feature" && f.geometry?.type !== "Point",
+      ),
     );
 
     for (const feature of features) {
@@ -162,8 +221,12 @@ function buildLabelCandidates(filtered: RoadDriverPlace[], zoom: number): LabelC
           const coords = point.geometry.coordinates;
 
           const step = 0.15;
-          const p1 = turf.along(line, Math.max(0, distance - step), { units: "kilometers" });
-          const p2 = turf.along(line, Math.min(totalLength, distance + step), { units: "kilometers" });
+          const p1 = turf.along(line, Math.max(0, distance - step), {
+            units: "kilometers",
+          });
+          const p2 = turf.along(line, Math.min(totalLength, distance + step), {
+            units: "kilometers",
+          });
           // Compass bearing → CSS rotation, normalised to [-90, 90] so text is never upside-down
           let angle = turf.bearing(p1, p2) - 90;
           if (angle < -90) angle += 180;
@@ -181,15 +244,28 @@ function buildLabelCandidates(filtered: RoadDriverPlace[], zoom: number): LabelC
   return all.reduce<LabelCandidate[]>((kept, candidate) => {
     const tooClose = kept.some(
       (k) =>
-        turf.distance(candidate.coords, k.coords, { units: "kilometers" }) < minLabelDistance
+        turf.distance(candidate.coords, k.coords, { units: "kilometers" }) <
+        minLabelDistance,
     );
     return tooClose ? kept : [...kept, candidate];
   }, []);
 }
 
 export function RoadDrivers(props: RoadDriversProps) {
-  const { drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter, openModal, fetchTravelDurationElement } = props;
-  const filtered = filterRoad(drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter);
+  const {
+    drivers,
+    currentSelectedCategory,
+    noCategoriesProvided,
+    isDriverMatchingFilter,
+    openModal,
+    fetchTravelDurationElement,
+  } = props;
+  const filtered = filterRoad(
+    drivers,
+    currentSelectedCategory,
+    noCategoriesProvided,
+    isDriverMatchingFilter,
+  );
   const zoom = useMapZoom();
 
   // Entry/exit markers and road-name labels both visible at zoom > 12.5 (matches OpenStreet)
@@ -198,15 +274,20 @@ export function RoadDrivers(props: RoadDriversProps) {
   // ── Entry / exit circle markers (matches Leaflet CircleMarker) ─────────────
   const entryMarkers: React.ReactNode[] = [];
   for (const driver of filtered) {
-    const entryExitFeatures = driver.features.filter(
-      (f: any) =>
+    const entryExitFeatures = driver.features.filter((f: any) => {
+      const featureType = f.properties?.type || f.properties?.Type;
+      return (
         f.type === "Feature" &&
         f.geometry?.type === "Point" &&
-        f.properties?.type === "entry_exit"
-    );
+        featureType &&
+        (featureType.toLowerCase().includes("entry") ||
+          featureType.toLowerCase().includes("exit"))
+      );
+    });
     for (const feature of entryExitFeatures) {
       const [lng, lat] = feature.geometry.coordinates;
-      const name = feature.properties?.name || feature.properties?.Name || "Entry/Exit";
+      const name =
+        feature.properties?.name || feature.properties?.Name || "Entry/Exit";
 
       entryMarkers.push(
         <AdvancedMarker
@@ -217,14 +298,20 @@ export function RoadDrivers(props: RoadDriversProps) {
               {
                 title: (
                   <Flex vertical>
-                    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                    <Typography.Text
+                      style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
+                    >
                       {driver.name}
                     </Typography.Text>
                   </Flex>
                 ),
                 subHeading:
                   driver.distance && driver.duration
-                    ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                    ? fetchTravelDurationElement(
+                        driver.distance,
+                        driver.duration,
+                        driver.comments,
+                      )
                     : "",
                 content: "",
                 tags: [
@@ -248,7 +335,7 @@ export function RoadDrivers(props: RoadDriversProps) {
               cursor: "pointer",
             }}
           />
-        </AdvancedMarker>
+        </AdvancedMarker>,
       );
     }
   }
@@ -275,26 +362,42 @@ export function RoadDrivers(props: RoadDriversProps) {
               {
                 title: (
                   <Flex vertical>
-                    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}>
+                    <Typography.Text
+                      style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
+                    >
                       {driver.name}
                     </Typography.Text>
-                    {featureProps?.name && featureProps.name.toLowerCase() !== driver.name.toLowerCase() ? (
+                    {featureProps?.name &&
+                    featureProps.name.toLowerCase() !==
+                      driver.name.toLowerCase() ? (
                       <Flex>
-                        <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>{capitalize(featureProps.name)}</Tag>
+                        <Tag style={{ fontSize: FONT_SIZE.HEADING_4 }}>
+                          {capitalize(featureProps.name)}
+                        </Tag>
                       </Flex>
                     ) : null}
                   </Flex>
                 ),
                 subHeading:
                   driver.distance && driver.duration
-                    ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                    ? fetchTravelDurationElement(
+                        driver.distance,
+                        driver.duration,
+                        driver.comments,
+                      )
                     : "",
-                content: driver.details?.oneLiner || driver.details?.description || "",
+                content:
+                  driver.details?.oneLiner || driver.details?.description || "",
                 tags: [
                   { label: "Highway", color: COLORS.primaryColor },
                   {
-                    label: driverStatusLabel(featureProps?.status || driver.status),
-                    color: isDashed || featureProps?.status === "construction" ? "warning" : "success",
+                    label: driverStatusLabel(
+                      featureProps?.status || driver.status,
+                    ),
+                    color:
+                      isDashed || featureProps?.status === "construction"
+                        ? "warning"
+                        : "success",
                   },
                 ],
               },
@@ -323,7 +426,7 @@ export function RoadDrivers(props: RoadDriversProps) {
           </div>
         </AdvancedMarker>
       );
-    }
+    },
   );
 
   return (
