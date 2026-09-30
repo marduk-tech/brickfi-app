@@ -1,5 +1,6 @@
 import { NewReportRequestForm } from "@/components/request-report/new-report-request-form";
 import { Metadata } from "next";
+import { Suspense } from "react";
 
 const META_DESCR = "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";
 const META_TITLE = "Brickfi | Get a 360 Report Card for any property in Bangalore";
@@ -65,5 +66,9 @@ export const metadata: Metadata = {
 };
 
 export default function RequestReportPage() {
-  return <NewReportRequestForm />;
+  return (
+    <Suspense fallback={null}>
+      <NewReportRequestForm />
+    </Suspense>
+  );
 }
