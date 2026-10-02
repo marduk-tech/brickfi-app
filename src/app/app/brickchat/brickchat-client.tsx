@@ -1007,7 +1007,7 @@ export function BrickChatCore({
           backgroundColor: COLORS.textColorDark,
           borderRadius: 16,
           padding: "8px 16px",
-          maxWidth: 420,
+          maxWidth: 575,
         }}
       >
         {question}
@@ -1359,6 +1359,7 @@ export function BrickChatCore({
                               fontWeight: 500,
                               marginBottom: 16,
                               display: "block",
+                              maxWidth: 850
                             }}
                           >
                             {children}
@@ -1498,6 +1499,7 @@ export function BrickChatCore({
                           fontSize: FONT_SIZE.HEADING_3,
                           marginTop: 32,
                           fontWeight: 500,
+                          maxWidth: 800
                         }}
                       >
                         {messageItem.answer.followupPrompt}
