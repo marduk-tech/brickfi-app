@@ -68,13 +68,13 @@ export default function ReferredLocationChips({
   }
 
   return (
-    <Flex gap={4} style={{ padding: 4,}}>
+    <Flex gap={4} style={{ padding: 4, flexShrink: 0 }}>
       <Flex align="center" gap={4}>
         {/* <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium }}>
           See on Map
         </Typography.Text> */}
       </Flex>
-      <Flex wrap="wrap" gap={6} style={{ marginTop: 4, marginBottom: 4 }}>
+      <Flex gap={6} style={{ marginTop: 4, marginBottom: 4, flexWrap: "nowrap" }}>
         {visibleItems.map((item) => {
           const label =
             item.name ||
@@ -85,11 +85,15 @@ export default function ReferredLocationChips({
           const clickable = !!item.id;
           return (
             <Flex
+              key={item.key}
               align="center"
               gap={4}
               style={{
                 padding: "2px 10px",
                 borderRadius: 12,
+                width: "auto",
+                flexShrink: 0,
+                whiteSpace: "nowrap",
                 backgroundColor: isSelected
                   ? COLORS.primaryColor
                   : COLORS.bgColorLightBlue,
@@ -105,17 +109,17 @@ export default function ReferredLocationChips({
                 size={14}
                 color={isSelected ? "white": COLORS.textColorDark}
               ></DynamicReactIcon>
-              <Flex
-                key={item.key}
+              <Typography.Text
                 onClick={clickable ? () => onToggle(item) : undefined}
                 style={{
                   cursor: clickable ? "pointer" : "default",
                   opacity: clickable ? 1 : 0.7,
                   fontSize: FONT_SIZE.PARA,
+                  whiteSpace: "nowrap",
                 }}
               >
                 {capitalize(label || "")}
-              </Flex>
+              </Typography.Text>
             </Flex>
           );
         })}

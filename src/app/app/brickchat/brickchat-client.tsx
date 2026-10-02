@@ -1369,10 +1369,22 @@ export function BrickChatCore({
                       {messageItem.answer.summary}
                     </Markdown>
                     {renderImages(messageItem.answer.images)}
-                    <Flex align="center" style={{marginBottom: 8}}>
+                    <Flex vertical>
+                      <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text>
+                    <Flex
+                      align="center"
+                      gap={8}
+                      style={{
+                        marginBottom: 8,
+                        width: "100%",
+                        overflowX: "scroll",
+                        flexWrap: "nowrap",
+                        scrollbarWidth: "none"
+                      }}
+                    >
                       {messageItem.answer.projectsList &&
                       !!messageItem.answer.projectsList.length ? (
-                        <Flex justify="flex-end">
+                        <Flex justify="flex-end" style={{ flexShrink: 0 }}>
                           <Button
                             size="small"
                             icon={
@@ -1415,17 +1427,17 @@ export function BrickChatCore({
                               fontSize: FONT_SIZE.PARA,
                               height: 24,
                               borderRadius: 16,
-                              border: `0.5px solid ${
+                              border: `1px solid ${
                                 !focusedReferredLocation &&
                                 mapResultsIndex === index
                                   ? COLORS.primaryColor
-                                  : COLORS.textColorDark
+                                  : COLORS.borderColorMedium
                               }`,
                               backgroundColor:
                                 !focusedReferredLocation &&
                                 mapResultsIndex === index
                                   ? COLORS.primaryColor
-                                  : "white",
+                                  : COLORS.bgColorLightBlue,
                               color:
                                 !focusedReferredLocation &&
                                 mapResultsIndex === index
@@ -1449,6 +1461,7 @@ export function BrickChatCore({
                           />
                         ) : null;
                       })()}
+                    </Flex>
                     </Flex>
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
