@@ -23,7 +23,6 @@ export default function PinnedProjectResults({
   description,
   hasChatStarted,
   onLocateProject,
-  isShownOnMap,
   onSelectProject,
 }: PinnedProjectResultsProps) {
   if (!results?.length) {
@@ -77,7 +76,6 @@ export default function PinnedProjectResults({
       <BrickChatResults
         results={results}
         onLocateProject={onLocateProject}
-        isShownOnMap={isShownOnMap}
         onSelectProject={onSelectProject}
       />
     </Flex>

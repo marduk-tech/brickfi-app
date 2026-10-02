@@ -1299,7 +1299,6 @@ export function BrickChatCore({
               description={defaultProjectsDescription}
               hasChatStarted={!!chatHistory.length}
               onLocateProject={handleLocateProject}
-              isShownOnMap={mapResultsIndex === undefined}
               onSelectProject={handleSelectProject}
             />
           ) : null}
