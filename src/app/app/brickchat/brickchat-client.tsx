@@ -1034,7 +1034,7 @@ export function BrickChatCore({
           margin: "0 auto",
           position: "relative",
           paddingBottom: 100,
-          width: isMobile ? "100%" : "50%",
+          width: isMobile ? "100%" : "57%",
           height: "100%",
         }}
       >
@@ -1370,7 +1370,7 @@ export function BrickChatCore({
                     </Markdown>
                     {renderImages(messageItem.answer.images)}
                     <Flex vertical>
-                      <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text>
+                      {/* <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text> */}
                     <Flex
                       align="center"
                       gap={8}
@@ -1548,8 +1548,8 @@ export function BrickChatCore({
       {!isMobile && (
         <Flex
           style={{
-            width: "47%",
-            minWidth: "47%",
+            width: "40%",
+            minWidth: "37%",
             padding: "0 1.5%",
             flexShrink: 0,
             isolation: "isolate",

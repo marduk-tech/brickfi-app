@@ -171,21 +171,22 @@ export default function BrickChatResults({
     <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
       {[...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0)).map((project) => (
-       <Flex style={{width: 200}}>
+       <Flex style={{width: 225}}>
           <Card
             hoverable
             style={{
-              width: 200,
+              width: 225,
               borderRadius: 12,
               display: "block",
               overflow: "hidden",
-              border: `1px solid ${COLORS.borderColor}`,
+              margin: "8px 0",
+              border: `1px solid ${COLORS.borderColorMedium}`,
             }}
             styles={{ body: { padding: 0 } }}
             cover={
               <div
                 style={{
-                  height: 105,
+                  height: 125,
                   width: "100%",
                   backgroundColor: COLORS.bgColor,
                   position: "relative",
@@ -226,7 +227,7 @@ export default function BrickChatResults({
               <Typography.Text
                 strong
                 style={{
-                  fontSize: FONT_SIZE.HEADING_4,
+                  fontSize: FONT_SIZE.HEADING_3,
                   color: COLORS.textColorDark,
                 }}
                 ellipsis={{ tooltip: project.projectName }}
@@ -348,7 +349,7 @@ export default function BrickChatResults({
                     />
                   </Flex>
                 )} */}
-                {/* {onSelectProject && (
+                {onSelectProject && (
                   <Flex
                     id="project-details"
                     align="center"
@@ -360,26 +361,29 @@ export default function BrickChatResults({
                       onSelectProject(project);
                     }}
                     style={{
-                      width: 24,
                       height: 24,
+                      marginLeft: "auto",
                       flexShrink: 0,
-                      borderRadius: "50%",
-                      backgroundColor: project.projectStatus === "report-verified" ? COLORS.primaryColor : "rgba(255, 255, 255, 0.9)",
+                      padding: "2px 4px",
+                      borderRadius: 4,
+                      backgroundColor:COLORS.primaryColor ,
                       boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
                       cursor: "pointer",
+                      color: "white"
                     }}
                   >
-                    <DynamicReactIcon
+                    {/* <DynamicReactIcon
                       iconName={project.projectStatus === "report-verified" ? "TbView360Number": "BiDetail"}
                       iconSet={project.projectStatus === "report-verified" ? "tb": "bi"}
                       size={18}
                       color={project.projectStatus === "report-verified" ? "white": COLORS.primaryColor}
-                    />
+                    /> */}
+                    360 Details
                   </Flex>
-                )} */}
+                )}
               </Flex>
               </Flex>
-              {onSelectProject && (
+              {/* {onSelectProject && (
                   <Flex
                     id="project-details"
                     align="center"
@@ -398,7 +402,7 @@ export default function BrickChatResults({
                   >
                    <Typography.Text style={{color: "white"}}>View 360 Analysis</Typography.Text>
                   </Flex>
-                )}
+                )} */}
             </Flex>
           </Card>
           </Flex>
