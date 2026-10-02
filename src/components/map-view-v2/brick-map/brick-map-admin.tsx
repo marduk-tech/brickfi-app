@@ -257,9 +257,9 @@ export function BrickMapAdmin() {
               projects={projectMarkers}
               projectId={selectedProjectId || undefined}
               fullSize={false}
-              showLocalities={true}
-              showCorridors={false}
-              showMicroPockets={true}
+              showLocalities="all"
+              showCorridors={[]}
+              showMicroPockets="all"
             />
           </>
         </Flex>

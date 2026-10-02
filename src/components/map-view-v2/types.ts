@@ -8,6 +8,9 @@ export interface ProjectMarkerInput {
   modalContent: MapModalContent;
 }
 
+/** A layer-visibility prop's value: a specific list of ids to show, "all" to show every record, or omitted/undefined to show none. */
+export type IdsOrAll = string[] | "all";
+
 export type GeoJSONCoordinate = [number, number];
 export type GeoJSONLineString = GeoJSONCoordinate[];
 export type GeoJSONMultiLineString = GeoJSONLineString[];

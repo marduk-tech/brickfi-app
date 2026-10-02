@@ -326,8 +326,6 @@ export function BrickMapCustomer({
               }))}
               projects={projectMarkers}
               fullSize={false}
-              showLocalities={false}
-              showCorridors={true}
               minMapZoom={11}
               categories={Object.keys(DRIVER_CATEGORIES).filter(
                 (k) =>

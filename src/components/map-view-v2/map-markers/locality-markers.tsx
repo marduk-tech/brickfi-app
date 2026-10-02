@@ -45,7 +45,7 @@ export const LocalityMarkers = ({
                       title: locality.name,
                       content: "",
                       tags: [
-                        { label: "Growth corridor", color: COLORS.textColorDark },
+                        { label: "Locality", color: COLORS.textColorDark },
                       ],
                     },
                     { lat: locality.location.lat, lng: locality.location.lng },

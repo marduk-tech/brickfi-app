@@ -1,8 +1,8 @@
 import { Locality } from "../../types/Locality";
 import { axiosApiInstance } from "../axios-api-Instance";
 
-export const getAllLocalities = async () => {
-  const endpoint = `/locality`;
+export const getAllLocalities = async (ids?: string[]) => {
+  const endpoint = ids?.length ? `/locality?ids=${ids.join(",")}` : `/locality`;
   return axiosApiInstance.get(endpoint).then((response) => {
     return response.data as Locality[];
   });

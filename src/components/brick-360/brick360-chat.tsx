@@ -745,7 +745,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
                     <MapViewV2
                       lvnzyProjectId={lvnzyProject?._id || ""}
                       projectId={lvnzyProject?.originalProjectId?._id}
-                      corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
+                      showCorridors={lvnzyProject?.originalProjectId?.info.corridors.map(
                         (c: any) => c.corridorId,
                       )}
                       hideAllFilters={false}
@@ -1061,7 +1061,7 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
               projectId={lvnzyProject?.originalProjectId?._id}
               lvnzyProjectId={lvnzyProject?._id || ""}
               hideAllFilters={false}
-              corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map(
+              showCorridors={lvnzyProject?.originalProjectId?.info.corridors.map(
                 (c: any) => c.corridorId,
               )}
               surroundingElements={surroundingElements}

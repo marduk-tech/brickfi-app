@@ -1,8 +1,8 @@
 import { Corridor } from "../../types/Corridor";
 import { axiosApiInstance } from "../axios-api-Instance";
 
-export const getAllCorridors = async () => {
-  const endpoint = `/corridors`;
+export const getAllCorridors = async (ids?: string[]) => {
+  const endpoint = ids?.length ? `/corridors?ids=${ids.join(",")}` : `/corridors`;
   return axiosApiInstance.get(endpoint).then((response) => {
     return response.data as Corridor[];
   });

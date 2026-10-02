@@ -10,11 +10,15 @@ import {
 import { queryKeys } from "../libs/constants";
 import { queryClient } from "../libs/query-client";
 import { Corridor } from "../types/Corridor";
+import { IdsOrAll } from "../components/map-view-v2/types";
 
-export function useFetchCorridors() {
+/** `show`: "all" (the default - matches the old always-fetch-everything behavior for callers that don't care, e.g. find-projects-client's corridor filter list) fetches every corridor, a list of ids fetches just those, an empty array fetches nothing. */
+export function useFetchCorridors(show: IdsOrAll = "all") {
+  const ids = Array.isArray(show) ? show : undefined;
   return useQuery({
-    queryKey: [queryKeys.getAllCorridors],
-    queryFn: () => getAllCorridors(),
+    queryKey: [queryKeys.getAllCorridors, show === "all" ? "all" : ids],
+    queryFn: () => getAllCorridors(ids),
+    enabled: show === "all" || !!ids?.length,
     refetchOnWindowFocus: false,
   });
 }

@@ -43,12 +43,23 @@ interface BrickMapChatProps {
   pillarMapConfig?: PillarMapConfig | null;
   /**
    * Specific driver/infra records to plot on the map - e.g. a chat answer's
-   * brickfiDriverIds chip, clicked in brickchat-client, which already has
+   * referred-location chip, clicked in brickchat-client, which already has
    * these fetched (via useFetchAllLivindexPlaces) for the chip labels. Only
    * meaningful in the non-detailedProject view. No default "every driver"
    * fetch happens here - empty/undefined means no drivers are plotted.
    */
   focusedDrivers?: IDriverPlace[];
+  /**
+   * A chat answer's locality/corridor/micropocket-type referred-location
+   * chip, clicked in brickchat-client (see getReferredLocationItems/
+   * ReferredLocationChips there) - each narrows the map to just that one
+   * record via MapViewWrapper's showLocalities/showCorridors/showMicroPockets
+   * (ids, not booleans - see map-view-google.tsx). Only meaningful in the
+   * non-detailedProject view; empty/undefined shows none, same as today.
+   */
+  focusedLocalityIds?: string[];
+  focusedCorridorIds?: string[];
+  focusedMicroPocketIds?: string[];
 }
 
 export function BrickMapChat({
@@ -58,6 +69,9 @@ export function BrickMapChat({
   detailedProject,
   pillarMapConfig,
   focusedDrivers,
+  focusedLocalityIds,
+  focusedCorridorIds,
+  focusedMicroPocketIds,
 }: BrickMapChatProps) {
   // No default "every driver in Bangalore" fetch - the base search-results
   // map only ever shows drivers when a caller explicitly supplies them (e.g.
@@ -135,7 +149,7 @@ export function BrickMapChat({
           projectId={detailedProject.originalProjectId?._id}
           lvnzyProjectId={detailedProject._id}
           drivers={pillarMapConfig ? pillarMapConfig.drivers : detailDrivers}
-          corridorIds={detailCorridorIds}
+          showCorridors={detailCorridorIds}
           surroundingElements={
             pillarMapConfig
               ? pillarMapConfig.surroundingElements || []
@@ -143,7 +157,6 @@ export function BrickMapChat({
           }
           projectsNearby={pillarMapConfig?.projectsNearby}
           projectSqftPricing={pillarProjectSqftPricing}
-          showMicroPockets={false}
           categories={pillarMapConfig ? pillarMapConfig.categories : allDriverCategories}
         />
       ) : (
@@ -153,9 +166,9 @@ export function BrickMapChat({
           projects={projectMarkers}
           focusedProjectId={focusedProjectId}
           fullSize={false}
-          showLocalities={false}
-          showCorridors={false}
-          showMicroPockets={false}
+          showLocalities={focusedLocalityIds ?? []}
+          showCorridors={focusedCorridorIds ?? []}
+          showMicroPockets={focusedMicroPocketIds ?? []}
           hideAllFilters={hideAllFilters}
           minMapZoom={10}
           categories={Object.keys(DRIVER_CATEGORIES).filter(

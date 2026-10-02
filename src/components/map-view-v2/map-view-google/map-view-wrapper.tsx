@@ -5,7 +5,7 @@ import { Button, Card, Flex, Modal, Typography } from "antd";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { ISurroundingElement } from "../../../types/Project";
-import { ProjectMarkerInput } from "../types";
+import { IdsOrAll, ProjectMarkerInput } from "../types";
 import { MapViewGoogle } from "./map-view-google";
 import MapViewV2 from "../map-view-v2";
 import { useDevice } from "@/hooks/use-device";
@@ -51,15 +51,14 @@ interface MapViewWrapperProps {
     projectType?: string;
   }[];
   projectSqftPricing?: number;
-  showLocalities?: boolean;
+  showLocalities?: IdsOrAll;
   onMapReady?: (map: any) => void;
-  showCorridors?: boolean;
-  showMicroPockets?: boolean;
+  showCorridors?: IdsOrAll;
+  showMicroPockets?: IdsOrAll;
   minMapZoom?: number;
   initialZoom?: number;
   categories?: string[];
   hideAllFilters?: boolean;
-  corridorIds?: string[];
   highlightedHomeTypes?: string[];
   /** Kept for backwards-compatibility with existing callers — no longer used. */
   defaultMode?: string;

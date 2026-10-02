@@ -604,11 +604,9 @@ export default function FindProjectsClient() {
             <MapViewV2
               projects={mapProjects}
               fullSize={false}
-              showLocalities={false}
               hideAllFilters={true}
               minMapZoom={10}
-              showCorridors={selectedCorridors.length > 0}
-              corridorIds={selectedCorridorIds}
+              showCorridors={selectedCorridorIds ?? []}
               highlightedHomeTypes={selectedHomeType}
               onMapReady={handleMapReady}
             />

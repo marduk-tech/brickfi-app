@@ -50,6 +50,7 @@ export interface MapViewContextProps {
   children: ReactNode;
   drivers?: IDriverPlace[];
   categories?: string[];
+  hideAllFilters?: boolean;
   surroundingElements?: ISurroundingElement[];
   primaryProject?: any;
   projectsNearby?: Array<{
@@ -69,6 +70,7 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
   children,
   drivers,
   categories,
+  hideAllFilters,
   surroundingElements,
   primaryProject,
   projectsNearby,
@@ -87,7 +89,7 @@ export const MapViewContextProvider: React.FC<MapViewContextProps> = ({
 
   // Use custom hooks for icons and filters
   const icons = useMapIcons(drivers, primaryProject, projectsNearby, projectSqftPricing);
-  const filters = useMapFilters(drivers, categories, surroundingElements);
+  const filters = useMapFilters(drivers, categories, surroundingElements, hideAllFilters);
 
   // Modal actions
   const openModal = useCallback((content: MapModalContent, position?: MapModalGeoPosition) => {

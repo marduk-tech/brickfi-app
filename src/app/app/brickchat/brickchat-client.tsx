@@ -7,7 +7,10 @@ import { PillarMapConfig } from "@/components/brick-360/brick360-pillar";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
 import { useDevice } from "@/hooks/use-device";
-import { useFetchAllLivindexPlaces } from "@/hooks/use-livindex-places";
+import {
+  useFetchAllLivindexPlaces,
+  useFetchLvnzyProjectDrivers,
+} from "@/hooks/use-livindex-places";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
 import { apiKey, baseApiUrl } from "@/libs/constants";
@@ -30,13 +33,15 @@ import {
   message,
 } from "antd";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Brick360Inline } from "./brick360-inline";
 import { BrickMapChat } from "./brick-map-chat";
-import DriverChips from "./driver-chips";
+import ReferredLocationChips, {
+  ReferredLocationChipItem,
+} from "./referred-location-chips";
 import PinnedProjectResults from "./pinned-project-results";
 import styles from "./brick-chat-results.module.css";
 
@@ -74,6 +79,16 @@ interface ExploreImagesGroup {
   images: ExploreImageItem[];
 }
 
+interface ResolvedLocation {
+  name: string;
+  /** locality/corridor/micropocket/driver id - empty for a direct-maps-geocoded landmark with no catalog/driver match. */
+  id: string;
+  lat: number;
+  lng: number;
+  /** empty for a direct-maps-geocoded landmark - see summarizeResolvedLocation in shared.js. */
+  type: "driver" | "locality" | "corridor" | "micropocket" | "";
+}
+
 interface ExploreAnswer {
   projectsList: ProjectResult[];
   summary: string;
@@ -82,6 +97,10 @@ interface ExploreAnswer {
   images?: ExploreImagesGroup[];
   /** brickfiId(s) of driver/infra records (schools, transit, tech parks etc) the answer discussed - see synthesize.js. */
   brickfiDriverIds?: string[];
+  /** LLM-suggested next step/question for this turn, e.g. "Want me to compare these?" - see synthesize.js. Empty when there's no sensible follow-up. */
+  followupPrompt?: string;
+  /** Named place(s)/area(s) resolved this turn (project-distance.js's targetPlaces, location-analysis.js's locationNames) - see summarizeResolvedLocation in shared.js. */
+  resolvedLocations?: ResolvedLocation[];
 }
 
 interface ChatMessage {
@@ -96,6 +115,39 @@ const SAMPLE_PROMPTS = [
   "Find me a plot at less than 6000 per sq.ft in North Bangalore",
   "4BHK apartment above 2500 sq.ft with lake facing units",
 ];
+
+// Combines a chat answer's brickfiDriverIds (raw LivIndexPlace ids, no label
+// of their own - resolved via useFetchAllLivindexPlaces inside
+// ReferredLocationChips) with its resolvedLocations (driver/locality/
+// corridor/micropocket/landmark hits, already labeled - see
+// summarizeResolvedLocation in shared.js) into one deduped chip list.
+// resolvedLocations takes priority on a shared id (e.g. "distance to Sampige
+// Line" both names the driver in the answer AND resolves it as a
+// targetPlace) since it already carries a name for free, no fetch needed.
+const getReferredLocationItems = (
+  answer: ExploreAnswer,
+): ReferredLocationChipItem[] => {
+  const items: ReferredLocationChipItem[] = [];
+  const seenKeys = new Set<string>();
+
+  (answer.resolvedLocations || []).forEach((loc) => {
+    const key = loc.id
+      ? `${loc.type || "landmark"}:${loc.id}`
+      : `landmark:${loc.name}:${loc.lat}:${loc.lng}`;
+    if (seenKeys.has(key)) return;
+    seenKeys.add(key);
+    items.push({ key, id: loc.id, type: loc.type, name: loc.name });
+  });
+
+  (answer.brickfiDriverIds || []).forEach((id) => {
+    const key = `driver:${id}`;
+    if (seenKeys.has(key)) return;
+    seenKeys.add(key);
+    items.push({ key, id, type: "driver" });
+  });
+
+  return items;
+};
 
 const formatThreadDate = (value: string) =>
   new Date(value).toLocaleString("en-IN", {
@@ -243,32 +295,87 @@ export function BrickChatCore({
   const [mapResultsIndex, setMapResultsIndex] = useState<number | undefined>();
   const [focusedProjectId, setFocusedProjectId] = useState<string | null>(null);
 
-  const handleLocateProject = (projectId: string) => {
-    if (isMobile) setShowMobileMap(true);
-    setTimeout(() => {
-          setFocusedProjectId(projectId);
+  // Once projectsList is populated, fetch the deduped neighborhood/
+  // connectivity drivers across all of them in one batched call, so the map
+  // can plot everything relevant to the current results (tech parks, metro
+  // stations, etc) without waiting on a brickfiDriverIds chip click.
+  const resultsLvnzyProjectIds = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (projectResults || [])
+            .map((p) => p.lvnzyProjectId)
+            .filter((id): id is string => !!id),
+        ),
+      ),
+    [projectResults],
+  );
+  const { data: projectResultsDrivers } = useFetchLvnzyProjectDrivers(
+    resultsLvnzyProjectIds,
+  );
 
-    }, isMobile ? 300: 10);
+  const handleLocateProject = (projectId: string) => {
+    setFocusedReferredLocation(null);
+    if (isMobile) setShowMobileMap(true);
+    setTimeout(
+      () => {
+        setFocusedProjectId(projectId);
+      },
+      isMobile ? 300 : 10,
+    );
   };
 
-  // A chat answer's brickfiDriverIds chip, clicked (see DriverChips) - plots
-  // just that one driver on the map (BrickMapChat has no default "every
-  // driver" fetch of its own). Single-select: clicking the already-selected
-  // chip again clears it back to showing none.
-  const [focusedDriverIds, setFocusedDriverIds] = useState<string[] | null>(
-    null,
-  );
+  // A chat answer's referred-location chip, clicked (see
+  // ReferredLocationChips/getReferredLocationItems) - narrows the map to
+  // just that one record (driver, or a locality/corridor/micropocket, or a
+  // no-op for a landmark with no id - see ReferredLocationChips's
+  // `clickable` check). Single-select: clicking the already-selected chip
+  // again clears it back to the default view.
+  const [focusedReferredLocation, setFocusedReferredLocation] =
+    useState<ReferredLocationChipItem | null>(null);
+  const handleToggleReferredLocation = (item: ReferredLocationChipItem) => {
+    setFocusedReferredLocation((prev) => {
+      const next = prev?.key === item.key ? null : item;
+      if (isMobile) setShowMobileMap(!!next);
+      return next;
+    });
+  };
+
+  const focusedDriverIds =
+    focusedReferredLocation?.type === "driver"
+      ? [focusedReferredLocation.id]
+      : null;
   const { data: focusedDrivers } = useFetchAllLivindexPlaces(
     focusedDriverIds || undefined,
     undefined,
     !!focusedDriverIds?.length,
   );
-  const handleToggleDriverFocus = (driverId: string) => {
-    if (isMobile) setShowMobileMap(true);
-    setFocusedDriverIds((prev) =>
-      prev?.length === 1 && prev[0] === driverId ? null : [driverId],
-    );
-  };
+  const focusedLocalityIds =
+    focusedReferredLocation?.type === "locality"
+      ? [focusedReferredLocation.id]
+      : [];
+  const focusedCorridorIds =
+    focusedReferredLocation?.type === "corridor"
+      ? [focusedReferredLocation.id]
+      : [];
+  const focusedMicroPocketIds =
+    focusedReferredLocation?.type === "micropocket"
+      ? [focusedReferredLocation.id]
+      : [];
+
+  // Default to the drivers relevant to the current results list; a driver
+  // chip click narrows the map down to just that one driver, and a
+  // locality/corridor/micropocket/landmark chip click clears drivers
+  // entirely instead (that layer plots its own thing via
+  // focusedLocalityIds/focusedCorridorIds/focusedMicroPocketIds below - no
+  // reason to also clutter the map with every result's drivers). Unselecting
+  // (clicking the same chip again, which clears focusedReferredLocation back
+  // to null) falls back to the full results-driven set again.
+  const mapDisplayDrivers = !focusedReferredLocation
+    ? projectResultsDrivers
+    : focusedReferredLocation.type === "driver"
+      ? focusedDrivers
+      : undefined;
 
   // Set by the "project-details" button on a project card (see
   // brick-chat-results.tsx) - swaps the chat panel for Brick360Inline and
@@ -277,13 +384,11 @@ export function BrickChatCore({
   const [selectedProject, setSelectedProject] = useState<ProjectResult | null>(
     null,
   );
-  const {
-    data: selectedLvnzyProject,
-    isLoading: selectedLvnzyProjectLoading,
-  } = useFetchLvnzyProjectBySlug(
-    selectedProject?.projectSlug || "",
-    !!selectedProject?.projectSlug,
-  );
+  const { data: selectedLvnzyProject, isLoading: selectedLvnzyProjectLoading } =
+    useFetchLvnzyProjectBySlug(
+      selectedProject?.projectSlug || "",
+      !!selectedProject?.projectSlug,
+    );
   const handleSelectProject = (project: ProjectResult) => {
     setSelectedProject(project);
     setPillarMapConfig(null);
@@ -293,9 +398,8 @@ export function BrickChatCore({
   // is expanded/collapsed - narrows the primary map to just that pillar's
   // relevant drivers/surroundings/nearby-pricing instead of the whole
   // project's connectivity. See brick-map-chat.tsx.
-  const [pillarMapConfig, setPillarMapConfig] = useState<PillarMapConfig | null>(
-    null,
-  );
+  const [pillarMapConfig, setPillarMapConfig] =
+    useState<PillarMapConfig | null>(null);
 
   // Keeps the conversation panel pinned to its latest content - new Q&A
   // pairs, in-flight streaming tokens, and the loader/Brick360Inline that
@@ -353,7 +457,12 @@ export function BrickChatCore({
   useEffect(() => {
     if (autoStartFiredRef.current) return;
     if (!autoStartQuestion || !user?._id) return;
-    if (selectedThreadId || activeThreadId || chatHistory.length || threadyHistoryLoading) {
+    if (
+      selectedThreadId ||
+      activeThreadId ||
+      chatHistory.length ||
+      threadyHistoryLoading
+    ) {
       return;
     }
 
@@ -896,7 +1005,13 @@ export function BrickChatCore({
   return (
     <Flex
       vertical={isMobile}
-      style={{ width: "100%", maxWidth: 2000, height: "calc(100vh - 50px)", padding: 8, overflowY: "scroll" }}
+      style={{
+        width: "100%",
+        maxWidth: 2000,
+        height: "calc(100vh - 50px)",
+        padding: 8,
+        overflowY: "scroll",
+      }}
     >
       <Flex
         vertical
@@ -905,24 +1020,74 @@ export function BrickChatCore({
           position: "relative",
           paddingBottom: 100,
           width: isMobile ? "100%" : "50%",
-          height: "100%"
+          height: "100%",
         }}
       >
-         {!showMobileMap ? <Form
-          form={form}
-          onFinish={handleSearch}
-          style={{
-            marginTop: 8,
-            position: "absolute",
-            bottom: 8,
-            width: "100%",
-            backgroundColor: "white",
-            zIndex: 1001,
-          }}
-        >
-          <Flex justify="flex-end" style={{ marginBottom: 2 }}>
-            {(activeThreadId || selectedThreadId) && (
-              <Tooltip title="Share chat">
+        {!showMobileMap ? (
+          <Form
+            form={form}
+            onFinish={handleSearch}
+            style={{
+              marginTop: 8,
+              position: "absolute",
+              bottom: 8,
+              width: "100%",
+              backgroundColor: "white",
+              zIndex: 1001,
+            }}
+          >
+            <Flex justify="flex-end" style={{ marginBottom: 2 }}>
+              {(activeThreadId || selectedThreadId) && (
+                <Tooltip title="Share chat">
+                  <Button
+                    type="text"
+                    style={{
+                      padding: "8px 0",
+                      height: "auto",
+                      width: 32,
+                      lineHeight: 1,
+                    }}
+                    icon={
+                      <DynamicReactIcon
+                        iconName="IoIosShareAlt"
+                        iconSet="io"
+                        color={COLORS.textColorMedium}
+                        size={18}
+                      />
+                    }
+                    onClick={handleShare}
+                  />
+                </Tooltip>
+              )}
+              {(activeThreadId || selectedThreadId) && (
+                <Tooltip title="View in LangSmith">
+                  <Button
+                    type="text"
+                    style={{
+                      padding: "8px 0",
+                      height: "auto",
+                      width: 32,
+                      lineHeight: 1,
+                    }}
+                    icon={
+                      <DynamicReactIcon
+                        iconName="LuUnlink"
+                        iconSet="lu"
+                        color={COLORS.textColorMedium}
+                        size={16}
+                      />
+                    }
+                    onClick={() => {
+                      const threadId = activeThreadId || selectedThreadId;
+                      window.open(
+                        `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
+                        "_blank",
+                      );
+                    }}
+                  />
+                </Tooltip>
+              )}
+              <Tooltip title="New chat">
                 <Button
                   type="text"
                   style={{
@@ -933,94 +1098,46 @@ export function BrickChatCore({
                   }}
                   icon={
                     <DynamicReactIcon
-                      iconName="IoIosShareAlt"
-                      iconSet="io"
-                      color={COLORS.textColorMedium}
-                      size={18}
-                    />
-                  }
-                  onClick={handleShare}
-                />
-              </Tooltip>
-            )}
-            {(activeThreadId || selectedThreadId) && (
-              <Tooltip title="View in LangSmith">
-                <Button
-                  type="text"
-                  style={{
-                    padding: "8px 0",
-                    height: "auto",
-                    width: 32,
-                    lineHeight: 1,
-                  }}
-                  icon={
-                    <DynamicReactIcon
-                      iconName="LuUnlink"
-                      iconSet="lu"
+                      iconName="RiChatAiFill"
+                      iconSet="ri"
                       color={COLORS.textColorMedium}
                       size={16}
                     />
                   }
                   onClick={() => {
-                    const threadId = activeThreadId || selectedThreadId;
-                    window.open(
-                      `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
-                      "_blank",
-                    );
+                    window.location.href = window.location.pathname;
                   }}
                 />
               </Tooltip>
-            )}
-            <Tooltip title="New chat">
-              <Button
-                type="text"
-                style={{
-                  padding: "8px 0",
-                  height: "auto",
-                  width: 32,
-                  lineHeight: 1,
-                }}
-                icon={
-                  <DynamicReactIcon
-                    iconName="RiChatAiFill"
-                    iconSet="ri"
-                    color={COLORS.textColorMedium}
-                    size={16}
+            </Flex>
+            <Form.Item name="question" style={{ marginBottom: 0 }}>
+              <Input
+                placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
+                size="large"
+                disabled={chatLoading || threadyHistoryLoading}
+                suffix={
+                  <Button
+                    type="text"
+                    htmlType="submit"
+                    icon={<BiSend size={20} />}
+                    disabled={chatLoading || threadyHistoryLoading}
+                    style={{ color: COLORS.primaryColor }}
                   />
                 }
-                onClick={() => {
-                  window.location.href = window.location.pathname;
+                style={{
+                  boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                  height: 50,
+                  backgroundColor: "white",
+                  border: "1px solid",
+                  borderColor: COLORS.borderColorMedium,
+                  borderRadius: 16,
+                  fontSize: FONT_SIZE.HEADING_4,
                 }}
+                onPressEnter={() => form.submit()}
               />
-            </Tooltip>
-          </Flex>
-          <Form.Item name="question" style={{ marginBottom: 0 }}>
-            <Input
-              placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
-              size="large"
-              disabled={chatLoading || threadyHistoryLoading}
-              suffix={
-                <Button
-                  type="text"
-                  htmlType="submit"
-                  icon={<BiSend size={20} />}
-                  disabled={chatLoading || threadyHistoryLoading}
-                  style={{ color: COLORS.primaryColor }}
-                />
-              }
-              style={{
-                boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-                height: 50,
-                backgroundColor: "white",
-                border: "1px solid",
-                borderColor: COLORS.borderColorMedium,
-                borderRadius: 16,
-                fontSize: FONT_SIZE.HEADING_4,
-              }}
-              onPressEnter={() => form.submit()}
-            />
-          </Form.Item>
-        </Form> : null}
+            </Form.Item>
+          </Form>
+        ) : null}
         <Flex
           vertical
           gap={24}
@@ -1032,9 +1149,7 @@ export function BrickChatCore({
           }}
         >
           {showWelcome ? (
-            <Flex
-              vertical
-            >
+            <Flex vertical>
               <Flex vertical>
                 <Typography.Text
                   style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
@@ -1234,30 +1349,20 @@ export function BrickChatCore({
                     {messageItem.answer.summary}
                   </Markdown>
                   {renderImages(messageItem.answer.images)}
-                  {messageItem.answer.brickfiDriverIds?.length ? (
-                    <DriverChips
-                      driverIds={messageItem.answer.brickfiDriverIds}
-                      selectedDriverId={focusedDriverIds?.[0] ?? null}
-                      onToggle={handleToggleDriverFocus}
-                    />
-                  ) : null}
+                  {(() => {
+                    const referredLocationItems = getReferredLocationItems(
+                      messageItem.answer,
+                    );
+                    return referredLocationItems.length ? (
+                      <ReferredLocationChips
+                        items={referredLocationItems}
+                        selectedKey={focusedReferredLocation?.key ?? null}
+                        onToggle={handleToggleReferredLocation}
+                      />
+                    ) : null;
+                  })()}
                   {!messageItem.answer.directAnswer ? (
-                    <Flex
-                      vertical
-                      gap={8}
-                      style={{
-                        borderRadius: 8,
-                        padding: mapResultsIndex === index ? "8px 16px" : 0,
-                        backgroundColor:
-                          mapResultsIndex === index
-                            ? COLORS.bgColorLightBlue
-                            : undefined,
-                        transition: "background-color 0.2s",
-                        border: `${
-                          mapResultsIndex === index ? "0.5px" : "0"
-                        } solid ${COLORS.borderColor}`,
-                      }}
-                    >
+                    <Flex vertical gap={8} style={{}}>
                       {messageItem.answer.projectsList &&
                       !!messageItem.answer.projectsList.length ? (
                         <Flex justify="flex-end">
@@ -1269,9 +1374,9 @@ export function BrickChatCore({
                                 iconSet="fa"
                                 size={16}
                                 color={
-                                  mapResultsIndex === index
+                                  !focusedReferredLocation && mapResultsIndex === index
                                     ? "white"
-                                    : COLORS.primaryColor
+                                    : COLORS.textColorDark
                                 }
                               ></DynamicReactIcon>
                             }
@@ -1279,16 +1384,26 @@ export function BrickChatCore({
                               mapResultsIndex === index ? "primary" : "default"
                             }
                             onClick={() => {
+                              setFocusedReferredLocation(null);
+                              if (isMobile) setShowMobileMap(true);
                               if (mapResultsIndex !== index) {
                                 setMapResultsIndex(index);
                                 setProjectResults(
                                   messageItem.answer.projectsList,
                                 );
-                                    if (isMobile) setShowMobileMap(true);
-
                               }
                             }}
-                            style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
+                            style={{
+                              fontSize: FONT_SIZE.PARA,
+                              height: 24,
+                              border: `0.5px solid ${ !focusedReferredLocation && mapResultsIndex === index
+                                  ? COLORS.primaryColor
+                                  : COLORS.textColorDark}`,
+                              backgroundColor:
+                                !focusedReferredLocation && mapResultsIndex === index
+                                  ? COLORS.primaryColor
+                                  : "white",
+                            }}
                           >
                             {mapResultsIndex === index ? "" : "See on Map"}
                           </Button>
@@ -1320,6 +1435,17 @@ export function BrickChatCore({
                           </Flex>
                         )}
                     </Flex>
+                  ) : null}
+                  {messageItem.answer.followupPrompt ? (
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.HEADING_3,
+                        marginTop: 32,
+                        fontWeight: 500
+                      }}
+                    >
+                      {messageItem.answer.followupPrompt}
+                    </Typography.Text>
                   ) : null}
                 </Flex>
               </Flex>
@@ -1356,6 +1482,7 @@ export function BrickChatCore({
                 onMapConfigChange={setPillarMapConfig}
               />
             ) : null}
+            
             <div ref={scrollBottomRef} />
           </Flex>
         </Flex>
@@ -1374,10 +1501,15 @@ export function BrickChatCore({
           <BrickMapChat
             projects={projectResults || []}
             focusedProjectId={focusedProjectId}
-            hideAllFilters={true}
+            hideAllFilters={!!focusedReferredLocation}
             detailedProject={selectedProject ? selectedLvnzyProject : undefined}
             pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
-            focusedDrivers={selectedProject ? undefined : focusedDrivers}
+            focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
+            focusedLocalityIds={selectedProject ? undefined : focusedLocalityIds}
+            focusedCorridorIds={selectedProject ? undefined : focusedCorridorIds}
+            focusedMicroPocketIds={
+              selectedProject ? undefined : focusedMicroPocketIds
+            }
           />
         </Flex>
       )}
@@ -1387,7 +1519,13 @@ export function BrickChatCore({
           <Flex
             justify="center"
             align="center"
-            onClick={() => setShowMobileMap((v) => !v)}
+            onClick={() => {
+              setShowMobileMap((prev) => {
+                const next = !prev;
+                if (next) setFocusedReferredLocation(null);
+                return next;
+              });
+            }}
             style={{
               position: "fixed",
               top: "50%",
@@ -1396,7 +1534,7 @@ export function BrickChatCore({
               width: 48,
               height: 48,
               backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
-              border: `1px solid ${showMobileMap ? COLORS.primaryColor: COLORS.textColorMedium}`,
+              border: `1px solid ${showMobileMap ? COLORS.primaryColor : COLORS.textColorMedium}`,
               borderRight: showMobileMap ? undefined : "none",
               borderTopLeftRadius: 12,
               borderBottomLeftRadius: 12,
@@ -1416,7 +1554,12 @@ export function BrickChatCore({
                 boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
               }}
             /> */}
-            <DynamicReactIcon color={showMobileMap ? "white": COLORS.textColorDark} iconName="FaMapLocationDot" iconSet="fa6" size={28}></DynamicReactIcon>
+            <DynamicReactIcon
+              color={showMobileMap ? "white" : COLORS.textColorDark}
+              iconName="FaMapLocationDot"
+              iconSet="fa6"
+              size={28}
+            ></DynamicReactIcon>
           </Flex>
 
           <Drawer
@@ -1440,14 +1583,28 @@ export function BrickChatCore({
               },
             }}
           >
-            <Flex vertical style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+            <Flex
+              vertical
+              style={{ position: "absolute", inset: 0, zIndex: 0 }}
+            >
               <BrickMapChat
                 projects={projectResults || []}
                 focusedProjectId={focusedProjectId}
-                hideAllFilters={!showMobileMap}
-                detailedProject={selectedProject ? selectedLvnzyProject : undefined}
+                hideAllFilters={!showMobileMap || !!focusedReferredLocation}
+                detailedProject={
+                  selectedProject ? selectedLvnzyProject : undefined
+                }
                 pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
-                focusedDrivers={selectedProject ? undefined : focusedDrivers}
+                focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
+                focusedLocalityIds={
+                  selectedProject ? undefined : focusedLocalityIds
+                }
+                focusedCorridorIds={
+                  selectedProject ? undefined : focusedCorridorIds
+                }
+                focusedMicroPocketIds={
+                  selectedProject ? undefined : focusedMicroPocketIds
+                }
               />
             </Flex>
           </Drawer>

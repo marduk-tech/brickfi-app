@@ -29,6 +29,7 @@ export const useMapFilters = (
   drivers?: IDriverPlace[],
   categories?: string[],
   surroundingElements?: ISurroundingElement[],
+  hideAllFilters?: boolean,
 ): UseMapFiltersReturn => {
   // Core filter states
   const [selectedDriverFilter, setSelectedDriverFilter] = useState<string>();
@@ -42,7 +43,15 @@ export const useMapFilters = (
 
   // Computed states
   const showCategorySelection = Boolean(categories && categories.length > 1);
-  const noCategoriesProvided = Boolean(!categories || categories.length === 0);
+  // Every driver-layer renderer (micro-market/transit/road/simple/polygon
+  // drivers, in both the Street and Google map variants) uses this flag to
+  // decide whether to gate markers by category membership at all, separately
+  // from isDriverMatchingFilter above - with the filter UI hidden there's no
+  // way to pick a different category, so treat it the same as "no categories
+  // provided" and let every supplied driver through.
+  const noCategoriesProvided = Boolean(
+    hideAllFilters || !categories || categories.length === 0,
+  );
   const hasCategories = Boolean(categories && categories.length > 0);
   const showDriverFilters = driverFilters.length > 1;
 
@@ -56,6 +65,12 @@ export const useMapFilters = (
   // Driver matching logic
   const isDriverMatchingFilter = useCallback(
     (driver: IDriverPlace): boolean => {
+      // With the filter controls hidden there's no way for the user to pick
+      // a different category/driver-type, so the auto-selected default
+      // filter (see the effect below) would otherwise silently hide every
+      // driver outside it - e.g. a brickfiDriverIds chip or a results-driven
+      // driver set with no filter UI of its own.
+      if (hideAllFilters) return true;
       if (!selectedDriverFilter) return true;
 
       // check filters for the CURRENT category, not all categories
@@ -88,7 +103,7 @@ export const useMapFilters = (
       // Fallback to driver type matching
       return selectedDriverFilter === driver.driver;
     },
-    [selectedDriverFilter, hasCategories, selectedCategory],
+    [hideAllFilters, selectedDriverFilter, hasCategories, selectedCategory],
   );
 
   // Helper function to find valid filter that has matching drivers

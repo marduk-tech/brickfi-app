@@ -85,7 +85,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
             projectId={lvnzyProject?.originalProjectId._id}
             drivers={drivers}
             lvnzyProjectId={lvnzyProject._id}
-            corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
+            showCorridors={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
             surroundingElements={surroundingElements}
             categories={allCategories}
           />
@@ -131,7 +131,7 @@ export const MapTab = ({ lvnzyProject }: MapTabProps) => {
               projectId={lvnzyProject?.originalProjectId._id}
               drivers={drivers}
               lvnzyProjectId={lvnzyProject._id}
-              corridorIds={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
+              showCorridors={lvnzyProject?.originalProjectId?.info.corridors.map((c: any) => c.corridorId)}
               surroundingElements={surroundingElements}
               fullSize={true}
               categories={allCategories}

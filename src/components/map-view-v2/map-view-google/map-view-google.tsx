@@ -19,7 +19,7 @@ import {
   useMapFiltersContext,
   useMapModal,
 } from "../contexts/map-view-context";
-import { ProjectMarkerInput } from "../types";
+import { IdsOrAll, ProjectMarkerInput } from "../types";
 
 import { MapCenterer, MapFocusHandler, MapReady } from "./map-camera";
 import { CorridorMarkers } from "./markers/corridor-markers";
@@ -48,15 +48,17 @@ export interface MapViewGoogleProps {
     projectType?: string;
   }[];
   projectSqftPricing?: number;
-  showLocalities?: boolean;
+  /** "all" shows every locality, a list of ids shows just those, omitted shows none. */
+  showLocalities?: IdsOrAll;
   onMapReady?: (map: google.maps.Map) => void;
-  showCorridors?: boolean;
-  showMicroPockets?: boolean;
+  /** "all" (default) shows every corridor, a list of ids shows just those, an empty array shows none. */
+  showCorridors?: IdsOrAll;
+  /** "all" shows every micro-pocket, a list of ids shows just those, omitted/empty shows none. */
+  showMicroPockets?: IdsOrAll;
   minMapZoom?: number;
   initialZoom?: number;
   categories?: string[];
   hideAllFilters?: boolean;
-  corridorIds?: string[];
   highlightedHomeTypes?: string[];
   /** "roadmap" (default) or "hybrid" (satellite + labels) */
   mapTypeId?: "roadmap" | "hybrid";
@@ -103,14 +105,13 @@ function MapViewGoogleInner({
   projectSqftPricing,
   showLocalities,
   onMapReady,
-  showCorridors = true,
-  showMicroPockets = false,
+  showCorridors = "all",
+  showMicroPockets,
   minMapZoom,
   initialZoom,
   categories,
   hideAllFilters,
   mapTypeId = "roadmap",
-  corridorIds,
   highlightedHomeTypes,
   primaryProject,
 }: MapViewGoogleProps & { primaryProject?: any }) {
@@ -131,13 +132,13 @@ function MapViewGoogleInner({
     isDriverMatchingFilter,
   } = useMapFiltersContext();
 
-  const { data: corridors } = useFetchCorridors();
-  const { data: localities } = useFetchLocalities();
-  const { data: microPockets } = useFetchMicroPockets(showMicroPockets);
-
-  const filteredCorridors = corridorIds
-    ? corridors?.filter((c) => corridorIds.includes(c._id))
-    : corridors;
+  // normalize an omitted show* prop to [] (fetch nothing) rather than
+  // letting it fall through to each hook's own "all" default, which only
+  // exists for callers with no show* concept of their own (see
+  // useFetchCorridors in use-corridors.ts).
+  const { data: corridors } = useFetchCorridors(showCorridors ?? []);
+  const { data: localities } = useFetchLocalities(showLocalities ?? []);
+  const { data: microPockets } = useFetchMicroPockets(showMicroPockets ?? []);
 
   const showSurroundings =
     selectedCategory === "surroundings" ||
@@ -227,17 +228,17 @@ function MapViewGoogleInner({
             openModal={openModal}
           />
 
-          {showLocalities && localities && (
+          {localities?.length ? (
             <LocalityMarkers localities={localities} openModal={openModal} />
-          )}
+          ) : null}
 
-          {showCorridors && (
-            <CorridorMarkers corridors={filteredCorridors} openModal={openModal} />
-          )}
+          {corridors?.length ? (
+            <CorridorMarkers corridors={corridors} openModal={openModal} />
+          ) : null}
 
-          {showMicroPockets && (
+          {microPockets?.length ? (
             <MicroPocketMarkers microPockets={microPockets} openModal={openModal} />
-          )}
+          ) : null}
 
           {showSurroundings && (
             <SurroundingMarkers
@@ -319,6 +320,7 @@ export function MapViewGoogle(props: MapViewGoogleProps) {
       <MapViewContextProvider
         drivers={props.drivers}
         categories={props.categories}
+        hideAllFilters={props.hideAllFilters}
         surroundingElements={props.surroundingElements}
         primaryProject={primaryProject}
         projectsNearby={props.projectsNearby}

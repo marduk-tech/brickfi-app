@@ -30,3 +30,26 @@ export function useFetchAllLivindexPlaces(
     enabled,
   });
 }
+
+export const fetchLvnzyProjectDrivers = async (lvnzyProjectIds: string[]) => {
+  return axiosApiInstance
+    .post("/livindex-places/lvnzy-project-drivers", { lvnzyProjectIds })
+    .then((response) => {
+      return response.data as IDriverPlace[];
+    });
+};
+
+// Fetches the deduped neighborhood/connectivity drivers for whichever
+// lvnzyProjectIds are currently in a brickchat results list - one batched
+// call instead of one per project (see fetchLvnzyProjectDrivers controller).
+export function useFetchLvnzyProjectDrivers(
+  lvnzyProjectIds?: string[],
+  enabled: boolean = true
+) {
+  return useQuery<IDriverPlace[]>({
+    queryKey: [queryKeys.getLvnzyProjectDrivers, lvnzyProjectIds || []],
+    queryFn: () => fetchLvnzyProjectDrivers(lvnzyProjectIds || []),
+    refetchOnWindowFocus: false,
+    enabled: enabled && !!lvnzyProjectIds?.length,
+  });
+}

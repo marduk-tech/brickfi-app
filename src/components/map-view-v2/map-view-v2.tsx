@@ -60,7 +60,7 @@ import {
   MapInstanceCapture,
   MapResizeHandler,
 } from "./map-utils/map-handlers";
-import { ProjectMarkerInput } from "./types";
+import { IdsOrAll, ProjectMarkerInput } from "./types";
 import { processDriversToPolygons } from "./utils";
 import { RentalLocalityAnchor } from "@/types/Rental";
 import { RentalSurfaceLayer } from "./map-layers/rental-surface-layer";
@@ -97,15 +97,17 @@ interface MapViewV2Props {
     projectType?: string;
   }[];
   projectSqftPricing?: number;
-  showLocalities?: boolean;
+  /** "all" shows every locality, a list of ids shows just those, omitted shows none. */
+  showLocalities?: IdsOrAll;
   onMapReady?: (map: any) => void;
-  showCorridors?: boolean;
-  showMicroPockets?: boolean;
+  /** "all" (default) shows every corridor, a list of ids shows just those, an empty array shows none. */
+  showCorridors?: IdsOrAll;
+  /** "all" shows every micro-pocket, a list of ids shows just those, omitted/empty shows none. */
+  showMicroPockets?: IdsOrAll;
   minMapZoom?: number;
   initialZoom?: number;
   categories?: string[];
   hideAllFilters?: boolean;
-  corridorIds?: string[];
   highlightedHomeTypes?: string[];
   rentalLocalities?: RentalLocalityAnchor[];
 }
@@ -122,14 +124,13 @@ const MapViewV2Inner = ({
   projectSqftPricing,
   showLocalities,
   onMapReady,
-  showCorridors = true,
-  showMicroPockets = false,
+  showCorridors = "all",
+  showMicroPockets,
   minMapZoom,
   initialZoom,
   categories,
   hideAllFilters,
   primaryProject,
-  corridorIds,
   highlightedHomeTypes,
   rentalLocalities,
 }: MapViewV2Props & { primaryProject?: any }) => {
@@ -169,10 +170,13 @@ const MapViewV2Inner = ({
   } = useMapFiltersContext();
   const { mapStyle, setMapStyle } = useMapStyleContext();
 
-  // Keep only non-state related hooks
-  const { data: corridors } = useFetchCorridors();
-  const { data: microPockets } = useFetchMicroPockets(showMicroPockets);
-  const { data: localities } = useFetchLocalities();
+  // Keep only non-state related hooks - normalize an omitted show* prop to
+  // [] (fetch nothing) rather than letting it fall through to each hook's
+  // own "all" default, which only exists for callers with no show* concept
+  // of their own (see useFetchCorridors in use-corridors.ts).
+  const { data: corridors } = useFetchCorridors(showCorridors ?? []);
+  const { data: microPockets } = useFetchMicroPockets(showMicroPockets ?? []);
+  const { data: localities } = useFetchLocalities(showLocalities ?? []);
   const currentSelectedCategory = selectedCategory;
 
   // Primary project is now passed from the wrapper component via context
@@ -317,7 +321,7 @@ const MapViewV2Inner = ({
                   setModalContent={openModal}
                   setInfoModalOpen={() => {}}
                 />
-                {showLocalities && localities ? (
+                {localities?.length ? (
                   <LocalityMarkers
                     localities={localities}
                     setModalContent={openModal}
@@ -326,20 +330,20 @@ const MapViewV2Inner = ({
                 ) : null}
                 {/* {renderSurroundings()} */}
                 {/* corridor pills sit on top of the rental dots, so skip them there */}
-                {showCorridors && !showRentals && (
+                {!showRentals && corridors?.length ? (
                   <CorridorMarkers
-                    corridors={corridorIds ? corridors?.filter(c => corridorIds.includes(c._id)): corridors}
+                    corridors={corridors}
                     setModalContent={openModal}
                     setInfoModalOpen={() => {}}
                   />
-                )}
-                {showMicroPockets && (
+                ) : null}
+                {microPockets?.length ? (
                   <MicroPocketMarkers
                     microPockets={microPockets}
                     setModalContent={openModal}
                     setInfoModalOpen={() => {}}
                   />
-                )}
+                ) : null}
                 {currentSelectedCategory === "surroundings" ||
                 (!drivers?.length && !!surroundingElements?.length) ? (
                   <SurroundingMarkers
@@ -469,6 +473,7 @@ const MapViewV2 = (props: MapViewV2Props) => {
     <MapViewContextProvider
       drivers={props.drivers}
       categories={props.categories}
+      hideAllFilters={props.hideAllFilters}
       surroundingElements={props.surroundingElements}
       primaryProject={primaryProject}
       projectsNearby={props.projectsNearby}

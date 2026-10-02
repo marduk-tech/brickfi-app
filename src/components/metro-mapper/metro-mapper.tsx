@@ -336,9 +336,8 @@ export function MetroMapper() {
               duration: driver.distance ? Math.round(driver.distance / 60) : 0,
             }))}
             fullSize={true}
-            showLocalities={false}
             onMapReady={setMapInstance}
-            showCorridors={false}
+            showCorridors={[]}
             minMapZoom={10}
             lvnzyProjectId=""
           />
@@ -376,8 +375,7 @@ export function MetroMapper() {
               ...driver,
             }))}
             fullSize={true}
-            showLocalities={false}
-            showCorridors={false}
+            showCorridors={[]}
           />
         </Flex>
       </Modal>
