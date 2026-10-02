@@ -39,6 +39,7 @@ import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Brick360Inline } from "./brick360-inline";
 import { BrickMapChat } from "./brick-map-chat";
+import BrickchatFeedback from "./brickchat-feedback";
 import ReferredLocationChips, {
   ReferredLocationChipItem,
 } from "./referred-location-chips";
@@ -1074,6 +1075,10 @@ export function BrickChatCore({
                   />
                 </Tooltip>
               )}
+              <BrickchatFeedback
+                threadId={activeThreadId || selectedThreadId}
+                userId={user?._id}
+              />
               {(activeThreadId || selectedThreadId) && (
                 <Tooltip title="View in LangSmith">
                   <Button

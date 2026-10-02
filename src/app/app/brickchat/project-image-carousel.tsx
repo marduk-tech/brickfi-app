@@ -99,14 +99,14 @@ export default function ProjectImageCarousel({
               <div
                 key={index}
                 style={{
-                  width: 5,
-                  height: 5,
+                  width: 8,
+                  height: 8,
                   borderRadius: "50%",
                   backgroundColor:
                     index === currentIndex
                       ? "#fff"
                       : "rgba(255, 255, 255, 0.5)",
-                  boxShadow: "0 0 2px rgba(0, 0, 0, 0.4)",
+                      border: '0.5px solid rgba(0, 0, 0, 0.5)'
                 }}
               />
             ))}
