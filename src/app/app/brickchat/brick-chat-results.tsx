@@ -22,7 +22,6 @@ interface BrickChatResultsProps {
   results: ProjectResult[];
   onLocateProject?: (projectId: string) => void;
   /** Whether this results list is the one currently plotted on the map — controls locate-pin visibility. */
-  isShownOnMap?: boolean;
   /**
    * When provided, the "project-details" button sets this project as the
    * brickchat-client's inline selection instead of navigating to the
@@ -75,7 +74,6 @@ const getProjectMetadata = (project: ProjectResult): string => {
 export default function BrickChatResults({
   results,
   onLocateProject,
-  isShownOnMap,
   onSelectProject,
 }: BrickChatResultsProps) {
   const { user, refetch } = useUser();
@@ -277,7 +275,7 @@ export default function BrickChatResults({
                 </Typography.Paragraph>
               )}
               <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
-                 {isShownOnMap && project.projectLocation?.lat && project.projectLocation?.lng && (
+                 {project.projectLocation?.lat && project.projectLocation?.lng && (
                   <Flex
                     align="center"
                     justify="center"

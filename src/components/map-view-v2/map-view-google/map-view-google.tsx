@@ -21,7 +21,12 @@ import {
 } from "../contexts/map-view-context";
 import { IdsOrAll, ProjectMarkerInput } from "../types";
 
-import { MapCenterer, MapFocusHandler, MapReady } from "./map-camera";
+import {
+  ActiveFocusCenterer,
+  MapCenterer,
+  MapFocusHandler,
+  MapReady,
+} from "./map-camera";
 import { CorridorMarkers } from "./markers/corridor-markers";
 import { LocalityMarkers } from "./markers/locality-markers";
 import { MicroMarketDrivers } from "./markers/micro-market-drivers";
@@ -215,6 +220,12 @@ function MapViewGoogleInner({
             projects={projects}
             focusedProjectId={focusedProjectId}
             openModal={openModal}
+          />
+          <ActiveFocusCenterer
+            localities={localities}
+            corridors={corridors}
+            microPockets={microPockets}
+            drivers={drivers}
           />
           {onMapReady && <MapReady onMapReady={onMapReady} />}
 

@@ -55,6 +55,7 @@ import { MapStyleControls } from "./map-style-switcher/map-style-controls";
 import { MapStyleType } from "./map-style-switcher/map-style-dialog";
 import { BoundsAwareDrivers } from "./map-utils/bounds-aware-drivers";
 import {
+  ActiveFocusCenterer,
   MapCenterHandler,
   MapFocusHandler,
   MapInstanceCapture,
@@ -290,6 +291,12 @@ const MapViewV2Inner = ({
             projects={projects}
             focusedProjectId={focusedProjectId}
             openModal={openModal}
+          />
+          <ActiveFocusCenterer
+            localities={localities}
+            corridors={corridors}
+            microPockets={microPockets}
+            drivers={drivers}
           />
           {onMapReady && <MapInstanceCapture onMapReady={onMapReady} />}
           <TileLayer key={mapStyle} url={getTileUrl(mapStyle)} attribution="" />

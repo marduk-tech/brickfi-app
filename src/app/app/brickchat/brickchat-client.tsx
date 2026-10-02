@@ -314,8 +314,23 @@ export function BrickChatCore({
     resultsLvnzyProjectIds,
   );
 
-  const handleLocateProject = (projectId: string) => {
+  // historyIndex is the chatHistory index the clicked project card belongs
+  // to (undefined for the PinnedProjectResults/defaultProjectResults card,
+  // which isn't part of chatHistory) - activates that message's own results
+  // list as the active one on the map first (same reasoning as the "N
+  // Projects" button fix: a fresh projectResults array reference so
+  // MapCenterer's re-centering effect fires even when re-selecting an
+  // already-active list), so the focused project is guaranteed to actually
+  // be among what's currently plotted rather than possibly belonging to a
+  // list that isn't the one currently shown on the map.
+  const handleLocateProject = (projectId: string, historyIndex?: number) => {
     setFocusedReferredLocation(null);
+    setMapResultsIndex(historyIndex);
+    setProjectResults(
+      historyIndex !== undefined
+        ? [...(chatHistory[historyIndex]?.answer.projectsList || [])]
+        : [...(defaultProjectResults || [])],
+    );
     if (isMobile) setShowMobileMap(true);
     setTimeout(
       () => {
@@ -1305,64 +1320,57 @@ export function BrickChatCore({
                   ? null
                   : renderQuestion(messageItem.question)}
 
-                {messageItem.steps?.length ? (
-                  <ChatTimeline
-                    steps={messageItem.steps}
-                    running={false}
-                    totalMs={messageItem.durationMs}
-                  />
-                ) : null}
-
-                <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                  {!messageItem.answer.directAnswer &&
-                  !!messageItem.answer.projectsList.length ? (
-                    <Typography.Text
-                      style={{
-                        fontSize: FONT_SIZE.SUB_TEXT,
-                        color: COLORS.textColorLight,
-                      }}
-                    >
-                      Found {messageItem.answer.projectsList.length} matching
-                      project
-                      {messageItem.answer.projectsList.length !== 1 ? "s" : ""}
-                    </Typography.Text>
+                <Flex
+                  vertical
+                  style={{ borderBottom: `${index !== chatHistory.length-1 ? 1: 0}px solid ${COLORS.borderColor}`, paddingBottom: 24, marginBottom: 16 }}
+                >
+                  {messageItem.steps?.length ? (
+                    <ChatTimeline
+                      steps={messageItem.steps}
+                      running={false}
+                      totalMs={messageItem.durationMs}
+                    />
                   ) : null}
 
-                  <Markdown
-                    className="bkchat-summary"
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      p: ({ children }) => (
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.HEADING_3,
-                            fontWeight: 500,
-                            marginBottom: 16,
-                            display: "block",
-                          }}
-                        >
-                          {children}
-                        </Typography.Text>
-                      ),
-                    }}
-                  >
-                    {messageItem.answer.summary}
-                  </Markdown>
-                  {renderImages(messageItem.answer.images)}
-                  {(() => {
-                    const referredLocationItems = getReferredLocationItems(
-                      messageItem.answer,
-                    );
-                    return referredLocationItems.length ? (
-                      <ReferredLocationChips
-                        items={referredLocationItems}
-                        selectedKey={focusedReferredLocation?.key ?? null}
-                        onToggle={handleToggleReferredLocation}
-                      />
-                    ) : null;
-                  })()}
-                  {!messageItem.answer.directAnswer ? (
-                    <Flex vertical gap={8} style={{}}>
+                  <Flex vertical gap={4} style={{ marginTop: 8 }}>
+                    {!messageItem.answer.directAnswer &&
+                    !!messageItem.answer.projectsList.length ? (
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.SUB_TEXT,
+                          color: COLORS.textColorLight,
+                        }}
+                      >
+                        Found {messageItem.answer.projectsList.length} matching
+                        project
+                        {messageItem.answer.projectsList.length !== 1
+                          ? "s"
+                          : ""}
+                      </Typography.Text>
+                    ) : null}
+
+                    <Markdown
+                      className="bkchat-summary"
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        p: ({ children }) => (
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.HEADING_3,
+                              fontWeight: 500,
+                              marginBottom: 16,
+                              display: "block",
+                            }}
+                          >
+                            {children}
+                          </Typography.Text>
+                        ),
+                      }}
+                    >
+                      {messageItem.answer.summary}
+                    </Markdown>
+                    {renderImages(messageItem.answer.images)}
+                    <Flex align="center" style={{marginBottom: 8}}>
                       {messageItem.answer.projectsList &&
                       !!messageItem.answer.projectsList.length ? (
                         <Flex justify="flex-end">
@@ -1374,7 +1382,8 @@ export function BrickChatCore({
                                 iconSet="fa"
                                 size={16}
                                 color={
-                                  !focusedReferredLocation && mapResultsIndex === index
+                                  !focusedReferredLocation &&
+                                  mapResultsIndex === index
                                     ? "white"
                                     : COLORS.textColorDark
                                 }
@@ -1386,67 +1395,103 @@ export function BrickChatCore({
                             onClick={() => {
                               setFocusedReferredLocation(null);
                               if (isMobile) setShowMobileMap(true);
-                              if (mapResultsIndex !== index) {
-                                setMapResultsIndex(index);
-                                setProjectResults(
-                                  messageItem.answer.projectsList,
-                                );
-                              }
+                              setMapResultsIndex(index);
+                              // a fresh array reference even when re-selecting
+                              // the same list (e.g. after wandering off to a
+                              // driver/locality focus) - MapCenterer's
+                              // re-centering effect only re-fires when its
+                              // `projects` dependency actually changes
+                              // reference, and setProjectResults with the
+                              // exact same array object React already holds
+                              // is a no-op (React bails out of re-rendering
+                              // for an Object.is-identical value), so
+                              // re-clicking this button on an
+                              // already-selected list would otherwise never
+                              // reset the camera back to it.
+                              setProjectResults([
+                                ...messageItem.answer.projectsList,
+                              ]);
                             }}
                             style={{
                               fontSize: FONT_SIZE.PARA,
                               height: 24,
-                              border: `0.5px solid ${ !focusedReferredLocation && mapResultsIndex === index
+                              borderRadius: 16,
+                              border: `0.5px solid ${
+                                !focusedReferredLocation &&
+                                mapResultsIndex === index
                                   ? COLORS.primaryColor
-                                  : COLORS.textColorDark}`,
+                                  : COLORS.textColorDark
+                              }`,
                               backgroundColor:
-                                !focusedReferredLocation && mapResultsIndex === index
+                                !focusedReferredLocation &&
+                                mapResultsIndex === index
                                   ? COLORS.primaryColor
                                   : "white",
+                              color:
+                                !focusedReferredLocation &&
+                                mapResultsIndex === index
+                                  ? "white"
+                                  : COLORS.textColorDark,
                             }}
                           >
-                            {mapResultsIndex === index ? "" : "See on Map"}
+                            {messageItem.answer.projectsList.length} Projects
                           </Button>
                         </Flex>
                       ) : null}
-
-                      <BrickChatResults
-                        results={messageItem.answer.projectsList}
-                        onLocateProject={handleLocateProject}
-                        isShownOnMap={mapResultsIndex === index}
-                        onSelectProject={handleSelectProject}
-                      />
-                      {!chatLoading &&
-                        (messageItem.answer.nextSetCount ?? 0) > 0 &&
-                        index === chatHistory.length - 1 && (
-                          <Flex justify="flex-start">
-                            <Button
-                              size="small"
-                              style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
-                              onClick={() => {
-                                form.setFieldsValue({
-                                  question: "show me more",
-                                });
-                                form.submit();
-                              }}
-                            >
-                              Show me more
-                            </Button>
-                          </Flex>
-                        )}
+                      {(() => {
+                        const referredLocationItems = getReferredLocationItems(
+                          messageItem.answer,
+                        );
+                        return referredLocationItems.length ? (
+                          <ReferredLocationChips
+                            items={referredLocationItems}
+                            selectedKey={focusedReferredLocation?.key ?? null}
+                            onToggle={handleToggleReferredLocation}
+                          />
+                        ) : null;
+                      })()}
                     </Flex>
-                  ) : null}
-                  {messageItem.answer.followupPrompt ? (
-                    <Typography.Text
-                      style={{
-                        fontSize: FONT_SIZE.HEADING_3,
-                        marginTop: 32,
-                        fontWeight: 500
-                      }}
-                    >
-                      {messageItem.answer.followupPrompt}
-                    </Typography.Text>
-                  ) : null}
+                    {!messageItem.answer.directAnswer ? (
+                      <Flex vertical gap={8} style={{}}>
+                        <BrickChatResults
+                          results={messageItem.answer.projectsList}
+                          onLocateProject={(projectId) =>
+                            handleLocateProject(projectId, index)
+                          }
+                          onSelectProject={handleSelectProject}
+                        />
+                        {!chatLoading &&
+                          (messageItem.answer.nextSetCount ?? 0) > 0 &&
+                          index === chatHistory.length - 1 && (
+                            <Flex justify="flex-start">
+                              <Button
+                                size="small"
+                                style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
+                                onClick={() => {
+                                  form.setFieldsValue({
+                                    question: "show me more",
+                                  });
+                                  form.submit();
+                                }}
+                              >
+                                Show me more
+                              </Button>
+                            </Flex>
+                          )}
+                      </Flex>
+                    ) : null}
+                    {messageItem.answer.followupPrompt ? (
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.HEADING_3,
+                          marginTop: 32,
+                          fontWeight: 500,
+                        }}
+                      >
+                        {messageItem.answer.followupPrompt}
+                      </Typography.Text>
+                    ) : null}
+                  </Flex>
                 </Flex>
               </Flex>
             ))}
@@ -1482,7 +1527,7 @@ export function BrickChatCore({
                 onMapConfigChange={setPillarMapConfig}
               />
             ) : null}
-            
+
             <div ref={scrollBottomRef} />
           </Flex>
         </Flex>
@@ -1505,8 +1550,12 @@ export function BrickChatCore({
             detailedProject={selectedProject ? selectedLvnzyProject : undefined}
             pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
             focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
-            focusedLocalityIds={selectedProject ? undefined : focusedLocalityIds}
-            focusedCorridorIds={selectedProject ? undefined : focusedCorridorIds}
+            focusedLocalityIds={
+              selectedProject ? undefined : focusedLocalityIds
+            }
+            focusedCorridorIds={
+              selectedProject ? undefined : focusedCorridorIds
+            }
             focusedMicroPocketIds={
               selectedProject ? undefined : focusedMicroPocketIds
             }

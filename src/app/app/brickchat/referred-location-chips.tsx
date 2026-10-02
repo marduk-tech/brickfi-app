@@ -68,7 +68,7 @@ export default function ReferredLocationChips({
   }
 
   return (
-    <Flex gap={4} style={{ padding: 4, marginTop: 16 }}>
+    <Flex gap={4} style={{ padding: 4,}}>
       <Flex align="center" gap={4}>
         {/* <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium }}>
           See on Map
@@ -95,7 +95,7 @@ export default function ReferredLocationChips({
                   : COLORS.bgColorLightBlue,
                 color: isSelected ? "white" : COLORS.textColorDark,
                 border: `1px solid ${
-                  isSelected ? COLORS.primaryColor : COLORS.borderColorDark
+                  isSelected ? COLORS.primaryColor : COLORS.borderColorMedium
                 }`,
               }}
             >
@@ -111,7 +111,7 @@ export default function ReferredLocationChips({
                 style={{
                   cursor: clickable ? "pointer" : "default",
                   opacity: clickable ? 1 : 0.7,
-                  fontSize: FONT_SIZE.HEADING_4,
+                  fontSize: FONT_SIZE.PARA,
                 }}
               >
                 {capitalize(label || "")}
