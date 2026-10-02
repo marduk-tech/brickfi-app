@@ -10,7 +10,6 @@ interface PinnedProjectResultsProps {
   description?: string;
   hasChatStarted: boolean;
   onLocateProject?: (projectId: string) => void;
-  isShownOnMap?: boolean;
   onSelectProject?: (project: ProjectResult) => void;
 }
 
