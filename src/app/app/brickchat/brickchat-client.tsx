@@ -18,7 +18,6 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { ChatThread } from "@/types/User";
 import {
   Button,
-  Collapse,
   Drawer,
   Empty,
   Flex,
@@ -44,6 +43,7 @@ import ReferredLocationChips, {
   ReferredLocationChipItem,
 } from "./referred-location-chips";
 import PinnedProjectResults from "./pinned-project-results";
+import StaticQueries from "./static-queries";
 import styles from "./brick-chat-results.module.css";
 
 export interface ProjectResult {
@@ -111,11 +111,12 @@ interface ChatMessage {
   durationMs?: number;
 }
 
-const SAMPLE_PROMPTS = [
-  "Looking for a 3BHK above 1200 sq.ft near Electronic City",
-  "Find me a plot at less than 6000 per sq.ft in North Bangalore",
-  "4BHK apartment above 2500 sq.ft with lake facing units",
-];
+// Desktop width for the "Your recent chats" left drawer - on mobile it uses
+// the same 85%-of-viewport sizing as the right-side map drawer instead (see
+// getMobileMapDrawerWidth).
+const RECENT_CHATS_DRAWER_WIDTH = 320;
+
+
 
 // Combines a chat answer's brickfiDriverIds (raw LivIndexPlace ids, no label
 // of their own - resolved via useFetchAllLivindexPlaces inside
@@ -286,6 +287,7 @@ export function BrickChatCore({
   const [threadsLoading, setThreadsLoading] = useState(false);
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
+  const [recentChatsDrawerOpen, setRecentChatsDrawerOpen] = useState(false);
 
   const getMobileMapDrawerWidth = () =>
     typeof window !== "undefined" ? Math.round(window.innerWidth * 0.85) : 320;
@@ -1024,37 +1026,182 @@ export function BrickChatCore({
       style={{
         width: "100%",
         maxWidth: 2000,
-        height: "calc(100vh - 50px)",
+        height: "calc(100vh - 60px)",
         padding: 8,
         overflowY: "scroll",
       }}
     >
-      <Flex
-        vertical
-        style={{
-          margin: "0 auto",
-          position: "relative",
-          paddingBottom: 100,
-          width: isMobile ? "100%" : "57%",
-          height: "100%",
-        }}
+      {/* <Drawer
+        placement="left"
+        open={recentChatsDrawerOpen}
+        onClose={() => setRecentChatsDrawerOpen(false)}
+        title="Your recent chats"
+        width={isMobile ? mobileDrawerWidth : RECENT_CHATS_DRAWER_WIDTH}
+        styles={{ body: { padding: 0 } }}
       >
-        {!showMobileMap ? (
-          <Form
-            form={form}
-            onFinish={handleSearch}
-            style={{
-              marginTop: 8,
-              position: "absolute",
-              bottom: 8,
-              width: "100%",
-              backgroundColor: "white",
-              zIndex: 1001,
-            }}
+        {threadsLoading ? (
+          <Flex align="center" gap={8} style={{ padding: 16 }}>
+            <Spin size="small" />
+            <Typography.Text type="secondary">
+              Loading conversations...
+            </Typography.Text>
+          </Flex>
+        ) : chatThreads.length === 0 ? (
+          <Typography.Text
+            type="secondary"
+            style={{ padding: 16, display: "block" }}
           >
-            <Flex justify="flex-end" style={{ marginBottom: 2 }}>
-              {(activeThreadId || selectedThreadId) && (
-                <Tooltip title="Share chat">
+            No recent chats yet.
+          </Typography.Text>
+        ) : (
+          <Flex vertical>
+            {chatThreads.map((thread, index) => (
+              <Flex
+                key={thread.thread_id}
+                vertical
+                gap={2}
+                onClick={() => {
+                  handleThreadSelect(thread.thread_id);
+                  setRecentChatsDrawerOpen(false);
+                }}
+                style={{
+                  cursor: "pointer",
+                  padding: "12px 16px",
+                  borderBottom:
+                    index == chatThreads.length - 1
+                      ? "none"
+                      : `1px solid ${COLORS.bgColorBlue}`,
+                  backgroundColor:
+                    thread.thread_id === (selectedThreadId || activeThreadId)
+                      ? "#fafafa"
+                      : undefined,
+                }}
+              >
+                <Typography.Text
+                  ellipsis
+                  style={{
+                    fontWeight: 500,
+                    fontSize: FONT_SIZE.HEADING_4,
+                  }}
+                >
+                  {thread.thread_title}
+                </Typography.Text>
+                <Typography.Text
+                  type="secondary"
+                  style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                >
+                  {formatThreadDate(thread.createdAt)}
+                </Typography.Text>
+              </Flex>
+            ))}
+          </Flex>
+        )}
+      </Drawer> */}
+        {/* <Flex
+          justify="center"
+          align="center"
+          onClick={() => setRecentChatsDrawerOpen(true)}
+          style={{
+            width: 32,
+            height: 32,
+            backgroundColor: recentChatsDrawerOpen
+              ? COLORS.primaryColor
+              : "white",
+            border: `1px solid ${recentChatsDrawerOpen ? COLORS.primaryColor : COLORS.textColorMedium}`,
+            cursor: "pointer",
+            touchAction: "manipulation",
+            zIndex: 1000,
+            borderRadius: 8,
+            marginLeft: 4,
+            transition: "left 0.25s ease",
+          }}
+        >
+          <DynamicReactIcon
+            color={recentChatsDrawerOpen ? "white" : COLORS.textColorDark}
+            iconName="LuMenu"
+            iconSet="lu"
+            size={22}
+          />
+        </Flex> */}
+        <Flex
+          vertical
+          style={{
+            margin: "0 auto",
+            position: "relative",
+            paddingBottom: 100,
+            width: isMobile ? "100%" : "57%",
+            height: "100%",
+          }}
+        >
+          {!showMobileMap ? (
+            <Form
+              form={form}
+              onFinish={handleSearch}
+              style={{
+                marginTop: 8,
+                position: "absolute",
+                bottom: 8,
+                width: "100%",
+                backgroundColor: "white",
+                zIndex: 1001,
+              }}
+            >
+              <Flex justify="flex-end" style={{ marginBottom: 2 }}>
+                {(activeThreadId || selectedThreadId) && (
+                  <Tooltip title="Share chat">
+                    <Button
+                      type="text"
+                      style={{
+                        padding: "8px 0",
+                        height: "auto",
+                        width: 32,
+                        lineHeight: 1,
+                      }}
+                      icon={
+                        <DynamicReactIcon
+                          iconName="IoIosShareAlt"
+                          iconSet="io"
+                          color={COLORS.textColorMedium}
+                          size={18}
+                        />
+                      }
+                      onClick={handleShare}
+                    />
+                  </Tooltip>
+                )}
+                <BrickchatFeedback
+                  threadId={activeThreadId || selectedThreadId}
+                  userId={user?._id}
+                />
+                {(activeThreadId || selectedThreadId) && (
+                  <Tooltip title="View in LangSmith">
+                    <Button
+                      type="text"
+                      style={{
+                        padding: "8px 0",
+                        height: "auto",
+                        width: 32,
+                        lineHeight: 1,
+                      }}
+                      icon={
+                        <DynamicReactIcon
+                          iconName="LuUnlink"
+                          iconSet="lu"
+                          color={COLORS.textColorMedium}
+                          size={16}
+                        />
+                      }
+                      onClick={() => {
+                        const threadId = activeThreadId || selectedThreadId;
+                        window.open(
+                          `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
+                          "_blank",
+                        );
+                      }}
+                    />
+                  </Tooltip>
+                )}
+                <Tooltip title="New chat">
                   <Button
                     type="text"
                     style={{
@@ -1065,555 +1212,425 @@ export function BrickChatCore({
                     }}
                     icon={
                       <DynamicReactIcon
-                        iconName="IoIosShareAlt"
-                        iconSet="io"
-                        color={COLORS.textColorMedium}
-                        size={18}
-                      />
-                    }
-                    onClick={handleShare}
-                  />
-                </Tooltip>
-              )}
-              <BrickchatFeedback
-                threadId={activeThreadId || selectedThreadId}
-                userId={user?._id}
-              />
-              {(activeThreadId || selectedThreadId) && (
-                <Tooltip title="View in LangSmith">
-                  <Button
-                    type="text"
-                    style={{
-                      padding: "8px 0",
-                      height: "auto",
-                      width: 32,
-                      lineHeight: 1,
-                    }}
-                    icon={
-                      <DynamicReactIcon
-                        iconName="LuUnlink"
-                        iconSet="lu"
+                        iconName="RiChatAiFill"
+                        iconSet="ri"
                         color={COLORS.textColorMedium}
                         size={16}
                       />
                     }
                     onClick={() => {
-                      const threadId = activeThreadId || selectedThreadId;
-                      window.open(
-                        `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
-                        "_blank",
-                      );
+                      window.location.href = window.location.pathname;
                     }}
                   />
                 </Tooltip>
-              )}
-              <Tooltip title="New chat">
-                <Button
-                  type="text"
-                  style={{
-                    padding: "8px 0",
-                    height: "auto",
-                    width: 32,
-                    lineHeight: 1,
-                  }}
-                  icon={
-                    <DynamicReactIcon
-                      iconName="RiChatAiFill"
-                      iconSet="ri"
-                      color={COLORS.textColorMedium}
-                      size={16}
+              </Flex>
+              <Form.Item name="question" style={{ marginBottom: 0 }}>
+                <Input
+                  placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
+                  size="large"
+                  disabled={chatLoading || threadyHistoryLoading}
+                  suffix={
+                    <Button
+                      type="text"
+                      htmlType="submit"
+                      icon={<BiSend size={20} />}
+                      disabled={chatLoading || threadyHistoryLoading}
+                      style={{ color: COLORS.primaryColor }}
                     />
                   }
-                  onClick={() => {
-                    window.location.href = window.location.pathname;
+                  style={{
+                    boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                    height: 50,
+                    backgroundColor: "white",
+                    border: "1px solid",
+                    borderColor: COLORS.borderColorMedium,
+                    borderRadius: 16,
+                    fontSize: FONT_SIZE.HEADING_4,
+                  }}
+                  onPressEnter={() => form.submit()}
+                />
+              </Form.Item>
+            </Form>
+          ) : null}
+          <Flex
+            vertical
+            gap={24}
+            style={{
+              height: "100%",
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+              paddingRight: 8,
+            }}
+          >
+            {showWelcome ? (
+              <Flex vertical>
+                <Flex vertical>
+                  <Typography.Text
+                    style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
+                  >
+                    Welcome to Brickfi
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      marginBottom: 24,
+                      fontSize: FONT_SIZE.HEADING_4,
+                      color: COLORS.textColorLight,
+                    }}
+                  >
+                    Start your home search with Brickfi. Just enter your
+                    requirement and let Brickfi do the work.
+                  </Typography.Text>
+                </Flex>
+
+                <StaticQueries
+                  disabled={chatLoading}
+                  onSelect={(query) => {
+                    form.setFieldsValue({ question: query });
+                    form.submit();
                   }}
                 />
-              </Tooltip>
-            </Flex>
-            <Form.Item name="question" style={{ marginBottom: 0 }}>
-              <Input
-                placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
-                size="large"
-                disabled={chatLoading || threadyHistoryLoading}
-                suffix={
-                  <Button
-                    type="text"
-                    htmlType="submit"
-                    icon={<BiSend size={20} />}
-                    disabled={chatLoading || threadyHistoryLoading}
-                    style={{ color: COLORS.primaryColor }}
-                  />
-                }
-                style={{
-                  boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-                  height: 50,
-                  backgroundColor: "white",
-                  border: "1px solid",
-                  borderColor: COLORS.borderColorMedium,
-                  borderRadius: 16,
-                  fontSize: FONT_SIZE.HEADING_4,
-                }}
-                onPressEnter={() => form.submit()}
-              />
-            </Form.Item>
-          </Form>
-        ) : null}
-        <Flex
-          vertical
-          gap={24}
-          style={{
-            height: "100%",
-            overflowY: "scroll",
-            scrollbarWidth: "none",
-            paddingRight: 8,
-          }}
-        >
-          {showWelcome ? (
-            <Flex vertical>
-              <Flex vertical>
-                <Typography.Text
-                  style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_1 }}
-                >
-                  Welcome to Brickfi
-                </Typography.Text>
-                <Typography.Text
-                  style={{
-                    marginBottom: 24,
-                    fontSize: FONT_SIZE.HEADING_4,
-                    color: COLORS.textColorLight,
-                  }}
-                >
-                  Start your home search with Brickfi. Just enter your
-                  requirement and let Brickfi do the work.
-                </Typography.Text>
-              </Flex>
 
-              <Flex vertical gap={12}>
-                <Flex align="center" justify="space-between">
-                  {(activeThreadId || selectedThreadId) && (
-                    <Button onClick={handleNewChat}>New Chat</Button>
-                  )}
-                </Flex>
-                {threadsLoading ? (
-                  <Flex align="center" gap={8}>
-                    <Spin size="small" />
-                    <Typography.Text type="secondary">
-                      Loading conversations...
-                    </Typography.Text>
-                  </Flex>
-                ) : chatThreads.length === 0 ? (
-                  <Flex style={{ width: "100%", flexWrap: "wrap" }}>
-                    {SAMPLE_PROMPTS.map((prompt) => (
-                      <Tag
-                        key={prompt}
-                        style={{
-                          marginBottom: 8,
-                          fontSize: FONT_SIZE.PARA,
-                          backgroundColor: COLORS.textColorDark,
-                          color: "white",
-                          padding: "2px 8px",
-                          cursor: chatLoading ? "not-allowed" : "pointer",
-                        }}
-                        onClick={() => {
-                          if (chatLoading) {
-                            return;
-                          }
-
-                          form.setFieldsValue({ question: prompt });
-                          form.submit();
-                        }}
-                      >
-                        {prompt}
-                      </Tag>
-                    ))}
-                  </Flex>
-                ) : (
-                  <Collapse
-                    items={[
-                      {
-                        key: "recent-chats",
-                        label: (
-                          <Typography.Text
-                            style={{
-                              fontSize: FONT_SIZE.PARA,
-                              color: COLORS.textColorLight,
-                            }}
-                          >
-                            Your recent chats
-                          </Typography.Text>
-                        ),
-                        children: (
-                          <Flex
-                            vertical
-                            style={{
-                              maxHeight: 300,
-                              overflowY: "scroll",
-                              scrollbarWidth: "none",
-                            }}
-                          >
-                            {chatThreads.map((thread, index) => (
-                              <Flex
-                                key={thread.thread_id}
-                                vertical
-                                gap={2}
-                                onClick={() =>
-                                  handleThreadSelect(thread.thread_id)
-                                }
-                                style={{
-                                  cursor: "pointer",
-                                  padding: "8px 4px",
-                                  borderBottom:
-                                    index == chatThreads.length - 1
-                                      ? "none"
-                                      : `1px solid ${COLORS.bgColorBlue}`,
-                                  backgroundColor:
-                                    thread.thread_id ===
-                                    (selectedThreadId || activeThreadId)
-                                      ? "#fafafa"
-                                      : undefined,
-                                }}
-                              >
-                                <Typography.Text
-                                  ellipsis
-                                  style={{
-                                    fontWeight: 500,
-                                    fontSize: FONT_SIZE.HEADING_4,
-                                  }}
-                                >
-                                  {thread.thread_title}
-                                </Typography.Text>
-                                <Typography.Text
-                                  type="secondary"
-                                  style={{ fontSize: FONT_SIZE.SUB_TEXT }}
-                                >
-                                  {formatThreadDate(thread.createdAt)}
-                                </Typography.Text>
-                              </Flex>
-                            ))}
-                          </Flex>
-                        ),
-                      },
-                    ]}
-                  />
-                )}
-              </Flex>
-            </Flex>
-          ) : defaultProjectResults?.length ? (
-            <PinnedProjectResults
-              results={defaultProjectResults}
-              description={defaultProjectsDescription}
-              hasChatStarted={!!chatHistory.length}
-              onLocateProject={handleLocateProject}
-              onSelectProject={handleSelectProject}
-            />
-          ) : null}
-
-          {threadyHistoryLoading && !chatHistory.length ? (
-            <Flex align="center" gap={12}>
-              <Spin size="small" />
-              <Typography.Text type="secondary">
-                Loading conversation...
-              </Typography.Text>
-            </Flex>
-          ) : null}
-
-          <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
-            {chatHistory.map((messageItem, index) => (
-              <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
-                {hideFirstQuestion && index === 0
-                  ? null
-                  : renderQuestion(messageItem.question)}
-
-                <Flex
-                  vertical
-                  style={{ borderBottom: `${index !== chatHistory.length-1 ? 1: 0}px solid ${COLORS.borderColor}`, paddingBottom: 24, marginBottom: 16 }}
-                >
-                  {messageItem.steps?.length ? (
-                    <ChatTimeline
-                      steps={messageItem.steps}
-                      running={false}
-                      totalMs={messageItem.durationMs}
-                    />
-                  ) : null}
-
-                  <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                    {!messageItem.answer.directAnswer &&
-                    !!messageItem.answer.projectsList.length ? (
-                      <Typography.Text
-                        style={{
-                          fontSize: FONT_SIZE.SUB_TEXT,
-                          color: COLORS.textColorLight,
-                        }}
-                      >
-                        Found {messageItem.answer.projectsList.length} matching
-                        project
-                        {messageItem.answer.projectsList.length !== 1
-                          ? "s"
-                          : ""}
-                      </Typography.Text>
-                    ) : null}
-
-                    <Markdown
-                      className="bkchat-summary"
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        p: ({ children }) => (
-                          <Typography.Text
-                            style={{
-                              fontSize: FONT_SIZE.HEADING_3,
-                              fontWeight: 500,
-                              marginBottom: 16,
-                              display: "block",
-                              maxWidth: 850
-                            }}
-                          >
-                            {children}
-                          </Typography.Text>
-                        ),
-                      }}
-                    >
-                      {messageItem.answer.summary}
-                    </Markdown>
-                    {renderImages(messageItem.answer.images)}
-                    <Flex vertical>
-                      {/* <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text> */}
-                    <Flex
-                      align="center"
-                      gap={8}
-                      style={{
-                        marginBottom: 8,
-                        width: "100%",
-                        overflowX: "scroll",
-                        flexWrap: "nowrap",
-                        scrollbarWidth: "none"
-                      }}
-                    >
-                      {messageItem.answer.projectsList &&
-                      !!messageItem.answer.projectsList.length ? (
-                        <Flex justify="flex-end" style={{ flexShrink: 0 }}>
-                          <Button
-                            size="small"
-                            icon={
-                              <DynamicReactIcon
-                                iconName="FaMapMarkedAlt"
-                                iconSet="fa"
-                                size={16}
-                                color={
-                                  !focusedReferredLocation &&
-                                  mapResultsIndex === index
-                                    ? "white"
-                                    : COLORS.textColorDark
-                                }
-                              ></DynamicReactIcon>
-                            }
-                            type={
-                              mapResultsIndex === index ? "primary" : "default"
-                            }
-                            onClick={() => {
-                              setFocusedReferredLocation(null);
-                              if (isMobile) setShowMobileMap(true);
-                              setMapResultsIndex(index);
-                              // a fresh array reference even when re-selecting
-                              // the same list (e.g. after wandering off to a
-                              // driver/locality focus) - MapCenterer's
-                              // re-centering effect only re-fires when its
-                              // `projects` dependency actually changes
-                              // reference, and setProjectResults with the
-                              // exact same array object React already holds
-                              // is a no-op (React bails out of re-rendering
-                              // for an Object.is-identical value), so
-                              // re-clicking this button on an
-                              // already-selected list would otherwise never
-                              // reset the camera back to it.
-                              setProjectResults([
-                                ...messageItem.answer.projectsList,
-                              ]);
-                            }}
-                            style={{
-                              fontSize: FONT_SIZE.PARA,
-                              height: 24,
-                              borderRadius: 16,
-                              border: `1px solid ${
-                                !focusedReferredLocation &&
-                                mapResultsIndex === index
-                                  ? COLORS.primaryColor
-                                  : COLORS.borderColorMedium
-                              }`,
-                              backgroundColor:
-                                !focusedReferredLocation &&
-                                mapResultsIndex === index
-                                  ? COLORS.primaryColor
-                                  : COLORS.bgColorLightBlue,
-                              color:
-                                !focusedReferredLocation &&
-                                mapResultsIndex === index
-                                  ? "white"
-                                  : COLORS.textColorDark,
-                            }}
-                          >
-                            {messageItem.answer.projectsList.length} Projects
-                          </Button>
-                        </Flex>
-                      ) : null}
-                      {(() => {
-                        const referredLocationItems = getReferredLocationItems(
-                          messageItem.answer,
-                        );
-                        return referredLocationItems.length ? (
-                          <ReferredLocationChips
-                            items={referredLocationItems}
-                            selectedKey={focusedReferredLocation?.key ?? null}
-                            onToggle={handleToggleReferredLocation}
-                          />
-                        ) : null;
-                      })()}
-                    </Flex>
-                    </Flex>
-                    {!messageItem.answer.directAnswer ? (
-                      <Flex vertical gap={8} style={{}}>
-                        <BrickChatResults
-                          results={messageItem.answer.projectsList}
-                          onLocateProject={(projectId) =>
-                            handleLocateProject(projectId, index)
-                          }
-                          onSelectProject={handleSelectProject}
-                        />
-                        {!chatLoading &&
-                          (messageItem.answer.nextSetCount ?? 0) > 0 &&
-                          index === chatHistory.length - 1 && (
-                            <Flex justify="flex-start">
-                              <Button
-                                size="small"
-                                style={{ fontSize: FONT_SIZE.PARA, height: 24 }}
-                                onClick={() => {
-                                  form.setFieldsValue({
-                                    question: "show me more",
-                                  });
-                                  form.submit();
-                                }}
-                              >
-                                Show me more
-                              </Button>
-                            </Flex>
-                          )}
-                      </Flex>
-                    ) : null}
-                    {messageItem.answer.followupPrompt ? (
-                      <Typography.Text
-                        style={{
-                          fontSize: FONT_SIZE.HEADING_3,
-                          marginTop: 32,
-                          fontWeight: 500,
-                          maxWidth: 800
-                        }}
-                      >
-                        {messageItem.answer.followupPrompt}
-                      </Typography.Text>
-                    ) : null}
+                <Flex vertical gap={12}>
+                  <Flex align="center" justify="space-between">
+                    {(activeThreadId || selectedThreadId) && (
+                      <Button onClick={handleNewChat}>New Chat</Button>
+                    )}
                   </Flex>
                 </Flex>
               </Flex>
-            ))}
-
-            {currentQuestion && chatLoading && (
-              <Flex vertical gap={12}>
-                {hideFirstQuestion && !chatHistory.length
-                  ? null
-                  : renderQuestion(currentQuestion)}
-                <ChatTimeline steps={steps} running />
-                {streamingSummary ? (
-                  <Markdown
-                    className="bkchat-summary"
-                    remarkPlugins={[remarkGfm]}
-                  >
-                    {streamingSummary}
-                  </Markdown>
-                ) : null}
-              </Flex>
-            )}
-
-            {selectedProject && selectedLvnzyProjectLoading ? (
-              <Loader />
-            ) : selectedProject && selectedLvnzyProject ? (
-              <Brick360Inline
-                key={selectedProject.projectId}
-                slug={selectedProject.projectSlug || ""}
-                projectData={selectedLvnzyProject}
-                onClose={() => {
-                  setSelectedProject(null);
-                  setPillarMapConfig(null);
-                }}
-                onMapConfigChange={setPillarMapConfig}
+            ) : defaultProjectResults?.length ? (
+              <PinnedProjectResults
+                results={defaultProjectResults}
+                description={defaultProjectsDescription}
+                hasChatStarted={!!chatHistory.length}
+                onLocateProject={handleLocateProject}
+                onSelectProject={handleSelectProject}
               />
             ) : null}
 
-            <div ref={scrollBottomRef} />
+            {threadyHistoryLoading && !chatHistory.length ? (
+              <Flex align="center" gap={12}>
+                <Spin size="small" />
+                <Typography.Text type="secondary">
+                  Loading conversation...
+                </Typography.Text>
+              </Flex>
+            ) : null}
+
+            <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
+              {chatHistory.map((messageItem, index) => (
+                <Flex
+                  key={`${messageItem.question}-${index}`}
+                  vertical
+                  gap={12}
+                >
+                  {hideFirstQuestion && index === 0
+                    ? null
+                    : renderQuestion(messageItem.question)}
+
+                  <Flex
+                    vertical
+                    style={{
+                      borderBottom: `${index !== chatHistory.length - 1 ? 1 : 0}px solid ${COLORS.borderColor}`,
+                      paddingBottom: 24,
+                      marginBottom: 16,
+                    }}
+                  >
+                    {messageItem.steps?.length ? (
+                      <ChatTimeline
+                        steps={messageItem.steps}
+                        running={false}
+                        totalMs={messageItem.durationMs}
+                      />
+                    ) : null}
+
+                    <Flex vertical gap={4} style={{ marginTop: 8 }}>
+                      {!messageItem.answer.directAnswer &&
+                      !!messageItem.answer.projectsList.length ? (
+                        <Typography.Text
+                          style={{
+                            fontSize: FONT_SIZE.SUB_TEXT,
+                            color: COLORS.textColorLight,
+                          }}
+                        >
+                          Found {messageItem.answer.projectsList.length}{" "}
+                          matching project
+                          {messageItem.answer.projectsList.length !== 1
+                            ? "s"
+                            : ""}
+                        </Typography.Text>
+                      ) : null}
+
+                      <Markdown
+                        className="bkchat-summary"
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => (
+                            <Typography.Text
+                              style={{
+                                fontSize: FONT_SIZE.HEADING_3,
+                                fontWeight: 500,
+                                marginBottom: 16,
+                                display: "block",
+                                maxWidth: 850,
+                              }}
+                            >
+                              {children}
+                            </Typography.Text>
+                          ),
+                        }}
+                      >
+                        {messageItem.answer.summary}
+                      </Markdown>
+                      {renderImages(messageItem.answer.images)}
+                      <Flex vertical>
+                        {/* <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text> */}
+                        <Flex
+                          align="center"
+                          gap={8}
+                          style={{
+                            marginBottom: 8,
+                            width: "100%",
+                            overflowX: "scroll",
+                            flexWrap: "nowrap",
+                            scrollbarWidth: "none",
+                          }}
+                        >
+                          {messageItem.answer.projectsList &&
+                          !!messageItem.answer.projectsList.length ? (
+                            <Flex justify="flex-end" style={{ flexShrink: 0 }}>
+                              <Button
+                                size="small"
+                                icon={
+                                  <DynamicReactIcon
+                                    iconName="FaMapMarkedAlt"
+                                    iconSet="fa"
+                                    size={16}
+                                    color={
+                                      !focusedReferredLocation &&
+                                      mapResultsIndex === index
+                                        ? "white"
+                                        : COLORS.textColorDark
+                                    }
+                                  ></DynamicReactIcon>
+                                }
+                                type={
+                                  mapResultsIndex === index
+                                    ? "primary"
+                                    : "default"
+                                }
+                                onClick={() => {
+                                  setFocusedReferredLocation(null);
+                                  if (isMobile) setShowMobileMap(true);
+                                  setMapResultsIndex(index);
+                                  // a fresh array reference even when re-selecting
+                                  // the same list (e.g. after wandering off to a
+                                  // driver/locality focus) - MapCenterer's
+                                  // re-centering effect only re-fires when its
+                                  // `projects` dependency actually changes
+                                  // reference, and setProjectResults with the
+                                  // exact same array object React already holds
+                                  // is a no-op (React bails out of re-rendering
+                                  // for an Object.is-identical value), so
+                                  // re-clicking this button on an
+                                  // already-selected list would otherwise never
+                                  // reset the camera back to it.
+                                  setProjectResults([
+                                    ...messageItem.answer.projectsList,
+                                  ]);
+                                }}
+                                style={{
+                                  fontSize: FONT_SIZE.PARA,
+                                  height: 24,
+                                  borderRadius: 16,
+                                  border: `1px solid ${
+                                    !focusedReferredLocation &&
+                                    mapResultsIndex === index
+                                      ? COLORS.primaryColor
+                                      : COLORS.borderColorMedium
+                                  }`,
+                                  backgroundColor:
+                                    !focusedReferredLocation &&
+                                    mapResultsIndex === index
+                                      ? COLORS.primaryColor
+                                      : COLORS.bgColorLightBlue,
+                                  color:
+                                    !focusedReferredLocation &&
+                                    mapResultsIndex === index
+                                      ? "white"
+                                      : COLORS.textColorDark,
+                                }}
+                              >
+                                {messageItem.answer.projectsList.length}{" "}
+                                Projects
+                              </Button>
+                            </Flex>
+                          ) : null}
+                          {(() => {
+                            const referredLocationItems =
+                              getReferredLocationItems(messageItem.answer);
+                            return referredLocationItems.length ? (
+                              <ReferredLocationChips
+                                items={referredLocationItems}
+                                selectedKey={
+                                  focusedReferredLocation?.key ?? null
+                                }
+                                onToggle={handleToggleReferredLocation}
+                              />
+                            ) : null;
+                          })()}
+                        </Flex>
+                      </Flex>
+                      {!messageItem.answer.directAnswer ? (
+                        <Flex vertical gap={8} style={{}}>
+                          <BrickChatResults
+                            results={messageItem.answer.projectsList}
+                            onLocateProject={(projectId) =>
+                              handleLocateProject(projectId, index)
+                            }
+                            onSelectProject={handleSelectProject}
+                          />
+                          {!chatLoading &&
+                            (messageItem.answer.nextSetCount ?? 0) > 0 &&
+                            index === chatHistory.length - 1 && (
+                              <Flex justify="flex-start">
+                                <Button
+                                  size="small"
+                                  style={{
+                                    fontSize: FONT_SIZE.PARA,
+                                    height: 24,
+                                  }}
+                                  onClick={() => {
+                                    form.setFieldsValue({
+                                      question: "show me more",
+                                    });
+                                    form.submit();
+                                  }}
+                                >
+                                  Show me more
+                                </Button>
+                              </Flex>
+                            )}
+                        </Flex>
+                      ) : null}
+                      {messageItem.answer.followupPrompt ? (
+                        <Typography.Text
+                          style={{
+                            fontSize: FONT_SIZE.HEADING_3,
+                            marginTop: 32,
+                            fontWeight: 500,
+                            maxWidth: 800,
+                          }}
+                        >
+                          {messageItem.answer.followupPrompt}
+                        </Typography.Text>
+                      ) : null}
+                    </Flex>
+                  </Flex>
+                </Flex>
+              ))}
+
+              {currentQuestion && chatLoading && (
+                <Flex vertical gap={12}>
+                  {hideFirstQuestion && !chatHistory.length
+                    ? null
+                    : renderQuestion(currentQuestion)}
+                  <ChatTimeline steps={steps} running />
+                  {streamingSummary ? (
+                    <Markdown
+                      className="bkchat-summary"
+                      remarkPlugins={[remarkGfm]}
+                    >
+                      {streamingSummary}
+                    </Markdown>
+                  ) : null}
+                </Flex>
+              )}
+
+              {selectedProject && selectedLvnzyProjectLoading ? (
+                <Loader />
+              ) : selectedProject && selectedLvnzyProject ? (
+                <Brick360Inline
+                  key={selectedProject.projectId}
+                  slug={selectedProject.projectSlug || ""}
+                  projectData={selectedLvnzyProject}
+                  onClose={() => {
+                    setSelectedProject(null);
+                    setPillarMapConfig(null);
+                  }}
+                  onMapConfigChange={setPillarMapConfig}
+                />
+              ) : null}
+
+              <div ref={scrollBottomRef} />
+            </Flex>
           </Flex>
         </Flex>
-      </Flex>
 
-      {!isMobile && (
-        <Flex
-          style={{
-            width: "40%",
-            minWidth: "37%",
-            padding: "0 1.5%",
-            flexShrink: 0,
-            isolation: "isolate",
-          }}
-        >
-          <BrickMapChat
-            projects={projectResults || []}
-            focusedProjectId={focusedProjectId}
-            hideAllFilters={!!focusedReferredLocation}
-            detailedProject={selectedProject ? selectedLvnzyProject : undefined}
-            pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
-            focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
-            focusedLocalityIds={
-              selectedProject ? undefined : focusedLocalityIds
-            }
-            focusedCorridorIds={
-              selectedProject ? undefined : focusedCorridorIds
-            }
-            focusedMicroPocketIds={
-              selectedProject ? undefined : focusedMicroPocketIds
-            }
-          />
-        </Flex>
-      )}
-
-      {isMobile && (
-        <>
+        {!isMobile && (
           <Flex
-            justify="center"
-            align="center"
-            onClick={() => {
-              setShowMobileMap((prev) => {
-                const next = !prev;
-                if (next) setFocusedReferredLocation(null);
-                return next;
-              });
-            }}
             style={{
-              position: "fixed",
-              top: "50%",
-              right: showMobileMap ? mobileDrawerWidth : 0,
-              transform: "translateY(-50%)",
-              width: 48,
-              height: 48,
-              backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
-              border: `1px solid ${showMobileMap ? COLORS.primaryColor : COLORS.textColorMedium}`,
-              borderRight: showMobileMap ? undefined : "none",
-              borderTopLeftRadius: 12,
-              borderBottomLeftRadius: 12,
-              cursor: "pointer",
-              touchAction: "manipulation",
-              zIndex: 1000,
-              transition: "right 0.25s ease",
-              boxShadow: "-2px 0 6px rgba(0,0,0,0.15)",
+              width: "40%",
+              minWidth: "37%",
+              padding: "0 1.5%",
+              flexShrink: 0,
+              isolation: "isolate",
             }}
           >
-            {/* <div
+            <BrickMapChat
+              projects={projectResults || []}
+              focusedProjectId={focusedProjectId}
+              hideAllFilters={!!focusedReferredLocation}
+              detailedProject={
+                selectedProject ? selectedLvnzyProject : undefined
+              }
+              pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
+              focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
+              focusedLocalityIds={
+                selectedProject ? undefined : focusedLocalityIds
+              }
+              focusedCorridorIds={
+                selectedProject ? undefined : focusedCorridorIds
+              }
+              focusedMicroPocketIds={
+                selectedProject ? undefined : focusedMicroPocketIds
+              }
+            />
+          </Flex>
+        )}
+
+        {isMobile && (
+          <>
+            <Flex
+              justify="center"
+              align="center"
+              onClick={() => {
+                setShowMobileMap((prev) => {
+                  const next = !prev;
+                  if (next) setFocusedReferredLocation(null);
+                  return next;
+                });
+              }}
+              style={{
+                position: "fixed",
+                top: "50%",
+                right: showMobileMap ? mobileDrawerWidth : 0,
+                transform: "translateY(-50%)",
+                width: 48,
+                height: 48,
+                backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
+                border: `1px solid ${showMobileMap ? COLORS.primaryColor : COLORS.textColorMedium}`,
+                borderRight: showMobileMap ? undefined : "none",
+                borderTopLeftRadius: 12,
+                borderBottomLeftRadius: 12,
+                cursor: "pointer",
+                touchAction: "manipulation",
+                zIndex: 1000,
+                transition: "right 0.25s ease",
+                boxShadow: "-2px 0 6px rgba(0,0,0,0.15)",
+              }}
+            >
+              {/* <div
               style={{
                 width: 8,
                 height: 50,
@@ -1622,63 +1639,66 @@ export function BrickChatCore({
                 boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
               }}
             /> */}
-            <DynamicReactIcon
-              color={showMobileMap ? "white" : COLORS.textColorDark}
-              iconName="FaMapLocationDot"
-              iconSet="fa6"
-              size={28}
-            ></DynamicReactIcon>
-          </Flex>
-
-          <Drawer
-            placement="right"
-            open={showMobileMap}
-            onClose={() => setShowMobileMap(false)}
-            mask={false}
-            closable={false}
-            width={mobileDrawerWidth}
-            styles={{
-              header: { display: "none" },
-              body: { padding: 0, position: "relative", overflow: "hidden" },
-              content: {
-                borderTopLeftRadius: 20,
-                borderBottomLeftRadius: 20,
-              },
-              wrapper: {
-                borderTopLeftRadius: 20,
-                borderBottomLeftRadius: 20,
-                borderLeft: `1px solid ${COLORS.textColorMedium}`,
-              },
-            }}
-          >
-            <Flex
-              vertical
-              style={{ position: "absolute", inset: 0, zIndex: 0 }}
-            >
-              <BrickMapChat
-                projects={projectResults || []}
-                focusedProjectId={focusedProjectId}
-                hideAllFilters={!showMobileMap || !!focusedReferredLocation}
-                detailedProject={
-                  selectedProject ? selectedLvnzyProject : undefined
-                }
-                pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
-                focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
-                focusedLocalityIds={
-                  selectedProject ? undefined : focusedLocalityIds
-                }
-                focusedCorridorIds={
-                  selectedProject ? undefined : focusedCorridorIds
-                }
-                focusedMicroPocketIds={
-                  selectedProject ? undefined : focusedMicroPocketIds
-                }
-              />
+              <DynamicReactIcon
+                color={showMobileMap ? "white" : COLORS.textColorDark}
+                iconName="FaMapLocationDot"
+                iconSet="fa6"
+                size={28}
+              ></DynamicReactIcon>
             </Flex>
-          </Drawer>
-        </>
-      )}
 
+            <Drawer
+              placement="right"
+              open={showMobileMap}
+              onClose={() => setShowMobileMap(false)}
+              mask={false}
+              closable={false}
+              width={mobileDrawerWidth}
+              styles={{
+                header: { display: "none" },
+                body: { padding: 0, position: "relative", overflow: "hidden" },
+                content: {
+                  borderTopLeftRadius: 20,
+                  borderBottomLeftRadius: 20,
+                },
+                wrapper: {
+                  borderTopLeftRadius: 20,
+                  borderBottomLeftRadius: 20,
+                  borderLeft: `1px solid ${COLORS.textColorMedium}`,
+                },
+              }}
+            >
+              <Flex
+                vertical
+                style={{ position: "absolute", inset: 0, zIndex: 0 }}
+              >
+                <BrickMapChat
+                  projects={projectResults || []}
+                  focusedProjectId={focusedProjectId}
+                  hideAllFilters={!showMobileMap || !!focusedReferredLocation}
+                  detailedProject={
+                    selectedProject ? selectedLvnzyProject : undefined
+                  }
+                  pillarMapConfig={
+                    selectedProject ? pillarMapConfig : undefined
+                  }
+                  focusedDrivers={
+                    selectedProject ? undefined : mapDisplayDrivers
+                  }
+                  focusedLocalityIds={
+                    selectedProject ? undefined : focusedLocalityIds
+                  }
+                  focusedCorridorIds={
+                    selectedProject ? undefined : focusedCorridorIds
+                  }
+                  focusedMicroPocketIds={
+                    selectedProject ? undefined : focusedMicroPocketIds
+                  }
+                />
+              </Flex>
+            </Drawer>
+          </>
+        )}
       <Modal
         open={shareModalOpen}
         onCancel={() => setShareModalOpen(false)}
