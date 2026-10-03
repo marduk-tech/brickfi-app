@@ -4,6 +4,7 @@ import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { apiKey, baseApiUrl } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import {
+  App,
   Button,
   Flex,
   Input,
@@ -12,31 +13,33 @@ import {
   Typography,
   Upload,
   UploadFile,
-  message,
 } from "antd";
+import type { RcFile } from "antd/es/upload";
 import { useState } from "react";
 
-// Reuses the existing single-file upload endpoint (upload.route.js) rather
+// Reuses the existing multi-file upload endpoint (upload.route.js) rather
 // than a brickchat-specific one - same S3 bucket/webp-conversion pipeline
-// every other image upload in the app already goes through.
-const uploadFeedbackImage = async (file: File): Promise<string> => {
+// every other image upload in the app already goes through. Field name
+// "files" matches upload.array('files', 100) there; the response's
+// `results` array is in the same order the files were appended.
+const uploadFeedbackImages = async (files: File[]): Promise<string[]> => {
   const formData = new FormData();
-  formData.append("image", file);
-  const res = await fetch(`${baseApiUrl}upload/single`, {
+  files.forEach((file) => formData.append("files", file));
+  const res = await fetch(`${baseApiUrl}upload/multiple`, {
     method: "POST",
     headers: { "x-api-key": apiKey || "" },
     body: formData,
   });
-  if (!res.ok) throw new Error(`upload/single ${res.status}`);
+  if (!res.ok) throw new Error(`upload/multiple ${res.status}`);
   const json = await res.json();
-  return json?.data?.Location;
+  return (json?.results || []).map((r: { Location: string }) => r.Location);
 };
 
 const submitBrickchatFeedback = async (payload: {
   threadId: string;
   userId: string;
   text: string;
-  imageUrl?: string;
+  imageUrls?: string[];
 }): Promise<void> => {
   const res = await fetch(`${baseApiUrl}brickchat-feedback`, {
     method: "POST",
@@ -49,6 +52,8 @@ const submitBrickchatFeedback = async (payload: {
   });
   if (!res.ok) throw new Error(`brickchat-feedback ${res.status}`);
 };
+
+const MAX_FEEDBACK_IMAGES = 5;
 
 interface BrickchatFeedbackProps {
   /** Same thread id the "Share chat"/"View in LangSmith" toolbar buttons use - see brickchat-client.tsx. */
@@ -69,6 +74,12 @@ export default function BrickchatFeedback({
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackFileList, setFeedbackFileList] = useState<UploadFile[]>([]);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  // Context-bound instance (see ClientProviders' <AntApp> wrapper) rather
+  // than the plain static import - the static message/notification/Modal
+  // API renders its own holder outside AntApp's StyleProvider cache, so its
+  // styles never get injected and the toast is invisible even though it
+  // technically fires.
+  const { message } = App.useApp();
 
   if (!threadId) {
     return null;
@@ -88,9 +99,13 @@ export default function BrickchatFeedback({
 
     setFeedbackSubmitting(true);
     try {
-      const file = feedbackFileList[0]?.originFileObj;
-      const imageUrl = file ? await uploadFeedbackImage(file) : undefined;
-      await submitBrickchatFeedback({ threadId, userId, text, imageUrl });
+      const files = feedbackFileList
+        .map((f) => f.originFileObj)
+        .filter((f): f is RcFile => !!f);
+      const imageUrls = files.length
+        ? await uploadFeedbackImages(files)
+        : undefined;
+      await submitBrickchatFeedback({ threadId, userId, text, imageUrls });
       message.success("Thanks for the feedback!");
       setFeedbackModalOpen(false);
     } catch (error) {
@@ -139,7 +154,7 @@ export default function BrickchatFeedback({
           <Typography.Paragraph
             style={{ color: COLORS.textColorMedium, marginBottom: 0 }}
           >
-            What's working well, or what should we fix? A screenshot helps
+            What's working well, or what should we fix? Screenshots help
             too.
           </Typography.Paragraph>
           <Input.TextArea
@@ -154,14 +169,14 @@ export default function BrickchatFeedback({
             fileList={feedbackFileList}
             beforeUpload={() => false}
             onChange={({ fileList }) =>
-              setFeedbackFileList(fileList.slice(-1))
+              setFeedbackFileList(fileList.slice(-MAX_FEEDBACK_IMAGES))
             }
-            onRemove={() => setFeedbackFileList([])}
-            maxCount={1}
+            multiple
+            maxCount={MAX_FEEDBACK_IMAGES}
             accept="image/*"
             disabled={feedbackSubmitting}
           >
-            {feedbackFileList.length === 0 ? (
+            {feedbackFileList.length < MAX_FEEDBACK_IMAGES ? (
               <Flex vertical align="center" gap={2}>
                 <DynamicReactIcon
                   iconName="MdOutlineAddPhotoAlternate"
@@ -175,7 +190,7 @@ export default function BrickchatFeedback({
                     color: COLORS.textColorMedium,
                   }}
                 >
-                  Add screenshot
+                  Add screenshots
                 </Typography.Text>
               </Flex>
             ) : null}
