@@ -467,7 +467,8 @@ export function BrickChatCore({
     !activeThreadId &&
     !chatHistory.length &&
     !defaultProjectResults?.length &&
-    !threadyHistoryLoading;
+    !threadyHistoryLoading &&
+    !chatLoading;
 
   // Auto-submit autoStartQuestion once, only when landing fresh (no thread
   // selected/active/loading and no history yet) - e.g. the initial
@@ -1147,7 +1148,7 @@ export function BrickChatCore({
               }}
             >
               <Flex justify="flex-end" style={{ marginBottom: 2 }}>
-                {(activeThreadId || selectedThreadId) && (
+                {/* {(activeThreadId || selectedThreadId) && (
                   <Tooltip title="Share chat">
                     <Button
                       type="text"
@@ -1168,7 +1169,7 @@ export function BrickChatCore({
                       onClick={handleShare}
                     />
                   </Tooltip>
-                )}
+                )} */}
                 <BrickchatFeedback
                   threadId={activeThreadId || selectedThreadId}
                   userId={user?._id}
