@@ -13,9 +13,9 @@ import {
 } from "@/hooks/use-livindex-places";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
-import { apiKey, baseApiUrl } from "@/libs/constants";
+import { apiKey, baseApiUrl, queryKeys } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { ChatThread } from "@/types/User";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Button,
   Drawer,
@@ -111,13 +111,6 @@ interface ChatMessage {
   durationMs?: number;
 }
 
-// Desktop width for the "Your recent chats" left drawer - on mobile it uses
-// the same 85%-of-viewport sizing as the right-side map drawer instead (see
-// getMobileMapDrawerWidth).
-const RECENT_CHATS_DRAWER_WIDTH = 320;
-
-
-
 // Combines a chat answer's brickfiDriverIds (raw LivIndexPlace ids, no label
 // of their own - resolved via useFetchAllLivindexPlaces inside
 // ReferredLocationChips) with its resolvedLocations (driver/locality/
@@ -149,28 +142,6 @@ const getReferredLocationItems = (
   });
 
   return items;
-};
-
-const formatThreadDate = (value: string) =>
-  new Date(value).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-
-const fetchChatThreads = async (userId: string): Promise<ChatThread[]> => {
-  const res = await fetch(`${baseApiUrl}user/${userId}/chat-threads`, {
-    cache: "no-store",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey || "",
-    },
-  });
-  if (!res.ok) throw new Error(`chat-threads ${res.status}`);
-  const json = await res.json();
-  return json?.data || [];
 };
 
 const fetchThreadHistory = async (
@@ -276,18 +247,16 @@ export function BrickChatCore({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isMobile } = useDevice();
+  const queryClient = useQueryClient();
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
-  const [chatThreads, setChatThreads] = useState<ChatThread[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string>();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
   const [chatLoading, setChatLoading] = useState(false);
   const [steps, setSteps] = useState<TimelineStep[]>([]);
   const [streamingSummary, setStreamingSummary] = useState<string>();
-  const [threadsLoading, setThreadsLoading] = useState(false);
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
-  const [recentChatsDrawerOpen, setRecentChatsDrawerOpen] = useState(false);
 
   const getMobileMapDrawerWidth = () =>
     typeof window !== "undefined" ? Math.round(window.innerWidth * 0.85) : 320;
@@ -515,62 +484,16 @@ export function BrickChatCore({
     });
   };
 
-  const refreshChatThreads = async () => {
-    if (!user?._id) {
-      return;
-    }
-
-    setThreadsLoading(true);
-
-    try {
-      const threads = await fetchChatThreads(user._id);
-      setChatThreads(threads);
-    } catch (error) {
-      console.error("Failed to load chat threads:", error);
-      message.error("Failed to load saved threads.");
-    } finally {
-      setThreadsLoading(false);
-    }
+  // The "Recent Chats" list itself now lives in the global sidebar drawer
+  // (dashboard-layout.tsx), fetched via useFetchChatThreads - invalidate
+  // that same query key here whenever this thread list could have changed,
+  // so the drawer shows the new/updated thread next time it's opened.
+  const refreshChatThreads = () => {
+    if (!user?._id) return;
+    queryClient.invalidateQueries({
+      queryKey: [queryKeys.getChatThreads, user._id],
+    });
   };
-
-  useEffect(() => {
-    if (!user?._id) {
-      return;
-    }
-
-    let cancelled = false;
-
-    const loadChatThreads = async () => {
-      setThreadsLoading(true);
-
-      try {
-        const threads = await fetchChatThreads(user._id);
-
-        if (cancelled) {
-          return;
-        }
-
-        setChatThreads(threads);
-      } catch (error) {
-        if (cancelled) {
-          return;
-        }
-
-        console.error("Failed to load chat threads:", error);
-        message.error("Failed to load saved threads.");
-      } finally {
-        if (!cancelled) {
-          setThreadsLoading(false);
-        }
-      }
-    };
-
-    void loadChatThreads();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [user?._id]);
 
   useEffect(() => {
     if (!user?._id || !selectedThreadId || sharedBy) {
@@ -675,7 +598,7 @@ export function BrickChatCore({
         });
         if (lastIdx >= 0) setMapResultsIndex(lastIdx);
 
-        await refreshChatThreads();
+        refreshChatThreads();
 
         setThreadyHistoryLoading(false);
 
@@ -876,7 +799,7 @@ export function BrickChatCore({
         onThreadCreated?.(resolvedThreadId);
       }
 
-      await refreshChatThreads();
+      refreshChatThreads();
     } catch (error) {
       console.error("Search error:", error);
       message.error("Failed to search projects. Please try again.");
@@ -886,17 +809,6 @@ export function BrickChatCore({
       setSteps([]);
       setStreamingSummary(undefined);
     }
-  };
-
-  const handleThreadSelect = (threadId: string) => {
-    if (!threadId || threadId === selectedThreadId) {
-      return;
-    }
-
-    setChatHistory([]);
-    setCurrentQuestion(undefined);
-    setMapResultsIndex(undefined);
-    syncThreadSearchParam(threadId);
   };
 
   const handleNewChat = () => {
@@ -1032,99 +944,7 @@ export function BrickChatCore({
         overflowY: "scroll",
       }}
     >
-      {/* <Drawer
-        placement="left"
-        open={recentChatsDrawerOpen}
-        onClose={() => setRecentChatsDrawerOpen(false)}
-        title="Your recent chats"
-        width={isMobile ? mobileDrawerWidth : RECENT_CHATS_DRAWER_WIDTH}
-        styles={{ body: { padding: 0 } }}
-      >
-        {threadsLoading ? (
-          <Flex align="center" gap={8} style={{ padding: 16 }}>
-            <Spin size="small" />
-            <Typography.Text type="secondary">
-              Loading conversations...
-            </Typography.Text>
-          </Flex>
-        ) : chatThreads.length === 0 ? (
-          <Typography.Text
-            type="secondary"
-            style={{ padding: 16, display: "block" }}
-          >
-            No recent chats yet.
-          </Typography.Text>
-        ) : (
-          <Flex vertical>
-            {chatThreads.map((thread, index) => (
-              <Flex
-                key={thread.thread_id}
-                vertical
-                gap={2}
-                onClick={() => {
-                  handleThreadSelect(thread.thread_id);
-                  setRecentChatsDrawerOpen(false);
-                }}
-                style={{
-                  cursor: "pointer",
-                  padding: "12px 16px",
-                  borderBottom:
-                    index == chatThreads.length - 1
-                      ? "none"
-                      : `1px solid ${COLORS.bgColorBlue}`,
-                  backgroundColor:
-                    thread.thread_id === (selectedThreadId || activeThreadId)
-                      ? "#fafafa"
-                      : undefined,
-                }}
-              >
-                <Typography.Text
-                  ellipsis
-                  style={{
-                    fontWeight: 500,
-                    fontSize: FONT_SIZE.HEADING_4,
-                  }}
-                >
-                  {thread.thread_title}
-                </Typography.Text>
-                <Typography.Text
-                  type="secondary"
-                  style={{ fontSize: FONT_SIZE.SUB_TEXT }}
-                >
-                  {formatThreadDate(thread.createdAt)}
-                </Typography.Text>
-              </Flex>
-            ))}
-          </Flex>
-        )}
-      </Drawer> */}
-        {/* <Flex
-          justify="center"
-          align="center"
-          onClick={() => setRecentChatsDrawerOpen(true)}
-          style={{
-            width: 32,
-            height: 32,
-            backgroundColor: recentChatsDrawerOpen
-              ? COLORS.primaryColor
-              : "white",
-            border: `1px solid ${recentChatsDrawerOpen ? COLORS.primaryColor : COLORS.textColorMedium}`,
-            cursor: "pointer",
-            touchAction: "manipulation",
-            zIndex: 1000,
-            borderRadius: 8,
-            marginLeft: 4,
-            transition: "left 0.25s ease",
-          }}
-        >
-          <DynamicReactIcon
-            color={recentChatsDrawerOpen ? "white" : COLORS.textColorDark}
-            iconName="LuMenu"
-            iconSet="lu"
-            size={22}
-          />
-        </Flex> */}
-        <Flex
+      <Flex
           vertical
           style={{
             margin: "0 auto",
@@ -1144,7 +964,10 @@ export function BrickChatCore({
                 bottom: 8,
                 width: "100%",
                 backgroundColor: "white",
-                zIndex: 1001,
+                // just enough to sit above the scrollable chat list behind
+                // it - antd Modal's own mask/dialog default to zIndex 1000,
+                // so anything >= that renders on top of a modal's backdrop
+                zIndex: 2,
               }}
             >
               <Flex justify="flex-end" style={{ marginBottom: 2 }}>

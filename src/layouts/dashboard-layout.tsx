@@ -1,6 +1,6 @@
 "use client";
 
-import { Drawer, Flex, Image, Layout, Modal, Typography } from "antd";
+import { Collapse, Drawer, Flex, Image, Layout, Modal, Spin, Typography } from "antd";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -8,6 +8,7 @@ import { CustomErrorBoundary } from "../components/common/custom-error-boundary"
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { LoginForm } from "../components/login-forms";
 import { UserDetailsForm } from "../components/user-details-form";
+import { formatThreadDate, useFetchChatThreads } from "../hooks/use-chat-threads";
 import { useDevice } from "../hooks/use-device";
 import { useUser } from "../hooks/use-user";
 import { safeStorage, safeWindow } from "../libs/browser-utils";
@@ -30,6 +31,11 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   const [showUserDetailsForm, setShowUserDetailsForm] = useState(false);
   const { isMobile } = useDevice();
   const router = useRouter();
+  const {
+    data: chatThreads,
+    isLoading: chatThreadsLoading,
+    refetch: refetchChatThreads,
+  } = useFetchChatThreads(user?._id);
 
   const { lvnzyProjectId, collectionId } = useParams<{
     lvnzyProjectId: string;
@@ -131,7 +137,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
             }}
             style={{ marginTop: link.alignBottom ? "auto" : "initial" }}
           >
-            <Flex align="center" gap={8}>
+            <Flex align="center" gap={4}>
               {link.icon.name ? (
                 <DynamicReactIcon
                   iconName={link.icon.name}
@@ -143,7 +149,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                 <Image width={16} src={link.icon.src}></Image>
               )}
 
-              <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+              <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4 }}>
                 {link.title}
               </Typography.Text>
             </Flex>
@@ -221,20 +227,34 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
               justify="space-between"
               style={{ height: 60, cursor: "pointer" }}
             >
-              <Flex
-                onClick={() => {
-                  if (lvnzyProjectId || collectionId) {
-                    router.push("/app");
-                  } else {
-                    router.push("/");
-                  }
-                }}
-                style={{ height: 60, display: "flex", alignItems: "center" }}
-              >
-                <img
-                  src="/images/brickfi-logo.png"
-                  style={{ height: 16, width: "auto", marginLeft: 4 }}
-                ></img>
+              <Flex align="center" gap={12} style={{ height: 60 }}>
+                <Flex
+                  onClick={() => {
+                    setSidebarOpen(true);
+                    refetchChatThreads();
+                  }}
+                  style={{ marginLeft: 4 }}
+                >
+                  <DynamicReactIcon
+                    iconName="HiOutlineMenuAlt3"
+                    iconSet="hi"
+                  ></DynamicReactIcon>
+                </Flex>
+                <Flex
+                  onClick={() => {
+                    if (lvnzyProjectId || collectionId) {
+                      router.push("/app");
+                    } else {
+                      router.push("/");
+                    }
+                  }}
+                  style={{ height: 60, display: "flex", alignItems: "center" }}
+                >
+                  <img
+                    src="/images/brickfi-logo.png"
+                    style={{ height: 16, width: "auto" }}
+                  ></img>
+                </Flex>
               </Flex>
               <Flex style={{ marginLeft: "auto" }} align="center">
                 <Link href="/feedback" target="_blank">
@@ -249,7 +269,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   align="center"
                   gap={4}
                 >
-                  
+
                   <DynamicReactIcon iconName="MdFeedback" iconSet="md" size={14} color={COLORS.textColorDark}></DynamicReactIcon>
                   <Typography.Text
                     style={{
@@ -260,7 +280,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   >
                     Feedback
                   </Typography.Text>
-                  
+
                 </Flex>
                 </Link>
 
@@ -276,24 +296,15 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                         router.push(LandingConstants.brickAssistLink);
                       }
                     }}
-                    style={{ height: 32, width: "auto", marginRight: 8 }}
+                    style={{ height: 32, width: "auto" }}
                   ></img>
-                  <Flex
-                    onClick={() => {
-                      setSidebarOpen(true);
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName="HiOutlineMenuAlt3"
-                      iconSet="hi"
-                    ></DynamicReactIcon>
-                  </Flex>
                 </Flex>
               </Flex>
             </Flex>
           </Header>
           <Drawer
             title=""
+            placement="left"
             onClose={() => {
               setSidebarOpen(false);
             }}
@@ -306,6 +317,77 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
               style={{ position: "relative", height: "100%" }}
             >
               <NavLinks navLinks={navLinks.filter((l) => !l.disabled)} />
+              {user?._id && (
+                <Collapse
+                  style={{ width: "100%" }}
+                  defaultActiveKey={[]}
+                  items={[
+                    {
+                      key: "recent-chats",
+                      label: "Recent Chats",
+                      children: chatThreadsLoading ? (
+                        <Flex align="center" gap={8}>
+                          <Spin size="small" />
+                          <Typography.Text
+                            type="secondary"
+                            style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                          >
+                            Loading...
+                          </Typography.Text>
+                        </Flex>
+                      ) : !chatThreads?.length ? (
+                        <Typography.Text
+                          type="secondary"
+                          style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                        >
+                          No recent chats yet.
+                        </Typography.Text>
+                      ) : (
+                        <Flex
+                          vertical
+                          style={{ maxHeight: 300, overflowY: "auto" }}
+                        >
+                          {chatThreads.map((thread, index) => (
+                            <Flex
+                              key={thread.thread_id}
+                              vertical
+                              gap={2}
+                              onClick={() => {
+                                setSidebarOpen(false);
+                                router.push(
+                                  `/app/brickchat?threadId=${thread.thread_id}`,
+                                );
+                              }}
+                              style={{
+                                cursor: "pointer",
+                                padding: "8px 0",
+                                borderBottom:
+                                  index === chatThreads.length - 1
+                                    ? "none"
+                                    : `1px solid ${COLORS.borderColorMedium}`,
+                              }}
+                            >
+                              <Typography.Text
+                                ellipsis
+                                style={{ fontSize: FONT_SIZE.PARA }}
+                              >
+                                {thread.thread_title}
+                              </Typography.Text>
+                              <Typography.Text
+                                type="secondary"
+                                style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                              >
+                                {formatThreadDate(thread.createdAt)}
+                              </Typography.Text>
+                            </Flex>
+                          ))}
+                        </Flex>
+                      ),
+                    },
+                  ]}
+                  
+                />
+              )}
               {/* {user?.savedLvnzyProjects &&
                 user.savedLvnzyProjects.length > 1 && (
                   <Select

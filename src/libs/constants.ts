@@ -15,6 +15,7 @@ export const queryKeys = {
   projectsMapView: "projectsMapView",
   getAllPlaces: "getAllPlaces",
   getLvnzyProjectDrivers: "getLvnzyProjectDrivers",
+  getChatThreads: "getChatThreads",
   getAllCorridors: "getAllCorridors",
   getAllMicroPockets: "getAllMicroPockets",
   getAllLocalities: "getAllLocalities",
