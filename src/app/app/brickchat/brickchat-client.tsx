@@ -1336,6 +1336,18 @@ export function BrickChatCore({
                               </Flex>
                             )}
                         </Flex>
+                      ) : !!messageItem.answer.projectsList?.length ? (
+                        <Flex vertical gap={8}>
+                          <BrickChatResults
+                            results={messageItem.answer.projectsList}
+                            onLocateProject={(projectId) =>
+                              handleLocateProject(projectId, index)
+                            }
+                            onSelectProject={handleSelectProject}
+                            skipOneLiner
+                            skipSort
+                          />
+                        </Flex>
                       ) : null}
                       {messageItem.answer.followupPrompt ? (
                         <Typography.Text

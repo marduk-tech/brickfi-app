@@ -28,6 +28,10 @@ interface BrickChatResultsProps {
    * standalone brick360 page in a new tab.
    */
   onSelectProject?: (project: ProjectResult) => void;
+  /** Narrative/shortlist answers have no oneLiner (the LLM wasn't asked to write one for these) - hide the block instead of rendering it empty. */
+  skipOneLiner?: boolean;
+  /** Narrative/shortlist answers have no rankScore (no rerank happened) - keep the order the server returned (order of first mention) instead of sorting. */
+  skipSort?: boolean;
 }
 
 // Pull the ids of projects already in the user's default collection
@@ -75,6 +79,8 @@ export default function BrickChatResults({
   results,
   onLocateProject,
   onSelectProject,
+  skipOneLiner,
+  skipSort,
 }: BrickChatResultsProps) {
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
@@ -170,7 +176,10 @@ export default function BrickChatResults({
   return (
     <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
-      {[...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0)).map((project) => (
+      {(skipSort
+        ? results
+        : [...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0))
+      ).map((project) => (
        <Flex style={{width: 225}}>
           <Card
             hoverable
@@ -257,7 +266,7 @@ export default function BrickChatResults({
                 </Typography.Text>
               )}
 
-              {project.oneLiner && (
+              {!skipOneLiner && project.oneLiner && (
                 <Typography.Paragraph
                   style={{
                     fontSize: FONT_SIZE.SUB_TEXT,

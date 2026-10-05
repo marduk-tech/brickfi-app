@@ -1,4 +1,4 @@
-import { AutoComplete, Flex, Select, Typography } from "antd";
+import { AutoComplete, Flex, Select, Switch, Typography } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useFetchAllLivindexPlaces } from "../../../hooks/use-livindex-places";
 import { useFetchProjects } from "../../../hooks/use-project";
@@ -43,10 +43,12 @@ export function BrickMapAdmin() {
     { enabled: !!homeTypeFilter }
   );
 
-  const [driverFilters, setDriverFilters] = useState<string[]>([
-    "industrial-hitech",
-    "airport",
-  ]);
+  const [driverFilters, setDriverFilters] = useState<string[]>([]);
+
+  const [showLocalitiesEnabled, setShowLocalitiesEnabled] = useState(false);
+  const [showCorridorsEnabled, setShowCorridorsEnabled] = useState(false);
+  const [showMicroPocketsEnabled, setShowMicroPocketsEnabled] =
+    useState(false);
 
   const [filteredProjects, setFilteredProjects] = useState<any[]>([]);
   const [filteredDrivers, setFilteredDrivers] = useState<IDriverPlace[]>([]);
@@ -206,9 +208,10 @@ export function BrickMapAdmin() {
           <Select
             style={{ width: 350 }}
             mode="multiple"
-            defaultValue={["industrial-hitech", "airport"]}
+            defaultValue={[]}
             showSearch
             maxTagCount="responsive"
+            placeholder="Select drivers to show"
             onChange={handleDriverSelect}
             options={Object.keys(LivIndexDriversConfig).map((k: string) => {
               return {
@@ -217,6 +220,27 @@ export function BrickMapAdmin() {
               };
             })}
           />
+          <Flex align="center" gap={6}>
+            <Switch
+              checked={showLocalitiesEnabled}
+              onChange={setShowLocalitiesEnabled}
+            />
+            <Typography.Text>Localities</Typography.Text>
+          </Flex>
+          <Flex align="center" gap={6}>
+            <Switch
+              checked={showCorridorsEnabled}
+              onChange={setShowCorridorsEnabled}
+            />
+            <Typography.Text>Corridors</Typography.Text>
+          </Flex>
+          <Flex align="center" gap={6}>
+            <Switch
+              checked={showMicroPocketsEnabled}
+              onChange={setShowMicroPocketsEnabled}
+            />
+            <Typography.Text>Micro Markets</Typography.Text>
+          </Flex>
         </Flex>
         <Flex style={{ flex: 1, position: "relative", minHeight: "600px" }}>
           <>
@@ -257,9 +281,9 @@ export function BrickMapAdmin() {
               projects={projectMarkers}
               projectId={selectedProjectId || undefined}
               fullSize={false}
-              showLocalities="all"
-              showCorridors={[]}
-              showMicroPockets="all"
+              showLocalities={showLocalitiesEnabled ? "all" : []}
+              showCorridors={showCorridorsEnabled ? "all" : []}
+              showMicroPockets={showMicroPocketsEnabled ? "all" : []}
             />
           </>
         </Flex>
