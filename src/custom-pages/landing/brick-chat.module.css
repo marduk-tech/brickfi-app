@@ -1,0 +1,48 @@
+/* antd puts className on the affix wrapper when a suffix is present, so
+   target the inner input as well. */
+.searchInput::placeholder,
+.searchInput input::placeholder {
+  color: #2d3f4e;
+  opacity: 1;
+}
+
+/* Full-bleed: break out of the centered section so cards enter/leave at the
+   page edges rather than the section's content edges. */
+.marquee {
+  position: relative;
+  left: 50%;
+  width: 100vw;
+  margin-left: -50vw;
+  overflow: hidden;
+}
+
+.marqueeTrack {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  width: max-content;
+  animation: marquee 40s linear infinite;
+}
+
+.marquee:hover .marqueeTrack {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* half the track = one full copy of the cards + half a gap */
+    transform: translateX(calc(-50% - 8px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee {
+    overflow-x: auto;
+  }
+  .marqueeTrack {
+    animation: none;
+  }
+}

@@ -368,7 +368,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps; isMobile: boolean }> 
           textAlign: isMobile ? "left" : sectionData.centerSectionTextAlign as any || "center",
           marginLeft: isMobile ? 16 : 0,
         }}
-        align="center"
+        align="left"
         justify="center"
       >
         {typeof sectionData.heading == "string" ? (

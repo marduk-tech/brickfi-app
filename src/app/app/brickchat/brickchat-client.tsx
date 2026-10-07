@@ -471,6 +471,9 @@ export function BrickChatCore({
 
   const syncThreadSearchParam = (threadId?: string) => {
     const params = new URLSearchParams(searchParams.toString());
+    // ?q= has already been consumed as autoStartQuestion - drop it so it
+    // doesn't linger in (or get shared via) the thread URL.
+    params.delete("q");
 
     if (threadId) {
       params.set("threadId", threadId);
@@ -1565,9 +1568,14 @@ export function BrickChatCore({
 }
 
 export default function BrickChatClient() {
+  // ?q= is set by the landing page search input - auto-submit it as the
+  // first question of a fresh chat.
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q")?.trim() || undefined;
+
   return (
     <AdminGuard allowedRoles={["admin", "member"]}>
-      <BrickChatCore />
+      <BrickChatCore autoStartQuestion={initialQuery} />
     </AdminGuard>
   );
 }
