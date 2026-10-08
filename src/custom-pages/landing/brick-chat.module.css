@@ -21,6 +21,8 @@
   align-items: stretch;
   gap: 16px;
   width: max-content;
+  /* room for the card box-shadow, which .marquee's overflow would clip */
+  padding: 12px 0 20px;
   animation: marquee 40s linear infinite;
 }
 

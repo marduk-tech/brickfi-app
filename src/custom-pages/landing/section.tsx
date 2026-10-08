@@ -234,7 +234,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps; isMobile: boolean }> =
               : sectionData.fullHeight
               ? "100vh"
               : "auto",
-            padding: isMobile ? "0 16px" : "0 32px",
+            padding: isMobile ? "0 16px" : "0 2px",
           }}
           align="center"
           justify={sectionData.mainImgAlign || isMobile ? "center" : "flex-end"}
