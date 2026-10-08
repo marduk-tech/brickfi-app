@@ -1,9 +1,11 @@
 "use client";
 
+import { CaretRightOutlined } from "@ant-design/icons";
 import { Collapse, Flex, Typography } from "antd";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import BrickChatResults from "./brick-chat-results";
 import { ProjectResult } from "./brickchat-client";
+import styles from "./pinned-project-results.module.css";
 
 interface PinnedProjectResultsProps {
   results: ProjectResult[];
@@ -65,14 +67,34 @@ export default function PinnedProjectResults({
         </Flex>
       ) : null}
       <Collapse
+        ghost
+        className={styles.collapse}
         defaultActiveKey={[]}
+        expandIcon={({ isActive }) => (
+          <Flex
+            align="center"
+            justify="center"
+            style={{
+              width: 20,
+              height: 20,
+              flexShrink: 0,
+              borderRadius: "50%",
+              backgroundColor: COLORS.primaryColor,
+            }}
+          >
+            <CaretRightOutlined
+              style={{ color: "white", fontSize: FONT_SIZE.SUB_TEXT }}
+              rotate={isActive ? 90 : 0}
+            />
+          </Flex>
+        )}
         items={[
           {
             key: "pinned-projects",
             label: (
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.SUB_TEXT,
+                  fontSize: FONT_SIZE.HEADING_4,
                   color: COLORS.textColorLight,
                 }}
               >
@@ -84,6 +106,7 @@ export default function PinnedProjectResults({
                 results={results}
                 onLocateProject={onLocateProject}
                 onSelectProject={onSelectProject}
+                minimal
               />
             ),
           },

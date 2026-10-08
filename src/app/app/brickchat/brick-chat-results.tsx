@@ -11,7 +11,7 @@ import {
   rupeeAmountFormat,
 } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Card, Flex, message, Tag, Typography } from "antd";
+import { Card, Flex, message, Modal, Tag, Tooltip, Typography } from "antd";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import DynamicReactIcon from "../../../components/common/dynamic-react-icon";
@@ -32,6 +32,13 @@ interface BrickChatResultsProps {
   skipOneLiner?: boolean;
   /** Narrative/shortlist answers have no rankScore (no rerank happened) - keep the order the server returned (order of first mention) instead of sorting. */
   skipSort?: boolean;
+  /**
+   * Compact single-line-per-project view instead of the full image card -
+   * just project name, corridor, and the 360 Details button (see
+   * PinnedProjectResults, where the saved/pinned strip doesn't need the
+   * full card treatment every other results list gets).
+   */
+  minimal?: boolean;
 }
 
 // Pull the ids of projects already in the user's default collection
@@ -81,10 +88,12 @@ export default function BrickChatResults({
   onSelectProject,
   skipOneLiner,
   skipSort,
+  minimal,
 }: BrickChatResultsProps) {
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const [messageApi, contextHolder] = message.useMessage();
+  const [modal, modalContextHolder] = Modal.useModal();
 
   const [savedIds, setSavedIds] = useState<string[]>(() =>
     getDefaultCollectionIds(user),
@@ -94,10 +103,7 @@ export default function BrickChatResults({
     setSavedIds(getDefaultCollectionIds(user));
   }, [user]);
 
-  const handleToggleSave = async (
-    e: React.MouseEvent,
-    project: ProjectResult,
-  ) => {
+  const handleToggleSave = (e: React.MouseEvent, project: ProjectResult) => {
     // cards are wrapped in a Link - don't navigate on icon click
     e.preventDefault();
     e.stopPropagation();
@@ -107,54 +113,63 @@ export default function BrickChatResults({
 
     const isSaved = savedIds.includes(lvnzyId);
 
-    const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
-    const defaultCollectionIndex = savedLvnzyProjects.findIndex(
-      (c: any) => c.collectionName === "default",
-    );
+    modal.confirm({
+      title: isSaved ? "Remove from saved projects?" : "Save this project?",
+      content: isSaved
+        ? `Remove "${project.projectName}" from your saved projects?`
+        : `Add "${project.projectName}" to your saved projects?`,
+      okText: isSaved ? "Remove" : "Save",
+      onOk: async () => {
+        const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
+        const defaultCollectionIndex = savedLvnzyProjects.findIndex(
+          (c: any) => c.collectionName === "default",
+        );
 
-    if (defaultCollectionIndex === -1) {
-      // nothing saved yet - create default collection with this project
-      savedLvnzyProjects.push({
-        collectionName: "default",
-        projects: [lvnzyId],
-      });
-    } else {
-      const existingProjects = (
-        savedLvnzyProjects[defaultCollectionIndex].projects || []
-      ).map((proj: any) => (proj?._id || proj)?.toString());
+        if (defaultCollectionIndex === -1) {
+          // nothing saved yet - create default collection with this project
+          savedLvnzyProjects.push({
+            collectionName: "default",
+            projects: [lvnzyId],
+          });
+        } else {
+          const existingProjects = (
+            savedLvnzyProjects[defaultCollectionIndex].projects || []
+          ).map((proj: any) => (proj?._id || proj)?.toString());
 
-      savedLvnzyProjects[defaultCollectionIndex].projects = isSaved
-        ? existingProjects.filter((id: string) => id !== lvnzyId)
-        : removeDuplicatesAndPrepend(existingProjects, lvnzyId);
-    }
+          savedLvnzyProjects[defaultCollectionIndex].projects = isSaved
+            ? existingProjects.filter((id: string) => id !== lvnzyId)
+            : removeDuplicatesAndPrepend(existingProjects, lvnzyId);
+        }
 
-    // optimistic update
-    const prevSavedIds = savedIds;
-    setSavedIds(
-      isSaved
-        ? savedIds.filter((id) => id !== lvnzyId)
-        : [lvnzyId, ...savedIds.filter((id) => id !== lvnzyId)],
-    );
+        // optimistic update
+        const prevSavedIds = savedIds;
+        setSavedIds(
+          isSaved
+            ? savedIds.filter((id) => id !== lvnzyId)
+            : [lvnzyId, ...savedIds.filter((id) => id !== lvnzyId)],
+        );
 
-    try {
-      await updateUser.mutateAsync({
-        userData: { savedLvnzyProjects },
-      });
+        try {
+          await updateUser.mutateAsync({
+            userData: { savedLvnzyProjects },
+          });
 
-      const cached = safeStorage.getItem(LocalStorageKeys.user);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        parsed.updated = new Date(0).toString();
-        safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(parsed));
-      }
-      refetch();
+          const cached = safeStorage.getItem(LocalStorageKeys.user);
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            parsed.updated = new Date(0).toString();
+            safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(parsed));
+          }
+          refetch();
 
-      messageApi.success(
-        isSaved ? "Removed from saved" : "Saved to your collection",
-      );
-    } catch {
-      setSavedIds(prevSavedIds);
-    }
+          messageApi.success(
+            isSaved ? "Removed from saved" : "Saved to your collection",
+          );
+        } catch {
+          setSavedIds(prevSavedIds);
+        }
+      },
+    });
   };
 
   const handleLocateOnMap = (e: React.MouseEvent, project: ProjectResult) => {
@@ -173,9 +188,165 @@ export default function BrickChatResults({
     );
   }
 
+  if (minimal) {
+    const orderedResults = skipSort
+      ? results
+      : [...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0));
+
+    return (
+      <Flex className={styles.scrollContainer} gap={16}>
+        {contextHolder}
+        {modalContextHolder}
+        {orderedResults.map((project) => (
+          <Flex key={project.projectId} style={{ width: 175 }}>
+            <Card
+              hoverable
+              style={{
+                width: 165,
+                borderRadius: 12,
+                overflow: "hidden",
+                margin: "8px 0",
+                border: `1px solid ${COLORS.borderColor}`,
+              }}
+              styles={{ body: { padding: 0 } }}
+              cover={
+                <div
+                  style={{
+                    height: 100,
+                    width: "100%",
+                    backgroundColor: COLORS.bgColor,
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  {project.projectImages?.length ? (
+                    <ProjectImageCarousel
+                      images={project.projectImages}
+                      alt={project.projectName}
+                    />
+                  ) : project.projectImage ? (
+                    <img
+                      src={project.projectImage}
+                      alt={project.projectName}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ) : (
+                    <Flex
+                      justify="center"
+                      align="center"
+                      style={{ height: "100%", color: COLORS.textColorLight }}
+                    >
+                      <Typography.Text type="secondary">
+                        No Image
+                      </Typography.Text>
+                    </Flex>
+                  )}
+                </div>
+              }
+            >
+              <Flex vertical gap={2}>
+                <Tooltip title={project.projectName}>
+                <Typography.Text
+                  strong
+                  style={{
+                    fontSize: FONT_SIZE.PARA,
+                    color: COLORS.textColorDark,
+                    padding: '4px 8px'
+                  }}
+                  ellipsis={{ tooltip: project.projectName }}
+                >
+                  {project.projectName}
+                </Typography.Text>
+                </Tooltip>
+                <Flex align="center" gap={0} style={{padding: "4px 8px"}}>
+                  {project.projectCorridor ? (
+                    <Tag
+                      style={{
+                        fontSize: FONT_SIZE.NOTE,
+                        color: COLORS.textColorDark,
+                        padding: "0px 4px"
+                      }}
+                    >
+                      {project.projectCorridor}
+                    </Tag>
+                  ) : (
+                    <span />
+                  )}
+                  <Flex align="center" gap={4} style={{ marginLeft: "auto" }}>
+                    {project.lvnzyProjectId && (
+                      <Flex
+                        align="center"
+                        justify="center"
+                        onClick={(e) => handleToggleSave(e, project)}
+                        style={{
+                          width: 24,
+                          height: 24,
+                          flexShrink: 0,
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <DynamicReactIcon
+                          iconName={
+                            savedIds.includes(project.lvnzyProjectId)
+                              ? "MdOutlineBookmark"
+                              : "MdOutlineBookmarkBorder"
+                          }
+                          iconSet="md"
+                          size={16}
+                          color={COLORS.primaryColor}
+                        />
+                      </Flex>
+                    )}
+                  
+                  </Flex>
+                </Flex>
+                  {onSelectProject && (
+                      <Flex
+                        id="project-details"
+                        align="center"
+                        justify="center"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          onSelectProject(project);
+                        }}
+                        style={{
+                          height: 24,
+                          flexShrink: 0,
+                          padding: "2px 4px",
+                          borderBottomLeftRadius: 4,
+                          borderBottomRightRadius: 4,
+                          marginTop: 4,
+                          backgroundColor: COLORS.primaryColor,
+                          cursor: "pointer",
+                          color: "white",
+                          fontSize: FONT_SIZE.SUB_TEXT,
+                          width: "100%",
+                          fontWeight: 500
+                        }}
+                      >
+                        View 360 Details
+                      </Flex>
+                    )}
+              </Flex>
+            </Card>
+          </Flex>
+        ))}
+      </Flex>
+    );
+  }
+
   return (
     <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
+      {modalContextHolder}
       {(skipSort
         ? results
         : [...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0))
@@ -189,7 +360,7 @@ export default function BrickChatResults({
               display: "block",
               overflow: "hidden",
               margin: "8px 0",
-              border: `1px solid ${COLORS.borderColorMedium}`,
+              border: `1px solid ${COLORS.borderColor}`,
             }}
             styles={{ body: { padding: 0 } }}
             cover={
@@ -285,6 +456,34 @@ export default function BrickChatResults({
                 </Typography.Paragraph>
               )}
               <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
+                {project.lvnzyProjectId && (
+                  <Flex
+                    align="center"
+                    justify="center"
+                    onClick={(e) => handleToggleSave(e, project)}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      flexShrink: 0,
+                      borderRadius: "50%",
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <DynamicReactIcon
+                      iconName={
+                        savedIds.includes(project.lvnzyProjectId)
+                          ? "MdOutlineBookmark"
+                          : "MdOutlineBookmarkBorder"
+                      }
+                      iconSet="md"
+                      size={16}
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                )}
+
                  {project.projectLocation?.lat && project.projectLocation?.lng && (
                   <Flex
                     align="center"
@@ -331,33 +530,6 @@ export default function BrickChatResults({
                   </Flex>
                 )}
 
-                {/* {project.lvnzyProjectId && (
-                  <Flex
-                    align="center"
-                    justify="center"
-                    onClick={(e) => handleToggleSave(e, project)}
-                    style={{
-                      width: 24,
-                      height: 24,
-                      flexShrink: 0,
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName={
-                        savedIds.includes(project.lvnzyProjectId)
-                          ? "IoBookmark"
-                          : "IoBookmarkOutline"
-                      }
-                      iconSet="io5"
-                      size={14}
-                      color={COLORS.primaryColor}
-                    />
-                  </Flex>
-                )} */}
                 {onSelectProject && (
                   <Flex
                     id="project-details"
