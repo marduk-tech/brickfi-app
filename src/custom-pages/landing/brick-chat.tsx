@@ -33,6 +33,30 @@ const SAMPLE_QUERIES = [
   "Show me properties under 3 crore within 10 mins of Prestige Tech Park",
 ];
 
+// TODO: swap placeholder images for framework-specific ones.
+const DATA_FRAMEWORK_ITEMS = [
+  {
+    label: "Builder",
+    imageUrl: "/images/landing/brick-chat/data-1.png",
+    text: "Track record, past deliveries, delays and litigation history of the developer, verified from RERA and public records.",
+  },
+  {
+    label: "Property",
+    imageUrl: "/images/landing/brickassistv2/3-2.png",
+    text: "Layout, density, open space, amenities and construction quality, so you know exactly what you're buying.",
+  },
+  {
+    label: "Location",
+    imageUrl: "/images/landing/brickassistv2/3-3.png",
+    text: "Connectivity, schools, hospitals, tech parks and upcoming infrastructure around the project.",
+  },
+  {
+    label: "Financials",
+    imageUrl: "/images/landing/brickassistv2/4-v2.png",
+    text: "Pricing against nearby projects, price trends and appreciation potential to judge if the deal is fair.",
+  },
+];
+
 export default function BrickChat({
   initialIsMobile = false,
 }: {
@@ -147,6 +171,59 @@ export default function BrickChat({
           ))}
         </div>
       </div>
+    );
+  };
+
+  const [selectedFrameworkIndex, setSelectedFrameworkIndex] = useState(0);
+
+  const getDataFrameworkTabs = () => {
+    const selected = DATA_FRAMEWORK_ITEMS[selectedFrameworkIndex];
+    return (
+      <Flex align="center" vertical gap={24} style={{ marginTop: 32 }}>
+        <Flex wrap gap={8}>
+          {DATA_FRAMEWORK_ITEMS.map((item, i) => {
+            const isSelected = i === selectedFrameworkIndex;
+            return (
+              <Button
+                key={item.label}
+                onClick={() => setSelectedFrameworkIndex(i)}
+                style={{
+                  borderRadius: 24,
+                  padding: "4px 20px",
+                  height: "auto",
+                  fontSize: FONT_SIZE.HEADING_3,
+                  fontWeight: 500,
+                  border: `1px solid ${COLORS.textColorDark}`,
+                  backgroundColor: isSelected
+                    ? COLORS.textColorDark
+                    : "transparent",
+                  color: isSelected
+                    ? COLORS.LANDING.LIGHT_PINK
+                    : COLORS.textColorDark,
+                }}
+              >
+                {item.label}
+              </Button>
+            );
+          })}
+        </Flex>
+        <Flex align="center" style={{width: isMobile ? "90%": "80%"}} gap={16}>
+          <img
+            src={selected.imageUrl}
+            alt={`Brick360 ${selected.label} analysis`}
+            style={{ width: 600, borderRadius: 16 }}
+          />
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_2,
+              color: COLORS.textColorDark,
+              textAlign: "left",
+            }}
+          >
+            {selected.text}
+          </Typography.Text>
+        </Flex>
+      </Flex>
     );
   };
 
@@ -630,7 +707,7 @@ export default function BrickChat({
           }
         />
       </Flex>
-      <SectionLeft
+      <SectionRight
         isMobile={isMobile}
         sectionData={{
           sectionMaxWidth: "100%",
@@ -667,60 +744,67 @@ export default function BrickChat({
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/brickchat-vs-broker.png"
             : "/images/landing/brick-chat/brickchat-vs-broker.png",
-          primaryImageSize: isMobile ? "90%" : "70%",
+          primaryImageSize: isMobile ? "90%" : "90%",
+        }}
+      ></SectionRight>
+
+
+ <SectionLeft
+        isMobile={isMobile}
+        sectionData={{
+          bgColor: COLORS.textColorDark,
+          sectionMaxWidth: "90%",
+          heading: (
+            <Flex vertical>
+              <h2
+                style={{
+                  fontSize: isMobile ? 40 : 54,
+                  color: "white",
+                  lineHeight: "100%",
+                  fontWeight: 800,
+                  margin: 0,
+                  maxWidth: 600
+                }}
+              >
+               The Complete Research Tool You Need
+              </h2>
+             
+            </Flex>
+          ),
+          subHeading: "",
+          centerSectionTextAlign: "left",
+          verticalPadding: 100,
+          textColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: isMobile
+            ? "/images/landing/brick-chat/brickchat-features.png"
+            : "/images/landing/brick-chat/brickchat-features.png",
+          primaryImageSize: isMobile ? "90%" : "80%",
         }}
       ></SectionLeft>
 
-      {/* <Flex
-          vertical
-          style={{ width: isMobile ? "100%" : 1250, margin: "auto" }}
-        >
-          <Flex
-            vertical={isMobile}
-            style={{
-              margin: "16px 0",
-            }}
-            justify="center"
-            gap={36}
-          >
-            {renderProcessStep({
-              index: 1,
-              heading: "True Discovery",
-              subHeading:
-                "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-              imageUrl: "/images/landing/brickassistv2/3-1.png",
-            })}
-            {renderProcessStep({
-              index: 2,
-              heading: "Property Evaluation",
-              subHeading:
-                "A detailed 360 report for every shortlisted project helps you evaluate and compare multiple properties. The report compiles legit data around builder, property, location and financials so that you can make an informed and confident decision. Learn more about Brick360 Report.",
-              imageUrl: "/images/landing/brickassistv2/3-2.png",
-            })}
-          </Flex>
-          <Flex
-            vertical={isMobile}
-            style={{
-              margin: "16px 0",
-            }}
-            justify="center"
-            gap={36}
-          >
-            {renderProcessStep({
-              index: 3,
-              heading: "Pre Purchase Support",
-              subHeading: "End to end support including scheduling site visits, real time inventory availability, unit selection guidance, negotitations. We are there with you to he",
-              imageUrl: "/images/landing/brickassistv2/3-3.png",
-            })}
-            {renderProcessStep({
-              index: 4,
-              heading: "Post Purchase Support",
-              subHeading:
-                "Start with couple of detailed 1:1 call to understand your requirements and take you through the Bangalore landscape. We help you navigate different areas as per your needs on basis of corridor analysis, price trends, infrastructure growth and more.",
-              imageUrl: "/images/landing/brickassistv2/3-3.png",
-            })}
-          </Flex>
-        </Flex> */}
+
+        <SectionCenter
+        isMobile={isMobile}
+        sectionData={{
+          heading:
+              <h2
+                style={{
+                  fontSize: isMobile ? 40 : 54,
+                  lineHeight: "100%",
+                  fontWeight: 800,
+                  margin: 0,
+                  color: "white"
+                }}
+              >
+              The 360 Data Framework You can Trust
+              </h2>,
+          subHeading: getDataFrameworkTabs(),
+          bgColor: COLORS.textColorDark,
+          mainImgAltText: "Testimonials from Brickfi Customers",
+          verticalPadding: isMobile ? 32 : 100,
+        }}
+      ></SectionCenter>
+         
       <Flex align="center" justify="center">
         <img
           src="/images/landing/brickassistv2/divider.png"
@@ -728,6 +812,7 @@ export default function BrickChat({
           height="auto"
         ></img>
       </Flex>
+
       <SectionCenter
         isMobile={isMobile}
         sectionData={{

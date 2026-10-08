@@ -1,6 +1,6 @@
 "use client";
 
-import { Flex, Typography } from "antd";
+import { Collapse, Flex, Typography } from "antd";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import BrickChatResults from "./brick-chat-results";
 import { ProjectResult } from "./brickchat-client";
@@ -63,20 +63,31 @@ export default function PinnedProjectResults({
             Curated by your Brickfi Advisor
           </Typography.Text>
         </Flex>
-      ) : hasChatStarted ? (
-        <Typography.Text
-          style={{
-            fontSize: FONT_SIZE.SUB_TEXT,
-            color: COLORS.textColorLight,
-          }}
-        >
-          Your saved projects ({results.length})
-        </Typography.Text>
       ) : null}
-      <BrickChatResults
-        results={results}
-        onLocateProject={onLocateProject}
-        onSelectProject={onSelectProject}
+      <Collapse
+        defaultActiveKey={[]}
+        items={[
+          {
+            key: "pinned-projects",
+            label: (
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.SUB_TEXT,
+                  color: COLORS.textColorLight,
+                }}
+              >
+                Your saved projects ({results.length})
+              </Typography.Text>
+            ),
+            children: (
+              <BrickChatResults
+                results={results}
+                onLocateProject={onLocateProject}
+                onSelectProject={onSelectProject}
+              />
+            ),
+          },
+        ]}
       />
     </Flex>
   );

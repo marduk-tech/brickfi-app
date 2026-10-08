@@ -245,7 +245,7 @@ const SectionRight: React.FC<{ sectionData: SectionProps; isMobile: boolean }> =
               alt={sectionData.mainImgAltText || ""}
               style={{
                 width: sectionData.primaryImageSize || "100%",
-                maxWidth: 900,
+                maxWidth: 1000,
               }}
             />
           ) : sectionData.mediaUrl ? (

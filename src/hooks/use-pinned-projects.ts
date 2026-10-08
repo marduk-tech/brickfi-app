@@ -25,6 +25,11 @@ export function usePinnedProjects(): UsePinnedProjectsResult {
     }
 
     const firstCollection = user.savedLvnzyProjects[0];
+    // GET /auth/myinfo/:id (see fetchUserDetails in auth.controller.js)
+    // already populates savedLvnzyProjects.projects into full LvnzyProject
+    // docs (slug/meta/score/originalProjectId.{media,info}) before this
+    // ever reaches the client - no separate fetch needed, just map each one
+    // the same way UserProjects/mapLvnzyProjectToResult already does.
     const projects = firstCollection?.projects;
 
     if (!projects?.length) {

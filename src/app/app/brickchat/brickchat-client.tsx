@@ -13,6 +13,7 @@ import {
 } from "@/hooks/use-livindex-places";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
+import { usePinnedProjects } from "@/hooks/use-pinned-projects";
 import { apiKey, baseApiUrl, queryKeys } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { useQueryClient } from "@tanstack/react-query";
@@ -249,6 +250,23 @@ export function BrickChatCore({
   const { isMobile } = useDevice();
   const queryClient = useQueryClient();
 
+  // A caller-supplied defaultProjectResults always wins; when none is given
+  // (the common case - most callers don't wire this up themselves), fall
+  // back to the current user's own pinned/saved projects automatically so
+  // every BrickChatCore usage gets a sensible default instead of a blank
+  // slate. usePinnedProjects is always called (hooks can't be conditional),
+  // so a caller that DOES pass its own defaultProjectResults still pays for
+  // this fetch - acceptable since it's a small, cached request, not worth
+  // threading an opt-out prop through for.
+  const {
+    defaultProjectResults: pinnedProjectResults,
+    defaultProjectsDescription: pinnedProjectsDescription,
+  } = usePinnedProjects();
+  const resolvedDefaultProjectResults =
+    defaultProjectResults ?? pinnedProjectResults;
+  const resolvedDefaultProjectsDescription =
+    defaultProjectsDescription ?? pinnedProjectsDescription;
+
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string>();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
@@ -431,11 +449,13 @@ export function BrickChatCore({
 
   const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
   const sharedBy = searchParams.get("sharedBy")?.trim() || undefined;
+  // Independent of PinnedProjectResults (always rendered above this, see
+  // the JSX below) - shows whenever there's no conversation actually in
+  // progress, regardless of whether a pinned/default project list exists.
   const showWelcome =
     !selectedThreadId &&
     !activeThreadId &&
     !chatHistory.length &&
-    !defaultProjectResults?.length &&
     !threadyHistoryLoading &&
     !chatLoading;
 
@@ -678,6 +698,17 @@ export function BrickChatCore({
           // question alone (see groundQueryInSeedProjects in ai.route.js).
           ...(seedProjectIdsForThisRequest?.length
             ? { seedProjectIds: seedProjectIdsForThisRequest }
+            : {}),
+          // always sent, every turn - the planner resolves a project
+          // reference against these only when it's confident the user
+          // means their saved/pinned set (see planner.js's "User's saved/
+          // pinned projects" prompt section), not as a default pool.
+          ...(resolvedDefaultProjectResults?.length
+            ? {
+                userPinnedProjects: resolvedDefaultProjectResults.map(
+                  (p) => p.projectName,
+                ),
+              }
             : {}),
         }),
       });
@@ -957,6 +988,7 @@ export function BrickChatCore({
             height: "100%",
           }}
         >
+          {/* Primary Search Input */}
           {!showMobileMap ? (
             <Form
               form={form}
@@ -1089,6 +1121,16 @@ export function BrickChatCore({
               paddingRight: 8,
             }}
           >
+            {/* Always at the top, independent of showWelcome below - the
+            component itself no-ops (returns null) when there's nothing to
+            show, so no outer conditional is needed here. */}
+            <PinnedProjectResults
+              results={resolvedDefaultProjectResults || []}
+              description={resolvedDefaultProjectsDescription}
+              hasChatStarted={!!chatHistory.length}
+              onLocateProject={handleLocateProject}
+              onSelectProject={handleSelectProject}
+            />
             {showWelcome ? (
               <Flex vertical>
                 <Flex vertical>
@@ -1125,14 +1167,6 @@ export function BrickChatCore({
                   </Flex>
                 </Flex>
               </Flex>
-            ) : defaultProjectResults?.length ? (
-              <PinnedProjectResults
-                results={defaultProjectResults}
-                description={defaultProjectsDescription}
-                hasChatStarted={!!chatHistory.length}
-                onLocateProject={handleLocateProject}
-                onSelectProject={handleSelectProject}
-              />
             ) : null}
 
             {threadyHistoryLoading && !chatHistory.length ? (
@@ -1406,6 +1440,7 @@ export function BrickChatCore({
           </Flex>
         </Flex>
 
+        {/* Map View for Desktop */}
         {!isMobile && (
           <Flex
             style={{
@@ -1438,6 +1473,7 @@ export function BrickChatCore({
           </Flex>
         )}
 
+        {/* Map View For Mobile in Expandable Drawer */}
         {isMobile && (
           <>
             <Flex
