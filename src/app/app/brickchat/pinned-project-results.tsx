@@ -27,9 +27,23 @@ export default function PinnedProjectResults({
   onLocateProject,
   onSelectProject,
 }: PinnedProjectResultsProps) {
-  if (!results?.length) {
-    return null;
-  }
+  // if (results?.length) {
+  //   return (
+  //     <div
+  //       style={{
+  //         width: 175,
+  //         height: 150,
+  //         flexShrink: 0,
+  //         backgroundImage:
+  //           "url(/images/landing/brick-chat/project-placeholder.png)",
+  //         backgroundSize: "60%",
+  //         backgroundRepeat: "no-repeat",
+  //         backgroundPosition: "center",
+  //         border: `1px solid ${COLORS.borderColor}`
+  //       }}
+  //     />
+  //   );
+  // }
 
   return (
     <Flex
@@ -101,7 +115,24 @@ export default function PinnedProjectResults({
                 Your saved projects ({results.length})
               </Typography.Text>
             ),
-            children: (
+            children: !results.length ? (
+              <div
+                style={{
+                  width: 130,
+                  height: 125,
+                  flexShrink: 0,
+                  backgroundImage:
+                    "url(/images/landing/brick-chat/project-placeholder.png)",
+                  backgroundSize: "75%",
+                  backgroundRepeat: "no-repeat",
+                  backgroundPosition: "center",
+                  border: `1px dashed ${COLORS.borderColor}`,
+                  borderRadius: 8,
+                  marginLeft: 32,
+                  marginTop: 16
+                }}
+              />
+            ) : (
               <BrickChatResults
                 results={results}
                 onLocateProject={onLocateProject}

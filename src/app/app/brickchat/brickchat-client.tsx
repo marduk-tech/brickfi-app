@@ -1122,7 +1122,7 @@ export function BrickChatCore({
             }}
           >
             {/* Always at the top, independent of showWelcome below - the
-            component itself no-ops (returns null) when there's nothing to
+            component itself renders a placeholder when there's nothing to
             show, so no outer conditional is needed here. */}
             <PinnedProjectResults
               results={resolvedDefaultProjectResults || []}
