@@ -1135,14 +1135,14 @@ export function BrickChatCore({
               <Flex vertical>
                 <Flex vertical>
                   <Typography.Text
-                    style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
+                    style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_2, fontWeight: 600 }}
                   >
                     Welcome to Brickfi
                   </Typography.Text>
                   <Typography.Text
                     style={{
                       marginBottom: 24,
-                      fontSize: FONT_SIZE.HEADING_4,
+                      fontSize: FONT_SIZE.SUB_TEXT,
                       color: COLORS.textColorLight,
                     }}
                   >
