@@ -180,7 +180,7 @@ export default function BrickChat({
               style={{
                 flexShrink: 0,
                 width: isMobile ? 220 : 280,
-                padding: "12px 20px",
+                padding: "8px 16px",
                 borderRadius: 16,
                 marginRight: 16,
                 backgroundColor: "white",

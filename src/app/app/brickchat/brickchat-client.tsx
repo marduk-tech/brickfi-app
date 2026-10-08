@@ -44,6 +44,7 @@ import ReferredLocationChips, {
   ReferredLocationChipItem,
 } from "./referred-location-chips";
 import PinnedProjectResults from "./pinned-project-results";
+import CollapsibleAnswer from "./collapsible-answer";
 import StaticQueries from "./static-queries";
 import styles from "./brick-chat-results.module.css";
 
@@ -1222,27 +1223,34 @@ export function BrickChatCore({
                         </Typography.Text>
                       ) : null}
 
-                      <Markdown
-                        className="bkchat-summary"
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          p: ({ children }) => (
-                            <Typography.Text
-                              style={{
-                                fontSize: FONT_SIZE.HEADING_3,
-                                fontWeight: 500,
-                                marginBottom: 16,
-                                display: "block",
-                                maxWidth: 850,
-                              }}
-                            >
-                              {children}
-                            </Typography.Text>
-                          ),
-                        }}
+                      {/* earlier turns clamp to 300px behind "See more" so
+                      the thread stays scannable; the latest turn always
+                      shows in full */}
+                      <CollapsibleAnswer
+                        collapsible={index < chatHistory.length - 1}
                       >
-                        {messageItem.answer.summary}
-                      </Markdown>
+                        <Markdown
+                          className="bkchat-summary"
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            p: ({ children }) => (
+                              <Typography.Text
+                                style={{
+                                  fontSize: FONT_SIZE.HEADING_3,
+                                  fontWeight: 500,
+                                  marginBottom: 16,
+                                  display: "block",
+                                  maxWidth: 850,
+                                }}
+                              >
+                                {children}
+                              </Typography.Text>
+                            ),
+                          }}
+                        >
+                          {messageItem.answer.summary}
+                        </Markdown>
+                      </CollapsibleAnswer>
                       {renderImages(messageItem.answer.images)}
                       <Flex vertical>
                         {/* <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text> */}
