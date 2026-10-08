@@ -974,7 +974,7 @@ export function BrickChatCore({
       style={{
         width: "100%",
         maxWidth: 2000,
-        height: "calc(100vh - 60px)",
+        height: "calc(100vh - 100px)",
         padding: 8,
         overflowY: "scroll",
       }}
@@ -1558,7 +1558,10 @@ export function BrickChatCore({
                 <BrickMapChat
                   projects={projectResults || []}
                   focusedProjectId={focusedProjectId}
-                  hideAllFilters={!showMobileMap || !!focusedReferredLocation}
+                  // not tied to showMobileMap: hideAllFilters also disables
+                  // driver filtering (see useMapFilters), so flipping it on
+                  // close made every driver render during the slide-out
+                  hideAllFilters={!!focusedReferredLocation}
                   detailedProject={
                     selectedProject ? selectedLvnzyProject : undefined
                   }
