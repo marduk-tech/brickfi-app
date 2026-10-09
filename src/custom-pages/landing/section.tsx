@@ -165,6 +165,7 @@ const SectionLeft: React.FC<{ sectionData: SectionProps; isMobile: boolean }> = 
               : sectionData.fullHeight
               ? "100vh"
               : "auto",
+              marginTop: isMobile ? 32: 0,
             padding: isMobile ? "0 8px" : "0 32px",
           }}
           align="center"

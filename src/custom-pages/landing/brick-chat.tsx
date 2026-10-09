@@ -179,7 +179,7 @@ export default function BrickChat({
               aria-hidden={i >= SAMPLE_QUERIES.length}
               style={{
                 flexShrink: 0,
-                width: isMobile ? 220 : 280,
+                width: isMobile ? 225 : 275,
                 padding: "8px 16px",
                 borderRadius: 16,
                 marginRight: 16,
@@ -196,28 +196,34 @@ export default function BrickChat({
                 boxShadow: `0 2px 8px ${COLORS.primaryColor}40`,
               }}
             >
-              <Typography.Text
-                style={{
-                  backgroundColor: COLORS.LANDING.LIGHT_PINK,
-                  padding: "4px 8px",
-                  fontSize: FONT_SIZE.HEADING_4,
-                  borderRadius: 8,
-                  border: `2px solid ${COLORS.LANDING.MEDIUM_PINK}`,
-                }}
-              >
-                {q.text}
-              </Typography.Text>
-              <Flex gap={8} justify="flex-start">
+                <Flex gap={8} justify="flex-start" style={{marginTop: 4}}>
                 {q.icons.map((icon) => (
+                  <Flex style={{backgroundColor: COLORS.LANDING.PINK, borderRadius: "50%", padding: 4}}>
                   <DynamicReactIcon
                     key={`${icon.iconSet}-${icon.iconName}`}
                     iconName={icon.iconName}
                     iconSet={icon.iconSet}
                     size={20}
-                    color={COLORS.LANDING.PINK}
+                    color="white"
                   />
+                  </Flex>
                 ))}
               </Flex>
+              <Typography.Text
+                style={{
+                  backgroundColor: COLORS.LANDING.LIGHT_PINK,
+                  padding: "4px 8px",
+                  fontSize: FONT_SIZE.HEADING_3,
+                  borderRadius: 8,
+                  border: `2px solid ${COLORS.LANDING.MEDIUM_PINK}`,
+                  marginBottom: 8,
+                  marginTop: 8,
+                  lineHeight: "130%"
+                }}
+              >
+                {q.text}
+              </Typography.Text>
+            
             </div>
           ))}
         </div>
@@ -657,7 +663,7 @@ export default function BrickChat({
         style={{ margin: "auto", marginBottom: 100 }}
         src={
           isMobile
-            ? "/images/landing/brick-chat/landing-demo.png"
+            ? "/images/landing/brick-chat/landing-demo-mob.png"
             : "/images/landing/brick-chat/landing-demo.png"
         }
       />
@@ -703,7 +709,7 @@ export default function BrickChat({
           style={{ margin: "auto", marginBottom: 100 }}
           src={
             isMobile
-              ? "/images/landing/brick-chat/brickchat-stats-2.png"
+              ? "/images/landing/brick-chat/brickchat-stats-2-mob.png"
               : "/images/landing/brick-chat/brickchat-stats-2.png"
           }
         />
@@ -780,9 +786,9 @@ export default function BrickChat({
           verticalPadding: 100,
           textColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: isMobile
-            ? "/images/landing/brick-chat/brickchat-features.png"
+            ? "/images/landing/brick-chat/brickchat-features-mob.png"
             : "/images/landing/brick-chat/brickchat-features.png",
-          primaryImageSize: "65%",
+          primaryImageSize: isMobile ? "90%":"65%",
         }}
       ></SectionCenter>
 
