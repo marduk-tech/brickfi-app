@@ -696,7 +696,7 @@ export default function BrickChat({
           </h2>
         </Flex>
         <img
-          width={350}
+          width={isMobile ? 350: 500}
           style={{ margin: "auto", marginBottom: 100, marginTop: 64 }}
           src={
             isMobile
@@ -718,12 +718,12 @@ export default function BrickChat({
         isMobile={isMobile}
         sectionData={{
           bgColor: COLORS.textColorDark,
-          sectionMaxWidth: isMobile ? "100%" : 1300,
+          sectionMaxWidth: isMobile ? "100%" : 1400,
           heading: (
             <Flex vertical>
               <h2
                 style={{
-                  fontSize: isMobile ? 40 : 50,
+                  fontSize: isMobile ? 40 : 54,
                   color: COLORS.LANDING.LIGHT_PINK,
                   lineHeight: "100%",
                   fontWeight: 800,
@@ -752,7 +752,7 @@ export default function BrickChat({
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/brickchat-vs-broker.png"
             : "/images/landing/brick-chat/brickchat-vs-broker.png",
-          primaryImageSize: isMobile ? "90%" : "70%",
+          primaryImageSize: isMobile ? "90%" : "80%",
         }}
       ></SectionLeft>
 
@@ -765,7 +765,7 @@ export default function BrickChat({
             <Flex vertical align="center">
               <h2
                 style={{
-                  fontSize: isMobile ? 40 : 50,
+                  fontSize: isMobile ? 40 : 54,
                   color: "white",
                   lineHeight: "100%",
                   fontWeight: 800,
