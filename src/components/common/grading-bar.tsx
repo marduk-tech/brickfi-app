@@ -91,8 +91,9 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
         style={{
           color: COLORS.textColorDark,
           backgroundColor: COLORS.bgColor,
-          borderRadius: 6,
-          padding: "1px 4px",
+          padding: "5px 5px",
+          borderTopRightRadius: 16,
+          borderBottomRightRadius: 16
         }}
         gap={4}
         align="center"
@@ -102,13 +103,13 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
          <Typography.Text
           style={{
             fontWeight: 400,
-            fontSize: FONT_SIZE.PARA,
+            fontSize: FONT_SIZE.HEADING_3,
             color: value ? COLORS.textColorDark: COLORS.textColorLight,
           }}
         >
           {value ? Math.round(value * 5) / 100 : "X X"}
         </Typography.Text>
-        {getSmileyIcon(value, 18)}
+        {getSmileyIcon(value, 20)}
       </Flex>
     );
   }

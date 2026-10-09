@@ -37,7 +37,7 @@ export const getMinMaxPrices = (prices: number[]) => {
 
   return max == min
     ? rupeeAmountFormat(min)
-    : `${rupeeAmountFormat(min)} - ${rupeeAmountFormat(max)}`;
+    : `${rupeeAmountFormat(min)}-${rupeeAmountFormat(max)}`;
 };
 const toRoman = (num: number) => {
   const romanMap: [number, string][] = [
@@ -104,8 +104,8 @@ export const rupeeAmountFormat = (amt: string | number) => {
     return amt;
   }
   const val = Math.abs(amtNum);
-  if (val >= 10000000) return `${(amtNum / 10000000).toFixed(2)} Cr`;
-  if (val >= 100000) return `${(amtNum / 100000).toFixed(2)} Lacs`;
+  if (val >= 10000000) return `${(amtNum / 10000000).toFixed(1)} Cr`;
+  if (val >= 100000) return `${Math.round(amtNum / 100000)} Lacs`;
   return amtNum;
 };
 

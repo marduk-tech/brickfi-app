@@ -3,7 +3,10 @@ import moment from "moment";
 import { forwardRef, useState } from "react";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 import { capitalize, getMinMaxPrices } from "../../libs/lvnzy-helper";
-import { computeProjectStatus, PROJECT_STATUS_CONFIG } from "../../libs/project-status";
+import {
+  computeProjectStatus,
+  PROJECT_STATUS_CONFIG,
+} from "../../libs/project-status";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LvnzyProject } from "../../types/LvnzyProject";
 import { useDevice } from "@/hooks/use-device";
@@ -47,15 +50,15 @@ const ADVISOR_LINK =
 const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
 
-  const {isMobile} = useDevice();
+  const { isMobile } = useDevice();
 
   const renderText = (text: string, color?: string) => {
     return (
       <Typography.Text
         style={{
-          fontSize: FONT_SIZE.PARA,
+          fontSize:isMobile ? FONT_SIZE.HEADING_3: FONT_SIZE.HEADING_3,
           margin: 0,
-          color: color || COLORS.textColorMedium,
+          color: color || "white",
         }}
       >
         {text}
@@ -73,20 +76,32 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
 
   return (
     <>
-      <Flex vertical style={{ marginTop: 4, marginBottom: 0 }}>
-        <Flex align="center" gap={8}>
-          <Flex align="center" gap={4}>
+     
+      <Flex
+        style={{
+          border: `1px solid ${COLORS.borderColor}`,
+          marginTop: 8,
+          marginBottom: 0,
+          backgroundColor: COLORS.textColorDark,
+          padding: "8px",
+          borderRadius: 8,
+        }}
+        gap={isMobile ? 16: 16}
+        vertical={isMobile}
+      >
+        <Flex align="center" gap={16}>
+          <Flex align="center" gap={8}>
             <DynamicReactIcon
               iconSet="tb"
               iconName="TbBuildingBank"
-              size={14}
-              color={COLORS.textColorMedium}
+              size={18}
+              color={"white"}
             />
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.PARA,
+                fontSize:isMobile ? FONT_SIZE.HEADING_3: FONT_SIZE.HEADING_3,
                 margin: 0,
-                color: COLORS.textColorMedium,
+                color: "white",
               }}
             >
               {lvnzyProject?.originalProjectId?.info?.developerId?.name ||
@@ -97,8 +112,8 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
             <DynamicReactIcon
               iconSet="io5"
               iconName="IoLocationSharp"
-              size={14}
-              color={COLORS.textColorMedium}
+              size={20}
+              color={"white"}
             />
             <Flex align="center">
               {renderText(`
@@ -110,84 +125,82 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
             }`)}
             </Flex>
           </Flex>
+           
+       
         </Flex>
         <Flex gap={12}>
-          <Flex align="center" gap={2}>
-            <DynamicReactIcon
-              iconSet="tb"
-              iconName="TbHome"
-              size={14}
-              color={COLORS.textColorMedium}
-            />
-            <Typography.Text
-              style={{
-                fontSize: isMobile ? FONT_SIZE.PARA: FONT_SIZE.PARA,
-                margin: 0,
-                color: COLORS.textColorMedium,
-              }}
-            >
-              {lvnzyProject?.meta.projectUnitTypes
-                .split(",")
-                .map((unitType: string) =>
-                  unitType.trim().toLowerCase() === "apartment"
-                    ? "Apt"
-                    : capitalize(unitType),
-                )
-                .join("/")}
-            </Typography.Text>
-          </Flex>
-          <Flex align="center" gap={2}>
-            <DynamicReactIcon
-              iconSet="hi"
-              iconName="HiOutlineCurrencyRupee"
-              size={14}
-              color={COLORS.textColorMedium}
-            />
-            <Typography.Text
-              style={{
-                fontSize: isMobile ? FONT_SIZE.PARA: FONT_SIZE.PARA,
-                margin: 0,
-                color: COLORS.textColorMedium,
-              }}
-            >
-              {getMinMaxPrices(
-                lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
-                  (c: any) => c.price,
-                ),
-              )}
-            </Typography.Text>
-          </Flex>
-
-          {projectStatus && projectStatusConfig && (
-            <Flex
-              align="center"
-              gap={4}
-              onClick={() => setStatusModalOpen(true)}
-              style={{
-                border: `1.5px solid ${projectStatusConfig.color}`,
-                borderRadius: 4,
-                padding: "2px 4px",
-                cursor: "pointer",
-              }}
-            >
+           <Flex align="center" gap={2} justify="center">
               <DynamicReactIcon
-                iconSet={projectStatusConfig.iconSet}
-                iconName={projectStatusConfig.iconName}
-                size={12}
-                color={projectStatusConfig.color}
+                iconSet="tb"
+                iconName="TbHome"
+                size={20}
+                color={"white"}
               />
               <Typography.Text
                 style={{
-                  fontSize: 10,
-                  fontWeight: 500,
-                  color: projectStatusConfig.color,
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_3
+                    : FONT_SIZE.HEADING_3,
+                  margin: 0,
+                  color: "white",
                 }}
               >
-                {projectStatus}
+                {lvnzyProject?.meta.projectUnitTypes
+                  .split(",")
+                  .map((unitType: string) => capitalize(unitType))
+                  .join("/")}
               </Typography.Text>
             </Flex>
-          )}
+            <Flex align="center" gap={2}>
+              <DynamicReactIcon
+                iconSet="hi"
+                iconName="HiOutlineCurrencyRupee"
+                size={22}
+                color={"white"}
+              />
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_3
+                    : FONT_SIZE.HEADING_3,
+                  margin: 0,
+                  color: "white",
+                }}
+              >
+                {getMinMaxPrices(
+                  lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
+                    (c: any) => c.price,
+                  ),
+                )}
+              </Typography.Text>
+            </Flex>
         </Flex>
+        {projectStatus && projectStatusConfig && (
+        <Flex
+          align="center"
+          gap={4}
+          onClick={() => setStatusModalOpen(true)}
+          style={{
+            cursor: "pointer",
+          }}
+        >
+          <DynamicReactIcon
+            iconSet={projectStatusConfig.iconSet}
+            iconName={projectStatusConfig.iconName}
+            size={18}
+            color={"white"}
+          />
+          <Typography.Text
+            style={{
+              fontSize:isMobile ? FONT_SIZE.HEADING_3: FONT_SIZE.HEADING_3,
+              fontWeight: 500,
+              color: "white",
+            }}
+          >
+            {projectStatus}
+          </Typography.Text>
+        </Flex>
+      )}
       </Flex>
       {projectStatus && projectStatusConfig && (
         <Modal
@@ -202,19 +215,38 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
                 size={16}
                 color={projectStatusConfig.color}
               />
-              <Typography.Text style={{ fontWeight: 600, color: projectStatusConfig.color }}>
+              <Typography.Text
+                style={{ fontWeight: 600, color: projectStatusConfig.color }}
+              >
                 {projectStatus}
               </Typography.Text>
             </Flex>
           }
         >
-          <Typography.Text style={{ fontSize: FONT_SIZE.PARA, color: COLORS.textColorMedium, lineHeight: "100%" }}>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.PARA,
+              color: "white",
+              lineHeight: "100%",
+            }}
+          >
             {projectStatusConfig.description}
           </Typography.Text>
-          <div style={{ marginTop: 12,lineHeight: "100%" }}>
-            <Typography.Text style={{ lineHeight: .4, fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}>
+          <div style={{ marginTop: 12, lineHeight: "100%" }}>
+            <Typography.Text
+              style={{
+                lineHeight: 0.4,
+                fontSize: FONT_SIZE.SUB_TEXT,
+                color: COLORS.textColorLight,
+              }}
+            >
               * For more details or for real time status, please{" "}
-              <a href={ADVISOR_LINK} target="_blank" rel="noopener noreferrer" style={{color: COLORS.textColorDark, fontWeight: 500}}>
+              <a
+                href={ADVISOR_LINK}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: COLORS.textColorDark, fontWeight: 500 }}
+              >
                 reach out to a brickfi advisor
               </a>{" "}
               today

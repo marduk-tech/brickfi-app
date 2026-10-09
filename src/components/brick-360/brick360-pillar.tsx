@@ -1287,8 +1287,8 @@ export function Brick360Highlights({
 
     function reasoningStmt(isDialog: boolean) {
       return (
-        <Flex vertical>
-          <Flex align="flex-start" gap={4} style={{ marginBottom: 8 }}>
+        <Flex vertical style={{padding: isDialog ? 0 : "8px 4px"}}>
+          <Flex align="center" gap={4} style={{  }}>
             {isDialog ? null : (
               <DynamicReactIcon
                 size={isPro ? 16 : 20}
@@ -1300,7 +1300,7 @@ export function Brick360Highlights({
             <Typography.Text
               style={{
                 fontWeight: 500,
-                fontSize: isDialog ? FONT_SIZE.HEADING_2 : FONT_SIZE.HEADING_4,
+                fontSize: isDialog ? FONT_SIZE.HEADING_2 : FONT_SIZE.HEADING_3,
                 lineHeight: "110%",
                 marginTop: isDialog ? 24 : 0,
               }}
@@ -1308,7 +1308,7 @@ export function Brick360Highlights({
               {title}
             </Typography.Text>
           </Flex>
-          {content && (
+          {content && isDialog ? (
             <div
               dangerouslySetInnerHTML={{
                 __html: `${content} ${
@@ -1327,7 +1327,7 @@ export function Brick360Highlights({
                 textWrap: "wrap",
               }}
             ></div>
-          )}
+          ): null}
         </Flex>
       );
     }
@@ -1393,16 +1393,16 @@ export function Brick360Highlights({
   return (
     <>
       <Flex vertical style={{ marginBottom: 0 }}>
-        <Typography.Text
+        {/* <Typography.Text
           style={{
-            fontSize: FONT_SIZE.PARA,
+            fontSize: FONT_SIZE.HEADING_4,
             marginBottom: 4,
             color: COLORS.textColorMedium,
             fontWeight: 600
           }}
         >
           360° HIGHLIGHTS
-        </Typography.Text>
+        </Typography.Text> */}
         {vertical ? (
           isMobile ? (
             <Flex vertical gap={12} style={{ width: "100%" }}>
@@ -1415,6 +1415,7 @@ export function Brick360Highlights({
                 gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                 gap: 12,
                 width: "100%",
+                maxWidth: 800
               }}
             >
               {cards}

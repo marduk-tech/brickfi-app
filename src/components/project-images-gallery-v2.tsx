@@ -160,6 +160,8 @@ export const ProjectGalleryV2 = ({
           overflowX: "scroll",
           whiteSpace: "nowrap",
           scrollbarWidth: "none",
+          marginBottom: 16,
+          marginTop: 16
         }}
         gap={8}
       >
@@ -181,7 +183,7 @@ export const ProjectGalleryV2 = ({
               padding: "4px 12px",
               borderRadius: 16,
               fontWeight: 500,
-              fontSize: FONT_SIZE.HEADING_4,
+              fontSize: FONT_SIZE.HEADING_3,
               backgroundColor:
                 selectedTag === tag ? COLORS.primaryColor : "white",
               color: selectedTag === tag ? "white" : COLORS.textColorMedium,
@@ -207,6 +209,8 @@ export const ProjectGalleryV2 = ({
                     margin: 0,
                     fontSize: FONT_SIZE.HEADING_2,
                     textTransform: "capitalize",
+                    fontWeight: 500,
+                    marginBottom: 8
                   }}
                 >
                   {tag == "layout"

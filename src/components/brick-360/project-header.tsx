@@ -2,6 +2,7 @@ import { Flex, Typography } from "antd";
 import MetaInfo from "./meta-info";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { forwardRef } from "react";
+import { useDevice } from "@/hooks/use-device";
 
 interface ProjectHeaderProps {
   lvnzyProject: any;
@@ -9,6 +10,8 @@ interface ProjectHeaderProps {
 
 export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
   ({ lvnzyProject }, ref) => {
+      const { isMobile } = useDevice();
+    
     return (
       <>
         {/* Main project upfront score card including metadata */}
@@ -35,8 +38,8 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
               style={{
                 margin: "0",
                 lineHeight: "100%",
-                fontSize: FONT_SIZE.HEADING_2,
-                fontWeight: 600,
+                fontSize: FONT_SIZE.HEADING_1 * .9,
+                fontWeight: 500,
               }}
             >
               {lvnzyProject?.meta.projectName}
@@ -45,10 +48,17 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
         </Flex>
 
         {/* One liner & timeline */}
-        <Flex vertical style={{ marginBottom: 8, padding: "0 8px" }}>
+        <Flex
+          vertical
+          style={{
+            margin: "16px 8px",
+            width: isMobile ? "initial" : "fit-content",
+            borderRadius: 8
+          }}
+        >
           <MetaInfo lvnzyProject={lvnzyProject!} ref={ref}></MetaInfo>
         </Flex>
       </>
     );
-  }
+  },
 );

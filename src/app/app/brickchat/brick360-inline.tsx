@@ -10,7 +10,10 @@ import {
   Brick360CategoryInfo,
   LocalStorageKeys,
 } from "../../../libs/constants";
-import { captureAnalyticsEvent, getCategoryScore } from "../../../libs/lvnzy-helper";
+import {
+  captureAnalyticsEvent,
+  getCategoryScore,
+} from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { LvnzyProject } from "../../../types/LvnzyProject";
 import {
@@ -24,6 +27,7 @@ import { ProjectHeader } from "../../../components/brick-360/project-header";
 import TimelineTabV2 from "../../../components/brick-360/timeline-tab-v2";
 import { UnitsTab } from "../../../components/brick-360/units-tab";
 import styles from "./brick360-inline.module.css";
+import { useDevice } from "@/hooks/use-device";
 
 // close button fades the container out before actually unmounting it -
 // this must match the CSS transition duration below.
@@ -79,6 +83,7 @@ export function Brick360Inline({
   };
 
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
+  const { isMobile } = useDevice();
 
   const { data: fetchedProject } = useFetchLvnzyProjectBySlug(
     slug,
@@ -189,9 +194,8 @@ export function Brick360Inline({
     }
   }, []);
 
-  const [selectedTabKey, setSelectedTabKey] = useState<string>(
-    HIGHLIGHTS_TAB_KEY,
-  );
+  const [selectedTabKey, setSelectedTabKey] =
+    useState<string>(HIGHLIGHTS_TAB_KEY);
   const tabKeyInitialized = useRef(false);
 
   const hasHighlights = !!(
@@ -203,9 +207,7 @@ export function Brick360Inline({
     if (lvnzyProject && !tabKeyInitialized.current) {
       tabKeyInitialized.current = true;
       setSelectedTabKey(
-        hasHighlights
-          ? HIGHLIGHTS_TAB_KEY
-          : PILLAR_TABS[0]?.key || "units",
+        hasHighlights ? HIGHLIGHTS_TAB_KEY : PILLAR_TABS[0]?.key || "units",
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -228,7 +230,12 @@ export function Brick360Inline({
         ]
       : []),
     ...PILLAR_TABS,
-    { key: "units", label: "Floorplans", iconName: "RiLayout2Fill", iconSet: "ri" },
+    {
+      key: "units",
+      label: "Floorplans",
+      iconName: "RiLayout2Fill",
+      iconSet: "ri",
+    },
     ...((lvnzyProject?.meta?.projectTimelines?.length ?? 0) > 0
       ? [
           {
@@ -258,26 +265,27 @@ export function Brick360Inline({
     return {
       key: tab.key,
       label: (
-        <Flex align="center" gap={2}>
-          <Flex
-            align="center"
-            gap={6}
-            style={{
-              backgroundColor: isActive ? COLORS.primaryColor : "transparent",
-              borderRadius: 16,
-              padding: isActive ? "4px 12px" : 0,
-            }}
-          >
+        <Flex
+          align="center"
+          gap={10}
+          style={{
+            backgroundColor: isActive ? COLORS.primaryColor : "transparent",
+            borderRadius: 16,
+            border: isActive ? `1.5px solid ${COLORS.primaryColor}` : `1px solid ${COLORS.borderColorMedium}`,
+            padding: isActive && selectedTabKey !== HIGHLIGHTS_TAB_KEY && categoryScore ? "0px 0 0px 12px" : "2px 12px",
+          }}
+        >
+          <Flex align="center" gap={6} style={{}}>
             <DynamicReactIcon
               iconName={tab.iconName}
               iconSet={tab.iconSet}
               color={isActive ? "white" : COLORS.textColorMedium}
-              size={16}
+              size={22}
             ></DynamicReactIcon>
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_4,
-                fontWeight: isActive ? 600: 500,
+                fontSize: FONT_SIZE.HEADING_2,
+                fontWeight: 500,
                 color: isActive ? "white" : COLORS.textColorMedium,
               }}
             >
@@ -314,9 +322,18 @@ export function Brick360Inline({
 
   // Up to 10 preview images shown as a horizontal strip right below the
   // header - "See All" opens the full MediaTab (same media/filtering logic)
-  // in a modal instead of media having its own top-level tab.
+  // in a modal instead of media having its own top-level tab. Exterior shots
+  // first, then amenities, then everything else - stable within each group,
+  // so the original media order is kept otherwise.
+  const previewImageRank = (m: any) => {
+    const tags: string[] = m.image?.tags || [];
+    if (tags.includes("exterior")) return 0;
+    if (tags.includes("amenities")) return 1;
+    return 2;
+  };
   const previewImages = (lvnzyProject?.originalProjectId?.media || [])
     .filter((m: any) => m.type === "image" && m.image?.url)
+    .sort((a: any, b: any) => previewImageRank(a) - previewImageRank(b))
     .slice(0, 10);
 
   return (
@@ -326,16 +343,19 @@ export function Brick360Inline({
         margin: "auto",
         overflowX: "hidden",
         width: "100%",
-        border: `0px solid ${COLORS.borderColor}`,
+        border: `2px solid ${COLORS.borderColor}`,
         backgroundColor: COLORS.bgColor,
         borderRadius: 12,
-        padding: "24px 8px",
+        padding: isMobile ? "16px 4px" : "24px 8px",
         opacity: isClosing ? 0 : 1,
         transition: `opacity ${CLOSE_FADE_MS}ms ease`,
-        position: "relative"
+        position: "relative",
       }}
     >
-      <Flex justify="flex-end" style={{position: "absolute", right: 0, top: 0}}>
+      <Flex
+        justify="flex-end"
+        style={{ position: "absolute", right: 0, top: 0 }}
+      >
         <Button
           type="text"
           icon={
@@ -353,16 +373,18 @@ export function Brick360Inline({
       <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
 
       {previewImages.length ? (
-        <div style={{ margin: "8px 0", padding: "0 8px 0", position: "relative" }}>
+        <div
+          style={{ margin: "8px 0", padding: "0 8px 0", position: "relative" }}
+        >
           <Flex
             gap={8}
             style={{
               width: "100%",
-              height: 125,
+              height: 150,
               overflowX: "scroll",
               scrollbarWidth: "none",
             }}
-             onClick={() => setMediaModalOpen(true)}
+            onClick={() => setMediaModalOpen(true)}
           >
             {previewImages.map((m: any, i: number) => (
               <img
@@ -375,6 +397,7 @@ export function Brick360Inline({
                   flexShrink: 0,
                   borderRadius: 8,
                   objectFit: "cover",
+                  border: `2px solid ${COLORS.borderColor}`,
                 }}
               />
             ))}
@@ -387,12 +410,18 @@ export function Brick360Inline({
               bottom: 8,
               right: 16,
               borderRadius: 8,
-              height: 24
+              height: 24,
             }}
             type="primary"
           >
-            <Typography.Text style={{fontSize: FONT_SIZE.SUB_TEXT, fontWeight: 800, color: "white"}}>
-            See All
+            <Typography.Text
+              style={{
+                fontSize: FONT_SIZE.SUB_TEXT,
+                fontWeight: 800,
+                color: "white",
+              }}
+            >
+              See All
             </Typography.Text>
           </Button>
         </div>
@@ -411,10 +440,18 @@ export function Brick360Inline({
         open={mediaModalOpen}
         onCancel={() => setMediaModalOpen(false)}
         footer={null}
-        title="Media"
+        title=""
         width={900}
         destroyOnHidden
-        styles={{ mask: { backgroundColor: "transparent" } }}
+        styles={{
+          // capped at 800px, or less on short screens so the modal never
+          // runs off the viewport - the media list scrolls inside
+          body: {
+            maxHeight: "min(700px, calc(100vh - 120px))",
+            overflowY: "auto",
+            scrollbarWidth: "none",
+          },
+        }}
       >
         <MediaTab lvnzyProject={lvnzyProject} />
       </Modal>
