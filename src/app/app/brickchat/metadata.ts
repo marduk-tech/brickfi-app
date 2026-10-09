@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import BrickChatClient from "./brickchat/brickchat-client";
 
+// shared by /app/brickchat and /app/brickchat/[threadId]
 const META_DESCR =
   "BrickChat. Find the perfect home.";
 const META_TITLE = "BrickChat";
@@ -61,7 +61,3 @@ export const metadata: Metadata = {
     },
   },
 };
-
-export default async function AppHomePage() {
-  return <BrickChatClient />;
-}

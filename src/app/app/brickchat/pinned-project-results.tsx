@@ -2,17 +2,25 @@
 
 import { CaretRightOutlined } from "@ant-design/icons";
 import { Collapse, Flex, Typography } from "antd";
+import { useEffect, useState } from "react";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import BrickChatResults from "./brick-chat-results";
 import { ProjectResult } from "./brickchat-client";
 import styles from "./pinned-project-results.module.css";
 
+const PINNED_KEY = "pinned-projects";
+
 interface PinnedProjectResultsProps {
   results: ProjectResult[];
   description?: string;
   hasChatStarted: boolean;
+  // expanded by default with no thread in progress (fresh chat), collapsed
+  // once one is - re-applied whenever that flips, manual toggles in between
+  // are kept
+  hasActiveThread: boolean;
   onLocateProject?: (projectId: string) => void;
   onSelectProject?: (project: ProjectResult) => void;
+  selectedProjectId?: string;
 }
 
 // Always-visible strip of the seeded/default project set (e.g. a user's
@@ -24,9 +32,17 @@ export default function PinnedProjectResults({
   results,
   description,
   hasChatStarted,
+  hasActiveThread,
   onLocateProject,
   onSelectProject,
+  selectedProjectId,
 }: PinnedProjectResultsProps) {
+  const [expanded, setExpanded] = useState(!hasActiveThread);
+
+  useEffect(() => {
+    setExpanded(!hasActiveThread);
+  }, [hasActiveThread]);
+
   // if (results?.length) {
   //   return (
   //     <div
@@ -83,7 +99,10 @@ export default function PinnedProjectResults({
       <Collapse
         ghost
         className={styles.collapse}
-        defaultActiveKey={[]}
+        activeKey={expanded ? [PINNED_KEY] : []}
+        onChange={(keys) =>
+          setExpanded((Array.isArray(keys) ? keys : [keys]).includes(PINNED_KEY))
+        }
         expandIcon={({ isActive }) => (
           <Flex
             align="center"
@@ -104,7 +123,7 @@ export default function PinnedProjectResults({
         )}
         items={[
           {
-            key: "pinned-projects",
+            key: PINNED_KEY,
             label: (
               <Typography.Text
                 style={{
@@ -137,6 +156,7 @@ export default function PinnedProjectResults({
                 results={results}
                 onLocateProject={onLocateProject}
                 onSelectProject={onSelectProject}
+                selectedProjectId={selectedProjectId}
                 minimal
               />
             ),

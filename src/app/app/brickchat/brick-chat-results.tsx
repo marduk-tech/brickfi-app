@@ -7,6 +7,7 @@ import { safeStorage } from "@/libs/browser-utils";
 import { LocalStorageKeys } from "@/libs/constants";
 import {
   capitalize,
+  getSaveCollectionIndex,
   removeDuplicatesAndPrepend,
   rupeeAmountFormat,
 } from "@/libs/lvnzy-helper";
@@ -39,13 +40,14 @@ interface BrickChatResultsProps {
    * full card treatment every other results list gets).
    */
   minimal?: boolean;
+  /** projectId of the project currently open in the inline 360 view - its card gets a highlighted border. */
+  selectedProjectId?: string;
 }
 
-// Pull the ids of projects already in the user's default collection
+// Pull the ids of projects already in the user's save collection (their
+// first one - see getSaveCollectionIndex)
 const getDefaultCollectionIds = (user: any): string[] => {
-  const defaultCollection = (user?.savedLvnzyProjects || []).find(
-    (c: any) => c.collectionName === "default",
-  );
+  const defaultCollection = (user?.savedLvnzyProjects || [])[0];
   return (defaultCollection?.projects || []).map((p: any) =>
     (p?._id || p)?.toString(),
   );
@@ -89,7 +91,13 @@ export default function BrickChatResults({
   skipOneLiner,
   skipSort,
   minimal,
+  selectedProjectId,
 }: BrickChatResultsProps) {
+  const cardBorder = (project: ProjectResult) =>
+    project.projectId === selectedProjectId
+      ? `8px solid ${COLORS.primaryColor}`
+      : `1px solid ${COLORS.borderColor}`;
+
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const [messageApi, contextHolder] = message.useMessage();
@@ -121,9 +129,7 @@ export default function BrickChatResults({
       okText: isSaved ? "Remove" : "Save",
       onOk: async () => {
         const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
-        const defaultCollectionIndex = savedLvnzyProjects.findIndex(
-          (c: any) => c.collectionName === "default",
-        );
+        const defaultCollectionIndex = getSaveCollectionIndex(savedLvnzyProjects);
 
         if (defaultCollectionIndex === -1) {
           // nothing saved yet - create default collection with this project
@@ -206,7 +212,7 @@ export default function BrickChatResults({
                 borderRadius: 12,
                 overflow: "hidden",
                 margin: "8px 0",
-                border: `1px solid ${COLORS.borderColor}`,
+                border: cardBorder(project),
               }}
               styles={{ body: { padding: 0 } }}
               cover={
@@ -360,7 +366,7 @@ export default function BrickChatResults({
               display: "block",
               overflow: "hidden",
               margin: "8px 0",
-              border: `1px solid ${COLORS.borderColor}`,
+              border: cardBorder(project),
             }}
             styles={{ body: { padding: 0 } }}
             cover={

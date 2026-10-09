@@ -98,13 +98,36 @@ export const getLvnzyProjectsDisplayCards = async (
   const data: ProjectResult[] = await res.json();
   // buildProjectListItem omits oneLiner/rankScore entirely when neither
   // applies (dropped by JSON.stringify) - default them here so this still
-  // satisfies ProjectResult's (non-optional) shape, same convention the
-  // client's old mapLvnzyProjectToResult used (oneLiner: "").
+  // satisfies ProjectResult's (non-optional) shape.
   return (data || []).map((p) => ({
     ...p,
     oneLiner: p.oneLiner || "",
     rankScore: p.rankScore || 0,
   }));
+};
+
+// One project card (same shape as getLvnzyProjectsDisplayCards' entries) by
+// any of its identifiers - originalProjectId, lvnzyProjectId or slug, all
+// resolved server-side (see resolveProjectId in the backend's
+// project-display-cache.service.js). null when nothing matches.
+export const getLvnzyProjectDisplayCard = async (
+  idOrSlug: string,
+): Promise<ProjectResult | null> => {
+  const res = await fetch(
+    `${baseApiUrl}lvnzy-projects/display-cache/${encodeURIComponent(idOrSlug)}`,
+    {
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": apiKey || "",
+      },
+    },
+  );
+
+  if (!res.ok) return null;
+
+  const p: ProjectResult = await res.json();
+  return { ...p, oneLiner: p.oneLiner || "", rankScore: p.rankScore || 0 };
 };
 
 // Query for ObjectId-based operations (internal)

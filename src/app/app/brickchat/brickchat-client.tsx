@@ -14,7 +14,16 @@ import {
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
 import { usePinnedProjects } from "@/hooks/use-pinned-projects";
-import { apiKey, baseApiUrl, queryKeys } from "@/libs/constants";
+import { useUpdateUserMutation } from "@/hooks/user-hooks";
+import { safeStorage } from "@/libs/browser-utils";
+import {
+  apiKey,
+  baseApiUrl,
+  LocalStorageKeys,
+  queryKeys,
+} from "@/libs/constants";
+import { addProjectToDefaultCollection } from "@/libs/lvnzy-helper";
+import { getLvnzyProjectDisplayCard } from "@/queries/lvnzy-projects";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -32,7 +41,7 @@ import {
   Typography,
   message,
 } from "antd";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
@@ -197,76 +206,50 @@ const openSharedThread = async (
   return { history: json?.data || [], threadId: json?.meta?.threadId };
 };
 
+// Threads open at /app/brickchat/<threadId> (see the [threadId] route).
+export const BRICKCHAT_THREAD_PATH_BASE = "/app/brickchat";
+
 interface BrickChatCoreProps {
-  defaultProjectResults?: ProjectResult[];
-  defaultProjectsDescription?: string;
   /**
-   * When set and there's no thread already open (no ?threadId=, no history),
+   * Keeps the open thread in the URL as `${threadPathBase}/<threadId>` (e.g.
+   * "/app/brickchat") and reads it back from there.
+   */
+  threadPathBase?: string;
+  /**
+   * When set and there's no thread already open (no thread id, no history),
    * automatically submits this question on mount instead of waiting for the
-   * user to type - e.g. an initial "compare my saved projects" query.
+   * user to type - e.g. the landing page's ?q= search.
    */
   autoStartQuestion?: string;
   /**
-   * Saved LvnzyProject ids to ground the auto-started query in (sent
-   * alongside the question on that first request only) - the backend
-   * resolves these to canonical project names and grounds the comparison
-   * in exactly them (see resolveExploreRequest/groundQueryInSeedProjects
-   * in ai.route.js).
+   * A project to open in the inline 360 view on load (the /app/<projectRef>
+   * route) - an lvnzyProjectId, slug or originalProjectId. Opened straight
+   * from the user's pinned projects when it's one of them; otherwise fetched
+   * by id/slug and added to their default saved collection.
    */
-  seedProjectIds?: string[];
-  /** Fires once, the first time a new thread id is assigned to this conversation. */
-  onThreadCreated?: (threadId: string) => void;
-  /**
-   * Fires when the thread named by ?threadId= (from defaultProjectResults'
-   * caller, e.g. a stored compareThreadId) fails to load - e.g. it expired
-   * or was deleted server-side. Lets the caller stop re-syncing that same
-   * dead id back into the URL, which would otherwise loop forever against
-   * the url-clearing this component already does on failure.
-   */
-  onThreadLoadError?: (threadId: string) => void;
-  /**
-   * Hides the question bubble for the thread's first turn - for a seeded
-   * entry point (autoStartQuestion) where that turn is always the
-   * auto-generated question, not something the user typed. Applies whether
-   * that first turn is currently streaming or was loaded from history on a
-   * resumed thread.
-   */
-  hideFirstQuestion?: boolean;
+  projectRef?: string;
 }
 
 export function BrickChatCore({
-  defaultProjectResults,
-  defaultProjectsDescription,
+  threadPathBase,
   autoStartQuestion,
-  seedProjectIds,
-  onThreadCreated,
-  onThreadLoadError,
-  hideFirstQuestion,
+  projectRef,
 }: BrickChatCoreProps) {
   const [form] = Form.useForm();
-  const { user } = useUser();
-  const router = useRouter();
+  const { user, refetch: refetchUser } = useUser();
+  const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { isMobile } = useDevice();
   const queryClient = useQueryClient();
 
-  // A caller-supplied defaultProjectResults always wins; when none is given
-  // (the common case - most callers don't wire this up themselves), fall
-  // back to the current user's own pinned/saved projects automatically so
-  // every BrickChatCore usage gets a sensible default instead of a blank
-  // slate. usePinnedProjects is always called (hooks can't be conditional),
-  // so a caller that DOES pass its own defaultProjectResults still pays for
-  // this fetch - acceptable since it's a small, cached request, not worth
-  // threading an opt-out prop through for.
+  // the current user's own pinned/saved projects - shown in
+  // PinnedProjectResults and sent with every turn as userPinnedProjects
   const {
     defaultProjectResults: pinnedProjectResults,
     defaultProjectsDescription: pinnedProjectsDescription,
+    isLoading: pinnedProjectsLoading,
   } = usePinnedProjects();
-  const resolvedDefaultProjectResults =
-    defaultProjectResults ?? pinnedProjectResults;
-  const resolvedDefaultProjectsDescription =
-    defaultProjectsDescription ?? pinnedProjectsDescription;
 
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [activeThreadId, setActiveThreadId] = useState<string>();
@@ -282,7 +265,7 @@ export function BrickChatCore({
 
   const [projectResults, setProjectResults] = useState<
     ProjectResult[] | undefined
-  >(defaultProjectResults);
+  >();
   const [mapResultsIndex, setMapResultsIndex] = useState<number | undefined>();
   const [focusedProjectId, setFocusedProjectId] = useState<string | null>(null);
 
@@ -306,7 +289,7 @@ export function BrickChatCore({
   );
 
   // historyIndex is the chatHistory index the clicked project card belongs
-  // to (undefined for the PinnedProjectResults/defaultProjectResults card,
+  // to (undefined for a PinnedProjectResults card,
   // which isn't part of chatHistory) - activates that message's own results
   // list as the active one on the map first (same reasoning as the "N
   // Projects" button fix: a fresh projectResults array reference so
@@ -320,7 +303,7 @@ export function BrickChatCore({
     setProjectResults(
       historyIndex !== undefined
         ? [...(chatHistory[historyIndex]?.answer.projectsList || [])]
-        : [...(defaultProjectResults || [])],
+        : [...(pinnedProjectResults || [])],
     );
     if (isMobile) setShowMobileMap(true);
     setTimeout(
@@ -400,6 +383,63 @@ export function BrickChatCore({
     setPillarMapConfig(null);
   };
 
+  // /app/<projectRef>: open that project once pinned projects have loaded -
+  // straight from the pinned list when it's already there, otherwise fetch
+  // it by id/slug, open it, and save it to the user's default collection
+  // (refetching the user re-derives the pinned list with it included).
+  const handledProjectRefRef = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!projectRef || !user?._id || pinnedProjectsLoading) return;
+    if (handledProjectRefRef.current === projectRef) return;
+    handledProjectRefRef.current = projectRef;
+
+    const pinned = (pinnedProjectResults || []).find(
+      (p) =>
+        p.lvnzyProjectId === projectRef ||
+        p.projectSlug === projectRef ||
+        p.projectId === projectRef,
+    );
+    if (pinned) {
+      handleSelectProject(pinned);
+      return;
+    }
+
+    const openAndSaveProject = async () => {
+      const project = await getLvnzyProjectDisplayCard(projectRef);
+      if (!project) {
+        message.error("Project not found.");
+        return;
+      }
+      handleSelectProject(project);
+
+      if (!project.lvnzyProjectId) return;
+      try {
+        await updateUser.mutateAsync({
+          userData: {
+            savedLvnzyProjects: addProjectToDefaultCollection(
+              user.savedLvnzyProjects,
+              project.lvnzyProjectId,
+            ),
+          },
+        });
+        // same cache-bust BrickChatResults' save toggle does, so useUser
+        // actually refetches rather than serving the localStorage copy
+        const cached = safeStorage.getItem(LocalStorageKeys.user);
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          parsed.updated = new Date(0).toString();
+          safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(parsed));
+        }
+        refetchUser();
+      } catch {
+        // update failures are already toasted by useUpdateUserMutation
+      }
+    };
+
+    void openAndSaveProject();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectRef, user?._id, pinnedProjectsLoading, pinnedProjectResults]);
+
   // Reported by Brick360Pillar (via Brick360Inline) when a data-point panel
   // is expanded/collapsed - narrows the primary map to just that pillar's
   // relevant drivers/surroundings/nearby-pricing instead of the whole
@@ -441,14 +481,19 @@ export function BrickChatCore({
   const [shareLink, setShareLink] = useState<string>();
   const [sharePreparing, setSharePreparing] = useState(false);
 
-  useEffect(() => {
-    if (defaultProjectResults?.length) setProjectResults(defaultProjectResults);
-  }, [defaultProjectResults]);
-
-  const pendingSeedProjectIdsRef = useRef<string[] | undefined>(undefined);
   const autoStartFiredRef = useRef(false);
 
-  const selectedThreadId = searchParams.get("threadId")?.trim() || undefined;
+  // With threadPathBase, the open thread lives in the path
+  // (/app/brickchat/<threadId>) - read from usePathname rather than the
+  // route's params, so URL updates made via history.replaceState (see
+  // syncThreadUrl) are picked up without a route change/remount.
+  const pathThreadId =
+    threadPathBase && pathname.startsWith(`${threadPathBase}/`)
+      ? decodeURIComponent(
+          pathname.slice(threadPathBase.length + 1).split("/")[0],
+        ).trim()
+      : undefined;
+  const selectedThreadId = pathThreadId || undefined;
   const sharedBy = searchParams.get("sharedBy")?.trim() || undefined;
   // Independent of PinnedProjectResults (always rendered above this, see
   // the JSX below) - shows whenever there's no conversation actually in
@@ -458,11 +503,11 @@ export function BrickChatCore({
     !activeThreadId &&
     !chatHistory.length &&
     !threadyHistoryLoading &&
-    !chatLoading;
+    !chatLoading &&
+    !selectedProject;
 
   // Auto-submit autoStartQuestion once, only when landing fresh (no thread
-  // selected/active/loading and no history yet) - e.g. the initial
-  // "compare my saved projects" query on the account page.
+  // selected/active/loading and no history yet).
   useEffect(() => {
     if (autoStartFiredRef.current) return;
     if (!autoStartQuestion || !user?._id) return;
@@ -476,12 +521,10 @@ export function BrickChatCore({
     }
 
     autoStartFiredRef.current = true;
-    pendingSeedProjectIdsRef.current = seedProjectIds;
     form.setFieldsValue({ question: autoStartQuestion });
     form.submit();
   }, [
     autoStartQuestion,
-    seedProjectIds,
     user?._id,
     selectedThreadId,
     activeThreadId,
@@ -490,22 +533,28 @@ export function BrickChatCore({
     form,
   ]);
 
-  const syncThreadSearchParam = (threadId?: string) => {
+  // Points the URL at `${threadPathBase}/<threadId>` (or the bare base with no
+  // thread). history.replaceState rather than router.replace: going from
+  // /app/brickchat to /app/brickchat/<id> crosses into the [threadId] route
+  // segment, and a router navigation would remount this component mid-
+  // conversation - Next.js syncs replaceState into usePathname/
+  // useSearchParams without one. No-op for embedded usages (no base).
+  const syncThreadUrl = (
+    threadId?: string,
+    { dropParams = [] as string[] } = {},
+  ) => {
+    if (!threadPathBase) return;
     const params = new URLSearchParams(searchParams.toString());
     // ?q= has already been consumed as autoStartQuestion - drop it so it
     // doesn't linger in (or get shared via) the thread URL.
     params.delete("q");
+    dropParams.forEach((p) => params.delete(p));
 
-    if (threadId) {
-      params.set("threadId", threadId);
-    } else {
-      params.delete("threadId");
-    }
-
+    const path = threadId
+      ? `${threadPathBase}/${encodeURIComponent(threadId)}`
+      : threadPathBase;
     const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, {
-      scroll: false,
-    });
+    window.history.replaceState(null, "", query ? `${path}?${query}` : path);
   };
 
   // The "Recent Chats" list itself now lives in the global sidebar drawer
@@ -561,8 +610,7 @@ export function BrickChatCore({
         setChatHistory([]);
 
         setThreadyHistoryLoading(false);
-        onThreadLoadError?.(selectedThreadId);
-        router.replace(pathname, { scroll: false });
+        syncThreadUrl();
       } finally {
         if (!cancelled) {
           setThreadyHistoryLoading(false);
@@ -578,9 +626,6 @@ export function BrickChatCore({
   }, [
     activeThreadId,
     chatHistory.length,
-    onThreadLoadError,
-    pathname,
-    router,
     selectedThreadId,
     sharedBy,
     user?._id,
@@ -627,10 +672,7 @@ export function BrickChatCore({
         setThreadyHistoryLoading(false);
 
         // Drop sharedBy and point the URL at the user's own thread copy.
-        router.replace(
-          newThreadId ? `${pathname}?threadId=${newThreadId}` : pathname,
-          { scroll: false },
-        );
+        syncThreadUrl(newThreadId, { dropParams: ["sharedBy"] });
       } catch (error) {
         if (cancelled) {
           return;
@@ -642,7 +684,7 @@ export function BrickChatCore({
         setChatHistory([]);
 
         setThreadyHistoryLoading(false);
-        router.replace(pathname, { scroll: false });
+        syncThreadUrl(undefined, { dropParams: ["sharedBy"] });
       } finally {
         if (!cancelled) {
           setThreadyHistoryLoading(false);
@@ -676,10 +718,17 @@ export function BrickChatCore({
     setSteps([]);
     setStreamingSummary(undefined);
     form.resetFields();
+    // captured before the reset below - sent with this turn so the planner
+    // can resolve "this project"/"it" to whatever was open (see planner.js's
+    // "Project open in the user's view")
+    const openProjectName = selectedProject?.projectName;
+    // a new turn moves the conversation on - close any open 360 view (same
+    // reset as Brick360Inline's own onClose) so the new answer isn't hidden
+    // behind it and the map goes back to the results
+    setSelectedProject(null);
+    setPillarMapConfig(null);
 
     const runStartedAt = Date.now();
-    const seedProjectIdsForThisRequest = pendingSeedProjectIdsRef.current;
-    pendingSeedProjectIdsRef.current = undefined;
 
     try {
       const res = await fetch(`${baseApiUrl}ai/explore-projects/stream`, {
@@ -694,19 +743,15 @@ export function BrickChatCore({
           limit: 10,
           userId: user._id,
           threadId: activeThreadId,
-          // only meaningful on a brand new thread - the backend grounds the
-          // comparison in these exact projects instead of the free-text
-          // question alone (see groundQueryInSeedProjects in ai.route.js).
-          ...(seedProjectIdsForThisRequest?.length
-            ? { seedProjectIds: seedProjectIdsForThisRequest }
-            : {}),
+          // null when nothing's open, so the backend clears last turn's
+          selectedProject: openProjectName || null,
           // always sent, every turn - the planner resolves a project
           // reference against these only when it's confident the user
           // means their saved/pinned set (see planner.js's "User's saved/
           // pinned projects" prompt section), not as a default pool.
-          ...(resolvedDefaultProjectResults?.length
+          ...(pinnedProjectResults?.length
             ? {
-                userPinnedProjects: resolvedDefaultProjectResults.map(
+                userPinnedProjects: pinnedProjectResults.map(
                   (p) => p.projectName,
                 ),
               }
@@ -830,8 +875,7 @@ export function BrickChatCore({
 
       if (!activeThreadId && resolvedThreadId) {
         setActiveThreadId(resolvedThreadId);
-        syncThreadSearchParam(resolvedThreadId);
-        onThreadCreated?.(resolvedThreadId);
+        syncThreadUrl(resolvedThreadId);
       }
 
       refreshChatThreads();
@@ -852,7 +896,7 @@ export function BrickChatCore({
     setCurrentQuestion(undefined);
     setMapResultsIndex(undefined);
     setThreadyHistoryLoading(false);
-    syncThreadSearchParam();
+    syncThreadUrl();
   };
 
   const handleShare = async () => {
@@ -867,7 +911,9 @@ export function BrickChatCore({
 
     try {
       await shareThread(user._id, threadId);
-      const link = `${window.location.origin}${pathname}?threadId=${threadId}&sharedBy=${user._id}`;
+      // always the standalone chat page, even when shared from an embedded
+      // usage - that's the only place a thread can be opened from a link
+      const link = `${window.location.origin}/app/brickchat/${encodeURIComponent(threadId)}?sharedBy=${user._id}`;
       setShareLink(link);
     } catch (error) {
       console.error("Failed to prepare share link:", error);
@@ -980,34 +1026,34 @@ export function BrickChatCore({
       }}
     >
       <Flex
-          vertical
-          style={{
-            margin: "0 auto",
-            position: "relative",
-            paddingBottom: 100,
-            width: isMobile ? "100%" : "57%",
-            height: "100%",
-          }}
-        >
-          {/* Primary Search Input */}
-          {!showMobileMap ? (
-            <Form
-              form={form}
-              onFinish={handleSearch}
-              style={{
-                marginTop: 8,
-                position: "absolute",
-                bottom: 8,
-                width: "100%",
-                backgroundColor: "white",
-                // just enough to sit above the scrollable chat list behind
-                // it - antd Modal's own mask/dialog default to zIndex 1000,
-                // so anything >= that renders on top of a modal's backdrop
-                zIndex: 2,
-              }}
-            >
-              <Flex justify="flex-end" style={{ marginBottom: 2 }}>
-                {/* {(activeThreadId || selectedThreadId) && (
+        vertical
+        style={{
+          margin: "0 auto",
+          position: "relative",
+          paddingBottom: 100,
+          width: isMobile ? "100%" : "57%",
+          height: "100%",
+        }}
+      >
+        {/* Primary Search Input */}
+        {!showMobileMap ? (
+          <Form
+            form={form}
+            onFinish={handleSearch}
+            style={{
+              marginTop: 8,
+              position: "absolute",
+              bottom: 8,
+              width: "100%",
+              backgroundColor: "white",
+              // just enough to sit above the scrollable chat list behind
+              // it - antd Modal's own mask/dialog default to zIndex 1000,
+              // so anything >= that renders on top of a modal's backdrop
+              zIndex: 2,
+            }}
+          >
+            <Flex justify="flex-end" style={{ marginBottom: 2 }}>
+              {/* {(activeThreadId || selectedThreadId) && (
                   <Tooltip title="Share chat">
                     <Button
                       type="text"
@@ -1029,39 +1075,12 @@ export function BrickChatCore({
                     />
                   </Tooltip>
                 )} */}
-                <BrickchatFeedback
-                  threadId={activeThreadId || selectedThreadId}
-                  userId={user?._id}
-                />
-                {(activeThreadId || selectedThreadId) && (
-                  <Tooltip title="View in LangSmith">
-                    <Button
-                      type="text"
-                      style={{
-                        padding: "8px 0",
-                        height: "auto",
-                        width: 32,
-                        lineHeight: 1,
-                      }}
-                      icon={
-                        <DynamicReactIcon
-                          iconName="LuUnlink"
-                          iconSet="lu"
-                          color={COLORS.textColorMedium}
-                          size={16}
-                        />
-                      }
-                      onClick={() => {
-                        const threadId = activeThreadId || selectedThreadId;
-                        window.open(
-                          `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
-                          "_blank",
-                        );
-                      }}
-                    />
-                  </Tooltip>
-                )}
-                <Tooltip title="New chat">
+              <BrickchatFeedback
+                threadId={activeThreadId || selectedThreadId}
+                userId={user?._id}
+              />
+              {(activeThreadId || selectedThreadId) && (
+                <Tooltip title="View in LangSmith">
                   <Button
                     type="text"
                     style={{
@@ -1072,365 +1091,393 @@ export function BrickChatCore({
                     }}
                     icon={
                       <DynamicReactIcon
-                        iconName="RiChatAiFill"
-                        iconSet="ri"
+                        iconName="LuUnlink"
+                        iconSet="lu"
                         color={COLORS.textColorMedium}
                         size={16}
                       />
                     }
                     onClick={() => {
-                      window.location.href = window.location.pathname;
+                      const threadId = activeThreadId || selectedThreadId;
+                      window.open(
+                        `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
+                        "_blank",
+                      );
                     }}
                   />
                 </Tooltip>
-              </Flex>
-              <Form.Item name="question" style={{ marginBottom: 0 }}>
-                <Input
-                  placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
-                  size="large"
-                  disabled={chatLoading || threadyHistoryLoading}
-                  suffix={
-                    <Button
-                      type="text"
-                      htmlType="submit"
-                      icon={<BiSend size={20} />}
-                      disabled={chatLoading || threadyHistoryLoading}
-                      style={{ color: COLORS.primaryColor }}
+              )}
+              <Tooltip title="New chat">
+                <Button
+                  type="text"
+                  style={{
+                    padding: "8px 0",
+                    height: "auto",
+                    width: 32,
+                    lineHeight: 1,
+                  }}
+                  icon={
+                    <DynamicReactIcon
+                      iconName="RiChatAiFill"
+                      iconSet="ri"
+                      color={COLORS.textColorMedium}
+                      size={16}
                     />
                   }
-                  style={{
-                    boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-                    height: 50,
-                    backgroundColor: "white",
-                    border: "1px solid",
-                    borderColor: COLORS.borderColorMedium,
-                    borderRadius: 16,
-                    fontSize: FONT_SIZE.HEADING_4,
+                  onClick={() => {
+                    // the bare base, not the current path - which on the
+                    // chat page now carries the thread id itself
+                    window.location.href =
+                      threadPathBase || window.location.pathname;
                   }}
-                  onPressEnter={() => form.submit()}
                 />
-              </Form.Item>
-            </Form>
-          ) : null}
-          <Flex
-            vertical
-            gap={24}
-            style={{
-              height: "100%",
-              overflowY: "scroll",
-              scrollbarWidth: "none",
-              paddingRight: 8,
-            }}
-          >
-            {/* Always at the top, independent of showWelcome below - the
+              </Tooltip>
+            </Flex>
+            <Form.Item name="question" style={{ marginBottom: 0 }}>
+              <Input
+                placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
+                size="large"
+                disabled={chatLoading || threadyHistoryLoading}
+                suffix={
+                  <Button
+                    type="text"
+                    htmlType="submit"
+                    icon={<BiSend size={20} />}
+                    disabled={chatLoading || threadyHistoryLoading}
+                    style={{ color: COLORS.primaryColor }}
+                  />
+                }
+                style={{
+                  boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                  height: 50,
+                  backgroundColor: "white",
+                  border: "1px solid",
+                  borderColor: COLORS.borderColorMedium,
+                  borderRadius: 16,
+                  fontSize: FONT_SIZE.HEADING_4,
+                }}
+                onPressEnter={() => form.submit()}
+              />
+            </Form.Item>
+          </Form>
+        ) : null}
+        <Flex
+          vertical
+          gap={24}
+          style={{
+            height: "100%",
+            overflowY: "scroll",
+            scrollbarWidth: "none",
+            paddingRight: 8,
+          }}
+        >
+          {/* Always at the top, independent of showWelcome below - the
             component itself renders a placeholder when there's nothing to
             show, so no outer conditional is needed here. */}
-            <PinnedProjectResults
-              results={resolvedDefaultProjectResults || []}
-              description={resolvedDefaultProjectsDescription}
-              hasChatStarted={!!chatHistory.length}
-              onLocateProject={handleLocateProject}
-              onSelectProject={handleSelectProject}
-            />
-            {showWelcome ? (
+          <PinnedProjectResults
+            results={pinnedProjectResults || []}
+            description={pinnedProjectsDescription}
+            hasChatStarted={!!chatHistory.length}
+            hasActiveThread={!!(activeThreadId || selectedThreadId)}
+            onLocateProject={handleLocateProject}
+            onSelectProject={handleSelectProject}
+            selectedProjectId={selectedProject?.projectId}
+          />
+          {showWelcome ? (
+            <Flex vertical>
               <Flex vertical>
-                <Flex vertical>
-                  <Typography.Text
-                    style={{ marginBottom: 0, fontSize: FONT_SIZE.HEADING_2, fontWeight: 600 }}
-                  >
-                    Welcome to Brickfi
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      marginBottom: 24,
-                      fontSize: FONT_SIZE.SUB_TEXT,
-                      color: COLORS.textColorLight,
-                    }}
-                  >
-                    Start your home search with Brickfi. Just enter your
-                    requirement and let Brickfi do the work.
-                  </Typography.Text>
-                </Flex>
-
-                <StaticQueries
-                  disabled={chatLoading}
-                  onSelect={(query) => {
-                    form.setFieldsValue({ question: query });
-                    form.submit();
+                <Typography.Text
+                  style={{
+                    marginBottom: 0,
+                    fontSize: FONT_SIZE.HEADING_2,
+                    fontWeight: 600,
                   }}
-                />
-
-                <Flex vertical gap={12}>
-                  <Flex align="center" justify="space-between">
-                    {(activeThreadId || selectedThreadId) && (
-                      <Button onClick={handleNewChat}>New Chat</Button>
-                    )}
-                  </Flex>
-                </Flex>
-              </Flex>
-            ) : null}
-
-            {threadyHistoryLoading && !chatHistory.length ? (
-              <Flex align="center" gap={12}>
-                <Spin size="small" />
-                <Typography.Text type="secondary">
-                  Loading conversation...
+                >
+                  Welcome to Brickfi
+                </Typography.Text>
+                <Typography.Text
+                  style={{
+                    marginBottom: 24,
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  Start your home search with Brickfi. Just enter your
+                  requirement and let Brickfi do the work.
                 </Typography.Text>
               </Flex>
-            ) : null}
 
-            <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
-              {chatHistory.map((messageItem, index) => (
+              <StaticQueries
+                disabled={chatLoading}
+                onSelect={(query) => {
+                  form.setFieldsValue({ question: query });
+                  form.submit();
+                }}
+              />
+
+              <Flex vertical gap={12}>
+                <Flex align="center" justify="space-between">
+                  {(activeThreadId || selectedThreadId) && (
+                    <Button onClick={handleNewChat}>New Chat</Button>
+                  )}
+                </Flex>
+              </Flex>
+            </Flex>
+          ) : null}
+
+          {threadyHistoryLoading && !chatHistory.length ? (
+            <Flex align="center" gap={12}>
+              <Spin size="small" />
+              <Typography.Text type="secondary">
+                Loading conversation...
+              </Typography.Text>
+            </Flex>
+          ) : null}
+
+          <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
+            {chatHistory.map((messageItem, index) => (
+              <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
+                {renderQuestion(messageItem.question)}
+
                 <Flex
-                  key={`${messageItem.question}-${index}`}
                   vertical
-                  gap={12}
+                  style={{
+                    borderBottom: `${index !== chatHistory.length - 1 ? 1 : 0}px solid ${COLORS.borderColor}`,
+                    paddingBottom: 24,
+                    marginBottom: 16,
+                  }}
                 >
-                  {hideFirstQuestion && index === 0
-                    ? null
-                    : renderQuestion(messageItem.question)}
+                  {messageItem.steps?.length ? (
+                    <ChatTimeline
+                      steps={messageItem.steps}
+                      running={false}
+                      totalMs={messageItem.durationMs}
+                    />
+                  ) : null}
 
-                  <Flex
-                    vertical
-                    style={{
-                      borderBottom: `${index !== chatHistory.length - 1 ? 1 : 0}px solid ${COLORS.borderColor}`,
-                      paddingBottom: 24,
-                      marginBottom: 16,
-                    }}
-                  >
-                    {messageItem.steps?.length ? (
-                      <ChatTimeline
-                        steps={messageItem.steps}
-                        running={false}
-                        totalMs={messageItem.durationMs}
-                      />
+                  <Flex vertical gap={4} style={{ marginTop: 8 }}>
+                    {!messageItem.answer.directAnswer &&
+                    !!messageItem.answer.projectsList.length ? (
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.SUB_TEXT,
+                          color: COLORS.textColorLight,
+                        }}
+                      >
+                        Found {messageItem.answer.projectsList.length} matching
+                        project
+                        {messageItem.answer.projectsList.length !== 1
+                          ? "s"
+                          : ""}
+                      </Typography.Text>
                     ) : null}
 
-                    <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                      {!messageItem.answer.directAnswer &&
-                      !!messageItem.answer.projectsList.length ? (
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.SUB_TEXT,
-                            color: COLORS.textColorLight,
-                          }}
-                        >
-                          Found {messageItem.answer.projectsList.length}{" "}
-                          matching project
-                          {messageItem.answer.projectsList.length !== 1
-                            ? "s"
-                            : ""}
-                        </Typography.Text>
-                      ) : null}
-
-                      {/* earlier turns clamp to 300px behind "See more" so
+                    {/* earlier turns clamp to 300px behind "See more" so
                       the thread stays scannable; the latest turn always
                       shows in full */}
-                      <CollapsibleAnswer
-                        collapsible={index < chatHistory.length - 1}
+                    <CollapsibleAnswer
+                      collapsible={index < chatHistory.length - 1}
+                    >
+                      <Markdown
+                        className="bkchat-summary"
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => (
+                            <Typography.Text
+                              style={{
+                                fontSize: FONT_SIZE.HEADING_3,
+                                fontWeight: 500,
+                                marginBottom: 16,
+                                display: "block",
+                                maxWidth: 850,
+                              }}
+                            >
+                              {children}
+                            </Typography.Text>
+                          ),
+                        }}
                       >
-                        <Markdown
-                          className="bkchat-summary"
-                          remarkPlugins={[remarkGfm]}
-                          components={{
-                            p: ({ children }) => (
-                              <Typography.Text
-                                style={{
-                                  fontSize: FONT_SIZE.HEADING_3,
-                                  fontWeight: 500,
-                                  marginBottom: 16,
-                                  display: "block",
-                                  maxWidth: 850,
-                                }}
-                              >
-                                {children}
-                              </Typography.Text>
-                            ),
-                          }}
-                        >
-                          {messageItem.answer.summary}
-                        </Markdown>
-                      </CollapsibleAnswer>
-                      {renderImages(messageItem.answer.images)}
-                      <Flex vertical>
-                        {/* <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text> */}
-                        <Flex
-                          align="center"
-                          gap={8}
-                          style={{
-                            marginBottom: 8,
-                            width: "100%",
-                            overflowX: "scroll",
-                            flexWrap: "nowrap",
-                            scrollbarWidth: "none",
-                          }}
-                        >
-                          {messageItem.answer.projectsList &&
-                          !!messageItem.answer.projectsList.length ? (
-                            <Flex justify="flex-end" style={{ flexShrink: 0 }}>
-                              <Button
-                                size="small"
-                                icon={
-                                  <DynamicReactIcon
-                                    iconName="FaMapMarkedAlt"
-                                    iconSet="fa"
-                                    size={16}
-                                    color={
-                                      !focusedReferredLocation &&
-                                      mapResultsIndex === index
-                                        ? "white"
-                                        : COLORS.textColorDark
-                                    }
-                                  ></DynamicReactIcon>
-                                }
-                                type={
-                                  mapResultsIndex === index
-                                    ? "primary"
-                                    : "default"
-                                }
-                                onClick={() => {
-                                  setFocusedReferredLocation(null);
-                                  if (isMobile) setShowMobileMap(true);
-                                  setMapResultsIndex(index);
-                                  // a fresh array reference even when re-selecting
-                                  // the same list (e.g. after wandering off to a
-                                  // driver/locality focus) - MapCenterer's
-                                  // re-centering effect only re-fires when its
-                                  // `projects` dependency actually changes
-                                  // reference, and setProjectResults with the
-                                  // exact same array object React already holds
-                                  // is a no-op (React bails out of re-rendering
-                                  // for an Object.is-identical value), so
-                                  // re-clicking this button on an
-                                  // already-selected list would otherwise never
-                                  // reset the camera back to it.
-                                  setProjectResults([
-                                    ...messageItem.answer.projectsList,
-                                  ]);
-                                }}
-                                style={{
-                                  fontSize: FONT_SIZE.PARA,
-                                  height: 24,
-                                  borderRadius: 16,
-                                  border: `1px solid ${
-                                    !focusedReferredLocation &&
-                                    mapResultsIndex === index
-                                      ? COLORS.primaryColor
-                                      : COLORS.borderColorMedium
-                                  }`,
-                                  backgroundColor:
-                                    !focusedReferredLocation &&
-                                    mapResultsIndex === index
-                                      ? COLORS.primaryColor
-                                      : COLORS.bgColorLightBlue,
-                                  color:
+                        {messageItem.answer.summary}
+                      </Markdown>
+                    </CollapsibleAnswer>
+                    {renderImages(messageItem.answer.images)}
+                    <Flex vertical>
+                      {/* <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text> */}
+                      <Flex
+                        align="center"
+                        gap={8}
+                        style={{
+                          marginBottom: 8,
+                          width: "100%",
+                          overflowX: "scroll",
+                          flexWrap: "nowrap",
+                          scrollbarWidth: "none",
+                        }}
+                      >
+                        {messageItem.answer.projectsList &&
+                        !!messageItem.answer.projectsList.length ? (
+                          <Flex justify="flex-end" style={{ flexShrink: 0 }}>
+                            <Button
+                              size="small"
+                              icon={
+                                <DynamicReactIcon
+                                  iconName="FaMapMarkedAlt"
+                                  iconSet="fa"
+                                  size={16}
+                                  color={
                                     !focusedReferredLocation &&
                                     mapResultsIndex === index
                                       ? "white"
-                                      : COLORS.textColorDark,
+                                      : COLORS.textColorDark
+                                  }
+                                ></DynamicReactIcon>
+                              }
+                              type={
+                                mapResultsIndex === index
+                                  ? "primary"
+                                  : "default"
+                              }
+                              onClick={() => {
+                                setFocusedReferredLocation(null);
+                                if (isMobile) setShowMobileMap(true);
+                                setMapResultsIndex(index);
+                                // a fresh array reference even when re-selecting
+                                // the same list (e.g. after wandering off to a
+                                // driver/locality focus) - MapCenterer's
+                                // re-centering effect only re-fires when its
+                                // `projects` dependency actually changes
+                                // reference, and setProjectResults with the
+                                // exact same array object React already holds
+                                // is a no-op (React bails out of re-rendering
+                                // for an Object.is-identical value), so
+                                // re-clicking this button on an
+                                // already-selected list would otherwise never
+                                // reset the camera back to it.
+                                setProjectResults([
+                                  ...messageItem.answer.projectsList,
+                                ]);
+                              }}
+                              style={{
+                                fontSize: FONT_SIZE.PARA,
+                                height: 24,
+                                borderRadius: 16,
+                                border: `1px solid ${
+                                  !focusedReferredLocation &&
+                                  mapResultsIndex === index
+                                    ? COLORS.primaryColor
+                                    : COLORS.borderColorMedium
+                                }`,
+                                backgroundColor:
+                                  !focusedReferredLocation &&
+                                  mapResultsIndex === index
+                                    ? COLORS.primaryColor
+                                    : COLORS.bgColorLightBlue,
+                                color:
+                                  !focusedReferredLocation &&
+                                  mapResultsIndex === index
+                                    ? "white"
+                                    : COLORS.textColorDark,
+                              }}
+                            >
+                              {messageItem.answer.projectsList.length} Projects
+                            </Button>
+                          </Flex>
+                        ) : null}
+                        {(() => {
+                          const referredLocationItems =
+                            getReferredLocationItems(messageItem.answer);
+                          return referredLocationItems.length ? (
+                            <ReferredLocationChips
+                              items={referredLocationItems}
+                              selectedKey={focusedReferredLocation?.key ?? null}
+                              onToggle={handleToggleReferredLocation}
+                            />
+                          ) : null;
+                        })()}
+                      </Flex>
+                    </Flex>
+                    {!messageItem.answer.directAnswer ? (
+                      <Flex vertical gap={8} style={{}}>
+                        <BrickChatResults
+                          results={messageItem.answer.projectsList}
+                          onLocateProject={(projectId) =>
+                            handleLocateProject(projectId, index)
+                          }
+                          onSelectProject={handleSelectProject}
+                          selectedProjectId={selectedProject?.projectId}
+                        />
+                        {!chatLoading &&
+                          (messageItem.answer.nextSetCount ?? 0) > 0 &&
+                          index === chatHistory.length - 1 && (
+                            <Flex justify="flex-start">
+                              <Button
+                                size="small"
+                                style={{
+                                  fontSize: FONT_SIZE.PARA,
+                                  height: 24,
+                                }}
+                                onClick={() => {
+                                  form.setFieldsValue({
+                                    question: "show me more",
+                                  });
+                                  form.submit();
                                 }}
                               >
-                                {messageItem.answer.projectsList.length}{" "}
-                                Projects
+                                Show me more
                               </Button>
                             </Flex>
-                          ) : null}
-                          {(() => {
-                            const referredLocationItems =
-                              getReferredLocationItems(messageItem.answer);
-                            return referredLocationItems.length ? (
-                              <ReferredLocationChips
-                                items={referredLocationItems}
-                                selectedKey={
-                                  focusedReferredLocation?.key ?? null
-                                }
-                                onToggle={handleToggleReferredLocation}
-                              />
-                            ) : null;
-                          })()}
-                        </Flex>
+                          )}
                       </Flex>
-                      {!messageItem.answer.directAnswer ? (
-                        <Flex vertical gap={8} style={{}}>
-                          <BrickChatResults
-                            results={messageItem.answer.projectsList}
-                            onLocateProject={(projectId) =>
-                              handleLocateProject(projectId, index)
-                            }
-                            onSelectProject={handleSelectProject}
-                          />
-                          {!chatLoading &&
-                            (messageItem.answer.nextSetCount ?? 0) > 0 &&
-                            index === chatHistory.length - 1 && (
-                              <Flex justify="flex-start">
-                                <Button
-                                  size="small"
-                                  style={{
-                                    fontSize: FONT_SIZE.PARA,
-                                    height: 24,
-                                  }}
-                                  onClick={() => {
-                                    form.setFieldsValue({
-                                      question: "show me more",
-                                    });
-                                    form.submit();
-                                  }}
-                                >
-                                  Show me more
-                                </Button>
-                              </Flex>
-                            )}
-                        </Flex>
-                      ) : !!messageItem.answer.projectsList?.length ? (
-                        <Flex vertical gap={8}>
-                          <BrickChatResults
-                            results={messageItem.answer.projectsList}
-                            onLocateProject={(projectId) =>
-                              handleLocateProject(projectId, index)
-                            }
-                            onSelectProject={handleSelectProject}
-                            skipOneLiner
-                            skipSort
-                          />
-                        </Flex>
-                      ) : null}
-                      {messageItem.answer.followupPrompt ? (
-                        <Typography.Text
-                          style={{
-                            fontSize: FONT_SIZE.HEADING_3,
-                            marginTop: 32,
-                            fontWeight: 500,
-                            maxWidth: 800,
-                          }}
-                        >
-                          {messageItem.answer.followupPrompt}
-                        </Typography.Text>
-                      ) : null}
-                    </Flex>
+                    ) : !!messageItem.answer.projectsList?.length ? (
+                      <Flex vertical gap={8}>
+                        <BrickChatResults
+                          results={messageItem.answer.projectsList}
+                          onLocateProject={(projectId) =>
+                            handleLocateProject(projectId, index)
+                          }
+                          onSelectProject={handleSelectProject}
+                          selectedProjectId={selectedProject?.projectId}
+                          skipOneLiner
+                          skipSort
+                        />
+                      </Flex>
+                    ) : null}
+                    {messageItem.answer.followupPrompt ? (
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.HEADING_3,
+                          marginTop: 32,
+                          fontWeight: 500,
+                          maxWidth: 800,
+                        }}
+                      >
+                        {messageItem.answer.followupPrompt}
+                      </Typography.Text>
+                    ) : null}
                   </Flex>
                 </Flex>
-              ))}
+              </Flex>
+            ))}
 
-              {currentQuestion && chatLoading && (
-                <Flex vertical gap={12}>
-                  {hideFirstQuestion && !chatHistory.length
-                    ? null
-                    : renderQuestion(currentQuestion)}
-                  <ChatTimeline steps={steps} running />
-                  {streamingSummary ? (
-                    <Markdown
-                      className="bkchat-summary"
-                      remarkPlugins={[remarkGfm]}
-                    >
-                      {streamingSummary}
-                    </Markdown>
-                  ) : null}
-                </Flex>
-              )}
+            {currentQuestion && chatLoading && (
+              <Flex vertical gap={12}>
+                {renderQuestion(currentQuestion)}
+                <ChatTimeline steps={steps} running />
+                {streamingSummary ? (
+                  <Markdown
+                    className="bkchat-summary"
+                    remarkPlugins={[remarkGfm]}
+                  >
+                    {streamingSummary}
+                  </Markdown>
+                ) : null}
+              </Flex>
+            )}
 
-              {selectedProject && selectedLvnzyProjectLoading ? (
-                <Loader />
-              ) : selectedProject && selectedLvnzyProject ? (
+            {selectedProject && selectedLvnzyProjectLoading ? (
+              <Loader />
+            ) : selectedProject && selectedLvnzyProject ? (
+              <Flex vertical gap={32}>
                 <Brick360Inline
                   key={selectedProject.projectId}
                   slug={selectedProject.projectSlug || ""}
@@ -1441,79 +1488,81 @@ export function BrickChatCore({
                   }}
                   onMapConfigChange={setPillarMapConfig}
                 />
-              ) : null}
+                <Typography.Text style={{fontWeight: 500, fontSize: FONT_SIZE.HEADING_3}}>
+                  Ask any specific question about the project or compare it with other projects.
+                </Typography.Text>
+              </Flex>
+            ) : null}
 
-              <div ref={scrollBottomRef} />
-            </Flex>
+            <div ref={scrollBottomRef} />
           </Flex>
         </Flex>
+      </Flex>
 
-        {/* Map View for Desktop */}
-        {!isMobile && (
+      {/* Map View for Desktop */}
+      {!isMobile && (
+        <Flex
+          style={{
+            width: "40%",
+            minWidth: "37%",
+            padding: "0 1.5%",
+            flexShrink: 0,
+            isolation: "isolate",
+          }}
+        >
+          <BrickMapChat
+            projects={projectResults || []}
+            focusedProjectId={focusedProjectId}
+            hideAllFilters={!!focusedReferredLocation}
+            detailedProject={selectedProject ? selectedLvnzyProject : undefined}
+            pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
+            focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
+            focusedLocalityIds={
+              selectedProject ? undefined : focusedLocalityIds
+            }
+            focusedCorridorIds={
+              selectedProject ? undefined : focusedCorridorIds
+            }
+            focusedMicroPocketIds={
+              selectedProject ? undefined : focusedMicroPocketIds
+            }
+          />
+        </Flex>
+      )}
+
+      {/* Map View For Mobile in Expandable Drawer */}
+      {isMobile && (
+        <>
           <Flex
+            justify="center"
+            align="center"
+            onClick={() => {
+              setShowMobileMap((prev) => {
+                const next = !prev;
+                if (next) setFocusedReferredLocation(null);
+                return next;
+              });
+            }}
             style={{
-              width: "40%",
-              minWidth: "37%",
-              padding: "0 1.5%",
-              flexShrink: 0,
-              isolation: "isolate",
+              position: "fixed",
+              top: "50%",
+              right: showMobileMap ? mobileDrawerWidth : 0,
+              transform: "translateY(-50%)",
+              width: 48,
+              height: 48,
+              backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
+              border: `1px solid ${showMobileMap ? COLORS.primaryColor : COLORS.textColorMedium}`,
+              borderRight: showMobileMap ? undefined : "none",
+              borderTopLeftRadius: 12,
+              borderBottomLeftRadius: 12,
+              cursor: "pointer",
+              touchAction: "manipulation",
+              zIndex: 1000,
+              transition: "right 0.25s ease",
+              boxShadow: "-2px 0 6px rgba(0,0,0,0.15)",
             }}
           >
-            <BrickMapChat
-              projects={projectResults || []}
-              focusedProjectId={focusedProjectId}
-              hideAllFilters={!!focusedReferredLocation}
-              detailedProject={
-                selectedProject ? selectedLvnzyProject : undefined
-              }
-              pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
-              focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
-              focusedLocalityIds={
-                selectedProject ? undefined : focusedLocalityIds
-              }
-              focusedCorridorIds={
-                selectedProject ? undefined : focusedCorridorIds
-              }
-              focusedMicroPocketIds={
-                selectedProject ? undefined : focusedMicroPocketIds
-              }
-            />
-          </Flex>
-        )}
-
-        {/* Map View For Mobile in Expandable Drawer */}
-        {isMobile && (
-          <>
-            <Flex
-              justify="center"
-              align="center"
-              onClick={() => {
-                setShowMobileMap((prev) => {
-                  const next = !prev;
-                  if (next) setFocusedReferredLocation(null);
-                  return next;
-                });
-              }}
-              style={{
-                position: "fixed",
-                top: "50%",
-                right: showMobileMap ? mobileDrawerWidth : 0,
-                transform: "translateY(-50%)",
-                width: 48,
-                height: 48,
-                backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
-                border: `1px solid ${showMobileMap ? COLORS.primaryColor : COLORS.textColorMedium}`,
-                borderRight: showMobileMap ? undefined : "none",
-                borderTopLeftRadius: 12,
-                borderBottomLeftRadius: 12,
-                cursor: "pointer",
-                touchAction: "manipulation",
-                zIndex: 1000,
-                transition: "right 0.25s ease",
-                boxShadow: "-2px 0 6px rgba(0,0,0,0.15)",
-              }}
-            >
-              {/* <div
+            {/* <div
               style={{
                 width: 8,
                 height: 50,
@@ -1522,69 +1571,65 @@ export function BrickChatCore({
                 boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
               }}
             /> */}
-              <DynamicReactIcon
-                color={showMobileMap ? "white" : COLORS.textColorDark}
-                iconName="FaMapLocationDot"
-                iconSet="fa6"
-                size={28}
-              ></DynamicReactIcon>
-            </Flex>
+            <DynamicReactIcon
+              color={showMobileMap ? "white" : COLORS.textColorDark}
+              iconName="FaMapLocationDot"
+              iconSet="fa6"
+              size={28}
+            ></DynamicReactIcon>
+          </Flex>
 
-            <Drawer
-              placement="right"
-              open={showMobileMap}
-              onClose={() => setShowMobileMap(false)}
-              mask={false}
-              closable={false}
-              width={mobileDrawerWidth}
-              styles={{
-                header: { display: "none" },
-                body: { padding: 0, position: "relative", overflow: "hidden" },
-                content: {
-                  borderTopLeftRadius: 20,
-                  borderBottomLeftRadius: 20,
-                },
-                wrapper: {
-                  borderTopLeftRadius: 20,
-                  borderBottomLeftRadius: 20,
-                  borderLeft: `1px solid ${COLORS.textColorMedium}`,
-                },
-              }}
+          <Drawer
+            placement="right"
+            open={showMobileMap}
+            onClose={() => setShowMobileMap(false)}
+            mask={false}
+            closable={false}
+            width={mobileDrawerWidth}
+            styles={{
+              header: { display: "none" },
+              body: { padding: 0, position: "relative", overflow: "hidden" },
+              content: {
+                borderTopLeftRadius: 20,
+                borderBottomLeftRadius: 20,
+              },
+              wrapper: {
+                borderTopLeftRadius: 20,
+                borderBottomLeftRadius: 20,
+                borderLeft: `1px solid ${COLORS.textColorMedium}`,
+              },
+            }}
+          >
+            <Flex
+              vertical
+              style={{ position: "absolute", inset: 0, zIndex: 0 }}
             >
-              <Flex
-                vertical
-                style={{ position: "absolute", inset: 0, zIndex: 0 }}
-              >
-                <BrickMapChat
-                  projects={projectResults || []}
-                  focusedProjectId={focusedProjectId}
-                  // not tied to showMobileMap: hideAllFilters also disables
-                  // driver filtering (see useMapFilters), so flipping it on
-                  // close made every driver render during the slide-out
-                  hideAllFilters={!!focusedReferredLocation}
-                  detailedProject={
-                    selectedProject ? selectedLvnzyProject : undefined
-                  }
-                  pillarMapConfig={
-                    selectedProject ? pillarMapConfig : undefined
-                  }
-                  focusedDrivers={
-                    selectedProject ? undefined : mapDisplayDrivers
-                  }
-                  focusedLocalityIds={
-                    selectedProject ? undefined : focusedLocalityIds
-                  }
-                  focusedCorridorIds={
-                    selectedProject ? undefined : focusedCorridorIds
-                  }
-                  focusedMicroPocketIds={
-                    selectedProject ? undefined : focusedMicroPocketIds
-                  }
-                />
-              </Flex>
-            </Drawer>
-          </>
-        )}
+              <BrickMapChat
+                projects={projectResults || []}
+                focusedProjectId={focusedProjectId}
+                // not tied to showMobileMap: hideAllFilters also disables
+                // driver filtering (see useMapFilters), so flipping it on
+                // close made every driver render during the slide-out
+                hideAllFilters={!!focusedReferredLocation}
+                detailedProject={
+                  selectedProject ? selectedLvnzyProject : undefined
+                }
+                pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
+                focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
+                focusedLocalityIds={
+                  selectedProject ? undefined : focusedLocalityIds
+                }
+                focusedCorridorIds={
+                  selectedProject ? undefined : focusedCorridorIds
+                }
+                focusedMicroPocketIds={
+                  selectedProject ? undefined : focusedMicroPocketIds
+                }
+              />
+            </Flex>
+          </Drawer>
+        </>
+      )}
       <Modal
         open={shareModalOpen}
         onCancel={() => setShareModalOpen(false)}
@@ -1614,7 +1659,11 @@ export function BrickChatCore({
   );
 }
 
-export default function BrickChatClient() {
+export default function BrickChatClient({
+  projectRef,
+}: {
+  projectRef?: string;
+} = {}) {
   // ?q= is set by the landing page search input - auto-submit it as the
   // first question of a fresh chat.
   const searchParams = useSearchParams();
@@ -1622,7 +1671,11 @@ export default function BrickChatClient() {
 
   return (
     <AdminGuard allowedRoles={["admin", "member"]}>
-      <BrickChatCore autoStartQuestion={initialQuery} />
+      <BrickChatCore
+        autoStartQuestion={initialQuery}
+        threadPathBase={BRICKCHAT_THREAD_PATH_BASE}
+        projectRef={projectRef}
+      />
     </AdminGuard>
   );
 }

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useUser } from "./use-user";
 import { ProjectResult } from "@/app/app/brickchat/brickchat-client";
-import { mapLvnzyProjectToResult } from "@/libs/lvnzy-helper";
+import { getLvnzyProjectsDisplayCards } from "@/queries/lvnzy-projects";
 
 interface UsePinnedProjectsResult {
   defaultProjectResults: ProjectResult[] | undefined;
@@ -11,46 +11,38 @@ interface UsePinnedProjectsResult {
   isLoading: boolean;
 }
 
+// display-cache is keyed by the ORIGINAL Project id (originalProjectId), not
+// the LvnzyProject's own _id - GET /auth/myinfo populates
+// savedLvnzyProjects.projects with originalProjectId (see fetchUserDetails in
+// auth.controller.js), so it's normally an object, but fall back to a bare id.
+const getOriginalProjectId = (lp: any): string | undefined => {
+  const original = lp?.originalProjectId;
+  return (original?._id || original)?.toString() || undefined;
+};
+
 export function usePinnedProjects(): UsePinnedProjectsResult {
   const { user, isLoading: userLoading } = useUser();
-  const [defaultProjectResults, setDefaultProjectResults] = useState<ProjectResult[] | undefined>();
-  const [defaultProjectsDescription, setDefaultProjectsDescription] = useState<string | undefined>();
 
-  useEffect(() => {
-    if (userLoading) return;
+  const firstCollection = user?.savedLvnzyProjects?.[0];
+  const projectIds: string[] = (firstCollection?.projects || [])
+    .map(getOriginalProjectId)
+    .filter((id: string | undefined): id is string => !!id);
 
-    if (!user?._id || !user.savedLvnzyProjects?.length) {
-      setDefaultProjectResults([]);
-      return;
-    }
+  // Always the same card shape brickchat's own results use (built server-side
+  // by buildProjectListItem), rather than mapping the populated LvnzyProject
+  // docs on the client. Order of projectIds is preserved by the backend.
+  const { data, isLoading: cardsLoading } = useQuery<ProjectResult[], Error>({
+    queryKey: ["pinned-projects-display-cache", projectIds],
+    queryFn: () => getLvnzyProjectsDisplayCards(projectIds),
+    enabled: !userLoading && projectIds.length > 0,
+    refetchOnWindowFocus: false,
+  });
 
-    const firstCollection = user.savedLvnzyProjects[0];
-    // GET /auth/myinfo/:id (see fetchUserDetails in auth.controller.js)
-    // already populates savedLvnzyProjects.projects into full LvnzyProject
-    // docs (slug/meta/score/originalProjectId.{media,info}) before this
-    // ever reaches the client - no separate fetch needed, just map each one
-    // the same way UserProjects/mapLvnzyProjectToResult already does.
-    const projects = firstCollection?.projects;
-
-    if (!projects?.length) {
-      setDefaultProjectResults([]);
-      return;
-    }
-
-    const mapped: ProjectResult[] = projects
-      .map((lp: any) => mapLvnzyProjectToResult(lp))
-      .filter((p: ProjectResult | null): p is ProjectResult => !!p?.projectName);
-
-    setDefaultProjectResults(mapped);
-
-    if (firstCollection.collectionDescription) {
-      setDefaultProjectsDescription(firstCollection.collectionDescription);
-    }
-  }, [userLoading, user?._id, user?.savedLvnzyProjects]);
+  const hasNoPinned = !userLoading && projectIds.length === 0;
 
   return {
-    defaultProjectResults,
-    defaultProjectsDescription,
-    isLoading: userLoading || defaultProjectResults === undefined,
+    defaultProjectResults: hasNoPinned ? [] : data,
+    defaultProjectsDescription: firstCollection?.collectionDescription || undefined,
+    isLoading: userLoading || (!hasNoPinned && cardsLoading),
   };
 }

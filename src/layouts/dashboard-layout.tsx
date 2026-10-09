@@ -355,7 +355,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                               onClick={() => {
                                 setSidebarOpen(false);
                                 router.push(
-                                  `/app/brickchat?threadId=${thread.thread_id}`,
+                                  `/app/brickchat/${encodeURIComponent(thread.thread_id)}`,
                                 );
                               }}
                               style={{
@@ -388,26 +388,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   
                 />
               )}
-              {/* {user?.savedLvnzyProjects &&
-                user.savedLvnzyProjects.length > 1 && (
-                  <Select
-                    style={{ minWidth: 200 }}
-                    placeholder="Select project list"
-                    defaultValue={user.savedLvnzyProjects[0]._id}
-                    optionFilterProp="label"
-                    onChange={(value: string) => {
-                      setSidebarOpen(false);
-                      navigate(`/app/${value}`);
-                    }}
-                    options={[
-                      { value: "all", label: "All Collections" },
-                      ...(user.savedLvnzyProjects?.map((c: any) => ({
-                        value: c._id,
-                        label: c.collectionName,
-                      })) ?? []),
-                    ]}
-                  />
-                )} */}
               <Flex gap={24} vertical style={{ marginTop: "auto" }}>
                 <Typography.Text
                   style={{

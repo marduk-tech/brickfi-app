@@ -10,7 +10,10 @@ import {
 import { useUser } from "../hooks/use-user";
 import { useUpdateUserMutation } from "../hooks/user-hooks";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
-import { removeDuplicatesAndPrepend } from "../libs/lvnzy-helper";
+import {
+  getSaveCollectionIndex,
+  removeDuplicatesAndPrepend,
+} from "../libs/lvnzy-helper";
 
 interface ProjectSearchProps {
   onSelect?: (
@@ -64,9 +67,7 @@ export const ProjectSearch: React.FC<ProjectSearchProps> = ({
     const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
 
     //  default collection or create new one
-    const defaultCollectionIndex = savedLvnzyProjects.findIndex(
-      (c) => c.collectionName === "default"
-    );
+    const defaultCollectionIndex = getSaveCollectionIndex(savedLvnzyProjects);
 
     console.log(defaultCollectionIndex);
 
@@ -114,9 +115,7 @@ export const ProjectSearch: React.FC<ProjectSearchProps> = ({
     const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
 
     // find default collection or create new one
-    const defaultCollectionIndex = savedLvnzyProjects.findIndex(
-      (c) => c.collectionName === "default"
-    );
+    const defaultCollectionIndex = getSaveCollectionIndex(savedLvnzyProjects);
 
     if (defaultCollectionIndex === -1) {
       // create new default collection with requestedProjects
@@ -181,9 +180,7 @@ export const ProjectSearch: React.FC<ProjectSearchProps> = ({
     const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
 
     // find default collection or create new one
-    const defaultCollectionIndex = savedLvnzyProjects.findIndex(
-      (c) => c.collectionName === "default"
-    );
+    const defaultCollectionIndex = getSaveCollectionIndex(savedLvnzyProjects);
 
     if (defaultCollectionIndex === -1) {
       // create new default collection with requestedProjects

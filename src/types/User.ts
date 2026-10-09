@@ -18,8 +18,6 @@ export interface SavedLvnzyProjectCollection {
   collectionName: string;
   collectionDescription?: string;
   projects: any[];
-  compareThreadId?: string;
-  compareThreadProjectIds?: string[];
 }
 
 export interface UtmEntry {
