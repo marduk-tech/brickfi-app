@@ -123,7 +123,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
                     ? FONT_SIZE.HEADING_3
                     : FONT_SIZE.HEADING_3,
                   margin: 0,
-                  color: COLORS.textColorDark,
+                  color: COLORS.textColorMedium,
                 }}
               >
                 {getMinMaxPrices(
