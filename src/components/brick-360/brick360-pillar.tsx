@@ -1162,9 +1162,9 @@ export const Brick360Pillar = forwardRef<any, Brick360PillarProps>(
 
             {orderedDataPoints.length ? (
               <Flex vertical style={{ marginTop: 16 }}>
-                <Typography.Text
+                {/* <Typography.Text
                   style={{
-                    fontSize: FONT_SIZE.PARA,
+                    fontSize: FONT_SIZE.HEADING_3,
                     marginBottom: 4,
                     color: COLORS.textColorMedium,
                     fontWeight: 600,
@@ -1172,7 +1172,7 @@ export const Brick360Pillar = forwardRef<any, Brick360PillarProps>(
                   }}
                 >
                   360° ANALYSIS
-                </Typography.Text>
+                </Typography.Text> */}
                 <Collapse
                   style={{ marginTop: 0 }}
                   bordered={false}
@@ -1222,10 +1222,11 @@ export const Brick360Pillar = forwardRef<any, Brick360PillarProps>(
                         borderRadius: 8,
                         overflow: "hidden",
                         backgroundColor: "white",
+                        width: "fit-content",
                       },
                       label: (
-                        <div ref={index === 0 ? ref : null}>
-                          <Flex align="center" gap={8} style={{ width: "100%" }}>
+                        <div ref={index === 0 ? ref : null} >
+                          <Flex align="center" gap={8} style={{minWidth: 300}}>
                             <RatingBar value={item[1].rating}></RatingBar>
                             <Typography.Text
                               style={{

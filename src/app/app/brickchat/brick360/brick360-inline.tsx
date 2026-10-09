@@ -2,36 +2,41 @@
 
 import { Button, Flex, Modal, Tabs, Tour, TourProps, Typography } from "antd";
 import { useEffect, useRef, useState } from "react";
-import { useFetchLvnzyProjectBySlug } from "../../../hooks/use-lvnzy-project";
-import DynamicReactIcon from "../../../components/common/dynamic-react-icon";
+import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 import {
   BRICK360_CATEGORY,
   Brick360CategoryInfo,
   LocalStorageKeys,
-} from "../../../libs/constants";
+} from "@/libs/constants";
 import {
   captureAnalyticsEvent,
   getCategoryScore,
-} from "../../../libs/lvnzy-helper";
-import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
-import { LvnzyProject } from "../../../types/LvnzyProject";
+} from "@/libs/lvnzy-helper";
+import { COLORS, FONT_SIZE } from "@/theme/style-constants";
+import { LvnzyProject } from "@/types/LvnzyProject";
 import {
   Brick360Highlights,
   Brick360Pillar,
+  FloorplansTab,
   PillarMapConfig,
-} from "../../../components/brick-360/brick360-pillar";
-import GradientBar from "../../../components/common/grading-bar";
-import { MediaTab } from "../../../components/brick-360/media-tab";
-import { ProjectHeader } from "../../../components/brick-360/project-header";
-import TimelineTabV2 from "../../../components/brick-360/timeline-tab-v2";
-import { UnitsTab } from "../../../components/brick-360/units-tab";
+  TimelineTab,
+} from "./tabs";
+import GradientBar from "@/components/common/grading-bar";
+import { MediaTab } from "@/components/brick-360/media-tab";
+import { ProjectHeader } from "@/components/brick-360/project-header";
 import styles from "./brick360-inline.module.css";
 import { useDevice } from "@/hooks/use-device";
 
 // close button fades the container out before actually unmounting it -
 // this must match the CSS transition duration below.
 const CLOSE_FADE_MS = 220;
+
+// Fixed height of the inline view - its content (header, images, tabs)
+// scrolls inside it rather than growing the chat panel. Capped to the
+// viewport so it never runs past the screen.
+const INLINE_HEIGHT = "min(820px, calc(100vh - 180px))";
 
 // One tab button per Brick360 pillar (Location/Developer/Property/Financials
 // per BRICK360_CATEGORY's declared order) - these used to be sections stacked
@@ -52,13 +57,32 @@ const PILLAR_TABS = Object.keys(BRICK360_CATEGORY)
 const PILLAR_KEYS = PILLAR_TABS.map((t) => t.key);
 
 const HIGHLIGHTS_TAB_KEY = "highlights";
+const UNITS_TAB_KEY = "units";
+const TIMELINE_TAB_KEY = "timeline";
+
+// Display order of the tab row - tabs a project has no data for (Highlights,
+// Timeline) are simply skipped; a tab key not listed here would go last.
+const TAB_ORDER = [
+  HIGHLIGHTS_TAB_KEY,
+  UNITS_TAB_KEY,
+  BRICK360_CATEGORY.property,
+  BRICK360_CATEGORY.financials,
+  BRICK360_CATEGORY.developer,
+  BRICK360_CATEGORY.areaConnectivity,
+  TIMELINE_TAB_KEY,
+];
+const tabOrderIndex = (key: string) => {
+  const i = TAB_ORDER.indexOf(key);
+  return i === -1 ? TAB_ORDER.length : i;
+};
+
 
 interface Brick360InlineProps {
   slug: string;
   projectData?: LvnzyProject;
   /** Closes this view and returns to the underlying brickchat conversation. */
   onClose: () => void;
-  /** Forwarded from Brick360Pillar - see brick360-pillar.tsx and brick-map-chat.tsx. */
+  /** Forwarded from the pillar tabs - see tabs/pillar-base.tsx and brick-map-chat.tsx. */
   onMapConfigChange?: (config: PillarMapConfig | null) => void;
 }
 
@@ -83,6 +107,12 @@ export function Brick360Inline({
   };
 
   const [mediaModalOpen, setMediaModalOpen] = useState(false);
+  // tag the gallery modal opens on - undefined for "See All" (every image)
+  const [mediaInitialTag, setMediaInitialTag] = useState<string>();
+  const openGallery = (tag?: string) => {
+    setMediaInitialTag(tag);
+    setMediaModalOpen(true);
+  };
   const { isMobile } = useDevice();
 
   const { data: fetchedProject } = useFetchLvnzyProjectBySlug(
@@ -207,7 +237,8 @@ export function Brick360Inline({
     if (lvnzyProject && !tabKeyInitialized.current) {
       tabKeyInitialized.current = true;
       setSelectedTabKey(
-        hasHighlights ? HIGHLIGHTS_TAB_KEY : PILLAR_TABS[0]?.key || "units",
+        // no highlights: next tab in TAB_ORDER (Floorplans, always present)
+        hasHighlights ? HIGHLIGHTS_TAB_KEY : UNITS_TAB_KEY,
       );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -231,7 +262,7 @@ export function Brick360Inline({
       : []),
     ...PILLAR_TABS,
     {
-      key: "units",
+      key: UNITS_TAB_KEY,
       label: "Floorplans",
       iconName: "RiLayout2Fill",
       iconSet: "ri",
@@ -239,14 +270,14 @@ export function Brick360Inline({
     ...((lvnzyProject?.meta?.projectTimelines?.length ?? 0) > 0
       ? [
           {
-            key: "timeline",
+            key: TIMELINE_TAB_KEY,
             label: "Timeline",
             iconName: "LuCalendarRange",
             iconSet: "lu",
           },
         ]
       : []),
-  ];
+  ].sort((a, b) => tabOrderIndex(a.key) - tabOrderIndex(b.key));
 
   const handleTabChange = (key: string) => {
     captureAnalyticsEvent("tab-navigate", {
@@ -270,7 +301,7 @@ export function Brick360Inline({
           gap={10}
           style={{
             backgroundColor: isActive ? COLORS.primaryColor : "transparent",
-            borderRadius: 16,
+            borderRadius: 8,
             border: isActive ? `1.5px solid ${COLORS.primaryColor}` : `1px solid ${COLORS.borderColorMedium}`,
             padding: isActive && selectedTabKey !== HIGHLIGHTS_TAB_KEY && categoryScore ? "0px 0 0px 12px" : "2px 12px",
           }}
@@ -307,15 +338,16 @@ export function Brick360Inline({
           </div>
         ) : PILLAR_KEYS.includes(tab.key) ? (
           <Brick360Pillar
+            onOpenGallery={openGallery}
             lvnzyProject={lvnzyProject}
             categoryKey={tab.key}
             ref={scoreParamTourRef}
             onMapConfigChange={onMapConfigChange}
           />
-        ) : tab.key === "units" ? (
-          <UnitsTab lvnzyProject={lvnzyProject} />
+        ) : tab.key === UNITS_TAB_KEY ? (
+          <FloorplansTab lvnzyProject={lvnzyProject} />
         ) : (
-          <TimelineTabV2 lvnzyProject={lvnzyProject} />
+          <TimelineTab lvnzyProject={lvnzyProject} />
         ),
     };
   });
@@ -341,20 +373,24 @@ export function Brick360Inline({
       vertical
       style={{
         margin: "auto",
-        overflowX: "hidden",
+        overflow: "hidden",
         width: "100%",
+        height: INLINE_HEIGHT,
         border: `2px solid ${COLORS.borderColor}`,
+        // mobile: full screen width (see brickchat-client), so no side
+        // borders/rounded corners against the screen edges
+        ...(isMobile ? { borderLeft: "none", borderRight: "none" } : {}),
         backgroundColor: COLORS.bgColor,
-        borderRadius: 12,
-        padding: isMobile ? "16px 4px" : "24px 8px",
+        borderRadius: isMobile ? 0 : 12,
         opacity: isClosing ? 0 : 1,
         transition: `opacity ${CLOSE_FADE_MS}ms ease`,
         position: "relative",
       }}
     >
+      {/* outside the scroll area below, so it stays put while content scrolls */}
       <Flex
         justify="flex-end"
-        style={{ position: "absolute", right: 0, top: 0 }}
+        style={{ position: "absolute", right: 0, top: 0, zIndex: 2 }}
       >
         <Button
           type="text"
@@ -370,6 +406,15 @@ export function Brick360Inline({
         />
       </Flex>
 
+      <div
+        style={{
+          flex: 1,
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          padding: isMobile ? "16px 4px" : "24px 8px",
+        }}
+      >
       <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
 
       {previewImages.length ? (
@@ -384,7 +429,7 @@ export function Brick360Inline({
               overflowX: "scroll",
               scrollbarWidth: "none",
             }}
-            onClick={() => setMediaModalOpen(true)}
+            onClick={() => openGallery()}
           >
             {previewImages.map((m: any, i: number) => (
               <img
@@ -404,7 +449,7 @@ export function Brick360Inline({
           </Flex>
           <Button
             size="small"
-            onClick={() => setMediaModalOpen(true)}
+            onClick={() => openGallery()}
             style={{
               position: "absolute",
               bottom: 8,
@@ -433,7 +478,9 @@ export function Brick360Inline({
         items={tabItems}
         destroyOnHidden
         className={styles.tabsNoNavBorder}
-        style={{ padding: "0 8px", marginTop: 16 }}
+        // gap between tab buttons (antd's default is 32px)
+        tabBarGutter={24}
+        style={{ padding: "0 8px", marginTop: 16, marginLeft: 0 }}
       />
 
       <Modal
@@ -453,7 +500,8 @@ export function Brick360Inline({
           },
         }}
       >
-        <MediaTab lvnzyProject={lvnzyProject} />
+        {/* destroyOnHidden remounts this each open, so initialTag applies */}
+        <MediaTab lvnzyProject={lvnzyProject} initialTag={mediaInitialTag} />
       </Modal>
 
       <Tour
@@ -464,6 +512,7 @@ export function Brick360Inline({
         }}
         steps={tourSteps}
       />
+      </div>
     </Flex>
   );
 }

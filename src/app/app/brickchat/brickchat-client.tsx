@@ -3,7 +3,7 @@
 import { AdminGuard } from "@/components/auth/admin-guard";
 import BrickChatResults from "@/app/app/brickchat/brick-chat-results";
 import ChatTimeline, { TimelineStep } from "@/app/app/brickchat/chat-timeline";
-import { PillarMapConfig } from "@/components/brick-360/brick360-pillar";
+import { PillarMapConfig } from "./brick360/tabs";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
 import { useDevice } from "@/hooks/use-device";
@@ -46,7 +46,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Brick360Inline } from "./brick360-inline";
+import { Brick360Inline } from "./brick360/brick360-inline";
 import { BrickMapChat } from "./brick-map-chat";
 import BrickchatFeedback from "./brickchat-feedback";
 import ReferredLocationChips, {
@@ -1021,7 +1021,10 @@ export function BrickChatCore({
         width: "100%",
         maxWidth: 2000,
         height: "calc(100vh - 100px)",
-        padding: 8,
+        // mobile: no side padding here - the search form and chat panel
+        // below carry their own 8px gutter instead, so the inline Brick360
+        // view can run the full screen width (it cancels the panel's gutter)
+        padding: isMobile ? "8px 0" : 8,
         overflowY: "scroll",
       }}
     >
@@ -1045,6 +1048,8 @@ export function BrickChatCore({
               position: "absolute",
               bottom: 8,
               width: "100%",
+              padding: isMobile ? "0 8px" : undefined,
+              boxSizing: "border-box",
               backgroundColor: "white",
               // just enough to sit above the scrollable chat list behind
               // it - antd Modal's own mask/dialog default to zIndex 1000,
@@ -1168,7 +1173,7 @@ export function BrickChatCore({
             height: "100%",
             overflowY: "scroll",
             scrollbarWidth: "none",
-            paddingRight: 8,
+            padding: isMobile ? "0 8px" : "0 8px 0 0",
           }}
         >
           {/* Always at the top, independent of showWelcome below - the
@@ -1477,7 +1482,9 @@ export function BrickChatCore({
             {selectedProject && selectedLvnzyProjectLoading ? (
               <Loader />
             ) : selectedProject && selectedLvnzyProject ? (
-              <Flex vertical gap={32}>
+              // mobile: cancel the chat panel's 8px gutter so the inline view
+              // spans the full screen width
+              <Flex vertical gap={32} style={isMobile ? { margin: "0 -8px" } : undefined}>
                 <Brick360Inline
                   key={selectedProject.projectId}
                   slug={selectedProject.projectSlug || ""}
@@ -1486,9 +1493,14 @@ export function BrickChatCore({
                     setSelectedProject(null);
                     setPillarMapConfig(null);
                   }}
-                  onMapConfigChange={setPillarMapConfig}
+                  onMapConfigChange={(config) => {
+                    setPillarMapConfig(config);
+                    // a pillar's "See on Map" - on mobile the map lives in
+                    // a closed drawer, so open it to actually show this
+                    if (config && isMobile) setShowMobileMap(true);
+                  }}
                 />
-                <Typography.Text style={{fontWeight: 500, fontSize: FONT_SIZE.HEADING_3}}>
+                <Typography.Text style={{fontWeight: 500, fontSize: FONT_SIZE.HEADING_2}}>
                   Ask any specific question about the project or compare it with other projects.
                 </Typography.Text>
               </Flex>

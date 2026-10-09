@@ -8,7 +8,7 @@ import dynamic from "next/dynamic";
 import type { ProjectMarkerInput } from "../../../components/map-view-v2/map-view-v2";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import type { LvnzyProject } from "../../../types/LvnzyProject";
-import type { PillarMapConfig } from "../../../components/brick-360/brick360-pillar";
+import type { PillarMapConfig } from "./brick360/tabs";
 import type { ProjectResult } from "./brickchat-client";
 const MapViewWrapper = dynamic(
   () => import("@/components/map-view-v2/map-view-google/map-view-wrapper"),
@@ -38,7 +38,7 @@ interface BrickMapChatProps {
    * data point is about (e.g. just school/office drivers, or just the corridor
    * pricing projects for the price-point data point) instead of the whole
    * project's connectivity. Only meaningful alongside detailedProject; ignored
-   * otherwise. See brick360-pillar.tsx.
+   * otherwise. See brick360/tabs/pillar-base.tsx.
    */
   pillarMapConfig?: PillarMapConfig | null;
   /**

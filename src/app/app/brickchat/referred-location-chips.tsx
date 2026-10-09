@@ -1,6 +1,8 @@
 "use client";
 
-import DynamicReactIcon from "@/components/common/dynamic-react-icon";
+import DynamicReactIcon, {
+  IconSetKey,
+} from "@/components/common/dynamic-react-icon";
 import { useFetchAllLivindexPlaces } from "@/hooks/use-livindex-places";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Tag, Typography } from "antd";
@@ -22,7 +24,22 @@ export interface ReferredLocationChipItem {
   type: ReferredLocationType;
   /** Already-known label (from resolvedLocations) - a bare brickfiDriverIds entry has none and gets one via useFetchAllLivindexPlaces below instead. */
   name?: string;
+  /** Chip icon - defaults to the map icon (DEFAULT_CHIP_ICON). */
+  icon?: { name: string; set: IconSetKey };
+  /** Show the label as-is instead of title-casing it (e.g. "See on Map", or place names with acronyms). */
+  keepLabelCase?: boolean;
+  /** Text after the label that's never truncated (e.g. "6 mins") - only the label gets the ellipsis. */
+  suffix?: string;
 }
+
+// chips never grow past this - the label is cut with an ellipsis instead
+// (full label in a tooltip); icon and suffix always stay whole
+const CHIP_MAX_WIDTH = 250;
+
+const DEFAULT_CHIP_ICON: { name: string; set: IconSetKey } = {
+  name: "FaMapMarkedAlt",
+  set: "fa",
+};
 
 interface ReferredLocationChipsProps {
   items: ReferredLocationChipItem[];
@@ -83,17 +100,25 @@ export default function ReferredLocationChips({
           // a landmark (no id) has no map layer to populate - show it for
           // context but don't make it look/act clickable
           const clickable = !!item.id;
+          const icon = item.icon || DEFAULT_CHIP_ICON;
+          const displayLabel = item.keepLabelCase
+            ? label || ""
+            : capitalize(label || "");
           return (
             <Flex
               key={item.key}
               align="center"
-              gap={4}
+              gap={8}
+              onClick={clickable ? () => onToggle(item) : undefined}
               style={{
                 padding: "2px 10px",
                 borderRadius: 12,
                 width: "auto",
+                maxWidth: CHIP_MAX_WIDTH,
                 flexShrink: 0,
                 whiteSpace: "nowrap",
+                cursor: clickable ? "pointer" : "default",
+                opacity: clickable ? 1 : 0.7,
                 backgroundColor: isSelected
                   ? COLORS.primaryColor
                   : COLORS.bgColorLightBlue,
@@ -103,23 +128,37 @@ export default function ReferredLocationChips({
                 }`,
               }}
             >
-              <DynamicReactIcon
-                iconName="FaMapMarkedAlt"
-                iconSet="fa"
-                size={14}
-                color={isSelected ? "white": COLORS.textColorDark}
-              ></DynamicReactIcon>
-              <Typography.Text
-                onClick={clickable ? () => onToggle(item) : undefined}
-                style={{
-                  cursor: clickable ? "pointer" : "default",
-                  opacity: clickable ? 1 : 0.7,
-                  fontSize: FONT_SIZE.PARA,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {capitalize(label || "")}
-              </Typography.Text>
+              <span style={{ display: "flex", flexShrink: 0 }}>
+                <DynamicReactIcon
+                  iconName={icon.name}
+                  iconSet={icon.set}
+                  size={18}
+                  color={isSelected ? "white" : COLORS.textColorDark}
+                ></DynamicReactIcon>
+              </span>
+              <Flex align="center" gap={4} style={{ minWidth: 0 }}>
+                <Typography.Text
+                  ellipsis={{ tooltip: displayLabel }}
+                  style={{
+                    minWidth: 0,
+                    fontSize: FONT_SIZE.HEADING_3,
+                    color: isSelected ? "white" : COLORS.textColorDark,
+                  }}
+                >
+                  {displayLabel}
+                </Typography.Text>
+                {item.suffix ? (
+                  <Typography.Text
+                    style={{
+                      flexShrink: 0,
+                      fontSize: FONT_SIZE.HEADING_3,
+                      color: isSelected ? "white" : COLORS.textColorDark,
+                    }}
+                  >
+                    {item.suffix}
+                  </Typography.Text>
+                ) : null}
+              </Flex>
             </Flex>
           );
         })}

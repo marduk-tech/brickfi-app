@@ -15,7 +15,7 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
     return (
       <>
         {/* Main project upfront score card including metadata */}
-        <Flex vertical style={{ padding: "0 8px" }}>
+        <Flex vertical style={{ padding: "0 8px",  }}>
           <Flex
             vertical
             style={{
@@ -51,9 +51,10 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
         <Flex
           vertical
           style={{
-            margin: "16px 8px",
+            margin: "4px 8px",
             width: isMobile ? "initial" : "fit-content",
-            borderRadius: 8
+            borderRadius: 8,
+            marginBottom: 24
           }}
         >
           <MetaInfo lvnzyProject={lvnzyProject!} ref={ref}></MetaInfo>

@@ -3,9 +3,11 @@ import { ProjectGalleryV2 } from "../project-images-gallery-v2";
 
 interface MediaTabProps {
   lvnzyProject: any;
+  /** Gallery tag filter to open on (see ProjectGalleryV2's initialTag). */
+  initialTag?: string;
 }
 
-export const MediaTab = ({ lvnzyProject }: MediaTabProps) => {
+export const MediaTab = ({ lvnzyProject, initialTag }: MediaTabProps) => {
   const filteredMedia = useMemo(() => {
     const media = lvnzyProject?.originalProjectId?.media || [];
     const unitConfigs =
@@ -38,5 +40,11 @@ export const MediaTab = ({ lvnzyProject }: MediaTabProps) => {
     return [...nonFloorplanMedia, ...unitConfigFloorplans];
   }, [lvnzyProject]);
 
-  return <ProjectGalleryV2 media={filteredMedia} selectedImageId={null} />;
+  return (
+    <ProjectGalleryV2
+      media={filteredMedia}
+      selectedImageId={null}
+      initialTag={initialTag}
+    />
+  );
 };

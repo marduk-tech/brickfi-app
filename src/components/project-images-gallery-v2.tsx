@@ -17,11 +17,14 @@ const TAGS_ORDER = [
 export const ProjectGalleryV2 = ({
   media,
   selectedImageId,
+  initialTag,
 }: {
   media: IMedia[];
   selectedImageId: string | null;
+  /** Tag filter to start on (e.g. "layout") - falls back to "all" when the
+   * media has no such tag. */
+  initialTag?: string;
 }) => {
-  const [selectedTag, setSelectedTag] = useState<string>("all");
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
@@ -68,6 +71,10 @@ export const ProjectGalleryV2 = ({
 
     return tagArray;
   }, [media]);
+
+  const [selectedTag, setSelectedTag] = useState<string>(() =>
+    initialTag && allTags.includes(initialTag) ? initialTag : "all",
+  );
 
   const groupedImages = useMemo(() => {
     // Filter videos first

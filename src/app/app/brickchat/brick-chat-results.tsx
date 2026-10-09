@@ -93,10 +93,7 @@ export default function BrickChatResults({
   minimal,
   selectedProjectId,
 }: BrickChatResultsProps) {
-  const cardBorder = (project: ProjectResult) =>
-    project.projectId === selectedProjectId
-      ? `8px solid ${COLORS.primaryColor}`
-      : `1px solid ${COLORS.borderColor}`;
+ 
 
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
@@ -212,9 +209,20 @@ export default function BrickChatResults({
                 borderRadius: 12,
                 overflow: "hidden",
                 margin: "8px 0",
-                border: cardBorder(project),
+                border: `1px solid ${COLORS.borderColor}`,
+                // column layout so the body can fill the card's full height
+                // and pin "View 360 Details" to the bottom (see below)
+                display: "flex",
+                flexDirection: "column",
               }}
-              styles={{ body: { padding: 0 } }}
+              styles={{
+                body: {
+                  padding: 0,
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                },
+              }}
               cover={
                 <div
                   style={{
@@ -254,7 +262,7 @@ export default function BrickChatResults({
                 </div>
               }
             >
-              <Flex vertical gap={2}>
+              <Flex vertical gap={2} style={{ flex: 1 }}>
                 <Tooltip title={project.projectName}>
                 <Typography.Text
                   strong
@@ -329,8 +337,10 @@ export default function BrickChatResults({
                           padding: "2px 4px",
                           borderBottomLeftRadius: 4,
                           borderBottomRightRadius: 4,
-                          marginTop: 4,
-                          backgroundColor: COLORS.primaryColor,
+                          // pushed to the bottom of the card whatever the
+                          // content above it, so buttons line up across cards
+                          marginTop: "auto",
+                          backgroundColor: project.projectId === selectedProjectId ? COLORS.primaryColor: COLORS.textColorDark,
                           cursor: "pointer",
                           color: "white",
                           fontSize: FONT_SIZE.SUB_TEXT,
@@ -366,7 +376,7 @@ export default function BrickChatResults({
               display: "block",
               overflow: "hidden",
               margin: "8px 0",
-              border: cardBorder(project),
+              border: `1px solid ${COLORS.borderColor}`,
             }}
             styles={{ body: { padding: 0 } }}
             cover={

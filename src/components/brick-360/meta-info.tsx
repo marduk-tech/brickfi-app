@@ -58,7 +58,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
         style={{
           fontSize:isMobile ? FONT_SIZE.HEADING_3: FONT_SIZE.HEADING_3,
           margin: 0,
-          color: color || "white",
+          color: color || COLORS.textColorMedium,
         }}
       >
         {text}
@@ -75,47 +75,65 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     : null;
 
   return (
-    <>
+    <Flex style={{margin: 0}}>
      
       <Flex
         style={{
-          border: `1px solid ${COLORS.borderColor}`,
-          marginTop: 8,
+          border: `0px solid ${COLORS.borderColor}`,
+          marginTop: 0,
           marginBottom: 0,
-          backgroundColor: COLORS.textColorDark,
-          padding: "8px",
           borderRadius: 8,
         }}
-        gap={isMobile ? 16: 16}
-        vertical={isMobile}
+        gap={isMobile ? 8: 16}
+        vertical
       >
-        <Flex align="center" gap={16}>
-          <Flex align="center" gap={8}>
-            <DynamicReactIcon
-              iconSet="tb"
-              iconName="TbBuildingBank"
-              size={18}
-              color={"white"}
-            />
-            <Typography.Text
-              style={{
-                fontSize:isMobile ? FONT_SIZE.HEADING_3: FONT_SIZE.HEADING_3,
-                margin: 0,
-                color: "white",
-              }}
-            >
-              {lvnzyProject?.originalProjectId?.info?.developerId?.name ||
-                "Developer"}
-            </Typography.Text>
-          </Flex>
-          <Flex align="center">
-            <DynamicReactIcon
-              iconSet="io5"
-              iconName="IoLocationSharp"
-              size={20}
-              color={"white"}
-            />
-            <Flex align="center">
+         <Flex gap={4}>
+           <Flex align="center" gap={2} justify="center">
+              {/* <DynamicReactIcon
+                iconSet="tb"
+                iconName="TbHome"
+                size={20}
+                color={"white"}
+              /> */}
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_3
+                    : FONT_SIZE.HEADING_3,
+                  margin: 0,
+                  color: COLORS.textColorMedium,
+                }}
+              >
+                {lvnzyProject?.meta.projectUnitTypes
+                  .split(",")
+                  .map((unitType: string) => capitalize(unitType))
+                  .join("/")},
+              </Typography.Text>
+            </Flex>
+            <Flex align="center" gap={0}>
+              <DynamicReactIcon
+                iconSet="fa6"
+                iconName="FaIndianRupeeSign"
+                size={16}
+                color={COLORS.textColorMedium}
+              />
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_3
+                    : FONT_SIZE.HEADING_3,
+                  margin: 0,
+                  color: COLORS.textColorDark,
+                }}
+              >
+                {getMinMaxPrices(
+                  lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
+                    (c: any) => c.price,
+                  ),
+                )},
+              </Typography.Text>
+            </Flex>
+             <Flex align="center">
               {renderText(`
             ${
               lvnzyProject.meta.projectCorridors.sort(
@@ -124,83 +142,58 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
               )[0].corridorName
             }`)}
             </Flex>
+        </Flex>
+        <Flex align="center" gap={16} style={{marginTop: 8}}>
+          <Flex align="center" gap={8} style={{backgroundColor: COLORS.bgColorMedium, padding: "2px 4px", borderRadius: 4}}>
+            <DynamicReactIcon
+              iconSet="tb"
+              iconName="TbBuildingBank"
+              size={18}
+              color={COLORS.textColorDark}
+            />
+            <Typography.Text
+              style={{
+                fontSize:isMobile ? FONT_SIZE.HEADING_4: FONT_SIZE.HEADING_4,
+                margin: 0,
+                color: COLORS.textColorDark,
+              }}
+            >
+              {lvnzyProject?.originalProjectId?.info?.developerId?.name ||
+                "Developer"}
+            </Typography.Text>
           </Flex>
-           
-       
-        </Flex>
-        <Flex gap={12}>
-           <Flex align="center" gap={2} justify="center">
-              <DynamicReactIcon
-                iconSet="tb"
-                iconName="TbHome"
-                size={20}
-                color={"white"}
-              />
-              <Typography.Text
-                style={{
-                  fontSize: isMobile
-                    ? FONT_SIZE.HEADING_3
-                    : FONT_SIZE.HEADING_3,
-                  margin: 0,
-                  color: "white",
-                }}
-              >
-                {lvnzyProject?.meta.projectUnitTypes
-                  .split(",")
-                  .map((unitType: string) => capitalize(unitType))
-                  .join("/")}
-              </Typography.Text>
-            </Flex>
-            <Flex align="center" gap={2}>
-              <DynamicReactIcon
-                iconSet="hi"
-                iconName="HiOutlineCurrencyRupee"
-                size={22}
-                color={"white"}
-              />
-              <Typography.Text
-                style={{
-                  fontSize: isMobile
-                    ? FONT_SIZE.HEADING_3
-                    : FONT_SIZE.HEADING_3,
-                  margin: 0,
-                  color: "white",
-                }}
-              >
-                {getMinMaxPrices(
-                  lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
-                    (c: any) => c.price,
-                  ),
-                )}
-              </Typography.Text>
-            </Flex>
-        </Flex>
-        {projectStatus && projectStatusConfig && (
+           {projectStatus && projectStatusConfig && (
         <Flex
           align="center"
           gap={4}
           onClick={() => setStatusModalOpen(true)}
           style={{
             cursor: "pointer",
+            backgroundColor: COLORS.bgColorMedium, 
+            padding: "2px 4px", borderRadius: 4
           }}
         >
           <DynamicReactIcon
             iconSet={projectStatusConfig.iconSet}
             iconName={projectStatusConfig.iconName}
             size={18}
-            color={"white"}
+            color={COLORS.textColorDark}
           />
           <Typography.Text
             style={{
-              fontSize:isMobile ? FONT_SIZE.HEADING_3: FONT_SIZE.HEADING_3,
+              fontSize:isMobile ? FONT_SIZE.HEADING_4: FONT_SIZE.HEADING_4,
               fontWeight: 500,
-              color: "white",
+              color: COLORS.textColorDark,
             }}
           >
             {projectStatus}
           </Typography.Text>
         </Flex>
       )}
+       
+        </Flex>
+       
+       
       </Flex>
       {projectStatus && projectStatusConfig && (
         <Modal
@@ -254,7 +247,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           </div>
         </Modal>
       )}
-    </>
+    </Flex>
   );
 });
 

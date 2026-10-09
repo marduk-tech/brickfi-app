@@ -147,9 +147,10 @@ body {
 
   .highlight {
     font-weight: 500;
-    color: #0084d1;
-    background-color: rgba(43, 203, 242, 0.1);
-    padding: 0 4px;
+    background-color: rgba(43, 203, 242, 0.12);
+    padding: 0 8px;
+    border-radius: 8;
+    font-size: 105%;
   }
 
   a[href*="brickassist"] {
