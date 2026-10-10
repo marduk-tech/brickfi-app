@@ -34,7 +34,7 @@ export function Brick360Highlights({
       <Flex
         align="flex-start"
         style={{
-          padding: "8px",
+          padding: "0px",
           borderRadius: 8,
           width: vertical ? "100%" : undefined,
         }}
@@ -65,7 +65,7 @@ export function Brick360Highlights({
               dangerouslySetInnerHTML={{ __html: content }}
               className={`reasoning ${isPro ? "" : "con"}`}
               style={{
-                fontSize: fs.HEADING_2,
+                fontSize: fs.HEADING_3,
                 margin: 0,
                 width: vertical ? "100%" : 275,
                 color: COLORS.textColorMedium,
@@ -122,7 +122,7 @@ export function Brick360Highlights({
         </Typography.Text> */}
         {vertical ? (
           isMobile ? (
-            <Flex vertical gap={12} style={{ width: "100%" }}>
+            <Flex vertical gap={0} style={{ width: "100%" }}>
               {cards}
             </Flex>
           ) : (

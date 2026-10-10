@@ -56,6 +56,7 @@ import PinnedProjectResults from "./pinned-project-results";
 import CollapsibleAnswer from "./collapsible-answer";
 import StaticQueries from "./static-queries";
 import styles from "./brick-chat-results.module.css";
+import { useBrick360FontSize } from "./brick360/use-font-size";
 
 export interface ProjectResult {
   projectId: string;
@@ -235,6 +236,8 @@ export function BrickChatCore({
   autoStartQuestion,
   projectRef,
 }: BrickChatCoreProps) {
+    const fs = useBrick360FontSize();
+  
   const [form] = Form.useForm();
   const { user, refetch: refetchUser } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
@@ -1503,7 +1506,7 @@ export function BrickChatCore({
                     if (config && isMobile) setShowMobileMap(true);
                   }}
                 />
-                <Typography.Text style={{fontWeight: 500, fontSize: FONT_SIZE.HEADING_2}}>
+                <Typography.Text style={{fontWeight: 500, fontSize: fs.HEADING_2, marginLeft: 12}}>
                   Ask any specific question about the project or compare it with other projects.
                 </Typography.Text>
               </Flex>
