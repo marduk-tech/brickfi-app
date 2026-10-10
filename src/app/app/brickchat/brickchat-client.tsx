@@ -583,8 +583,27 @@ export function BrickChatCore({
     });
   };
 
+  // The thread "New chat" just left (see handleNewChat). Its id lingers in
+  // the URL for a render after the reset (history.replaceState reaches
+  // usePathname a render later), and with history now empty the effect
+  // below would otherwise start re-loading that very thread.
+  const leavingThreadIdRef = useRef<string | null>(null);
+
   useEffect(() => {
+    // the URL has moved off the thread being left - stop ignoring it, so
+    // it can still be reopened normally later (e.g. from the sidebar)
+    if (
+      leavingThreadIdRef.current &&
+      selectedThreadId !== leavingThreadIdRef.current
+    ) {
+      leavingThreadIdRef.current = null;
+    }
+
     if (!user?._id || !selectedThreadId || sharedBy) {
+      return;
+    }
+
+    if (selectedThreadId === leavingThreadIdRef.current) {
       return;
     }
 
@@ -637,6 +656,9 @@ export function BrickChatCore({
 
     return () => {
       cancelled = true;
+      // a cancelled load never reaches its own finally-reset below, so clear
+      // the "Loading conversation..." flag here - otherwise it sticks
+      setThreadyHistoryLoading(false);
     };
   }, [
     activeThreadId,
@@ -746,7 +768,13 @@ export function BrickChatCore({
     const runStartedAt = Date.now();
 
     try {
+      // "New chat" aborts this (see handleNewChat), so a reply still
+      // streaming can't land in the fresh conversation afterwards
+      searchAbortRef.current?.abort();
+      const abortController = new AbortController();
+      searchAbortRef.current = abortController;
       const res = await fetch(`${baseApiUrl}ai/explore-projects/stream`, {
+        signal: abortController.signal,
         method: "POST",
         cache: "no-store",
         headers: {
@@ -895,6 +923,8 @@ export function BrickChatCore({
 
       refreshChatThreads();
     } catch (error) {
+      // aborted by "New chat" - expected, not a failure to report
+      if ((error as any)?.name === "AbortError") return;
       console.error("Search error:", error);
       message.error("Failed to search projects. Please try again.");
     } finally {
@@ -905,12 +935,36 @@ export function BrickChatCore({
     }
   };
 
+  // in-flight /explore-projects/stream request, if any (see handleSearch)
+  const searchAbortRef = useRef<AbortController | null>(null);
+
+  // Starts a fresh conversation in place (no page reload): stops any reply
+  // still streaming, clears the thread and everything shown for it (history,
+  // streaming state, open 360 view, map focus/results, search box), and
+  // points the URL back at the bare chat path. Pinned projects are kept.
   const handleNewChat = () => {
+    searchAbortRef.current?.abort();
+    searchAbortRef.current = null;
+    // don't let the history effect re-load the thread being left while its
+    // id is still in the URL (see leavingThreadIdRef)
+    leavingThreadIdRef.current = selectedThreadId || activeThreadId || null;
+
     setActiveThreadId(undefined);
     setChatHistory([]);
     setCurrentQuestion(undefined);
-    setMapResultsIndex(undefined);
+    setChatLoading(false);
+    setSteps([]);
+    setStreamingSummary(undefined);
     setThreadyHistoryLoading(false);
+
+    setSelectedProject(null);
+    setPillarMapConfig(null);
+    setFocusedReferredLocation(null);
+    setFocusedProjectId(null);
+    setMapResultsIndex(undefined);
+    setProjectResults(undefined);
+
+    form.resetFields();
     syncThreadUrl();
   };
 
@@ -1144,12 +1198,7 @@ export function BrickChatCore({
                       size={16}
                     />
                   }
-                  onClick={() => {
-                    // the bare base, not the current path - which on the
-                    // chat page now carries the thread id itself
-                    window.location.href =
-                      threadPathBase || window.location.pathname;
-                  }}
+                  onClick={handleNewChat}
                 />
               </Tooltip>
             </Flex>
@@ -1198,7 +1247,6 @@ export function BrickChatCore({
             results={pinnedProjectResults || []}
             description={pinnedProjectsDescription}
             hasChatStarted={!!chatHistory.length}
-            hasActiveThread={!!(activeThreadId || selectedThreadId)}
             onLocateProject={handleLocateProject}
             onSelectProject={handleSelectProject}
             selectedProjectId={selectedProject?.projectId}

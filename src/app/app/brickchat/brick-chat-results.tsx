@@ -458,7 +458,7 @@ export default function BrickChatResults({
   }
 
   return (
-    <Flex className={styles.scrollContainer} gap={16}>
+    <Flex className={styles.scrollContainer} gap={4}>
       {contextHolder}
       {modalContextHolder}
       {orderResults(results, skipSort).map((project) => (

@@ -3,6 +3,8 @@
 import { CaretRightOutlined } from "@ant-design/icons";
 import { Collapse, Flex, Typography } from "antd";
 import { useEffect, useState } from "react";
+import { safeStorage } from "@/libs/browser-utils";
+import { LocalStorageKeys } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import BrickChatResults from "./brick-chat-results";
 import { ProjectResult } from "./brickchat-client";
@@ -14,10 +16,6 @@ interface PinnedProjectResultsProps {
   results: ProjectResult[];
   description?: string;
   hasChatStarted: boolean;
-  // expanded by default with no thread in progress (fresh chat), collapsed
-  // once one is - re-applied whenever that flips, manual toggles in between
-  // are kept
-  hasActiveThread: boolean;
   onLocateProject?: (projectId: string) => void;
   onSelectProject?: (project: ProjectResult) => void;
   selectedProjectId?: string;
@@ -35,17 +33,22 @@ export default function PinnedProjectResults({
   results,
   description,
   hasChatStarted,
-  hasActiveThread,
   onLocateProject,
   onSelectProject,
   selectedProjectId,
   collapseOnSelect,
 }: PinnedProjectResultsProps) {
-  const [expanded, setExpanded] = useState(!hasActiveThread);
+  // Open by default only on the very first visit ever (remembered in
+  // localStorage), collapsed on every visit, new chat or thread switch after
+  // that - the user can still toggle it. Starts collapsed and opens after
+  // mount, since localStorage isn't readable during server rendering.
+  const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    setExpanded(!hasActiveThread);
-  }, [hasActiveThread]);
+    if (safeStorage.getItem(LocalStorageKeys.pinnedProjectsSeen)) return;
+    safeStorage.setItem(LocalStorageKeys.pinnedProjectsSeen, "true");
+    setExpanded(true);
+  }, []);
 
   // keyed on the selected id (not a boolean) so picking a different project
   // collapses it again even if the user re-opened it in between
@@ -134,15 +137,30 @@ export default function PinnedProjectResults({
         items={[
           {
             key: PINNED_KEY,
-            label: (
+            label: (<Flex gap={6} align="center" >
               <Typography.Text
                 style={{
                   fontSize: FONT_SIZE.HEADING_4,
                   color: COLORS.textColorLight,
                 }}
               >
-                Your saved projects ({results.length})
+                Your saved projects
               </Typography.Text>
+               <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.SUB_TEXT,
+                  color: COLORS.textColorMedium,
+                  backgroundColor: COLORS.bgColorMedium,
+                  borderRadius: 4,
+                  width: 18,
+                  height: 18,
+                  textAlign: "center",
+                  fontWeight: 500
+                }}
+              >
+                {results.length}
+              </Typography.Text>
+              </Flex>
             ),
             children: !results.length ? (
               <div

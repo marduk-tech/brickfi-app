@@ -30,6 +30,9 @@ export const LocalStorageKeys = {
   user: "user",
   tour: "tour",
   utmHistory: "utm_history",
+  // set once the saved-projects strip in brickchat has been shown open on
+  // a first visit - it starts collapsed on every visit after that
+  pinnedProjectsSeen: "pinned_projects_seen",
 };
 
 export const env = process.env.NEXT_PUBLIC_ENV;
