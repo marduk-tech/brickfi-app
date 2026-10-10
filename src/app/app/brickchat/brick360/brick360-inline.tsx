@@ -400,7 +400,7 @@ export function Brick360Inline({
             gap={8}
             style={{
               width: "100%",
-              height: 150,
+              height: isMobile ? 100: 150,
               overflowX: "scroll",
               scrollbarWidth: "none",
             }}
@@ -460,7 +460,7 @@ export function Brick360Inline({
         style={
           {
             padding: "0 8px",
-            marginTop: isMobile ? 8 :16,
+            marginTop: 0,
             marginLeft: 0,
             "--tab-bar-border-color": COLORS.borderColor,
             "--tab-active-color": COLORS.primaryColor,

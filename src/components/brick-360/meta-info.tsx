@@ -121,7 +121,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           {priceText}
           {corridorText ? `, ${corridorText}` : ""}
         </div>
-        <Flex align="center" gap={16} style={{marginTop: 8}}>
+        <Flex align="center" gap={16} style={{marginTop: 0}}>
           <Flex align="center" gap={8} style={{backgroundColor: COLORS.bgColorMedium, padding: "2px 4px", borderRadius: 4}}>
             <DynamicReactIcon
               iconSet="tb"
