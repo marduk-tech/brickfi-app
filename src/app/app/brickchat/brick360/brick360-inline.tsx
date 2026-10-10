@@ -313,7 +313,7 @@ export function Brick360Inline({
             <Typography.Text
               style={{
                 fontSize: fs.HEADING_2,
-                fontWeight: 500,
+                fontWeight: 400,
                 color: isActive ? "white" : COLORS.textColorMedium,
               }}
             >

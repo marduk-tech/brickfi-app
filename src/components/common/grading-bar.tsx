@@ -91,9 +91,9 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
         style={{
           color: COLORS.textColorDark,
           backgroundColor: COLORS.bgColor,
-          padding: "5px 5px",
-          borderTopRightRadius: 8,
-          borderBottomRightRadius: 8
+          padding: "3px 3px",
+          borderTopRightRadius: 6,
+          borderBottomRightRadius: 6
         }}
         gap={4}
         align="center"

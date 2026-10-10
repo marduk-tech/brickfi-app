@@ -21,13 +21,13 @@ export const STAT_CARD_STYLE: CSSProperties = {
 };
 
 export const STAT_LABEL_STYLE: CSSProperties = {
-  fontSize: FONT_SIZE.HEADING_2,
+  fontSize: FONT_SIZE.HEADING_3,
   marginBottom: 2,
   color: COLORS.primaryColor,
 };
 
 export const STAT_VALUE_STYLE: CSSProperties = {
-  fontSize: FONT_SIZE.HEADING_2,
+  fontSize: FONT_SIZE.HEADING_3,
   color: COLORS.textColorMedium,
   fontWeight: 500,
 };
@@ -97,7 +97,7 @@ export const StatCard = ({
       ...style,
     }}
   >
-    <Typography.Text style={{ ...STAT_LABEL_STYLE, fontSize: fs.HEADING_2 }}>
+    <Typography.Text style={{ ...STAT_LABEL_STYLE, fontSize: fs.HEADING_3 }}>
       {label}
     </Typography.Text>
     {children ? (
@@ -112,7 +112,7 @@ export const StatCard = ({
           top: "100%",
           left: 0,
           marginTop: 2,
-          fontSize: fs.HEADING_4,
+          fontSize: fs.HEADING_3,
           color: COLORS.textColorMedium,
           whiteSpace: "nowrap",
         }}
@@ -135,7 +135,7 @@ export const StatValue = ({
   const fs = useBrick360FontSize();
   return (
     <Typography.Text
-      style={{ ...STAT_VALUE_STYLE, fontSize: fs.HEADING_2, ...style }}
+      style={{ ...STAT_VALUE_STYLE, fontSize: fs.HEADING_3, ...style }}
     >
       {children}
     </Typography.Text>

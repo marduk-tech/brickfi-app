@@ -171,7 +171,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
 
           {configFilters && configFilters.length > 1 ? (
             <Flex
-              gap={4}
+              gap={12}
               style={{
                 marginTop: 16,
                 width: "100%",
@@ -182,7 +182,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
             >
               {configFilters?.map((filter: string) => {
                 return (
-                  <Tag
+                  <Typography.Text
                     key={`filter-${filter}`}
                     color={
                       filter == selectedConfigFilter
@@ -190,17 +190,18 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                         : "default"
                     }
                     style={{
-                      fontSize: fs.HEADING_2,
+                      fontSize: fs.HEADING_3,
                       padding: "4px 8px",
-                      borderRadius: 8,
                       cursor: "pointer",
+                      fontWeight: 500,
+                      borderBottom: filter == selectedConfigFilter ? `3px solid ${COLORS.primaryColor}`: `0px`
                     }}
                     onClick={() => {
                       setSelectedConfigFilter(filter);
                     }}
                   >
                     {filter}
-                  </Tag>
+                  </Typography.Text>
                 );
               })}
             </Flex>
