@@ -250,24 +250,27 @@ const PropertyStats = ({ lvnzyProject }: { lvnzyProject?: LvnzyProject }) => {
   );
   const floorsContent =
     lvnzyProject.originalProjectId?.info.unitConfigWithPricing &&
-    (lvnzyProject as any)?.meta.projectConfigurations.unitsBreakup
+    (lvnzyProject as any)?.meta?.projectConfigurations?.unitsBreakup
       ? getTotalFloors(lvnzyProject, fs)
       : null;
-  const totalUnits = (lvnzyProject as any)?.property.layout.totalUnits;
-  const totalPhases = (lvnzyProject as any)?.property.layout.totalPhases;
+  // property.layout comes from the generated report - may be missing when
+  // the report isn't generated yet (stat cards still render then)
+  const layout = (lvnzyProject as any)?.property?.layout;
+  const totalLandArea = layout?.totalLandArea;
+  const totalUnits = layout?.totalUnits;
+  const totalPhases = layout?.totalPhases;
 
   return (
     <StatCardRow bottomSpace={imageCards.length ? IMAGE_CARD_CAPTION_SPACE : 0}>
-      <StatCard label="SCALE">
-        <StatValue>
-          {Math.round(
-            (lvnzyProject as any)?.property.layout.totalLandArea / 404.68564,
-          ) / 10}{" "}
-          Acre
-        </StatValue>
-        {totalUnits && <StatValue>· {totalUnits} Units</StatValue>}
-        {totalPhases > 1 && <StatValue>· {totalPhases} Phases</StatValue>}
-      </StatCard>
+      {totalLandArea ? (
+        <StatCard label="SCALE">
+          <StatValue>
+            {Math.round(totalLandArea / 404.68564) / 10} Acre
+          </StatValue>
+          {totalUnits && <StatValue>· {totalUnits} Units</StatValue>}
+          {totalPhases > 1 && <StatValue>· {totalPhases} Phases</StatValue>}
+        </StatCard>
+      ) : null}
 
       {unitSizesContent && (
         <StatCard label="UNIT SIZES">

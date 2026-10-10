@@ -145,7 +145,7 @@ export const LocationPillar = forwardRef<any, PillarProps>((props, ref) => {
           captureAnalyticsEvent("driver-map-focus", {
             driverName: driver.name,
             driverType: driver.driver,
-            projectName: lvnzyProject?.meta.projectName,
+            projectName: lvnzyProject?.meta?.projectName,
             projectId: lvnzyProject?._id,
           });
         }}

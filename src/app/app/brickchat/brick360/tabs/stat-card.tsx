@@ -112,8 +112,8 @@ export const StatCard = ({
           top: "100%",
           left: 0,
           marginTop: 2,
-          fontSize: fs.HEADING_3,
-          color: COLORS.textColorMedium,
+          fontSize: fs.HEADING_4,
+          color: COLORS.textColorLight,
           whiteSpace: "nowrap",
         }}
       >

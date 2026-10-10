@@ -296,7 +296,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
           question,
           pillar: dataPointSelected?.selectedDataPointCategory || "",
           dataPoint: dataPointSelected?.selectedDataPointSubCategory || "",
-          projectName: lvnzyProject?.meta.projectName || "",
+          projectName: lvnzyProject?.meta?.projectName || "",
           projectId: lvnzyProject?._id,
         });
 
@@ -422,7 +422,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
       captureAnalyticsEvent("datapoint-map-view", {
         pillar: categoryKey,
         dataPoint: key.split("::")[1],
-        projectName: lvnzyProject?.meta.projectName,
+        projectName: lvnzyProject?.meta?.projectName,
         projectId: lvnzyProject?._id,
       });
     };
@@ -462,17 +462,15 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
           {renderDataPointExtra?.(dataPointKey)}
 
           <Flex vertical gap={16} style={{ marginBottom: 24, marginTop: 8 }}>
-            {(dataPoint?.reasoning || []).map(
-              (r: string, i: number) => (
-                <Flex key={i} style={{ maxWidth: 850 }}>
-                  <div
-                    dangerouslySetInnerHTML={{ __html: r }}
-                    className="reasoning"
-                    style={{ fontSize: fs.HEADING_3, margin: 0 }}
-                  ></div>
-                </Flex>
-              ),
-            )}
+            {(dataPoint?.reasoning || []).map((r: string, i: number) => (
+              <Flex key={i} style={{ maxWidth: 850 }}>
+                <div
+                  dangerouslySetInnerHTML={{ __html: r }}
+                  className="reasoning"
+                  style={{ fontSize: fs.HEADING_3, margin: 0 }}
+                ></div>
+              </Flex>
+            ))}
           </Flex>
 
           {/* {followUpPrompts && followUpPrompts.length && !currentQuestion ? (
@@ -577,31 +575,48 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
       );
     };
 
+    // No score yet (report not generated): still show the pillar's stat
+    // cards (header) - they come from project data that exists without the
+    // report - with the "not generated" message below them.
     if (
       !lvnzyProject ||
       !lvnzyProject.score ||
       Object.keys(lvnzyProject.score).length < 3
     ) {
       return (
-        <Flex
-          vertical
-          align="center"
-          justify="center"
-          gap={12}
-          style={{
-            padding: "32px 16px",
-            marginBottom: 16,
-            borderRadius: 12,
-            backgroundColor: "#f8f8f8",
-            border: "1px dashed #d9d9d9",
-          }}
-        >
-          <Typography.Text
-            style={{ marginBottom: 16, color: "#8c8c8c", textAlign: "left" }}
+        <Flex vertical>
+          {lvnzyProject ? header : null}
+          <Flex
+            vertical
+            align="center"
+            justify="center"
+            gap={12}
+            style={{
+              padding: "32px 16px",
+              marginTop: 16,
+              marginBottom: 16,
+              borderRadius: 12,
+              backgroundColor: "#f8f8f8",
+              border: "1px dashed #d9d9d9",
+            }}
           >
-            The Brick 360 report for this project has not been generated yet.
-            Request the admin.
-          </Typography.Text>
+            <DynamicReactIcon
+              iconName="VscChatSparkleError"
+              iconSet="vsc"
+              size={32}
+              color={COLORS.textColorMedium}
+            ></DynamicReactIcon>
+            <Typography.Text
+              style={{
+                marginBottom: 16,
+                color: "#8c8c8c",
+                textAlign: "center",
+              }}
+            >
+              A detailed assessment has not been created yet for this project.
+              <br></br> Drop a message below and I will get back once ready.
+            </Typography.Text>
+          </Flex>
         </Flex>
       );
     }
@@ -642,7 +657,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                   item[1].rating > 0
                                     ? COLORS.textColorDark
                                     : COLORS.textColorLight,
-                                    fontWeight: 500
+                                fontWeight: 500,
                               }}
                             >
                               {capitalize(

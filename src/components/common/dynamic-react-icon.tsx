@@ -19,7 +19,8 @@ export type IconSetKey =
   | "bs"
   | "pi"
   | "lu"
-  | "lia";
+  | "lia"
+  | "vsc";
 
 interface IconProps {
   iconSet: IconSetKey;
@@ -48,6 +49,7 @@ export const dynamicImportMap: any = {
   pi: () => import("react-icons/pi"),
   lia: () => import("react-icons/lia"),
   lu: () => import("react-icons/lu"),
+   vsc: () => import("react-icons/vsc"),
 };
 
 const DynamicReactIcon: React.FC<IconProps> = ({

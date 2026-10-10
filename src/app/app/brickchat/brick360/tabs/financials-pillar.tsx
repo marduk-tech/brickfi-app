@@ -203,7 +203,7 @@ const FinancialStats = ({ lvnzyProject }: { lvnzyProject?: LvnzyProject }) => {
     <>
       <StatCardRow bottomSpace={typicalRange ? STAT_CARD_NOTE_SPACE : 0}>
         <StatCard label="AVG. SQUARE FOOT PRICE">
-          {lvnzyProject?.meta.costingDetails && (
+          {lvnzyProject?.meta?.costingDetails && (
             <Flex gap={1} align="center">
               <RupeeIcon />
               <StatValue>

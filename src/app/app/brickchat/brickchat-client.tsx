@@ -1194,7 +1194,7 @@ export function BrickChatCore({
             onLocateProject={handleLocateProject}
             onSelectProject={handleSelectProject}
             selectedProjectId={selectedProject?.projectId}
-            collapseOnSelect={isMobile}
+            collapseOnSelect={true}
           />
           {showWelcome ? (
             <Flex vertical>
