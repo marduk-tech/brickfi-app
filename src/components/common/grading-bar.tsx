@@ -2,6 +2,7 @@ import React from "react";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { Flex, Typography } from "antd";
 import DynamicReactIcon from "./dynamic-react-icon";
+import { useBrick360FontSize } from "@/app/app/brickchat/brick360/use-font-size";
 
 type GradientBarProps = {
   value: number;
@@ -14,6 +15,9 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
   const interpolate = (start: number, end: number, factor: number): number => {
     return Math.round(start + (end - start) * factor);
   };
+
+    const fs = useBrick360FontSize();
+  
 
   const getGradientColor = (value: number): string => {
     const clampedValue = Math.max(0, Math.min(100, value)); // Ensure the value is between 0-100
@@ -104,7 +108,7 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
          <Typography.Text
           style={{
             fontWeight: 500,
-            fontSize: FONT_SIZE.HEADING_3,
+            fontSize: fs.HEADING_3,
             color: value ? COLORS.textColorDark: COLORS.textColorLight,
           }}
         >
