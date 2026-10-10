@@ -1,7 +1,9 @@
 "use client";
 
 import { AdminGuard } from "@/components/auth/admin-guard";
-import BrickChatResults from "@/app/app/brickchat/brick-chat-results";
+import BrickChatResults, {
+  BrickChatResultsSkeleton,
+} from "@/app/app/brickchat/brick-chat-results";
 import ChatTimeline, { TimelineStep } from "@/app/app/brickchat/chat-timeline";
 import { PillarMapConfig } from "./brick360/tabs";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
@@ -206,6 +208,12 @@ const openSharedThread = async (
   const json = await res.json();
   return { history: json?.data || [], threadId: json?.meta?.threadId };
 };
+
+// Streamed step ids that only occur when the answer will be a project list
+// (directAnswer false) - a discover search (vectorSearch) or paging through
+// one's results (formatResults, also "show me more"). See STEPS in the
+// backend's brickchat-v2/progress.js.
+const PROJECT_LIST_STEP_IDS = ["vectorSearch", "formatResults"];
 
 // Threads open at /app/brickchat/<threadId> (see the [threadId] route).
 export const BRICKCHAT_THREAD_PATH_BASE = "/app/brickchat";
@@ -1007,10 +1015,10 @@ export function BrickChatCore({
       <Typography.Text
         style={{
           color: "white",
-          fontSize: FONT_SIZE.HEADING_3,
+          fontSize: FONT_SIZE.HEADING_4,
           backgroundColor: COLORS.textColorDark,
           borderRadius: 16,
-          padding: "8px 16px",
+          padding: "4px 12px",
           maxWidth: 575,
         }}
       >
@@ -1027,7 +1035,7 @@ export function BrickChatCore({
       style={{
         width: "100%",
         maxWidth: 2000,
-        height: "calc(100vh - 100px)",
+        height: isMobile ? "calc(100vh - 100px)": "calc(100vh - 60px)",
         // mobile: no side padding here - the search form and chat panel
         // below carry their own 8px gutter instead, so everything (including
         // the inline Brick360 view) gets an even 8px on both sides
@@ -1269,7 +1277,7 @@ export function BrickChatCore({
                   ) : null}
 
                   <Flex vertical gap={4} style={{ marginTop: 8 }}>
-                    {!messageItem.answer.directAnswer &&
+                    {/* {!messageItem.answer.directAnswer &&
                     !!messageItem.answer.projectsList.length ? (
                       <Typography.Text
                         style={{
@@ -1283,39 +1291,10 @@ export function BrickChatCore({
                           ? "s"
                           : ""}
                       </Typography.Text>
-                    ) : null}
+                    ) : null} */}
 
-                    {/* earlier turns clamp to 300px behind "See more" so
-                      the thread stays scannable; the latest turn always
-                      shows in full */}
-                    <CollapsibleAnswer
-                      collapsible={index < chatHistory.length - 1}
-                    >
-                      <Markdown
-                        className="bkchat-summary"
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          p: ({ children }) => (
-                            <Typography.Text
-                              style={{
-                                fontSize: FONT_SIZE.HEADING_3,
-                                fontWeight: 500,
-                                marginBottom: 16,
-                                display: "block",
-                                maxWidth: 850,
-                              }}
-                            >
-                              {children}
-                            </Typography.Text>
-                          ),
-                        }}
-                      >
-                        {messageItem.answer.summary}
-                      </Markdown>
-                    </CollapsibleAnswer>
                     {renderImages(messageItem.answer.images)}
-                    <Flex vertical>
-                      {/* <Typography.Text style={{color: COLORS.textColorLight}}>See on Map</Typography.Text> */}
+                    {/* Map Chips */}
                       <Flex
                         align="center"
                         gap={8}
@@ -1408,7 +1387,6 @@ export function BrickChatCore({
                           ) : null;
                         })()}
                       </Flex>
-                    </Flex>
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
                         <BrickChatResults
@@ -1455,12 +1433,42 @@ export function BrickChatCore({
                         />
                       </Flex>
                     ) : null}
+
+                    {/* earlier turns clamp to 300px behind "See more" so
+                      the thread stays scannable; the latest turn always
+                      shows in full */}
+                    <CollapsibleAnswer
+                      collapsible={index < chatHistory.length - 1}
+                    >
+                      <Markdown
+                        className="bkchat-summary"
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => (
+                            <Typography.Text
+                              style={{
+                                fontSize: FONT_SIZE.HEADING_4,
+                                fontWeight: 500,
+                                marginBottom: 16,
+                                display: "block",
+                                maxWidth: 850,
+                              }}
+                            >
+                              {children}
+                            </Typography.Text>
+                          ),
+                        }}
+                      >
+                        {messageItem.answer.summary}
+                      </Markdown>
+                    </CollapsibleAnswer>
+                    
                     {messageItem.answer.followupPrompt ? (
                       <Typography.Text
                         style={{
-                          fontSize: FONT_SIZE.HEADING_3,
-                          marginTop: 32,
-                          fontWeight: 500,
+                          fontSize: FONT_SIZE.HEADING_4,
+                          marginTop: 8,
+                          fontWeight: 600,
                           maxWidth: 800,
                         }}
                       >
@@ -1476,6 +1484,11 @@ export function BrickChatCore({
               <Flex vertical gap={12}>
                 {renderQuestion(currentQuestion)}
                 <ChatTimeline steps={steps} running />
+                {/* a project-list answer (directAnswer false) is on its way
+                    - placeholder cards until the real ones arrive */}
+                {steps.some((s) => PROJECT_LIST_STEP_IDS.includes(s.id)) ? (
+                  <BrickChatResultsSkeleton />
+                ) : null}
                 {streamingSummary ? (
                   <Markdown
                     className="bkchat-summary"
@@ -1484,6 +1497,7 @@ export function BrickChatCore({
                     {streamingSummary}
                   </Markdown>
                 ) : null}
+                
               </Flex>
             )}
 

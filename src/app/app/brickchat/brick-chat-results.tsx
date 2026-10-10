@@ -12,7 +12,16 @@ import {
   rupeeAmountFormat,
 } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Card, Flex, message, Modal, Tag, Tooltip, Typography } from "antd";
+import {
+  Card,
+  Flex,
+  message,
+  Modal,
+  Skeleton,
+  Tag,
+  Tooltip,
+  Typography,
+} from "antd";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import DynamicReactIcon from "../../../components/common/dynamic-react-icon";
@@ -57,6 +66,67 @@ const formatPriceInCrores = (price: number): string => {
   const crores = price / 10000000;
   return `₹${crores.toFixed(2)} Crs`;
 };
+
+// One-liners from discovery results start with how well the project matches
+// the query - "strong-match; ..." / "moderate-match; ..." / "weak-match; ..."
+// - which is shown as its own tag next to the corridor rather than inline.
+type MatchLevel = "strong-match" | "moderate-match" | "weak-match";
+
+const MATCH_LEVEL_CONFIG: Record<MatchLevel, { label: string; color: string }> =
+  {
+    "strong-match": { label: "Strong Match", color: "green" },
+    "moderate-match": { label: "Moderate Match", color: "gold" },
+    "weak-match": { label: "Weak Match", color: "red" },
+  };
+
+const ONE_LINER_MATCH_PREFIX = /^\s*(strong-match|moderate-match|weak-match)\s*;\s*/i;
+
+// Splits the leading match level off a one-liner; `text` is the rest (or the
+// whole one-liner, unchanged, when it has no such prefix).
+const parseOneLiner = (
+  oneLiner?: string,
+): { match?: MatchLevel; text: string } => {
+  const raw = oneLiner || "";
+  const m = raw.match(ONE_LINER_MATCH_PREFIX);
+  if (!m) return { text: raw };
+  const rest = raw.slice(m[0].length);
+  return {
+    match: m[1].toLowerCase() as MatchLevel,
+    // capitalise just the first letter - the rest of the sentence as written
+    text: rest.charAt(0).toUpperCase() + rest.slice(1),
+  };
+};
+
+// Display order: rankScore (highest first) unless skipSort, then every
+// weak match moved to the end. Strong and moderate matches aren't reordered
+// among themselves, and weak ones keep their relative order too.
+const orderResults = (
+  results: ProjectResult[],
+  skipSort?: boolean,
+): ProjectResult[] => {
+  const ranked = skipSort
+    ? results
+    : [...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0));
+  const isWeak = (p: ProjectResult) =>
+    parseOneLiner(p.oneLiner).match === "weak-match";
+  return [...ranked.filter((p) => !isWeak(p)), ...ranked.filter(isWeak)];
+};
+
+const MatchTag = ({
+  match,
+  style,
+}: {
+  match?: MatchLevel;
+  style?: React.CSSProperties;
+}) =>
+  match ? (
+    <Tag
+      color={MATCH_LEVEL_CONFIG[match].color}
+      style={{ borderRadius: 8, fontSize: FONT_SIZE.NOTE, ...style }}
+    >
+      {MATCH_LEVEL_CONFIG[match].label}
+    </Tag>
+  ) : null;
 
 const getProjectMetadata = (project: ProjectResult): string => {
   const parts: string[] = [];
@@ -175,6 +245,32 @@ export default function BrickChatResults({
     });
   };
 
+  // full one-liner in a dialog - the card only shows the first 3 lines
+  const handleShowOneLiner = (e: React.MouseEvent, project: ProjectResult) => {
+    // cards are wrapped in a Link - don't navigate on click
+    e.preventDefault();
+    e.stopPropagation();
+
+    modal.info({
+      title: project.projectName,
+      content: (
+        <Typography.Paragraph
+          style={{
+            fontSize: FONT_SIZE.PARA,
+            color: COLORS.textColorMedium,
+            lineHeight: "140%",
+            marginBottom: 0,
+          }}
+        >
+          {parseOneLiner(project.oneLiner).text}
+        </Typography.Paragraph>
+      ),
+      icon: null,
+      okText: "Close",
+      maskClosable: true,
+    });
+  };
+
   const handleLocateOnMap = (e: React.MouseEvent, project: ProjectResult) => {
     // cards are wrapped in a Link - don't navigate on icon click
     e.preventDefault();
@@ -192,9 +288,7 @@ export default function BrickChatResults({
   }
 
   if (minimal) {
-    const orderedResults = skipSort
-      ? results
-      : [...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0));
+    const orderedResults = orderResults(results, skipSort);
 
     return (
       <Flex className={styles.scrollContainer} gap={16}>
@@ -290,6 +384,10 @@ export default function BrickChatResults({
                   ) : (
                     <span />
                   )}
+                  <MatchTag
+                    match={parseOneLiner(project.oneLiner).match}
+                    style={{ padding: "0px 4px", }}
+                  />
                   <Flex align="center" gap={4} style={{ marginLeft: "auto" }}>
                     {project.lvnzyProjectId && (
                       <Flex
@@ -363,10 +461,7 @@ export default function BrickChatResults({
     <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
       {modalContextHolder}
-      {(skipSort
-        ? results
-        : [...results].sort((a, b) => (b.rankScore ?? 0) - (a.rankScore ?? 0))
-      ).map((project) => (
+      {orderResults(results, skipSort).map((project) => (
        <Flex style={{width: 225}}>
           <Card
             hoverable
@@ -419,39 +514,49 @@ export default function BrickChatResults({
             }
           >
             <Flex  vertical gap={2}>
-              <Flex style={{padding: 8}} gap={2} vertical>
+              <Flex style={{padding: 8}} gap={0} vertical>
               <Typography.Text
-                strong
                 style={{
                   fontSize: FONT_SIZE.HEADING_3,
                   color: COLORS.textColorDark,
+                  fontWeight: 500
                 }}
                 ellipsis={{ tooltip: project.projectName }}
               >
                 {project.projectName}
               </Typography.Text>
-              <Flex>
-                <Tag
-                  style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
-                    color: COLORS.textColorDark,
-                  }}
-                >
-                  {project.projectCorridor}
-                </Tag>
-              </Flex>
-
-              {getProjectMetadata(project) && (
+                 {getProjectMetadata(project) && (
                 <Typography.Text
                   style={{
-                    fontSize: FONT_SIZE.PARA,
+                    fontSize: FONT_SIZE.SUB_TEXT,
                     color: COLORS.textColorLight,
+                    marginTop: -4
                   }}
                   ellipsis={{ tooltip: getProjectMetadata(project) }}
                 >
                   {getProjectMetadata(project)}
                 </Typography.Text>
               )}
+              <Flex wrap>
+                <Tag
+                  style={{
+                    fontSize: FONT_SIZE.NOTE,
+                    color: COLORS.textColorDark,
+                    padding: "0 4px",
+                    marginTop: 8,
+                    backgroundColor: COLORS.bgColor,
+                    borderRadius: 8,
+                  }}
+                >
+                  {project.projectCorridor}
+                </Tag>
+                <MatchTag
+                  match={parseOneLiner(project.oneLiner).match}
+                  style={{ padding: "0 4px", marginTop: 8 }}
+                />
+              </Flex>
+
+           
 
               {!skipOneLiner && project.oneLiner && (
                 <Typography.Paragraph
@@ -461,14 +566,16 @@ export default function BrickChatResults({
                     marginBottom: 0,
                     marginTop: 8,
                     lineHeight: "140%",
-                    backgroundColor: COLORS.bgColorLightBlue,
-                    padding: 4,
-                    borderRadius: 4,
-                    border: `1px solid ${COLORS.borderColor}`,
+                    fontWeight: 500,
+                    cursor: "pointer",
                   }}
-                  ellipsis={{ rows: 4, tooltip: project.oneLiner }}
+                  ellipsis={{
+                    rows: 3,
+                    tooltip: parseOneLiner(project.oneLiner).text,
+                  }}
+                  onClick={(e) => handleShowOneLiner(e, project)}
                 >
-                  {project.oneLiner}
+                  {parseOneLiner(project.oneLiner).text}
                 </Typography.Paragraph>
               )}
               <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
@@ -478,8 +585,8 @@ export default function BrickChatResults({
                     justify="center"
                     onClick={(e) => handleToggleSave(e, project)}
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 20,
+                      height: 20,
                       flexShrink: 0,
                       borderRadius: "50%",
                       backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -506,8 +613,8 @@ export default function BrickChatResults({
                     justify="center"
                     onClick={(e) => handleLocateOnMap(e, project)}
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 20,
+                      height: 20,
                       flexShrink: 0,
                       borderRadius: "50%",
                       backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -529,8 +636,8 @@ export default function BrickChatResults({
                     align="center"
                     justify="center"
                     style={{
-                      width: 24,
-                      height: 24,
+                      width: 20,
+                      height: 20,
                       flexShrink: 0,
                       borderRadius: "50%",
                       backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -566,7 +673,8 @@ export default function BrickChatResults({
                       backgroundColor:COLORS.primaryColor ,
                       boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
                       cursor: "pointer",
-                      color: "white"
+                      color: "white",
+                      fontSize: FONT_SIZE.SUB_TEXT
                     }}
                   >
                     {/* <DynamicReactIcon
@@ -603,6 +711,45 @@ export default function BrickChatResults({
             </Flex>
           </Card>
           </Flex>
+      ))}
+    </Flex>
+  );
+}
+
+// Placeholder row shown while a project list is still being fetched (see
+// brickchat-client's streaming block) - same card size/shape and scroll row
+// as the full (non-minimal) result cards above, so the real cards drop into
+// the same space.
+export function BrickChatResultsSkeleton({ count = 4 }: { count?: number }) {
+  return (
+    <Flex className={styles.scrollContainer} gap={0}>
+      {Array.from({ length: count }).map((_, i) => (
+        <Flex key={i} style={{ width: 225, flexShrink: 0 }}>
+          <Card
+            style={{
+              width: 200,
+              borderRadius: 12,
+              overflow: "hidden",
+              margin: "8px 0",
+              border: `1px solid ${COLORS.borderColor}`,
+            }}
+            styles={{ body: { padding: 8 } }}
+            cover={
+              <Skeleton.Node
+                active
+                style={{ width: 200, height: 100, borderRadius: 0 }}
+              >
+                <span />
+              </Skeleton.Node>
+            }
+          >
+            <Skeleton
+              active
+              title={{ width: "70%", }}
+              paragraph={{ rows: 0, width: ["40%", "90%", "80%"] }}
+            />
+          </Card>
+        </Flex>
       ))}
     </Flex>
   );
