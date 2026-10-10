@@ -10,6 +10,7 @@ import {
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 import { LvnzyProject } from "../../types/LvnzyProject";
 import { useDevice } from "@/hooks/use-device";
+import { useBrick360FontSize } from "@/app/app/brickchat/brick360/use-font-size";
 
 type MetaInfoProps = {
   lvnzyProject: LvnzyProject;
@@ -49,33 +50,39 @@ const ADVISOR_LINK =
 
 const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
   const [statusModalOpen, setStatusModalOpen] = useState(false);
+  const [summaryModalOpen, setSummaryModalOpen] = useState(false);
 
   const { isMobile } = useDevice();
-
-  const renderText = (text: string, color?: string) => {
-    return (
-      <Typography.Text
-        style={{
-          fontSize:isMobile ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
-          margin: 0,
-          color: color || COLORS.textColorMedium,
-        }}
-      >
-        {text}
-      </Typography.Text>
-    );
-  };
+  // must run before the early return below (rules of hooks)
+  const fs = useBrick360FontSize();
 
   if (!lvnzyProject) return null;
 
   const projectStatus = computeProjectStatus(lvnzyProject);
+
+  // the one-line summary (configurations, price range, nearest corridor) -
+  // clipped with an ellipsis, full text in a dialog on click
+  const unitTypesText = (lvnzyProject?.meta.projectUnitTypes || "")
+    .split(",")
+    .map((unitType: string) => capitalize(unitType))
+    .join("/");
+  const priceText = getMinMaxPrices(
+    (lvnzyProject?.originalProjectId?.info.unitConfigWithPricing || []).map(
+      (c: any) => c.price,
+    ),
+  );
+  // sorted copy - .sort() on the array itself would reorder the project data
+  const corridorText =
+    [...(lvnzyProject.meta.projectCorridors || [])].sort(
+      (a: any, b: any) => a.approxDistanceInKms - b.approxDistanceInKms,
+    )[0]?.corridorName || "";
 
   const projectStatusConfig = projectStatus
     ? PROJECT_STATUS_CONFIG[projectStatus]
     : null;
 
   return (
-    <Flex style={{margin: 0}}>
+    <Flex style={{ margin: 0, minWidth: 0, maxWidth: "100%" }}>
      
       <Flex
         style={{
@@ -83,62 +90,37 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           marginTop: 0,
           marginBottom: 0,
           borderRadius: 8,
+          minWidth: 0,
+          maxWidth: "100%",
         }}
         gap={isMobile ? 8: 16}
         vertical
       >
-         <Flex gap={4}>
-           <Flex align="center" gap={2} justify="center">
-              {/* <DynamicReactIcon
-                iconSet="tb"
-                iconName="TbHome"
-                size={20}
-                color={"white"}
-              /> */}
-              <Typography.Text
-                style={{
-                  fontSize: isMobile ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
-                  margin: 0,
-                  color: COLORS.textColorMedium,
-                }}
-              >
-                {lvnzyProject?.meta.projectUnitTypes
-                  .split(",")
-                  .map((unitType: string) => capitalize(unitType))
-                  .join("/")},
-              </Typography.Text>
-            </Flex>
-            <Flex align="center" gap={0}>
-              <DynamicReactIcon
-                iconSet="fa6"
-                iconName="FaIndianRupeeSign"
-                size={16}
-                color={COLORS.textColorMedium}
-              />
-              <Typography.Text
-                style={{
-                  fontSize: isMobile ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
-                  margin: 0,
-                  color: COLORS.textColorMedium,
-                }}
-              >
-                {getMinMaxPrices(
-                  lvnzyProject?.originalProjectId?.info.unitConfigWithPricing.map(
-                    (c: any) => c.price,
-                  ),
-                )},
-              </Typography.Text>
-            </Flex>
-             <Flex align="center">
-              {renderText(`
-            ${
-              lvnzyProject.meta.projectCorridors.sort(
-                (a: any, b: any) =>
-                  a.approxDistanceInKms - b.approxDistanceInKms,
-              )[0].corridorName
-            }`)}
-            </Flex>
-        </Flex>
+        <div
+          onClick={() => setSummaryModalOpen(true)}
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            minWidth: 0,
+            maxWidth: "100%",
+            cursor: "pointer",
+            fontSize: fs.HEADING_3,
+            color: COLORS.textColorMedium,
+          }}
+        >
+          {unitTypesText},{" "}
+          <span style={{ display: "inline-flex", verticalAlign: "middle" }}>
+            <DynamicReactIcon
+              iconSet="fa6"
+              iconName="FaIndianRupeeSign"
+              size={16}
+              color={COLORS.textColorMedium}
+            />
+          </span>
+          {priceText}
+          {corridorText ? `, ${corridorText}` : ""}
+        </div>
         <Flex align="center" gap={16} style={{marginTop: 8}}>
           <Flex align="center" gap={8} style={{backgroundColor: COLORS.bgColorMedium, padding: "2px 4px", borderRadius: 4}}>
             <DynamicReactIcon
@@ -191,6 +173,41 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
        
        
       </Flex>
+      <Modal
+        open={summaryModalOpen}
+        onCancel={() => setSummaryModalOpen(false)}
+        footer={null}
+        title={lvnzyProject.meta.projectName}
+      >
+        <Flex vertical gap={8}>
+          {[
+            ["Configurations", unitTypesText],
+            ["Price range", priceText ? `₹${priceText}` : ""],
+            ["Corridor", corridorText],
+          ]
+            .filter(([, value]) => !!value)
+            .map(([label, value]) => (
+              <Flex vertical key={label}>
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  {label}
+                </Typography.Text>
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_4,
+                    color: COLORS.textColorDark,
+                  }}
+                >
+                  {value}
+                </Typography.Text>
+              </Flex>
+            ))}
+        </Flex>
+      </Modal>
       {projectStatus && projectStatusConfig && (
         <Modal
           open={statusModalOpen}

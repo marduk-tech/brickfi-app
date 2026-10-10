@@ -148,9 +148,9 @@ body {
   .highlight {
     font-weight: 500;
     background-color: rgba(43, 203, 242, 0.12);
-    padding: 0 8px;
+    padding: 0 4px;
     border-radius: 8;
-    font-size: 105%;
+    font-size: 102%;
   }
 
   a[href*="brickassist"] {
@@ -173,8 +173,9 @@ body {
   }
   &.con {
     .highlight {
-      color: #ff8080;
       background-color: #fff1f1;
+      font-weight: 500;
+      padding: 0 4px;
     }
 
     &.truncated {

@@ -276,7 +276,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                         <Flex vertical style={{ marginBottom: 8 }}>
                           <Typography.Text
                             style={{
-                              fontSize: fs.HEADING_2,
+                              fontSize: fs.HEADING_3,
                               fontWeight: 500,
                               color: COLORS.primaryColor,
                               
