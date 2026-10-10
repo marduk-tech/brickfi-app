@@ -21,6 +21,9 @@ interface PinnedProjectResultsProps {
   onLocateProject?: (projectId: string) => void;
   onSelectProject?: (project: ProjectResult) => void;
   selectedProjectId?: string;
+  // collapse whenever a project gets selected (e.g. on mobile, where the
+  // open strip would push the selected project's details out of view)
+  collapseOnSelect?: boolean;
 }
 
 // Always-visible strip of the seeded/default project set (e.g. a user's
@@ -36,12 +39,19 @@ export default function PinnedProjectResults({
   onLocateProject,
   onSelectProject,
   selectedProjectId,
+  collapseOnSelect,
 }: PinnedProjectResultsProps) {
   const [expanded, setExpanded] = useState(!hasActiveThread);
 
   useEffect(() => {
     setExpanded(!hasActiveThread);
   }, [hasActiveThread]);
+
+  // keyed on the selected id (not a boolean) so picking a different project
+  // collapses it again even if the user re-opened it in between
+  useEffect(() => {
+    if (collapseOnSelect && selectedProjectId) setExpanded(false);
+  }, [collapseOnSelect, selectedProjectId]);
 
   // if (results?.length) {
   //   return (

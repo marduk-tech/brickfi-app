@@ -448,16 +448,20 @@ export function BrickChatCore({
     useState<PillarMapConfig | null>(null);
 
   // Keeps the conversation panel pinned to its latest content - new Q&A
-  // pairs, in-flight streaming tokens, and the loader/Brick360Inline that
-  // appear after selecting a project all land at the bottom of this list, so
-  // scroll there whenever any of them change instead of requiring the user
-  // to scroll down manually. Debounced because streamingSummary updates on
-  // every token - calling scrollIntoView("smooth") that often restarts the
-  // animation each time and looks like stutter rather than a scroll.
+  // pairs and in-flight streaming tokens land at the bottom of this list, so
+  // scroll there whenever they change instead of requiring the user to
+  // scroll down manually. Skipped entirely while a project is selected (its
+  // Brick360Inline view shouldn't yank the panel to the bottom); closing it
+  // re-runs this and scrolls back to the latest content. A new turn clears
+  // the selection first (see handleSearch), so streaming still auto-scrolls.
+  // Debounced because streamingSummary updates on every token - calling
+  // scrollIntoView("smooth") that often restarts the animation each time and
+  // looks like stutter rather than a scroll.
   const scrollBottomRef = useRef<HTMLDivElement | null>(null);
   const scrollDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     if (scrollDebounceRef.current) clearTimeout(scrollDebounceRef.current);
+    if (selectedProject) return;
     scrollDebounceRef.current = setTimeout(() => {
       scrollBottomRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -1022,8 +1026,8 @@ export function BrickChatCore({
         maxWidth: 2000,
         height: "calc(100vh - 100px)",
         // mobile: no side padding here - the search form and chat panel
-        // below carry their own 8px gutter instead, so the inline Brick360
-        // view can run the full screen width (it cancels the panel's gutter)
+        // below carry their own 8px gutter instead, so everything (including
+        // the inline Brick360 view) gets an even 8px on both sides
         padding: isMobile ? "8px 0" : 8,
         overflowY: "scroll",
       }}
@@ -1187,6 +1191,7 @@ export function BrickChatCore({
             onLocateProject={handleLocateProject}
             onSelectProject={handleSelectProject}
             selectedProjectId={selectedProject?.projectId}
+            collapseOnSelect={isMobile}
           />
           {showWelcome ? (
             <Flex vertical>
@@ -1482,9 +1487,7 @@ export function BrickChatCore({
             {selectedProject && selectedLvnzyProjectLoading ? (
               <Loader />
             ) : selectedProject && selectedLvnzyProject ? (
-              // mobile: cancel the chat panel's 8px gutter so the inline view
-              // spans the full screen width
-              <Flex vertical gap={32} style={isMobile ? { margin: "0 -8px" } : undefined}>
+              <Flex vertical gap={32}>
                 <Brick360Inline
                   key={selectedProject.projectId}
                   slug={selectedProject.projectSlug || ""}

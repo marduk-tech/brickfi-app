@@ -34,11 +34,6 @@ import { useDevice } from "@/hooks/use-device";
 // this must match the CSS transition duration below.
 const CLOSE_FADE_MS = 220;
 
-// Fixed height of the inline view - its content (header, images, tabs)
-// scrolls inside it rather than growing the chat panel. Capped to the
-// viewport so it never runs past the screen.
-const INLINE_HEIGHT = "min(820px, calc(100vh - 180px))";
-
 // One tab button per Brick360 pillar (Location/Developer/Property/Financials
 // per BRICK360_CATEGORY's declared order) - these used to be sections stacked
 // inside a single shared "Brick 360" tab; now each is its own top-level tab,
@@ -375,24 +370,20 @@ export function Brick360Inline({
       vertical
       style={{
         margin: "auto",
-        overflow: "hidden",
+        overflowX: "hidden",
         width: "100%",
-        height: INLINE_HEIGHT,
         border: `2px solid ${COLORS.borderColor}`,
-        // mobile: full screen width (see brickchat-client), so no side
-        // borders/rounded corners against the screen edges
-        ...(isMobile ? { borderLeft: "none", borderRight: "none" } : {}),
         backgroundColor: COLORS.bgColor,
-        borderRadius: isMobile ? 0 : 12,
+        borderRadius: 12,
+        padding: isMobile ? "16px 4px" : "24px 8px",
         opacity: isClosing ? 0 : 1,
         transition: `opacity ${CLOSE_FADE_MS}ms ease`,
         position: "relative",
       }}
     >
-      {/* outside the scroll area below, so it stays put while content scrolls */}
       <Flex
         justify="flex-end"
-        style={{ position: "absolute", right: 0, top: 0, zIndex: 2 }}
+        style={{ position: "absolute", right: 0, top: 0 }}
       >
         <Button
           type="text"
@@ -408,15 +399,6 @@ export function Brick360Inline({
         />
       </Flex>
 
-      <div
-        style={{
-          flex: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          overflowX: "hidden",
-          padding: isMobile ? "16px 4px" : "24px 8px",
-        }}
-      >
       <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
 
       {previewImages.length ? (
@@ -514,7 +496,6 @@ export function Brick360Inline({
         }}
         steps={tourSteps}
       />
-      </div>
     </Flex>
   );
 }
