@@ -454,13 +454,13 @@ export function Brick360Inline({
         destroyOnHidden
         className={styles.tabsNoNavBorder}
         // gap between tab buttons (antd's default is 32px)
-        tabBarGutter={24}
+        tabBarGutter={isMobile ? 16: 24}
         // colours for the tab bar's bottom line and the active tab's
         // underline on it (see brick360-inline.module.css)
         style={
           {
             padding: "0 8px",
-            marginTop: 16,
+            marginTop: isMobile ? 8 :16,
             marginLeft: 0,
             "--tab-bar-border-color": COLORS.borderColor,
             "--tab-active-color": COLORS.primaryColor,

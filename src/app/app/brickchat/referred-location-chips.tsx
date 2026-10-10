@@ -9,6 +9,7 @@ import { Flex, Tag, Typography } from "antd";
 import {
   capitalize
 } from "@/libs/lvnzy-helper";
+import { useBrick360FontSize } from "./brick360/use-font-size";
 export type ReferredLocationType =
   | "driver"
   | "locality"
@@ -67,6 +68,8 @@ export default function ReferredLocationChips({
     undefined,
     !!unlabeledDriverIds.length,
   );
+    const fs = useBrick360FontSize();
+  
 
   // A bare brickfiDriverIds entry (no name of its own - see
   // ReferredLocationChipItem) that useFetchAllLivindexPlaces couldn't find a
@@ -141,7 +144,7 @@ export default function ReferredLocationChips({
                   ellipsis={{ tooltip: displayLabel }}
                   style={{
                     minWidth: 0,
-                    fontSize: FONT_SIZE.HEADING_3,
+                    fontSize: fs.HEADING_3,
                     color: isSelected ? "white" : COLORS.textColorDark,
                   }}
                 >
@@ -151,7 +154,7 @@ export default function ReferredLocationChips({
                   <Typography.Text
                     style={{
                       flexShrink: 0,
-                      fontSize: FONT_SIZE.HEADING_3,
+                      fontSize: fs.HEADING_3,
                       color: isSelected ? "white" : COLORS.textColorDark,
                     }}
                   >
