@@ -3,6 +3,7 @@
 // Floorplans tab of brick360-inline.tsx - copied from
 // components/brick-360/units-tab.tsx (still used as-is by the standalone
 // brick360-v2/v3 pages).
+import { useBrick360FontSize } from "../use-font-size";
 import { ExclamationCircleFilled } from "@ant-design/icons";
 import { Alert, Flex, Image, Modal, Tag, Typography } from "antd";
 import { useEffect, useState } from "react";
@@ -89,6 +90,7 @@ const compareUnitFilters = (a: any, b: any) => {
 
 export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
   const { isMobile } = useDevice();
+  const fs = useBrick360FontSize();
   const isPreLaunch =
     computeProjectStatus(lvnzyProject) === PROJECT_STATUS.PRE_LAUNCH;
   const [configFilters, setConfigFilters] = useState<string[]>([]);
@@ -188,7 +190,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                         : "default"
                     }
                     style={{
-                      fontSize: FONT_SIZE.HEADING_2,
+                      fontSize: fs.HEADING_2,
                       padding: "4px 8px",
                       borderRadius: 8,
                       cursor: "pointer",
@@ -274,7 +276,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                         <Flex vertical style={{ marginBottom: 8 }}>
                           <Typography.Text
                             style={{
-                              fontSize: FONT_SIZE.HEADING_2,
+                              fontSize: fs.HEADING_2,
                               fontWeight: 500,
                               color: COLORS.primaryColor,
                               
@@ -284,7 +286,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                           </Typography.Text>
                           <Typography.Text
                             style={{
-                              fontSize: FONT_SIZE.HEADING_3,
+                              fontSize: fs.HEADING_3,
                               color: COLORS.textColorMedium,
                             }}
                           >
@@ -298,7 +300,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                           {c.sizeCarpet ? (
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_3,
+                                fontSize: fs.HEADING_3,
                                 color: COLORS.textColorMedium,
                               }}
                             >
@@ -308,7 +310,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                           {c.sizePlot ? (
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_3,
+                                fontSize: fs.HEADING_3,
                                 color: COLORS.textColorMedium,
                               }}
                             >
@@ -320,7 +322,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                         <Flex>
                           <Typography.Text
                             style={{
-                              fontSize: FONT_SIZE.HEADING_4,
+                              fontSize: fs.HEADING_4,
                               textTransform: "uppercase",
                               color: COLORS.primaryColor,
                             }}
@@ -331,7 +333,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                       )}
 
                       <Typography.Text
-                        style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
+                        style={{ fontSize: fs.HEADING_2, fontWeight: 500 }}
                       >
                         ₹{rupeeAmountFormat(c.price)}
                       </Typography.Text>

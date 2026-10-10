@@ -1,5 +1,6 @@
 "use client";
 
+import { useBrick360FontSize } from "../use-font-size";
 import { Flex, Typography } from "antd";
 import { CSSProperties, ReactNode } from "react";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
@@ -82,7 +83,10 @@ export const StatCard = ({
   note?: ReactNode;
   onClick?: () => void;
   style?: CSSProperties;
-}) => (
+}) => {
+  // STAT_*_STYLE are the desktop sizes; the hook steps them down on mobile
+  const fs = useBrick360FontSize();
+  return (
   <Flex
     vertical
     onClick={onClick}
@@ -93,7 +97,9 @@ export const StatCard = ({
       ...style,
     }}
   >
-    <Typography.Text style={STAT_LABEL_STYLE}>{label}</Typography.Text>
+    <Typography.Text style={{ ...STAT_LABEL_STYLE, fontSize: fs.HEADING_2 }}>
+      {label}
+    </Typography.Text>
     {children ? (
       <Flex align="center" gap={4}>
         {children}
@@ -106,7 +112,7 @@ export const StatCard = ({
           top: "100%",
           left: 0,
           marginTop: 2,
-          fontSize: FONT_SIZE.HEADING_4,
+          fontSize: fs.HEADING_4,
           color: COLORS.textColorMedium,
           whiteSpace: "nowrap",
         }}
@@ -115,7 +121,8 @@ export const StatCard = ({
       </Typography.Text>
     ) : null}
   </Flex>
-);
+  );
+};
 
 /** A stat card's value text. */
 export const StatValue = ({
@@ -124,8 +131,13 @@ export const StatValue = ({
 }: {
   children: ReactNode;
   style?: CSSProperties;
-}) => (
-  <Typography.Text style={{ ...STAT_VALUE_STYLE, ...style }}>
-    {children}
-  </Typography.Text>
-);
+}) => {
+  const fs = useBrick360FontSize();
+  return (
+    <Typography.Text
+      style={{ ...STAT_VALUE_STYLE, fontSize: fs.HEADING_2, ...style }}
+    >
+      {children}
+    </Typography.Text>
+  );
+};

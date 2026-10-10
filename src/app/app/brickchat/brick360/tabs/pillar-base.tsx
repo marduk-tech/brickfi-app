@@ -1,5 +1,6 @@
 "use client";
 
+import { useBrick360FontSize } from "../use-font-size";
 import { Alert, Flex, Form, Tag, Typography, message } from "antd";
 import { makeStreamingJsonRequest } from "http-streaming-request";
 import { sha256 } from "js-sha256";
@@ -129,6 +130,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
     ref,
   ) => {
     const { user } = useUser();
+    const fs = useBrick360FontSize();
     const [messageApi, contextHolder] = message.useMessage();
 
     // This pillar's title/data-points, derived synchronously from
@@ -386,14 +388,14 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                   __html: (queryStreamingText || "").replace(/\n/g, "<br>"),
                 }}
                 className="reasoning"
-                style={{ fontSize: FONT_SIZE.HEADING_3, margin: 0 }}
+                style={{ fontSize: fs.HEADING_3, margin: 0 }}
               ></div>
             </Flex>
           ) : null}
           <div
             dangerouslySetInnerHTML={{ __html: a }}
             className="reasoning"
-            style={{ fontSize: FONT_SIZE.HEADING_3, margin: 0 }}
+            style={{ fontSize: fs.HEADING_3, margin: 0 }}
           ></div>
         </Flex>
       </Flex>
@@ -466,7 +468,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                   <div
                     dangerouslySetInnerHTML={{ __html: r }}
                     className="reasoning"
-                    style={{ fontSize: FONT_SIZE.HEADING_3, margin: 0 }}
+                    style={{ fontSize: fs.HEADING_3, margin: 0 }}
                   ></div>
                 </Flex>
               ),
@@ -477,7 +479,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
             <Flex gap={4} style={{ width: "100%", flexWrap: "wrap", marginBottom: 16 }}>
               <Divider
                 style={{
-                  fontSize: FONT_SIZE.HEADING_4,
+                  fontSize: fs.HEADING_4,
                   color: COLORS.textColorLight,
                   margin: 0,
                   marginBottom: 8,
@@ -491,7 +493,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                   key={p}
                   style={{
                     backgroundColor: COLORS.bgColorBlue,
-                    fontSize: FONT_SIZE.HEADING_4,
+                    fontSize: fs.HEADING_4,
                     padding: "4px",
                     borderRadius: 8,
                     marginBottom: 4,
@@ -635,7 +637,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                           <Flex align="center" gap={8} style={{ minWidth: 0 }}>
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_2,
+                                fontSize: fs.HEADING_2,
                                 color:
                                   item[1].rating > 0
                                     ? COLORS.textColorDark
@@ -731,7 +733,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                       border: `0px`,
                       borderRadius: 8,
                       color: COLORS.textColorDark,
-                      fontSize: FONT_SIZE.HEADING_4,
+                      fontSize: fs.HEADING_4,
                       backgroundColor: COLORS.bgColorMedium,
                     }}
                   >

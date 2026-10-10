@@ -3,6 +3,7 @@
 // Timeline tab of brick360-inline.tsx - copied from
 // components/brick-360/timeline-tab-v2.tsx (still used as-is by the
 // standalone brick360-v2 page).
+import { useBrick360FontSize } from "../use-font-size";
 import React, { useEffect, useState } from "react";
 import { Flex, Tag, Timeline, Typography } from "antd";
 import dayjs from "dayjs";
@@ -58,6 +59,7 @@ function getMonthsDiff(dateStart: string, dateComp: string) {
 }
 
 export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
+  const fs = useBrick360FontSize();
   const [timelines, setTimelines] = useState<any[]>([]);
   useEffect(() => {
     let timelines: any[] = [];
@@ -160,7 +162,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                   <Flex vertical gap={4}>
                     <Typography.Text
                       style={{
-                        fontSize: FONT_SIZE.HEADING_2,
+                        fontSize: fs.HEADING_2,
                         lineHeight: "110%",
                       }}
                     >
@@ -186,7 +188,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                           style={{
                             marginRight: 4,
                             color: COLORS.textColorMedium,
-                            fontSize: FONT_SIZE.HEADING_4,
+                            fontSize: fs.HEADING_4,
                           }}
                         >
                           {index == 0 ? "Initial Timeline" : "Extension"}:
@@ -194,7 +196,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                         <Typography.Text
                           style={{
                             color: COLORS.textColorMedium,
-                            fontSize: FONT_SIZE.HEADING_4,
+                            fontSize: fs.HEADING_4,
                           }}
                         >
                           {getFormattedDateString(entry.startDate)} -{" "}

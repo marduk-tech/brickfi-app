@@ -1,5 +1,6 @@
 "use client";
 
+import { useBrick360FontSize } from "../use-font-size";
 import { Flex, Typography } from "antd";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { useDevice } from "@/hooks/use-device";
@@ -22,6 +23,7 @@ export function Brick360Highlights({
   vertical,
 }: Brick360HighlightsProps) {
   const { isMobile } = useDevice();
+  const fs = useBrick360FontSize();
 
   // Each pro/con card shows its full content inline - no truncation, "Read
   // more" link or click-to-open dialog.
@@ -50,7 +52,7 @@ export function Brick360Highlights({
             <Typography.Text
               style={{
                 fontWeight: 500,
-                fontSize: FONT_SIZE.HEADING_2,
+                fontSize: fs.HEADING_2,
                 lineHeight: "110%",
                 marginTop: 2
               }}
@@ -63,7 +65,7 @@ export function Brick360Highlights({
               dangerouslySetInnerHTML={{ __html: content }}
               className={`reasoning ${isPro ? "" : "con"}`}
               style={{
-                fontSize: FONT_SIZE.HEADING_2,
+                fontSize: fs.HEADING_2,
                 margin: 0,
                 width: vertical ? "100%" : 275,
                 color: COLORS.textColorMedium,
@@ -110,7 +112,7 @@ export function Brick360Highlights({
       <Flex vertical style={{ marginBottom: 0 }}>
         {/* <Typography.Text
           style={{
-            fontSize: FONT_SIZE.HEADING_4,
+            fontSize: fs.HEADING_4,
             marginBottom: 4,
             color: COLORS.textColorMedium,
             fontWeight: 600

@@ -1,5 +1,6 @@
 "use client";
 
+import { useBrick360FontSize } from "./use-font-size";
 import { Button, Flex, Modal, Tabs, Tour, TourProps, Typography } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
@@ -114,6 +115,7 @@ export function Brick360Inline({
     setMediaModalOpen(true);
   };
   const { isMobile } = useDevice();
+  const fs = useBrick360FontSize();
 
   const { data: fetchedProject } = useFetchLvnzyProjectBySlug(
     slug,
@@ -138,7 +140,7 @@ export function Brick360Inline({
     tempTourSteps?.push({
       title: (
         <Typography.Text
-          style={{ fontSize: FONT_SIZE.HEADING_3, color: "white" }}
+          style={{ fontSize: fs.HEADING_3, color: "white" }}
         >
           Click card to know more details
         </Typography.Text>
@@ -155,7 +157,7 @@ export function Brick360Inline({
             }}
           ></img>
           <Typography.Text
-            style={{ width: 300, fontSize: FONT_SIZE.HEADING_2 }}
+            style={{ width: 300, fontSize: fs.HEADING_2 }}
           >
             Click{" "}
             <span
@@ -184,7 +186,7 @@ export function Brick360Inline({
       tempTourSteps?.push({
         title: (
           <Typography.Text
-            style={{ fontSize: FONT_SIZE.HEADING_3, color: "white" }}
+            style={{ fontSize: fs.HEADING_3, color: "white" }}
           >
             Click card to know more details
           </Typography.Text>
@@ -201,7 +203,7 @@ export function Brick360Inline({
               }}
             ></img>
             <Typography.Text
-              style={{ width: 300, fontSize: FONT_SIZE.HEADING_2 }}
+              style={{ width: 300, fontSize: fs.HEADING_2 }}
             >
               Click to see payment plan details.
             </Typography.Text>
@@ -315,7 +317,7 @@ export function Brick360Inline({
             ></DynamicReactIcon>
             <Typography.Text
               style={{
-                fontSize: FONT_SIZE.HEADING_2,
+                fontSize: fs.HEADING_2,
                 fontWeight: 500,
                 color: isActive ? "white" : COLORS.textColorMedium,
               }}

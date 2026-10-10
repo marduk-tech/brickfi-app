@@ -56,7 +56,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     return (
       <Typography.Text
         style={{
-          fontSize:isMobile ? FONT_SIZE.HEADING_3: FONT_SIZE.HEADING_3,
+          fontSize:isMobile ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
           margin: 0,
           color: color || COLORS.textColorMedium,
         }}
@@ -97,9 +97,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
               /> */}
               <Typography.Text
                 style={{
-                  fontSize: isMobile
-                    ? FONT_SIZE.HEADING_3
-                    : FONT_SIZE.HEADING_3,
+                  fontSize: isMobile ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
                   margin: 0,
                   color: COLORS.textColorMedium,
                 }}
@@ -119,9 +117,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
               />
               <Typography.Text
                 style={{
-                  fontSize: isMobile
-                    ? FONT_SIZE.HEADING_3
-                    : FONT_SIZE.HEADING_3,
+                  fontSize: isMobile ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
                   margin: 0,
                   color: COLORS.textColorMedium,
                 }}
@@ -153,7 +149,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
             />
             <Typography.Text
               style={{
-                fontSize:isMobile ? FONT_SIZE.HEADING_4: FONT_SIZE.HEADING_4,
+                fontSize:isMobile ? FONT_SIZE.SUB_TEXT : FONT_SIZE.HEADING_4,
                 margin: 0,
                 color: COLORS.textColorDark,
               }}
@@ -181,7 +177,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           />
           <Typography.Text
             style={{
-              fontSize:isMobile ? FONT_SIZE.HEADING_4: FONT_SIZE.HEADING_4,
+              fontSize:isMobile ? FONT_SIZE.SUB_TEXT : FONT_SIZE.HEADING_4,
               fontWeight: 500,
               color: COLORS.textColorDark,
             }}

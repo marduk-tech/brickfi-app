@@ -1,5 +1,6 @@
 "use client";
 
+import { Brick360FontSize, useBrick360FontSize } from "../use-font-size";
 import { Flex, Image, Typography } from "antd";
 import moment from "moment";
 import { forwardRef, useState } from "react";
@@ -11,7 +12,7 @@ import { StatCard, StatCardRow, StatValue } from "./stat-card";
 
 // --- property summary line (land area/units/size/floors/phases) - shown
 // above the Property pillar's data points (moved from units-tab.tsx) ---
-const getTotalFloors = (lvnzyProject: any) => {
+const getTotalFloors = (lvnzyProject: any, fs: Brick360FontSize) => {
   const towers = lvnzyProject?.meta?.projectConfigurations?.towers;
   if (!towers || !Array.isArray(towers) || towers.length === 0) {
     return "";
@@ -33,7 +34,7 @@ const getTotalFloors = (lvnzyProject: any) => {
     return (
       <Typography.Text
         style={{
-          fontSize: FONT_SIZE.HEADING_2,
+          fontSize: fs.HEADING_2,
           fontWeight: 500,
           color: COLORS.textColorMedium,
         }}
@@ -46,7 +47,7 @@ const getTotalFloors = (lvnzyProject: any) => {
   return null;
 };
 
-const getMinMaxSize = (configs: any[]) => {
+const getMinMaxSize = (configs: any[], fs: Brick360FontSize) => {
   let sizes: number[] = [];
   (configs || []).forEach((c: any) => {
     if (c.sizeBuiltup) {
@@ -63,7 +64,7 @@ const getMinMaxSize = (configs: any[]) => {
     return (
       <Typography.Text
         style={{
-          fontSize: FONT_SIZE.HEADING_2,
+          fontSize: fs.HEADING_2,
           fontWeight: 500,
           color: COLORS.textColorMedium,
         }}
@@ -142,6 +143,7 @@ const TaggedImageCard = ({
   urls: string[];
   caption: string;
 }) => {
+  const fs = useBrick360FontSize();
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewIndex, setPreviewIndex] = useState(0);
 
@@ -194,7 +196,7 @@ const TaggedImageCard = ({
       >
         <Typography.Text
           style={{
-            fontSize: FONT_SIZE.HEADING_4,
+            fontSize: fs.HEADING_4,
             color: COLORS.textColorMedium,
           }}
         >
@@ -234,6 +236,7 @@ const TaggedImageCard = ({
 };
 
 const PropertyStats = ({ lvnzyProject }: { lvnzyProject?: LvnzyProject }) => {
+  const fs = useBrick360FontSize();
   if (!lvnzyProject) return null;
 
   const imageCards = TAGGED_IMAGE_CARDS.map((c) => ({
@@ -243,11 +246,12 @@ const PropertyStats = ({ lvnzyProject }: { lvnzyProject?: LvnzyProject }) => {
 
   const unitSizesContent = getMinMaxSize(
     lvnzyProject.originalProjectId?.info.unitConfigWithPricing,
+    fs,
   );
   const floorsContent =
     lvnzyProject.originalProjectId?.info.unitConfigWithPricing &&
     (lvnzyProject as any)?.meta.projectConfigurations.unitsBreakup
-      ? getTotalFloors(lvnzyProject)
+      ? getTotalFloors(lvnzyProject, fs)
       : null;
   const totalUnits = (lvnzyProject as any)?.property.layout.totalUnits;
   const totalPhases = (lvnzyProject as any)?.property.layout.totalPhases;
