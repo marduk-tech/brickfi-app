@@ -1,10 +1,12 @@
-/* Removes antd Tabs' full-width bottom border line under the whole tab bar,
-   and the ink-bar underline below the active tab - active state is instead
-   conveyed purely by the tab label/icon switching to COLORS.primaryColor. */
+/* Tab bar: a single bottom line under the tab titles (antd's own
+   .ant-tabs-nav::before), with the active tab's underline (antd's ink bar)
+   sitting exactly on top of it - antd already positions the two to overlap.
+   Colours come in as CSS variables set on the <Tabs> in brick360-inline.tsx
+   (--tab-bar-border-color / --tab-active-color), so they track COLORS. */
 .tabsNoNavBorder :global(.ant-tabs-nav::before) {
-  border-bottom: none !important;
+  border-bottom: 1px solid var(--tab-bar-border-color) !important;
 }
 
 .tabsNoNavBorder :global(.ant-tabs-ink-bar) {
-  display: none !important;
+  background: var(--tab-active-color) !important;
 }

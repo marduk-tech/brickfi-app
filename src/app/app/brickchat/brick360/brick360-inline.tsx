@@ -2,7 +2,7 @@
 
 import { useBrick360FontSize } from "./use-font-size";
 import { Button, Flex, Modal, Tabs, Tour, TourProps, Typography } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
@@ -11,10 +11,7 @@ import {
   Brick360CategoryInfo,
   LocalStorageKeys,
 } from "@/libs/constants";
-import {
-  captureAnalyticsEvent,
-  getCategoryScore,
-} from "@/libs/lvnzy-helper";
+import { captureAnalyticsEvent, getCategoryScore } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { LvnzyProject } from "@/types/LvnzyProject";
 import {
@@ -71,7 +68,6 @@ const tabOrderIndex = (key: string) => {
   const i = TAB_ORDER.indexOf(key);
   return i === -1 ? TAB_ORDER.length : i;
 };
-
 
 interface Brick360InlineProps {
   slug: string;
@@ -134,9 +130,7 @@ export function Brick360Inline({
     const tempTourSteps: TourProps["steps"] = [];
     tempTourSteps?.push({
       title: (
-        <Typography.Text
-          style={{ fontSize: fs.HEADING_3, color: "white" }}
-        >
+        <Typography.Text style={{ fontSize: fs.HEADING_3, color: "white" }}>
           Click card to know more details
         </Typography.Text>
       ),
@@ -151,9 +145,7 @@ export function Brick360Inline({
               borderRadius: 8,
             }}
           ></img>
-          <Typography.Text
-            style={{ width: 300, fontSize: fs.HEADING_2 }}
-          >
+          <Typography.Text style={{ width: 300, fontSize: fs.HEADING_2 }}>
             Click{" "}
             <span
               style={{
@@ -180,9 +172,7 @@ export function Brick360Inline({
     ) {
       tempTourSteps?.push({
         title: (
-          <Typography.Text
-            style={{ fontSize: fs.HEADING_3, color: "white" }}
-          >
+          <Typography.Text style={{ fontSize: fs.HEADING_3, color: "white" }}>
             Click card to know more details
           </Typography.Text>
         ),
@@ -197,9 +187,7 @@ export function Brick360Inline({
                 borderRadius: 8,
               }}
             ></img>
-            <Typography.Text
-              style={{ width: 300, fontSize: fs.HEADING_2 }}
-            >
+            <Typography.Text style={{ width: 300, fontSize: fs.HEADING_2 }}>
               Click to see payment plan details.
             </Typography.Text>
           </Flex>
@@ -295,37 +283,40 @@ export function Brick360Inline({
       label: (
         <Flex
           align="center"
-          gap={10}
+          gap={4}
           style={{
-            backgroundColor: isActive ? COLORS.primaryColor : "transparent",
-            borderRadius: 8,
-            border: isActive ? `1.5px solid ${COLORS.primaryColor}` : `1px solid ${COLORS.borderColorMedium}`,
-            padding: isActive && selectedTabKey !== HIGHLIGHTS_TAB_KEY && categoryScore ? "0px 0 0px 12px" : "2px 12px",
+            padding:
+              isActive && selectedTabKey !== HIGHLIGHTS_TAB_KEY && categoryScore
+                ? "0px 0 0px 12px"
+                : "2px 12px",
           }}
+          vertical
         >
           <Flex align="center" gap={6} style={{}}>
             <DynamicReactIcon
               iconName={tab.iconName}
               iconSet={tab.iconSet}
-              color={isActive ? "white" : COLORS.textColorMedium}
-              size={22}
+              color={isActive ? COLORS.primaryColor : COLORS.textColorMedium}
+              size={isMobile ? 28: 32}
             ></DynamicReactIcon>
+          </Flex>
+          <Flex align="center" gap={4}>
             <Typography.Text
               style={{
-                fontSize: fs.HEADING_2,
+                fontSize: fs.HEADING_3,
                 fontWeight: 400,
-                color: isActive ? "white" : COLORS.textColorMedium,
+                color: isActive ? COLORS.primaryColor : COLORS.textColorMedium,
               }}
             >
               {tab.label}
             </Typography.Text>
+            {categoryScore ? (
+              <GradientBar
+                value={getCategoryScore(categoryScore)}
+                showBadgeOnly
+              ></GradientBar>
+            ) : null}
           </Flex>
-          {categoryScore ? (
-            <GradientBar
-              value={getCategoryScore(categoryScore)}
-              showBadgeOnly
-            ></GradientBar>
-          ) : null}
         </Flex>
       ),
       children:
@@ -464,7 +455,17 @@ export function Brick360Inline({
         className={styles.tabsNoNavBorder}
         // gap between tab buttons (antd's default is 32px)
         tabBarGutter={24}
-        style={{ padding: "0 8px", marginTop: 16, marginLeft: 0 }}
+        // colours for the tab bar's bottom line and the active tab's
+        // underline on it (see brick360-inline.module.css)
+        style={
+          {
+            padding: "0 8px",
+            marginTop: 16,
+            marginLeft: 0,
+            "--tab-bar-border-color": COLORS.borderColor,
+            "--tab-active-color": COLORS.primaryColor,
+          } as CSSProperties
+        }
       />
 
       <Modal
