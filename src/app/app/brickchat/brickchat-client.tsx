@@ -42,7 +42,7 @@ import {
   message,
 } from "antd";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -1671,11 +1671,23 @@ export function BrickChatCore({
   );
 }
 
-export default function BrickChatClient({
+// useSearchParams() (here and inside BrickChatCore) must sit under a
+// Suspense boundary, otherwise Next.js can't prerender the pages rendering
+// this (/app, /app/brickchat, /app/brickchat/[threadId], /app/[projectRef])
+// and fails the build ("missing-suspense-with-csr-bailout").
+export default function BrickChatClient(props: { projectRef?: string } = {}) {
+  return (
+    <Suspense fallback={<Loader />}>
+      <BrickChatClientContent {...props} />
+    </Suspense>
+  );
+}
+
+function BrickChatClientContent({
   projectRef,
 }: {
   projectRef?: string;
-} = {}) {
+}) {
   // ?q= is set by the landing page search input - auto-submit it as the
   // first question of a fresh chat.
   const searchParams = useSearchParams();
