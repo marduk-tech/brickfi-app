@@ -40,7 +40,27 @@
   }
 }
 
+.typingCaret {
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background-color: currentColor;
+  animation: caretBlink 1s step-end infinite;
+}
+
+@keyframes caretBlink {
+  50% {
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .typingCaret {
+    animation: none;
+  }
+
   .marquee {
     overflow-x: auto;
   }

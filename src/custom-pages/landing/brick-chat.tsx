@@ -81,6 +81,106 @@ const SAMPLE_QUERIES: {
   },
 ];
 
+const TYPE_DELAY_MS = 20;
+const DELETE_DELAY_MS = 15;
+const HOLD_DELAY_MS = 1800;
+
+// Cycles through SAMPLE_QUERIES, typing each one out character by character.
+// Kept as its own component so the per-character ticks don't re-render the page.
+function TypingPlaceholder({ isMobile }: { isMobile: boolean }) {
+  const [queryIndex, setQueryIndex] = useState(0);
+  const [charCount, setCharCount] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
+
+  useEffect(() => {
+    setReduceMotion(
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
+  }, []);
+
+  const query = SAMPLE_QUERIES[queryIndex];
+
+  useEffect(() => {
+    if (reduceMotion) {
+      const t = setTimeout(
+        () => setQueryIndex((i) => (i + 1) % SAMPLE_QUERIES.length),
+        HOLD_DELAY_MS * 2,
+      );
+      return () => clearTimeout(t);
+    }
+
+    let t: ReturnType<typeof setTimeout>;
+    if (!isDeleting && charCount < query.text.length) {
+      t = setTimeout(() => setCharCount((c) => c + 1), TYPE_DELAY_MS);
+    } else if (!isDeleting) {
+      t = setTimeout(() => setIsDeleting(true), HOLD_DELAY_MS);
+    } else if (charCount > 0) {
+      t = setTimeout(() => setCharCount((c) => c - 1), DELETE_DELAY_MS);
+    } else {
+      setIsDeleting(false);
+      setQueryIndex((i) => (i + 1) % SAMPLE_QUERIES.length);
+      return;
+    }
+    return () => clearTimeout(t);
+  }, [charCount, isDeleting, query, reduceMotion]);
+
+  return (
+    <div
+      aria-hidden
+      style={{
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        flexDirection: isMobile ? "column" : "row",
+        alignItems: isMobile ? "flex-start" : "center",
+        justifyContent: isMobile ? "center" : "flex-start",
+        gap: 8,
+        padding: "0 24px",
+        pointerEvents: "none",
+        overflow: "hidden",
+      }}
+    >
+      <Flex gap={4} style={{ flexShrink: 0 }}>
+        {query.icons.map((icon) => (
+          <Flex
+            key={`${icon.iconSet}-${icon.iconName}`}
+            style={{
+              backgroundColor: COLORS.LANDING.PINK,
+              borderRadius: "50%",
+              padding: 3,
+            }}
+          >
+            <DynamicReactIcon
+              iconName={icon.iconName}
+              iconSet={icon.iconSet}
+              size={isMobile ? 12 : 14}
+              color="white"
+            />
+          </Flex>
+        ))}
+      </Flex>
+      <span
+        style={{
+          fontSize: isMobile ? FONT_SIZE.HEADING_3 : FONT_SIZE.HEADING_3,
+          lineHeight: "120%",
+          color: COLORS.textColorDark,
+          opacity: 0.8,
+          fontWeight: 500,
+          textAlign: "left",
+          display: "-webkit-box",
+          WebkitLineClamp: isMobile ? 3 : 2,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}
+      >
+        {reduceMotion ? query.text : query.text.slice(0, charCount)}
+        <span className={styles.typingCaret} />
+      </span>
+    </div>
+  );
+}
+
 export default function BrickChat({
   initialIsMobile = false,
 }: {
@@ -112,6 +212,7 @@ export default function BrickChat({
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   // Needs at least two words before the query is worth sending.
   const isSearchQueryValid = /\S+\s+\S+/.test(searchQuery);
 
@@ -123,53 +224,72 @@ export default function BrickChat({
   };
 
   const getSearchInput = () => {
+    // Animated sample queries stand in for the placeholder until the user
+    // focuses the box or starts typing.
+    const showTypingPlaceholder = !searchQuery && !isSearchFocused;
     return (
-      <Input
-        className={styles.searchInput}
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        onPressEnter={submitSearch}
-        placeholder="Start Searching Today"
-        variant="borderless"
-        suffix={
-          searchQuery ? (
-            <Button
-              type="primary"
-              shape="round"
-              icon={<SendOutlined />}
-              disabled={!isSearchQueryValid}
-              onClick={submitSearch}
-              aria-label="Send"
-            />
-          ) : null
-        }
+      <div
         style={{
+          position: "relative",
           marginTop: 32,
           marginBottom: isMobile ? 32 : 0,
-          height: isMobile ? 56 : 64,
-          borderRadius: 24,
-          backgroundColor: "white",
-          boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
-          padding: "0 12px 0 24px",
           width: "100%",
           maxWidth: 800,
         }}
-        styles={{
-          input: {
-            fontSize: FONT_SIZE.HEADING_2,
-            color: COLORS.textColorDark,
-            textAlign: "center",
-          },
-        }}
-      />
+      >
+        <Input
+          className={styles.searchInput}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          onPressEnter={submitSearch}
+          onFocus={() => setIsSearchFocused(true)}
+          onBlur={() => setIsSearchFocused(false)}
+          placeholder={showTypingPlaceholder ? "" : "Start Searching Today"}
+          aria-label="Search properties"
+          variant="borderless"
+          suffix={
+            searchQuery ? (
+              <Button
+                type="primary"
+                shape="round"
+                icon={<SendOutlined />}
+                disabled={!isSearchQueryValid}
+                onClick={submitSearch}
+                aria-label="Send"
+              />
+            ) : null
+          }
+          style={{
+            height: isMobile ? 112 : 64,
+            borderRadius: 24,
+            backgroundColor: "white",
+            boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
+            padding: "0 12px 0 24px",
+            width: "100%",
+          }}
+          styles={{
+            input: {
+              fontSize: FONT_SIZE.HEADING_2,
+              color: COLORS.textColorDark,
+              textAlign: "center",
+            },
+          }}
+        />
+        {showTypingPlaceholder && <TypingPlaceholder isMobile={isMobile} />}
+      </div>
     );
   };
 
   const getMarqueeText = () => {
+    return null;
     return (
       <div
         className={styles.marquee}
-        style={{ marginTop: 64, backgroundColor: COLORS.textColorDark, padding: "16px 0" }}
+        style={{
+          marginTop: 64,
+          backgroundColor: COLORS.textColorDark,
+          padding: "16px 0",
+        }}
       >
         {/* Cards rendered twice so the -50% translate loops seamlessly */}
         <div className={styles.marqueeTrack}>
@@ -196,16 +316,22 @@ export default function BrickChat({
                 boxShadow: `0 2px 8px ${COLORS.primaryColor}40`,
               }}
             >
-                <Flex gap={8} justify="flex-start" style={{marginTop: 4}}>
+              <Flex gap={8} justify="flex-start" style={{ marginTop: 4 }}>
                 {q.icons.map((icon) => (
-                  <Flex style={{backgroundColor: COLORS.LANDING.PINK, borderRadius: "50%", padding: 4}}>
-                  <DynamicReactIcon
-                    key={`${icon.iconSet}-${icon.iconName}`}
-                    iconName={icon.iconName}
-                    iconSet={icon.iconSet}
-                    size={20}
-                    color="white"
-                  />
+                  <Flex
+                    style={{
+                      backgroundColor: COLORS.LANDING.PINK,
+                      borderRadius: "50%",
+                      padding: 4,
+                    }}
+                  >
+                    <DynamicReactIcon
+                      key={`${icon.iconSet}-${icon.iconName}`}
+                      iconName={icon.iconName}
+                      iconSet={icon.iconSet}
+                      size={20}
+                      color="white"
+                    />
                   </Flex>
                 ))}
               </Flex>
@@ -218,12 +344,11 @@ export default function BrickChat({
                   border: `2px solid ${COLORS.LANDING.MEDIUM_PINK}`,
                   marginBottom: 8,
                   marginTop: 8,
-                  lineHeight: "130%"
+                  lineHeight: "130%",
                 }}
               >
                 {q.text}
               </Typography.Text>
-            
             </div>
           ))}
         </div>
@@ -561,8 +686,10 @@ export default function BrickChat({
       <SectionCenter
         isMobile={isMobile}
         sectionData={{
+          verticalPadding: 24,
           centerSectionTextAlign: "left",
           sectionMaxWidth: isMobile ? "100%" : 1000,
+          marginTop: 75,
           heading: (
             <Flex vertical gap={8}>
               <Flex align="center" gap={4}>
@@ -578,7 +705,7 @@ export default function BrickChat({
                     fontWeight: 500,
                   }}
                 >
-                  Brickfi AI   
+                  Brickfi AI
                 </Typography.Text>
               </Flex>
               <h1
@@ -595,7 +722,6 @@ export default function BrickChat({
             </Flex>
           ),
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 150 : 150,
           primaryImageSize: isMobile ? "100%" : "100%",
           subHeading: (
             <Flex vertical>
@@ -604,7 +730,7 @@ export default function BrickChat({
                   fontSize: FONT_SIZE.HEADING_2,
                   marginTop: 8,
                   marginBottom: 0,
-                  lineHeight:  "120%"
+                  lineHeight: "120%",
                 }}
               >
                 Describe your dream home in your own words. Our AI scans
@@ -658,15 +784,18 @@ export default function BrickChat({
         }}
       ></SectionCenter>
 
-      <img
-        width={isMobile ? "90%" : "80%"}
-        style={{ margin: "auto", marginBottom: 100 }}
-        src={
-          isMobile
-            ? "/images/landing/brick-chat/landing-demo-mob.png"
-            : "/images/landing/brick-chat/landing-demo.png"
-        }
-      />
+      <Flex vertical align="center" justify="center" style={{ width: "100%", marginTop: 32 }}>
+        {/* <Typography.Text>Have a Real Estate Query ? Just Brickfi it!</Typography.Text> */}
+        <img
+          width={isMobile ? "90%" : "80%"}
+          style={{ marginTop: 16, marginBottom: "64px" }}
+          src={
+            isMobile
+              ? "/images/landing/brick-chat/landing-demo-mob.png"
+              : "/images/landing/brick-chat/landing-demo.png"
+          }
+        />
+      </Flex>
       <Flex vertical>
         <Flex
           vertical
@@ -681,7 +810,7 @@ export default function BrickChat({
               margin: 0,
             }}
           >
-            No One Looks at Real Estate.
+            Brickfi is Redefining.
           </h2>
           <h2
             style={{
@@ -692,11 +821,11 @@ export default function BrickChat({
               color: COLORS.primaryColor,
             }}
           >
-            Like Brickfi Does.
+            How You Explore Real Estate
           </h2>
         </Flex>
         <img
-          width={isMobile ? 350: 500}
+          width={isMobile ? 350 : 500}
           style={{ margin: "auto", marginBottom: 100, marginTop: 64 }}
           src={
             isMobile
@@ -723,14 +852,14 @@ export default function BrickChat({
             <Flex vertical>
               <h2
                 style={{
-                  fontSize: isMobile ? 40 : 54,
+                  fontSize: isMobile ? 40 : 50,
                   color: COLORS.LANDING.LIGHT_PINK,
                   lineHeight: "100%",
                   fontWeight: 800,
                   margin: 0,
                 }}
               >
-                Home Buying can be Risky & Confusing.
+                Finding the Right Home can be Risky & Confusing.
               </h2>
               <h2
                 style={{
@@ -738,6 +867,7 @@ export default function BrickChat({
                   lineHeight: "100%",
                   fontWeight: 800,
                   margin: 0,
+                  marginTop: 24,
                   color: COLORS.primaryColor,
                 }}
               >
@@ -766,17 +896,24 @@ export default function BrickChat({
               <h2
                 style={{
                   fontSize: isMobile ? 40 : 54,
+                  lineHeight: "100%",
+                  fontWeight: 800,
+                  margin: 0,
+                  marginBottom: 0,
+                  color: COLORS.primaryColor
+                }}
+              >
+                With The Research ToolSet
+              </h2>
+              <h2
+                style={{
+                  fontSize: isMobile ? 40 : 54,
                   color: "white",
                   lineHeight: "100%",
                   fontWeight: 800,
                   margin: 0,
-                  marginBottom: 32,
                 }}
               >
-                With The{" "}
-                <span style={{ color: COLORS.primaryColor }}>
-                  Research ToolSet
-                </span>{" "}
                 To Make it Easy & Efficient
               </h2>
             </Flex>
@@ -788,7 +925,7 @@ export default function BrickChat({
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/brickchat-features-mob.png"
             : "/images/landing/brick-chat/brickchat-features.png",
-          primaryImageSize: isMobile ? "90%":"65%",
+          primaryImageSize: isMobile ? "90%" : "65%",
         }}
       ></SectionCenter>
 
@@ -836,7 +973,7 @@ export default function BrickChat({
           heading: (
             <h2
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * .9,
+                fontSize: FONT_SIZE.HEADING_1 * 0.9,
                 lineHeight: "100%",
                 marginBottom: 16,
                 margin: 0,
@@ -863,7 +1000,7 @@ export default function BrickChat({
           heading: (
             <h2
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * .9,
+                fontSize: FONT_SIZE.HEADING_1 * 0.9,
                 lineHeight: "100%",
                 margin: 0,
               }}
@@ -895,7 +1032,7 @@ export default function BrickChat({
           heading: (
             <h2
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * .9,
+                fontSize: FONT_SIZE.HEADING_1 * 0.9,
                 lineHeight: "100%",
                 margin: 0,
                 marginBottom: 16,
@@ -921,7 +1058,7 @@ export default function BrickChat({
           heading: (
             <h2
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * .9,
+                fontSize: FONT_SIZE.HEADING_1 * 0.9,
                 lineHeight: "100%",
                 margin: 0,
               }}

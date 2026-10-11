@@ -15,6 +15,7 @@ interface SectionProps {
   bgColor?: string;
   textColor?: string;
   verticalPadding?: number;
+  marginTop?: number;
   fullHeight?: boolean;
   primaryImageSize?: string;
   mediaUrl?: string;
@@ -356,6 +357,7 @@ const SectionCenter: React.FC<{ sectionData: SectionProps; isMobile: boolean }> 
         backgroundColor: sectionData.bgColor || "white",
         minHeight: "auto",
         margin: "auto",
+        marginTop: sectionData.marginTop || "initial",
         padding: sectionData.verticalPadding
           ? `${sectionData.verticalPadding}px 0`
           : "72px 0",
