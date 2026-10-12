@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretRightOutlined, SendOutlined } from "@ant-design/icons";
+import { PlusOutlined, SendOutlined } from "@ant-design/icons";
 import {
   Button,
   Carousel,
@@ -82,6 +82,95 @@ const SAMPLE_QUERIES: {
     ],
   },
 ];
+
+// Unique icons from SAMPLE_QUERIES, in order of first appearance.
+const CTA_ICONS = SAMPLE_QUERIES.flatMap((q) => q.icons).filter(
+  (icon, i, all) =>
+    all.findIndex(
+      (other) =>
+        other.iconName === icon.iconName && other.iconSet === icon.iconSet,
+    ) === i,
+);
+const CTA_ICON_FLIP_MS = 1500;
+
+// Cycles through CTA_ICONS, `count` at a time, with a flip. Its own component
+// so the ticks only re-render the icons, not the page.
+function FlippingIcons({
+  count,
+  size,
+  color,
+}: {
+  count: number;
+  size: number;
+  color: string;
+}) {
+  const [startIndex, setStartIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(
+      () => setStartIndex((i) => (i + count) % CTA_ICONS.length),
+      CTA_ICON_FLIP_MS,
+    );
+    return () => clearInterval(id);
+  }, [count]);
+
+  const gap = 6;
+  // white circle around each icon
+  const circle = size + 10;
+  return (
+    // fixed box (and fixed slots) so loading/swapping icons never shifts the
+    // button width
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap,
+        width: count * circle + (count - 1) * gap,
+        height: circle,
+        flexShrink: 0,
+      }}
+    >
+      {Array.from({ length: count }, (_, slot) => {
+        const iconIndex = (startIndex + slot) % CTA_ICONS.length;
+        const icon = CTA_ICONS[iconIndex];
+        return (
+          // the circle stays put; only the icon inside it flips
+          <span
+            key={slot}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: circle,
+              height: circle,
+              borderRadius: "50%",
+              backgroundColor: "white",
+            }}
+          >
+            {/* key remounts on every change, replaying the flip; later slots
+                flip slightly after earlier ones */}
+            <span
+              key={iconIndex}
+              className={styles.flipIcon}
+              style={{
+                width: size,
+                height: size,
+                animationDelay: `${slot * 120}ms`,
+              }}
+            >
+              <DynamicReactIcon
+                iconName={icon.iconName}
+                iconSet={icon.iconSet}
+                size={size}
+                color={color}
+              />
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
+}
 
 const TYPE_DELAY_MS = 20;
 const DELETE_DELAY_MS = 15;
@@ -414,11 +503,11 @@ export default function BrickChat({
     return (
       <h3
         style={{
-          fontSize: FONT_SIZE.HEADING_2,
+          fontSize: FONT_SIZE.HEADING_3,
           textAlign: "left",
-          color: "white",
+          color: COLORS.textColorDark,
           margin: 0,
-          fontWeight: 500,
+          fontWeight: 400,
           lineHeight: "120%",
         }}
       >
@@ -429,18 +518,17 @@ export default function BrickChat({
 
   const getFaqText = (text: string | ReactNode) => {
     return (
-      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}>
+      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_4 }}>
         {typeof text == "string" ? text : <>{text}</>}
       </p>
     );
   };
   const faqPanelStyle = {
-    marginBottom: 24,
-    background: COLORS.LANDING.BLUISH,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    color: COLORS.LANDING.LIGHT_PINK,
+    background: "transparent",
+    borderRadius: 0,
+    color: COLORS.textColorMedium,
     border: "none",
+    borderBottom: `1px solid ${COLORS.textColorVeryLight}`,
   };
   const faqs: CollapseProps["items"] = [
     {
@@ -915,7 +1003,7 @@ export default function BrickChat({
           backgroundColor: COLORS.LANDING.LIGHT_PINK,
           padding: "100px 0",
           fontWeight: 200,
-          width: isMobile? "90%:":"80%",
+          width: isMobile ? "90%:" : "80%",
           margin: "auto",
         }}
       >
@@ -960,7 +1048,7 @@ export default function BrickChat({
       </Flex>
 
       <Flex
-        gap={isMobile ? 16: 8}
+        gap={isMobile ? 16 : 8}
         wrap={isMobile ? "wrap" : undefined}
         justify="center"
         align="center"
@@ -1124,53 +1212,130 @@ export default function BrickChat({
                   paddingBottom: 24,
                 }}
               >
-                When we started out, <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}> buying a home in Bangalore felt like navigating a maze</span>. Exploring, research, assessment, all things
-                that we take for given before buying; in this market, that felt
-                almost impossible.<br></br>
+                When we started out,{" "}
+                <span
+                  style={{
+                    backgroundColor: COLORS.LANDING.PINK,
+                    color: "white",
+                    padding: "0 4px",
+                    borderRadius: 4,
+                  }}
+                >
+                  {" "}
+                  buying a home in Bangalore felt like navigating a maze
+                </span>
+                . Exploring, research, assessment, all things that we take for
+                given before buying; in this market, that felt almost
+                impossible.<br></br>
                 <br></br>
                 The brokers were no help. There were far too many of them, the
                 spam was relentless, and no one was qualified or unbiased enough
-                to actually guide us through the process. <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}>Everyone was only
-                interested in making a sale.</span> The most shocking part was
-                realizing just how comfortable they were with lying—even though
-                this was the biggest financial decision of our lives.<br></br>
+                to actually guide us through the process.{" "}
+                <span
+                  style={{
+                    backgroundColor: COLORS.LANDING.PINK,
+                    color: "white",
+                    padding: "0 4px",
+                    borderRadius: 4,
+                  }}
+                >
+                  Everyone was only interested in making a sale.
+                </span>{" "}
+                The most shocking part was realizing just how comfortable they
+                were with lying—even though this was the biggest financial
+                decision of our lives.<br></br>
                 <br></br>
                 Despite our initial motivation, stepping into the field made one
-                thing clear: no one was solving for the buyer. <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}>No one seemed
-                curious enough to dig deep into the real estate</span> ecosystem to
-                build a genuinely data- and research-driven platform.<br></br>
+                thing clear: no one was solving for the buyer.{" "}
+                <span
+                  style={{
+                    backgroundColor: COLORS.LANDING.PINK,
+                    color: "white",
+                    padding: "0 4px",
+                    borderRadius: 4,
+                  }}
+                >
+                  No one seemed curious enough to dig deep into the real estate
+                </span>{" "}
+                ecosystem to build a genuinely data- and research-driven
+                platform.<br></br>
                 <br></br>
                 That is why we set out to solve this problem. We are building a
                 research-oriented platform designed to empower home buyers. Our
-                <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}>mission is to create the most objective, data-backed</span> real estate
-                evaluation platform—giving buyers the clarity and confidence
-                they deserve.<br></br>
+                <span
+                  style={{
+                    backgroundColor: COLORS.LANDING.PINK,
+                    color: "white",
+                    padding: "0 4px",
+                    borderRadius: 4,
+                  }}
+                >
+                  mission is to create the most objective, data-backed
+                </span>{" "}
+                real estate evaluation platform—giving buyers the clarity and
+                confidence they deserve.<br></br>
                 <br></br>
               </Typography.Text>
+              <Flex justify="center" style={{ width: "100%" }}>
+                <Button
+                  type="primary"
+                  shape="round"
+                  href="/app"
+                  style={{
+                    alignSelf: "flex-start",
+                    padding: "32px",
+                    fontSize: FONT_SIZE.HEADING_2,
+                    marginTop: 32,
+                  }}
+                >
+                  <Flex align="center" gap={16}>
+                    Try Brickfi Today
+                    <FlippingIcons
+                      count={2}
+                      size={16}
+                      color={COLORS.primaryColor}
+                    />
+                  </Flex>
+                </Button>
+              </Flex>
             </Flex>
           ),
           mainImgAltText: "Brickfi Assist - End to End Property Consultation",
           verticalPadding: isMobile ? 48 : 75,
         }}
       ></SectionCenter>
+
       <SectionCenter
         isMobile={isMobile}
         sectionData={{
-          heading: "FAQ",
+          heading: (
+            <Flex align="flex-start">
+              <Flex align="center" gap={8}>
+              <DynamicReactIcon color={COLORS.textColorMedium} size={26} iconName="FaRegCircleQuestion" iconSet="fa6"></DynamicReactIcon>
+              <Typography.Text style={{ color: COLORS.textColorMedium, fontSize: FONT_SIZE.HEADING_1, fontWeight: 300 }}>
+                Frequently Asked Questions
+              </Typography.Text>
+              </Flex>
+            </Flex>
+          ),
           sectionMaxWidth: isMobile ? "100%" : 900,
           bgColor: COLORS.LANDING.LIGHT_PINK,
-          verticalPadding: isMobile ? 48 : 75,
+          verticalPadding: isMobile ? 32 : 32,
           subHeading: (
             <Flex style={{ marginTop: 32 }}>
               <Collapse
+                ghost
+                expandIconPosition="end"
                 expandIcon={({ isActive }) => (
-                  <CaretRightOutlined
+                  // "+" turns into "×" when open
+                  <PlusOutlined
                     style={{
-                      color: "white",
-                      fontSize: FONT_SIZE.HEADING_3,
+                      color: COLORS.textColorDark,
+                      fontSize: FONT_SIZE.HEADING_4,
                       marginTop: 4,
+                      transition: "transform 0.2s",
                     }}
-                    rotate={isActive ? 90 : 0}
+                    rotate={isActive ? 45 : 0}
                   />
                 )}
                 style={{ width: isMobile ? "100%" : 900, border: "none" }}

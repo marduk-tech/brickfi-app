@@ -161,3 +161,28 @@
 .featureFrameMobile .dotBottomMid {
   display: none;
 }
+
+.flipIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* backwards: stay hidden during a staggered animation-delay */
+  animation: iconFlip 0.5s ease-out backwards;
+}
+
+@keyframes iconFlip {
+  from {
+    transform: perspective(200px) rotateX(-90deg);
+    opacity: 0;
+  }
+  to {
+    transform: perspective(200px) rotateX(0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flipIcon {
+    animation: none;
+  }
+}
