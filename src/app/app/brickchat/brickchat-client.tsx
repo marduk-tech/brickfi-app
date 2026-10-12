@@ -158,6 +158,33 @@ const getReferredLocationItems = (
   return items;
 };
 
+// The summary cites places inline as "[<24-hex id>]" or "[<id>, <id>]" -
+// a brickfiDriverId or a resolvedLocation id (see synthesize.js).
+const LOCATION_REF_REGEX =
+  /\s*\[\s*([0-9a-f]{24}(?:\s*,\s*[0-9a-f]{24})*)\s*\]/gi;
+// a ref still streaming in, e.g. a trailing "[67e3b78a"
+const PARTIAL_LOCATION_REF_REGEX = /\s*\[[0-9a-f,\s]*$/i;
+const LOCATION_REF_HREF_PREFIX = "#loc-";
+
+// While streaming: hide refs entirely (they turn into chips once the answer
+// is final - see linkLocationRefs).
+const stripLocationRefs = (text: string) =>
+  text.replace(LOCATION_REF_REGEX, "").replace(PARTIAL_LOCATION_REF_REGEX, "");
+
+// Final answer: turn each ref into an empty markdown link with a "#loc-<id>"
+// href, which the summary's `a` renderer swaps for an inline chip. A fragment
+// href survives react-markdown's default urlTransform; a custom scheme wouldn't.
+const linkLocationRefs = (text: string) =>
+  text.replace(
+    LOCATION_REF_REGEX,
+    (_, ids: string) =>
+      " " +
+      ids
+        .split(",")
+        .map((id) => `[](${LOCATION_REF_HREF_PREFIX}${id.trim()})`)
+        .join(" "),
+  );
+
 const fetchThreadHistory = async (
   userId: string,
   threadId: string,
@@ -1505,9 +1532,38 @@ export function BrickChatCore({
                               {children}
                             </Typography.Text>
                           ),
+                          a: ({ href, children }) => {
+                            if (!href?.startsWith(LOCATION_REF_HREF_PREFIX)) {
+                              return <a href={href}>{children}</a>;
+                            }
+                            const id = href.slice(
+                              LOCATION_REF_HREF_PREFIX.length,
+                            );
+                            // reuse the chip row's item (same key, so
+                            // selection highlights both); an id the answer
+                            // didn't list is treated as a driver - the chip
+                            // looks up its name, or renders nothing
+                            const item = getReferredLocationItems(
+                              messageItem.answer,
+                            ).find((i) => i.id === id) || {
+                              key: `driver:${id}`,
+                              id,
+                              type: "driver" as const,
+                            };
+                            return (
+                              <ReferredLocationChips
+                                inline
+                                items={[item]}
+                                selectedKey={
+                                  focusedReferredLocation?.key ?? null
+                                }
+                                onToggle={handleToggleReferredLocation}
+                              />
+                            );
+                          },
                         }}
                       >
-                        {messageItem.answer.summary}
+                        {linkLocationRefs(messageItem.answer.summary)}
                       </Markdown>
                     </CollapsibleAnswer>
                     
@@ -1542,7 +1598,7 @@ export function BrickChatCore({
                     className="bkchat-summary"
                     remarkPlugins={[remarkGfm]}
                   >
-                    {streamingSummary}
+                    {stripLocationRefs(streamingSummary)}
                   </Markdown>
                 ) : null}
                 

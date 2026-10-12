@@ -11,18 +11,21 @@ export interface Brick360FontSize {
   HEADING_2: number;
   HEADING_3: number;
   HEADING_4: number;
+  SUB_TEXT: number;
 }
 
 const DESKTOP_FONT_SIZE: Brick360FontSize = {
   HEADING_2: FONT_SIZE.HEADING_3,
   HEADING_3: FONT_SIZE.HEADING_4,
   HEADING_4: FONT_SIZE.SUB_TEXT,
+  SUB_TEXT: FONT_SIZE.SUB_TEXT
 };
 
 const MOBILE_FONT_SIZE: Brick360FontSize = {
   HEADING_2: FONT_SIZE.HEADING_3,
   HEADING_3: FONT_SIZE.HEADING_4,
   HEADING_4: FONT_SIZE.SUB_TEXT,
+  SUB_TEXT: FONT_SIZE.SUB_TEXT
 };
 
 export const useBrick360FontSize = (): Brick360FontSize => {

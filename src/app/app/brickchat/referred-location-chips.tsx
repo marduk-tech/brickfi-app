@@ -48,6 +48,8 @@ interface ReferredLocationChipsProps {
   selectedKey?: string | null;
   /** Toggles a chip - selecting it again clears the focus. Not called for a landmark chip (no id, nothing to focus). */
   onToggle: (item: ReferredLocationChipItem) => void;
+  /** Render inside running text (e.g. a summary sentence) - no row padding, sits on the text line. */
+  inline?: boolean;
 }
 
 // Combines a chat answer's brickfiDriverIds (raw LivIndexPlace ids, no label
@@ -59,6 +61,7 @@ export default function ReferredLocationChips({
   items,
   selectedKey,
   onToggle,
+  inline,
 }: ReferredLocationChipsProps) {
   const unlabeledDriverIds = items
     .filter((item) => item.type === "driver" && !item.name)
@@ -88,13 +91,27 @@ export default function ReferredLocationChips({
   }
 
   return (
-    <Flex gap={4} style={{ padding: 4, flexShrink: 0 }}>
+    <Flex
+      gap={4}
+      style={
+        inline
+          ? { display: "inline-flex", verticalAlign: "middle" }
+          : { padding: 4, flexShrink: 0 }
+      }
+    >
       <Flex align="center" gap={4}>
         {/* <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_4, color: COLORS.textColorMedium }}>
           See on Map
         </Typography.Text> */}
       </Flex>
-      <Flex gap={6} style={{ marginTop: 4, marginBottom: 4, flexWrap: "nowrap" }}>
+      <Flex
+        gap={8}
+        style={{
+          marginTop: inline ? 0 : 4,
+          marginBottom: inline ? 0 : 4,
+          flexWrap: "nowrap",
+        }}
+      >
         {visibleItems.map((item) => {
           const label =
             item.name ||
@@ -114,7 +131,7 @@ export default function ReferredLocationChips({
               gap={8}
               onClick={clickable ? () => onToggle(item) : undefined}
               style={{
-                padding: "2px 10px",
+                padding: "1px 6px",
                 borderRadius: 12,
                 width: "auto",
                 maxWidth: CHIP_MAX_WIDTH,
@@ -124,18 +141,16 @@ export default function ReferredLocationChips({
                 opacity: clickable ? 1 : 0.7,
                 backgroundColor: isSelected
                   ? COLORS.primaryColor
-                  : COLORS.bgColorLightBlue,
+                  : "white",
+                  boxShadow: "0 0 1px rgba(0,0,0,0.4)",
                 color: isSelected ? "white" : COLORS.textColorDark,
-                border: `1px solid ${
-                  isSelected ? COLORS.primaryColor : COLORS.borderColorMedium
-                }`,
               }}
             >
               <span style={{ display: "flex", flexShrink: 0 }}>
                 <DynamicReactIcon
                   iconName={icon.name}
                   iconSet={icon.set}
-                  size={12}
+                  size={10}
                   color={isSelected ? "white" : COLORS.textColorDark}
                 ></DynamicReactIcon>
               </span>
@@ -144,8 +159,8 @@ export default function ReferredLocationChips({
                   ellipsis={{ tooltip: displayLabel }}
                   style={{
                     minWidth: 0,
-                    fontSize: fs.HEADING_4,
-                    color: isSelected ? "white" : COLORS.textColorDark,
+                    fontSize: fs.SUB_TEXT,
+                    color: isSelected ? "white" : COLORS.textColorMedium,
                   }}
                 >
                   {displayLabel}
