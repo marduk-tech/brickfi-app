@@ -3,6 +3,7 @@
 import { CaretRightOutlined, SendOutlined } from "@ant-design/icons";
 import {
   Button,
+  Carousel,
   Collapse,
   CollapseProps,
   Divider,
@@ -11,7 +12,8 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { ReactNode, useEffect, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
+import type { CarouselRef } from "antd/es/carousel";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -181,12 +183,62 @@ function TypingPlaceholder({ isMobile }: { isMobile: boolean }) {
   );
 }
 
+const REPORT_FEATURES: {
+  label: string;
+  iconName: string;
+  iconSet: IconSetKey;
+  title: string;
+  headingMarginBottom?: number;
+  subHeading: string;
+  mainImgUrl: string;
+}[] = [
+  {
+    label: "Property Layout",
+    iconName: "SiHomebridge",
+    iconSet: "si",
+    title: "Property Layout & Design",
+    subHeading:
+      "Don't judge a property by its brochure (said someone); Brick360 looks at numbers like open space, unit density, unit distribution, amenities mix and more to give a deeper insights into property layout.",
+    mainImgUrl: "/images/landing/report-feature-layout.png",
+  },
+  {
+    label: "Location Dissection",
+    iconName: "FaMapLocation",
+    iconSet: "fa6",
+    title: "Location Dissection to Assess Livability & Future Growth.",
+    subHeading:
+      "Analysing livability is more than just checking the nearest mall. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
+    mainImgUrl: "/images/landing/report-feature-location.png",
+  },
+  {
+    label: "Builder Credibility",
+    iconName: "TbBuildingBank",
+    iconSet: "tb",
+    title: "Builder Track Records, Complaints & Delays",
+    headingMarginBottom: 16,
+    subHeading:
+      "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity to get a sense of execution risks and credibility.",
+    mainImgUrl: "/images/landing/report-feature-builder.png",
+  },
+  {
+    label: "Financials Assessment",
+    iconName: "FaMoneyBills",
+    iconSet: "fa6",
+    title: "Financials Assessment including Price Point, Rental Yield.",
+    subHeading:
+      "Making the right financial decisions becomes all the more necessary. Assess the price point, rental yield and growth potential with upto date pricing information. ",
+    mainImgUrl: "/images/landing/report-feature-financials.png",
+  },
+];
+
 export default function BrickChat({
   initialIsMobile = false,
 }: {
   initialIsMobile?: boolean;
 }) {
   const [isMobile, setIsMobile] = useState(initialIsMobile);
+  const featureCarouselRef = useRef<CarouselRef>(null);
+  const [activeFeature, setActiveFeature] = useState(0);
   const { height } = useWindowDimensions();
 
   useEffect(() => {
@@ -393,197 +445,73 @@ export default function BrickChat({
   const faqs: CollapseProps["items"] = [
     {
       key: "1",
-      label: getFaqHeading("What is Brickfi Assist ?"),
+      label: getFaqHeading("How do I search for a home on Brickfi?"),
       style: faqPanelStyle,
       children: getFaqText(
-        <>
-          With Brickfi Assist, you get expert property-buying advice for new and
-          under-construction properties, including apartments, villas, and plots
-          in Bengaluru.<br></br>
-          We provide a data-backed, verified list of curated properties tailored
-          to your requirements.<br></br>
-          Additionally, we offer end-to-end support—from site visits and
-          negotiations to post-purchase documentation assistance.
-        </>,
+        "Describe what you're looking for in plain English — budget, location, priorities, anything that matters to you and your family. No filters, no forms.",
       ),
     },
     {
       key: "2",
-      label: getFaqHeading("Is this a paid service ?"),
+      label: getFaqHeading("How does the AI decide what to recommend?"),
       style: faqPanelStyle,
       children: getFaqText(
-        <>
-          <b style={{ color: COLORS.primaryColor }}>
-            The service is completely free for our buyers.
-          </b>
-          <br></br>
-          We typically earn a commission from developers. However, this does not
-          mean we favor any particular developer. Most developers allocate a
-          standard commission for advisors which varies. This ensures that
-          buyers do not incur any additional costs.
-        </>,
+        "It matches your stated priorities against live projects across Bangalore and shortlists what genuinely fits — not what's being pushed the hardest.",
       ),
     },
     {
+      // TODO: confirm this claim is fully accurate before shipping.
       key: "3",
-      label: getFaqHeading("How are you different from other brokers ?"),
+      label: getFaqHeading(
+        "Do you have any tie-up with builders or brokers that affects recommendations?",
+      ),
       style: faqPanelStyle,
-      children: (
-        <Flex vertical gap={16}>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            <p
-              style={{
-                color: COLORS.primaryColor,
-                margin: 0,
-                lineHeight: "120%",
-                fontWeight: 500,
-              }}
-            >
-              We DON&apos;T sell or promote specific projects like traditional
-              brokers.
-            </p>
-            Instead, we provide data-backed advice, curation, and analysis
-            across projects in Bangalore.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            {" "}
-            <p
-              style={{
-                color: COLORS.primaryColor,
-                margin: 0,
-                lineHeight: "120%",
-                fontWeight: 500,
-              }}
-            >
-              We DON&apos;T provide superficial or biased marketing information.
-            </p>{" "}
-            Our insights are derived from verified sources such as RERA,
-            OpenStreetMap, Google Maps, and OpenCity—combined with deep analysis
-            of builder track record, location dynamics, and future developments.
-            <br></br>
-            We help you understand both the strengths and risks of every
-            property.<br></br>
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            {" "}
-            <p
-              style={{
-                color: COLORS.primaryColor,
-                margin: 0,
-                lineHeight: "120%",
-                fontWeight: 500,
-              }}
-            >
-              Our work DOESN&apos;T stop once you make a decision.
-            </p>{" "}
-            We go the extra mile in terms of negotiation, post purchase
-            formalities, legal due-dilligence and any other assistance you might
-            need once you have made your decision.
-          </Typography.Text>
-        </Flex>
+      children: getFaqText(
+        "No — recommendations are matched to your criteria, not to any builder or broker arrangement.",
       ),
     },
     {
       key: "4",
-      label: getFaqHeading("What all to expect during consultation?"),
+      label: getFaqHeading("Is the Discovery tool free to use?"),
       style: faqPanelStyle,
-      children: (
-        <Flex vertical gap={32}>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            <b>✔ INTRO CALL</b>
-            <br></br>
-            We begin with a detailed discussion of your requirements and provide
-            an overview of Bangalore’s landscape and understanding of different
-            micro-markets.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            <b>✔ SHORTLISTING</b>
-            <br></br>
-            Based on your needs, we curate a set of relevant projects and share
-            detailed Brick360° reports for each to help you understand &
-            evaluate each property.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            <b>✔ DECISION MAKING</b>
-            <br></br>
-            Once you shortlist properties, we assist with site visits, pricing
-            discussions, and timelines to help you make an informed decision. We
-            support you through final negotiations, unit selection, and payment
-            planning.
-          </Typography.Text>
-          <Typography.Text
-            style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            <b>✔ POST BUY ASSISTANCE</b>
-            <br></br>
-            Once a deal is finalized we help with{" "}
-            <span style={{ color: COLORS.textColorDark }}>
-              legal oversight, builder communication, contractual review, and
-              title verification
-            </span>{" "}
-            of the property. This ensures you are free from any legal conflicts
-            and payments are secure as well as risk free.
-          </Typography.Text>
-        </Flex>
+      children: getFaqText(
+        "Yes, searching and getting shortlisted recommendations is free.",
       ),
     },
     {
       key: "5",
-      label: getFaqHeading("How do you curate projects?"),
+      label: getFaqHeading(
+        "What is the Brick360 Report, and where does the data come from?",
+      ),
       style: faqPanelStyle,
       children: getFaqText(
-        <>
-          We have a database of over{" "}
-          <span style={{ color: COLORS.textColorDark }}>
-            2000 projects across Bangalore
-          </span>{" "}
-          including data points around{" "}
-          <span style={{ color: COLORS.textColorDark }}>
-            builder credibility, upcoming infra projects near a location,
-            surroundings & more
-          </span>{" "}
-          . This helps us to match-make projects based on your requirements. For
-          instance, if you are love a home with more greenery around, we can
-          shortlist projects based on surroundings. If you are primary purpose
-          is investment, we can find projects near upcoming infra or business
-          centres.
-        </>,
+        "An independent report for any RERA-registered property in Bangalore, covering legal standing, pricing, builder history, layout, and location — sourced from verified government and public records like RERA, BBMP, Open City, and Open Street, not brochures.",
       ),
     },
     {
+      // TODO: add the current free-report limit and turnaround time before shipping.
       key: "6",
-      label: getFaqHeading("Do you provide legal services ?"),
+      label: getFaqHeading("Is the report free, and how long does it take?"),
       style: faqPanelStyle,
-      children: getFaqText(`
-          We do offer legal services as part of our consultation including legal oversight, lawyer contractual review and title verification.`),
-    },
-    {
-      key: "6",
-      label: getFaqHeading(
-        "Do you help with property management including resale/rental ?",
+      children: getFaqText(
+        "You can generate free reports for RERA-registered properties in Bangalore.",
       ),
-      style: faqPanelStyle,
-      children: getFaqText(`
-          We do not directly provide services with resale or rental. However, we can help you get in touch with a partner who can assist you with the same.`),
     },
     {
-      key: "6",
-      label: getFaqHeading("Do you help with finding a rental property ?"),
+      key: "7",
+      label: getFaqHeading("What kind of red flags can the report reveal?"),
       style: faqPanelStyle,
-      children: getFaqText(`
-          As of now, we do NOT provide assistance with rentals.`),
+      children: getFaqText(
+        "Legal issues like disputed land or unclear title, past builder delays and complaints, pricing out of line with the market, and location concerns no listing would mention — like nearby drains, high-tension lines, or transit noise.",
+      ),
+    },
+    {
+      key: "8",
+      label: getFaqHeading("Can I compare multiple properties side by side?"),
+      style: faqPanelStyle,
+      children: getFaqText(
+        "Yes — generate reports for different projects and compare them directly on price, legal standing, builder history, and location.",
+      ),
     },
   ];
 
@@ -784,64 +712,115 @@ export default function BrickChat({
         }}
       ></SectionCenter>
 
-      <Flex vertical align="center" justify="center" style={{ width: "100%", marginTop: 32 }}>
+      <Flex
+        vertical
+        align="center"
+        justify="center"
+        style={{ width: "100%", marginTop: 32 }}
+      >
         {/* <Typography.Text>Have a Real Estate Query ? Just Brickfi it!</Typography.Text> */}
-        <img
-          width={isMobile ? "90%" : "80%"}
-          style={{ marginTop: 16, marginBottom: "64px" }}
-          src={
-            isMobile
-              ? "/images/landing/brick-chat/landing-demo-mob.png"
-              : "/images/landing/brick-chat/landing-demo.png"
-          }
-        />
+        {isMobile ? (
+          <img
+            width="90%"
+            style={{ marginTop: 16, marginBottom: "64px" }}
+            src="/images/landing/brick-chat/landing-demo-mob.png"
+          />
+        ) : (
+          // muted + playsInline are what let browsers autoplay it, like the GIF it replaces
+          <video
+            width="80%"
+            style={{ marginTop: 16, marginBottom: "64px" }}
+            src="/images/landing/brick-chat/landing-demo.mp4"
+            poster="/images/landing/brick-chat/landing-demo.png"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-label="Brickfi AI demo"
+          />
+        )}
       </Flex>
       <Flex vertical>
         <Flex
-          vertical
-          style={{ width: isMobile ? "90%" : "80%", margin: "auto" }}
+          vertical={isMobile}
+          style={{
+            maxWidth: isMobile ? "90%" : "80%",
+            margin: "auto",
+            marginBottom: isMobile ? 32 : 0,
+          }}
+          gap={isMobile ? 16 : 40}
         >
-          <h2
-            style={{
-              fontSize: isMobile ? 40 : 54,
-              color: COLORS.textColorDark,
-              lineHeight: "100%",
-              fontWeight: 800,
-              margin: 0,
-            }}
-          >
-            Brickfi is Redefining.
-          </h2>
-          <h2
-            style={{
-              fontSize: isMobile ? 40 : 54,
-              lineHeight: "100%",
-              fontWeight: 800,
-              margin: 0,
-              color: COLORS.primaryColor,
-            }}
-          >
-            How You Explore Real Estate
-          </h2>
+          {isMobile && (
+            <img
+              width={isMobile ? 125 : 250}
+              style={{
+                margin: isMobile ? 16 : "auto",
+                marginTop: isMobile ? 0 : 64,
+              }}
+              src={
+                isMobile
+                  ? "/images/landing/brick-chat/brickchat-stats.png"
+                  : "/images/landing/brick-chat/brickchat-stats.png"
+              }
+            />
+          )}
+          <Flex vertical style={{ width: "100%", margin: "auto" }}>
+            <h2
+              style={{
+                fontSize: isMobile ? 40 : 54,
+                color: COLORS.textColorDark,
+                lineHeight: "100%",
+                fontWeight: 800,
+                margin: 0,
+              }}
+            >
+              Brickfi is Redefining.
+            </h2>
+            <h2
+              style={{
+                fontSize: isMobile ? 40 : 54,
+                lineHeight: "100%",
+                fontWeight: 800,
+                margin: 0,
+                color: COLORS.primaryColor,
+              }}
+            >
+              How You Explore Real Estate
+            </h2>
+          </Flex>
+          {!isMobile && (
+            <img
+              width={isMobile ? 175 : 250}
+              style={{ margin: "auto", marginBottom: 100, marginTop: 64 }}
+              src={
+                isMobile
+                  ? "/images/landing/brick-chat/brickchat-stats.png"
+                  : "/images/landing/brick-chat/brickchat-stats.png"
+              }
+            />
+          )}
         </Flex>
-        <img
-          width={isMobile ? 350 : 500}
-          style={{ margin: "auto", marginBottom: 100, marginTop: 64 }}
-          src={
-            isMobile
-              ? "/images/landing/brick-chat/brickchat-stats.png"
-              : "/images/landing/brick-chat/brickchat-stats.png"
-          }
-        />
-        <img
-          width={isMobile ? "90%" : "70%"}
-          style={{ margin: "auto", marginBottom: 100 }}
-          src={
-            isMobile
-              ? "/images/landing/brick-chat/brickchat-stats-2-mob.png"
-              : "/images/landing/brick-chat/brickchat-stats-2.png"
-          }
-        />
+        <Flex vertical align="center">
+          <Typography.Text
+            style={{
+              textTransform: "uppercase",
+              fontSize: FONT_SIZE.HEADING_2,
+              color: COLORS.LANDING.PINK,
+            }}
+          >
+            DATA BACKED & UNBIASED REAL ESTATE PLATFORM
+          </Typography.Text>
+          <img
+            width={isMobile ? "90%" : "70%"}
+            style={{ margin: "auto", marginBottom: 100 }}
+            src={
+              isMobile
+                ? "/images/landing/brick-chat/brickchat-stats-2-mob.png"
+                : "/images/landing/brick-chat/brickchat-stats-2.png"
+            }
+          />
+        </Flex>
       </Flex>
       <SectionLeft
         isMobile={isMobile}
@@ -900,7 +879,7 @@ export default function BrickChat({
                   fontWeight: 800,
                   margin: 0,
                   marginBottom: 0,
-                  color: COLORS.primaryColor
+                  color: COLORS.primaryColor,
                 }}
               >
                 With The Research ToolSet
@@ -936,11 +915,23 @@ export default function BrickChat({
           backgroundColor: COLORS.LANDING.LIGHT_PINK,
           padding: "100px 0",
           fontWeight: 200,
-          width: "80%",
+          width: isMobile? "90%:":"80%",
           margin: "auto",
         }}
       >
         <Flex vertical style={{ maxWidth: 1400, padding: "0 16px" }}>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_1,
+              lineHeight: "100%",
+              maxWidth: 800,
+              fontWeight: 500,
+              marginBottom: 16,
+              color: COLORS.primaryColor,
+            }}
+          >
+            BRICK360 FRAMEWORK
+          </Typography.Text>
           <h2
             style={{
               fontSize: FONT_SIZE.HEADING_1 * 1.5,
@@ -951,9 +942,10 @@ export default function BrickChat({
             }}
           >
             <span style={{ color: COLORS.LANDING.PINK, fontWeight: 500 }}>
-              Brick360 Framework
+              What makes Brickfi different ?
             </span>{" "}
           </h2>
+
           <Typography.Text
             style={{
               fontSize: FONT_SIZE.HEADING_1,
@@ -961,127 +953,114 @@ export default function BrickChat({
               maxWidth: 800,
             }}
           >
-            The most comprehensive and legit data backed framework to rate and
-            analyse properties.
+            The most comprehensive, intelligent and verified-data backed
+            framework to rate and analyse real estate.
           </Typography.Text>
         </Flex>
       </Flex>
 
-      <SectionLeft
-        isMobile={isMobile}
-        sectionData={{
-          heading: (
-            <h2
-              style={{
-                fontSize: FONT_SIZE.HEADING_1 * 0.9,
-                lineHeight: "100%",
-                marginBottom: 16,
-                margin: 0,
-              }}
-            >
-              Detailed Breakdown of The Layout
-            </h2>
-          ),
-          subHeading:
-            "Don't judge a property by its brochure (said someone); Brick360 looks at numbers like open space, unit density, unit distribution, amenities mix and more to give a deeper insights into property layout.",
-          imageContainerWidth: 50,
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: "/images/landing/report-feature-layout.png",
-          primaryImageSize: "100%",
-          itemsAlignSectionLeft: "flex-start",
-          sectionMaxWidth: isMobile ? "100%" : "1100px",
-          verticalPadding: 24,
+      <Flex
+        gap={isMobile ? 16: 8}
+        wrap={isMobile ? "wrap" : undefined}
+        justify="center"
+        align="center"
+        style={{
+          padding: isMobile ? "16px" : "16px 0",
+          marginBottom: 32,
+          flexShrink: 0,
         }}
-      ></SectionLeft>
-
-      {[
-        {
-          sectionMaxWidth: isMobile ? "100%" : "1100px",
-          heading: (
-            <h2
+      >
+        {REPORT_FEATURES.map((feature, index) => {
+          const isActive = index === activeFeature;
+          return (
+            <Button
+              key={feature.label}
+              shape="round"
+              onClick={() => featureCarouselRef.current?.goTo(index)}
               style={{
-                fontSize: FONT_SIZE.HEADING_1 * 0.9,
-                lineHeight: "100%",
-                margin: 0,
+                flexShrink: 0,
+                height: 32,
+                padding: "0 14px",
+                fontSize: 13,
+                backgroundColor: isActive ? COLORS.textColorDark : "white",
+                border: 0,
+                fontWeight: 500,
+                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+                borderColor: isActive
+                  ? COLORS.textColorDark
+                  : COLORS.textColorVeryLight,
+                color: isActive ? "#fff" : COLORS.textColorMedium,
               }}
             >
-              Location Dissection to Assess Livability & Future Growth.
-            </h2>
-          ),
-          subHeading:
-            "Analysing livability is more than just checking the nearest mall. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
-          imageContainerWidth: 60,
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: "/images/landing/report-feature-location.png",
-          primaryImageSize: "100%",
-          itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
-        },
-      ].map((a: any) => {
-        return isMobile ? (
-          <SectionLeft isMobile={isMobile} sectionData={a}></SectionLeft>
-        ) : (
-          <SectionRight isMobile={isMobile} sectionData={a}></SectionRight>
-        );
-      })}
+              <Flex align="center" gap={6}>
+                <DynamicReactIcon
+                  iconName={feature.iconName}
+                  iconSet={feature.iconSet}
+                  size={14}
+                  color={isActive ? "#fff" : COLORS.textColorMedium}
+                />
+                {feature.label}
+              </Flex>
+            </Button>
+          );
+        })}
+      </Flex>
 
-      <SectionLeft
-        isMobile={isMobile}
-        sectionData={{
-          sectionMaxWidth: isMobile ? "100%" : "1100px",
-          heading: (
-            <h2
-              style={{
-                fontSize: FONT_SIZE.HEADING_1 * 0.9,
-                lineHeight: "100%",
-                margin: 0,
-                marginBottom: 16,
-              }}
-            >
-              Builder Track Records, Complaints & Delays
-            </h2>
+      <Carousel
+        ref={featureCarouselRef}
+        autoplay
+        autoplaySpeed={4000}
+        dots={false}
+        beforeChange={(_, next) => setActiveFeature(next)}
+      >
+        {REPORT_FEATURES.map(
+          ({ title, headingMarginBottom, subHeading, mainImgUrl }) => (
+            <div key={title}>
+              <div
+                className={`${styles.featureFrame} ${
+                  isMobile ? styles.featureFrameMobile : ""
+                }`}
+              >
+                <div className={styles.featureCell}>
+                  <img src={mainImgUrl} alt={title} style={{ width: "100%" }} />
+                </div>
+                <div className={styles.featureCell}>
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_1,
+                      lineHeight: "100%",
+                      margin: 0,
+                      marginBottom: headingMarginBottom ?? 0,
+                    }}
+                  >
+                    {title}
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_3,
+                      color: COLORS.textColorMedium,
+                      fontWeight: 300,
+                    }}
+                  >
+                    {subHeading}
+                  </Typography.Text>
+                </div>
+                {/* dots where the frame lines meet */}
+                <span className={`${styles.frameDot} ${styles.dotTopLeft}`} />
+                <span className={`${styles.frameDot} ${styles.dotTopMid}`} />
+                <span className={`${styles.frameDot} ${styles.dotTopRight}`} />
+                <span
+                  className={`${styles.frameDot} ${styles.dotBottomLeft}`}
+                />
+                <span className={`${styles.frameDot} ${styles.dotBottomMid}`} />
+                <span
+                  className={`${styles.frameDot} ${styles.dotBottomRight}`}
+                />
+              </div>
+            </div>
           ),
-          subHeading:
-            "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity to get a sense of execution risks and credibility.",
-          imageContainerWidth: 50,
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: "/images/landing/report-feature-builder.png",
-          primaryImageSize: "100%",
-          itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
-        }}
-      ></SectionLeft>
-
-      {[
-        {
-          sectionMaxWidth: isMobile ? "100%" : "1100px",
-          heading: (
-            <h2
-              style={{
-                fontSize: FONT_SIZE.HEADING_1 * 0.9,
-                lineHeight: "100%",
-                margin: 0,
-              }}
-            >
-              Financials Assessment including Price Point, Rental Yield.
-            </h2>
-          ),
-          subHeading:
-            "Making the right financial decisions becomes all the more necessary. Assess the price point, rental yield and growth potential with upto date pricing information. ",
-          imageContainerWidth: 50,
-          bgColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: "/images/landing/report-feature-financials.png",
-          primaryImageSize: "100%",
-          itemsAlignSectionLeft: "flex-start",
-          verticalPadding: 24,
-        },
-      ].map((a: any) => {
-        return isMobile ? (
-          <SectionLeft isMobile={isMobile} sectionData={a}></SectionLeft>
-        ) : (
-          <SectionRight isMobile={isMobile} sectionData={a}></SectionRight>
-        );
-      })}
+        )}
+      </Carousel>
 
       <Flex align="center" justify="center">
         <img
@@ -1145,26 +1124,25 @@ export default function BrickChat({
                   paddingBottom: 24,
                 }}
               >
-                When we started out, buying a home in Bangalore felt like
-                navigating a maze. Exploring, research, assessment, all things
+                When we started out, <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}> buying a home in Bangalore felt like navigating a maze</span>. Exploring, research, assessment, all things
                 that we take for given before buying; in this market, that felt
                 almost impossible.<br></br>
                 <br></br>
                 The brokers were no help. There were far too many of them, the
                 spam was relentless, and no one was qualified or unbiased enough
-                to actually guide us through the process. Everyone was only
-                interested in making a sale. The most shocking part was
+                to actually guide us through the process. <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}>Everyone was only
+                interested in making a sale.</span> The most shocking part was
                 realizing just how comfortable they were with lying—even though
                 this was the biggest financial decision of our lives.<br></br>
                 <br></br>
                 Despite our initial motivation, stepping into the field made one
-                thing clear: no one was solving for the buyer. No one seemed
-                curious enough to dig deep into the real estate ecosystem to
+                thing clear: no one was solving for the buyer. <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}>No one seemed
+                curious enough to dig deep into the real estate</span> ecosystem to
                 build a genuinely data- and research-driven platform.<br></br>
                 <br></br>
                 That is why we set out to solve this problem. We are building a
                 research-oriented platform designed to empower home buyers. Our
-                mission is to create the most objective, data-backed real estate
+                <span style={{backgroundColor: COLORS.LANDING.PINK, color: "white", padding: "0 4px", borderRadius:4}}>mission is to create the most objective, data-backed</span> real estate
                 evaluation platform—giving buyers the clarity and confidence
                 they deserve.<br></br>
                 <br></br>

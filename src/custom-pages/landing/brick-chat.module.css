@@ -68,3 +68,96 @@
     animation: none;
   }
 }
+
+/* The page root is a fixed-height column flex; overflow-x makes this row's
+   min-height 0, so without flex-shrink: 0 it collapses to nothing. */
+.featureFilters {
+  flex-shrink: 0;
+  max-width: 100%;
+  padding: 24px 16px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.featureFilters::-webkit-scrollbar {
+  display: none;
+}
+
+/* Framed 2-column feature slide: hairline borders with dots at the
+   intersections. Margin keeps the dots clear of the carousel's overflow clip. */
+.featureFrame {
+  --frame-line: rgba(45, 63, 78, 0.18);
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: calc(100% - 32px);
+  max-width: 1100px;
+  margin: 24px auto;
+  border: 1px solid var(--frame-line);
+}
+
+.featureCell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 32px;
+}
+
+.featureCell + .featureCell {
+  border-left: 1px solid var(--frame-line);
+}
+
+.frameDot {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #2d3f4e;
+  transform: translate(-50%, -50%);
+}
+
+.dotTopLeft {
+  top: 0;
+  left: 0;
+}
+.dotTopMid {
+  top: 0;
+  left: 50%;
+}
+.dotTopRight {
+  top: 0;
+  left: 100%;
+}
+.dotBottomLeft {
+  top: 100%;
+  left: 0;
+}
+.dotBottomMid {
+  top: 100%;
+  left: 50%;
+}
+.dotBottomRight {
+  top: 100%;
+  left: 100%;
+}
+
+/* Mobile: stack the cells; the divider becomes horizontal, so drop the
+   mid dots that sat on the vertical divider. */
+.featureFrameMobile {
+  grid-template-columns: 1fr;
+}
+
+.featureFrameMobile .featureCell {
+  padding: 16px;
+}
+
+.featureFrameMobile .featureCell + .featureCell {
+  border-left: none;
+  border-top: 1px solid var(--frame-line);
+}
+
+.featureFrameMobile .dotTopMid,
+.featureFrameMobile .dotBottomMid {
+  display: none;
+}
