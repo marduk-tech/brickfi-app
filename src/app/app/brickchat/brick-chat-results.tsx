@@ -79,7 +79,8 @@ const MATCH_LEVEL_CONFIG: Record<MatchLevel, { label: string; color: string }> =
     "weak-match": { label: "Weak Match", color: "red" },
   };
 
-const ONE_LINER_MATCH_PREFIX = /^\s*(strong-match|moderate-match|weak-match)\s*;\s*/i;
+const ONE_LINER_MATCH_PREFIX =
+  /^\s*(strong-match|moderate-match|weak-match)\s*;\s*/i;
 
 // Splits the leading match level off a one-liner; `text` is the rest (or the
 // whole one-liner, unchanged, when it has no such prefix).
@@ -163,8 +164,6 @@ export default function BrickChatResults({
   minimal,
   selectedProjectId,
 }: BrickChatResultsProps) {
- 
-
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const [messageApi, contextHolder] = message.useMessage();
@@ -196,7 +195,8 @@ export default function BrickChatResults({
       okText: isSaved ? "Remove" : "Save",
       onOk: async () => {
         const savedLvnzyProjects = [...(user.savedLvnzyProjects || [])];
-        const defaultCollectionIndex = getSaveCollectionIndex(savedLvnzyProjects);
+        const defaultCollectionIndex =
+          getSaveCollectionIndex(savedLvnzyProjects);
 
         if (defaultCollectionIndex === -1) {
           // nothing saved yet - create default collection with this project
@@ -291,7 +291,7 @@ export default function BrickChatResults({
     const orderedResults = orderResults(results, skipSort);
 
     return (
-      <Flex className={styles.scrollContainer} gap={16}>
+      <Flex className={styles.scrollContainer} gap={8}>
         {contextHolder}
         {modalContextHolder}
         {orderedResults.map((project) => (
@@ -299,7 +299,7 @@ export default function BrickChatResults({
             <Card
               hoverable
               style={{
-                width: 165,
+                width: 150,
                 borderRadius: 12,
                 overflow: "hidden",
                 margin: "8px 0",
@@ -315,6 +315,7 @@ export default function BrickChatResults({
                   flex: 1,
                   display: "flex",
                   flexDirection: "column",
+                  paddingBottom: 4
                 },
               }}
               cover={
@@ -329,7 +330,7 @@ export default function BrickChatResults({
                 >
                   {project.projectImages?.length ? (
                     <ProjectImageCarousel
-                      images={project.projectImages}
+                      images={project.projectImages.slice(0,1)}
                       alt={project.projectName}
                     />
                   ) : project.projectImage ? (
@@ -357,37 +358,69 @@ export default function BrickChatResults({
               }
             >
               <Flex vertical gap={2} style={{ flex: 1 }}>
+                {/* {project.projectCorridor ? (
+                  <Flex>
+                  <Tag
+                    style={{
+                      fontSize: FONT_SIZE.NOTE,
+                      color: COLORS.textColorDark,
+                      padding: "0px 2px",
+                      marginTop: 4,
+                      marginLeft: 4
+                    }}
+                  >
+                    {project.projectCorridor}
+                  </Tag>
+                  </Flex>
+                ) : (
+                  <span />
+                )} */}
                 <Tooltip title={project.projectName}>
-                <Typography.Text
-                  strong
-                  style={{
-                    fontSize: FONT_SIZE.PARA,
-                    color: COLORS.textColorDark,
-                    padding: '4px 8px'
-                  }}
-                  ellipsis={{ tooltip: project.projectName }}
-                >
-                  {project.projectName}
-                </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.PARA,
+                      color: COLORS.textColorDark,
+                      padding: "4px 4px",
+                    }}
+                    ellipsis={{ tooltip: project.projectName }}
+                  >
+                    {project.projectName}
+                  </Typography.Text>
                 </Tooltip>
-                <Flex align="center" gap={0} style={{padding: "4px 8px"}}>
-                  {project.projectCorridor ? (
-                    <Tag
-                      style={{
-                        fontSize: FONT_SIZE.NOTE,
-                        color: COLORS.textColorDark,
-                        padding: "0px 4px"
-                      }}
-                    >
-                      {project.projectCorridor}
-                    </Tag>
-                  ) : (
-                    <span />
-                  )}
-                  <MatchTag
-                    match={parseOneLiner(project.oneLiner).match}
-                    style={{ padding: "0px 4px", }}
-                  />
+                <Flex align="flex-start" gap={0} style={{ padding: "4px 8px" }}>
+                  {onSelectProject && (
+                  <Flex
+                    id="project-details"
+                    align="center"
+                    justify="center"
+                    onClick={(e) => {
+                      // cards are wrapped in a Link - don't navigate on icon click
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onSelectProject(project);
+                    }}
+                    style={{
+                      height: 24,
+                      flexShrink: 0,
+                      padding: "2px 4px",
+                      borderRadius: 4,
+                      border: `0.5px solid ${COLORS.borderColor}`,
+                      backgroundColor: "white",
+                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      cursor: "pointer",
+                      color: COLORS.textColorDark,
+                      fontSize: FONT_SIZE.SUB_TEXT,
+                    }}
+                  >
+                    {/* <DynamicReactIcon
+                      iconName={project.projectStatus === "report-verified" ? "TbView360Number": "BiDetail"}
+                      iconSet={project.projectStatus === "report-verified" ? "tb": "bi"}
+                      size={18}
+                      color={project.projectStatus === "report-verified" ? "white": COLORS.primaryColor}
+                    /> */}
+                    360 Details
+                  </Flex>
+                )}
                   <Flex align="center" gap={4} style={{ marginLeft: "auto" }}>
                     {project.lvnzyProjectId && (
                       <Flex
@@ -412,43 +445,13 @@ export default function BrickChatResults({
                           }
                           iconSet="md"
                           size={16}
-                          color={COLORS.primaryColor}
+                          color={COLORS.textColorDark}
                         />
                       </Flex>
                     )}
-                  
                   </Flex>
                 </Flex>
-                  {onSelectProject && (
-                      <Flex
-                        id="project-details"
-                        align="center"
-                        justify="center"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          onSelectProject(project);
-                        }}
-                        style={{
-                          height: 24,
-                          flexShrink: 0,
-                          padding: "2px 4px",
-                          borderBottomLeftRadius: 4,
-                          borderBottomRightRadius: 4,
-                          // pushed to the bottom of the card whatever the
-                          // content above it, so buttons line up across cards
-                          marginTop: "auto",
-                          backgroundColor: project.projectId === selectedProjectId ? COLORS.primaryColor: COLORS.textColorDark,
-                          cursor: "pointer",
-                          color: "white",
-                          fontSize: FONT_SIZE.SUB_TEXT,
-                          width: "100%",
-                          fontWeight: 500
-                        }}
-                      >
-                        View 360 Details
-                      </Flex>
-                    )}
+                 
               </Flex>
             </Card>
           </Flex>
@@ -458,11 +461,11 @@ export default function BrickChatResults({
   }
 
   return (
-    <Flex className={styles.scrollContainer} gap={4}>
+    <Flex className={styles.scrollContainer} gap={16}>
       {contextHolder}
       {modalContextHolder}
       {orderResults(results, skipSort).map((project) => (
-       <Flex style={{width: 225}}>
+        <Flex style={{ width: 225 }}>
           <Card
             hoverable
             style={{
@@ -471,13 +474,13 @@ export default function BrickChatResults({
               display: "block",
               overflow: "hidden",
               margin: "8px 0",
-              border: `1px solid ${COLORS.borderColor}`,
+              border: `0.5px solid ${COLORS.borderColor}`,
             }}
             styles={{ body: { padding: 0 } }}
             cover={
               <div
                 style={{
-                  height: 125,
+                  height: 100,
                   width: "100%",
                   backgroundColor: COLORS.bgColor,
                   position: "relative",
@@ -508,35 +511,10 @@ export default function BrickChatResults({
                     <Typography.Text type="secondary">No Image</Typography.Text>
                   </Flex>
                 )}
-
-               
               </div>
             }
           >
-            <Flex  vertical gap={2}>
-              <Flex style={{padding: 8}} gap={0} vertical>
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_3,
-                  color: COLORS.textColorDark,
-                  fontWeight: 500
-                }}
-                ellipsis={{ tooltip: project.projectName }}
-              >
-                {project.projectName}
-              </Typography.Text>
-                 {getProjectMetadata(project) && (
-                <Typography.Text
-                  style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
-                    color: COLORS.textColorLight,
-                    marginTop: -4
-                  }}
-                  ellipsis={{ tooltip: getProjectMetadata(project) }}
-                >
-                  {getProjectMetadata(project)}
-                </Typography.Text>
-              )}
+            <Flex style={{ padding: 4 }} gap={0} vertical>
               <Flex wrap>
                 <Tag
                   style={{
@@ -555,22 +533,45 @@ export default function BrickChatResults({
                   style={{ padding: "0 4px", marginTop: 8 }}
                 />
               </Flex>
-
-           
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_3,
+                  color: COLORS.textColorDark,
+                  fontWeight: 500,
+                }}
+                ellipsis={{ tooltip: project.projectName }}
+              >
+                {project.projectName}
+              </Typography.Text>
+              {getProjectMetadata(project) && (
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorLight,
+                    marginTop: -4,
+                  }}
+                  ellipsis={{ tooltip: getProjectMetadata(project) }}
+                >
+                  {getProjectMetadata(project)}
+                </Typography.Text>
+              )}
 
               {!skipOneLiner && project.oneLiner && (
                 <Typography.Paragraph
                   style={{
                     fontSize: FONT_SIZE.SUB_TEXT,
                     color: COLORS.textColorMedium,
-                    marginBottom: 0,
-                    marginTop: 8,
+                    padding: "4px",
                     lineHeight: "140%",
-                    fontWeight: 500,
+                    borderRadius: 4,
+                    marginTop: 4,
+                    marginBottom: 2,
+                    fontWeight: 400,
+                    backgroundColor: COLORS.bgColor,
                     cursor: "pointer",
                   }}
                   ellipsis={{
-                    rows: 3,
+                    rows: 2,
                     tooltip: parseOneLiner(project.oneLiner).text,
                   }}
                   onClick={(e) => handleShowOneLiner(e, project)}
@@ -607,29 +608,30 @@ export default function BrickChatResults({
                   </Flex>
                 )}
 
-                 {project.projectLocation?.lat && project.projectLocation?.lng && (
-                  <Flex
-                    align="center"
-                    justify="center"
-                    onClick={(e) => handleLocateOnMap(e, project)}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      flexShrink: 0,
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName="IoLocateOutline"
-                      iconSet="io5"
-                      size={18}
-                      color={COLORS.primaryColor}
-                    />
-                  </Flex>
-                )}
+                {project.projectLocation?.lat &&
+                  project.projectLocation?.lng && (
+                    <Flex
+                      align="center"
+                      justify="center"
+                      onClick={(e) => handleLocateOnMap(e, project)}
+                      style={{
+                        width: 20,
+                        height: 20,
+                        flexShrink: 0,
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <DynamicReactIcon
+                        iconName="IoLocateOutline"
+                        iconSet="io5"
+                        size={18}
+                        color={COLORS.primaryColor}
+                      />
+                    </Flex>
+                  )}
 
                 {project.isDeveloperPartner && (
                   <Flex
@@ -670,11 +672,11 @@ export default function BrickChatResults({
                       flexShrink: 0,
                       padding: "2px 4px",
                       borderRadius: 4,
-                      backgroundColor:COLORS.primaryColor ,
+                      backgroundColor: COLORS.primaryColor,
                       boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
                       cursor: "pointer",
                       color: "white",
-                      fontSize: FONT_SIZE.SUB_TEXT
+                      fontSize: FONT_SIZE.SUB_TEXT,
                     }}
                   >
                     {/* <DynamicReactIcon
@@ -687,30 +689,9 @@ export default function BrickChatResults({
                   </Flex>
                 )}
               </Flex>
-              </Flex>
-              {/* {onSelectProject && (
-                  <Flex
-                    id="project-details"
-                    align="center"
-                    justify="center"
-                    onClick={(e) => {
-                      // cards are wrapped in a Link - don't navigate on icon click
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onSelectProject(project);
-                    }}
-                    style={{
-                      width: "100%",
-                      backgroundColor: project.projectStatus === "report-verified" ? COLORS.primaryColor : "rgba(255, 255, 255, 0.9)",
-                      cursor: "pointer",
-                    }}
-                  >
-                   <Typography.Text style={{color: "white"}}>View 360 Analysis</Typography.Text>
-                  </Flex>
-                )} */}
             </Flex>
           </Card>
-          </Flex>
+        </Flex>
       ))}
     </Flex>
   );
@@ -745,7 +726,7 @@ export function BrickChatResultsSkeleton({ count = 4 }: { count?: number }) {
           >
             <Skeleton
               active
-              title={{ width: "70%", }}
+              title={{ width: "70%" }}
               paragraph={{ rows: 0, width: ["40%", "90%", "80%"] }}
             />
           </Card>
