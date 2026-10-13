@@ -3,6 +3,10 @@ import { IDriverPlace } from "../types/Project";
 export const envMode = process.env.NEXT_PUBLIC_ENV;
 
 export const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
+// internal admin app (Brickfi Logger thread pages etc) - set per environment,
+// e.g. the staging admin for staging builds
+export const adminUrl =
+  process.env.NEXT_PUBLIC_ADMIN_URL;
 export const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 export const sitemapApiKey = process.env.SITEMAP_API_KEY;
 

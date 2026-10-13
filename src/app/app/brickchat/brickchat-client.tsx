@@ -56,6 +56,7 @@ import ReferredLocationChips, {
   ReferredLocationType,
 } from "./referred-location-chips";
 import PinnedProjectResults from "./pinned-project-results";
+import ThreadLinksButton from "./thread-links-button";
 import CollapsibleAnswer from "./collapsible-answer";
 import StaticQueries from "./static-queries";
 import styles from "./brick-chat-results.module.css";
@@ -1203,32 +1204,9 @@ export function BrickChatCore({
                 userId={user?._id}
               />
               {(activeThreadId || selectedThreadId) && (
-                <Tooltip title="View in LangSmith">
-                  <Button
-                    type="text"
-                    style={{
-                      padding: "8px 0",
-                      height: "auto",
-                      width: 32,
-                      lineHeight: 1,
-                    }}
-                    icon={
-                      <DynamicReactIcon
-                        iconName="LuUnlink"
-                        iconSet="lu"
-                        color={COLORS.textColorMedium}
-                        size={16}
-                      />
-                    }
-                    onClick={() => {
-                      const threadId = activeThreadId || selectedThreadId;
-                      window.open(
-                        `https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f?runview=threads&peekedConversationId=${threadId}`,
-                        "_blank",
-                      );
-                    }}
-                  />
-                </Tooltip>
+                <ThreadLinksButton
+                  threadId={(activeThreadId || selectedThreadId) as string}
+                />
               )}
               <Tooltip title="New chat">
                 <Button
