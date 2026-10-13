@@ -53,6 +53,7 @@ import { BrickMapChat } from "./brick-map-chat";
 import BrickchatFeedback from "./brickchat-feedback";
 import ReferredLocationChips, {
   ReferredLocationChipItem,
+  ReferredLocationType,
 } from "./referred-location-chips";
 import PinnedProjectResults from "./pinned-project-results";
 import CollapsibleAnswer from "./collapsible-answer";
@@ -157,6 +158,15 @@ const getReferredLocationItems = (
 
   return items;
 };
+
+// An answer's chips start out with the first few selected (and the reset
+// icon goes back to this) - landmarks have no id and can't be focused, so
+// they're skipped rather than counted.
+const DEFAULT_SELECTED_CHIP_COUNT = 3;
+const getDefaultReferredLocations = (answer: ExploreAnswer) =>
+  getReferredLocationItems(answer)
+    .filter((i) => !!i.id)
+    .slice(0, DEFAULT_SELECTED_CHIP_COUNT);
 
 // The summary cites places inline as "[<24-hex id>]" or "[<id>, <id>]" -
 // a brickfiDriverId or a resolvedLocation id (see synthesize.js).
@@ -336,7 +346,7 @@ export function BrickChatCore({
   // be among what's currently plotted rather than possibly belonging to a
   // list that isn't the one currently shown on the map.
   const handleLocateProject = (projectId: string, historyIndex?: number) => {
-    setFocusedReferredLocation(null);
+    setFocusedReferredLocations([]);
     setMapResultsIndex(historyIndex);
     setProjectResults(
       historyIndex !== undefined
@@ -352,55 +362,58 @@ export function BrickChatCore({
     );
   };
 
-  // A chat answer's referred-location chip, clicked (see
+  // A chat answer's referred-location chips, clicked (see
   // ReferredLocationChips/getReferredLocationItems) - narrows the map to
-  // just that one record (driver, or a locality/corridor/micropocket, or a
-  // no-op for a landmark with no id - see ReferredLocationChips's
-  // `clickable` check). Single-select: clicking the already-selected chip
-  // again clears it back to the default view.
-  const [focusedReferredLocation, setFocusedReferredLocation] =
-    useState<ReferredLocationChipItem | null>(null);
+  // just the selected records (drivers, localities, corridors,
+  // micropockets; a landmark with no id is a no-op - see
+  // ReferredLocationChips's `clickable` check). Multi-select: each click
+  // toggles that chip in/out, and deselecting the last one falls back to
+  // the default view.
+  const [focusedReferredLocations, setFocusedReferredLocations] = useState<
+    ReferredLocationChipItem[]
+  >([]);
+  const hasFocusedReferredLocations = focusedReferredLocations.length > 0;
   const handleToggleReferredLocation = (item: ReferredLocationChipItem) => {
-    setFocusedReferredLocation((prev) => {
-      const next = prev?.key === item.key ? null : item;
-      if (isMobile) setShowMobileMap(!!next);
+    setFocusedReferredLocations((prev) => {
+      const next = prev.some((i) => i.key === item.key)
+        ? prev.filter((i) => i.key !== item.key)
+        : [...prev, item];
+      if (isMobile) setShowMobileMap(next.length > 0);
       return next;
     });
   };
-
-  const focusedDriverIds =
-    focusedReferredLocation?.type === "driver"
-      ? [focusedReferredLocation.id]
-      : null;
-  const { data: focusedDrivers } = useFetchAllLivindexPlaces(
-    focusedDriverIds || undefined,
-    undefined,
-    !!focusedDriverIds?.length,
+  // the "See on map" reset icon - drops every other selection and goes back
+  // to the answer's default selection (see getDefaultReferredLocations)
+  const handleResetReferredLocations = (answer: ExploreAnswer) => {
+    setFocusedReferredLocations(getDefaultReferredLocations(answer));
+    if (isMobile) setShowMobileMap(true);
+  };
+  const focusedReferredLocationKeys = focusedReferredLocations.map(
+    (i) => i.key,
   );
-  const focusedLocalityIds =
-    focusedReferredLocation?.type === "locality"
-      ? [focusedReferredLocation.id]
-      : [];
-  const focusedCorridorIds =
-    focusedReferredLocation?.type === "corridor"
-      ? [focusedReferredLocation.id]
-      : [];
-  const focusedMicroPocketIds =
-    focusedReferredLocation?.type === "micropocket"
-      ? [focusedReferredLocation.id]
-      : [];
+  const focusedIdsOfType = (type: ReferredLocationType) =>
+    focusedReferredLocations.filter((i) => i.type === type).map((i) => i.id);
 
-  // Default to the drivers relevant to the current results list; a driver
-  // chip click narrows the map down to just that one driver, and a
-  // locality/corridor/micropocket/landmark chip click clears drivers
-  // entirely instead (that layer plots its own thing via
-  // focusedLocalityIds/focusedCorridorIds/focusedMicroPocketIds below - no
-  // reason to also clutter the map with every result's drivers). Unselecting
-  // (clicking the same chip again, which clears focusedReferredLocation back
-  // to null) falls back to the full results-driven set again.
-  const mapDisplayDrivers = !focusedReferredLocation
+  const focusedDriverIds = focusedIdsOfType("driver");
+  const { data: focusedDrivers } = useFetchAllLivindexPlaces(
+    focusedDriverIds.length ? focusedDriverIds : undefined,
+    undefined,
+    !!focusedDriverIds.length,
+  );
+  const focusedLocalityIds = focusedIdsOfType("locality");
+  const focusedCorridorIds = focusedIdsOfType("corridor");
+  const focusedMicroPocketIds = focusedIdsOfType("micropocket");
+
+  // Default to the drivers relevant to the current results list; once any
+  // chip is selected the map shows only the selected drivers (none if only
+  // locality/corridor/micropocket chips are selected - those layers plot
+  // their own thing via focusedLocalityIds/focusedCorridorIds/
+  // focusedMicroPocketIds below, no reason to also clutter the map with
+  // every result's drivers). Deselecting every chip falls back to the full
+  // results-driven set again.
+  const mapDisplayDrivers = !hasFocusedReferredLocations
     ? projectResultsDrivers
-    : focusedReferredLocation.type === "driver"
+    : focusedDriverIds.length
       ? focusedDrivers
       : undefined;
 
@@ -660,6 +673,10 @@ export function BrickChatCore({
           }
         });
         if (lastIdx >= 0) setMapResultsIndex(lastIdx);
+        const lastAnswer = history[history.length - 1]?.answer;
+        setFocusedReferredLocations(
+          lastAnswer ? getDefaultReferredLocations(lastAnswer) : [],
+        );
       } catch (error) {
         if (cancelled) {
           return;
@@ -730,6 +747,10 @@ export function BrickChatCore({
           }
         });
         if (lastIdx >= 0) setMapResultsIndex(lastIdx);
+        const lastAnswer = history[history.length - 1]?.answer;
+        setFocusedReferredLocations(
+          lastAnswer ? getDefaultReferredLocations(lastAnswer) : [],
+        );
 
         refreshChatThreads();
 
@@ -927,6 +948,7 @@ export function BrickChatCore({
         setProjectResults(finalAnswer.projectsList);
         setMapResultsIndex(chatHistory.length);
       }
+      setFocusedReferredLocations(getDefaultReferredLocations(finalAnswer));
 
       const completedSteps = stepList.map((s) =>
         s.status === "active"
@@ -986,7 +1008,7 @@ export function BrickChatCore({
 
     setSelectedProject(null);
     setPillarMapConfig(null);
-    setFocusedReferredLocation(null);
+    setFocusedReferredLocations([]);
     setFocusedProjectId(null);
     setMapResultsIndex(undefined);
     setProjectResults(undefined);
@@ -1392,7 +1414,7 @@ export function BrickChatCore({
                                   iconSet="fa"
                                   size={16}
                                   color={
-                                    !focusedReferredLocation &&
+                                    !hasFocusedReferredLocations &&
                                     mapResultsIndex === index
                                       ? "white"
                                       : COLORS.textColorDark
@@ -1405,7 +1427,7 @@ export function BrickChatCore({
                                   : "default"
                               }
                               onClick={() => {
-                                setFocusedReferredLocation(null);
+                                setFocusedReferredLocations([]);
                                 if (isMobile) setShowMobileMap(true);
                                 setMapResultsIndex(index);
                                 // a fresh array reference even when re-selecting
@@ -1429,18 +1451,18 @@ export function BrickChatCore({
                                 height: 24,
                                 borderRadius: 16,
                                 border: `1px solid ${
-                                  !focusedReferredLocation &&
+                                  !hasFocusedReferredLocations &&
                                   mapResultsIndex === index
                                     ? COLORS.primaryColor
                                     : COLORS.borderColorMedium
                                 }`,
                                 backgroundColor:
-                                  !focusedReferredLocation &&
+                                  !hasFocusedReferredLocations &&
                                   mapResultsIndex === index
                                     ? COLORS.primaryColor
                                     : COLORS.bgColorLightBlue,
                                 color:
-                                  !focusedReferredLocation &&
+                                  !hasFocusedReferredLocations &&
                                   mapResultsIndex === index
                                     ? "white"
                                     : COLORS.textColorDark,
@@ -1450,17 +1472,6 @@ export function BrickChatCore({
                             </Button>
                           </Flex>
                         ) : null}
-                        {(() => {
-                          const referredLocationItems =
-                            getReferredLocationItems(messageItem.answer);
-                          return referredLocationItems.length ? (
-                            <ReferredLocationChips
-                              items={referredLocationItems}
-                              selectedKey={focusedReferredLocation?.key ?? null}
-                              onToggle={handleToggleReferredLocation}
-                            />
-                          ) : null;
-                        })()}
                       </Flex>
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
@@ -1553,10 +1564,9 @@ export function BrickChatCore({
                             return (
                               <ReferredLocationChips
                                 inline
+                                iconOnly
                                 items={[item]}
-                                selectedKey={
-                                  focusedReferredLocation?.key ?? null
-                                }
+                                selectedKeys={focusedReferredLocationKeys}
                                 onToggle={handleToggleReferredLocation}
                               />
                             );
@@ -1566,6 +1576,66 @@ export function BrickChatCore({
                         {linkLocationRefs(messageItem.answer.summary)}
                       </Markdown>
                     </CollapsibleAnswer>
+
+                    {(() => {
+                      const referredLocationItems =
+                        getReferredLocationItems(messageItem.answer);
+                      if (!referredLocationItems.length) return null;
+                      const hasFocusable = referredLocationItems.some(
+                        (i) => !!i.id,
+                      );
+                      return (
+                        <Flex vertical gap={4} style={{ marginBottom: 2 }}>
+                          <Flex align="center" gap={6}>
+                            <Typography.Text
+                              style={{
+                                fontSize: FONT_SIZE.SUB_TEXT,
+                                fontWeight: 400,
+                                color: COLORS.textColorMedium,
+                              }}
+                            >
+                              See on map
+                            </Typography.Text>
+                            {hasFocusable ? (
+                              <Tooltip title="Reset">
+                                <Button
+                                  type="text"
+                                  size="small"
+                                  aria-label="Reset map selection"
+                                  icon={
+                                    <DynamicReactIcon
+                                      iconName="RxReset"
+                                      iconSet="rx"
+                                      size={14}
+                                      color={COLORS.textColorMedium}
+                                    />
+                                  }
+                                  onClick={() =>
+                                    handleResetReferredLocations(
+                                      messageItem.answer,
+                                    )
+                                  }
+                                  style={{ height: 20, width: 20 }}
+                                />
+                              </Tooltip>
+                            ) : null}
+                          </Flex>
+                          <Flex
+                            style={{
+                              width: "100%",
+                              overflowX: "scroll",
+                              scrollbarWidth: "none",
+                            }}
+                          >
+                            <ReferredLocationChips
+                              items={referredLocationItems}
+                              selectedKeys={focusedReferredLocationKeys}
+                              onToggle={handleToggleReferredLocation}
+                            />
+                          </Flex>
+                        </Flex>
+                      );
+                    })()}
                     
                     {messageItem.answer.followupPrompt ? (
                       <Typography.Text
@@ -1649,7 +1719,7 @@ export function BrickChatCore({
           <BrickMapChat
             projects={projectResults || []}
             focusedProjectId={focusedProjectId}
-            hideAllFilters={!!focusedReferredLocation}
+            hideAllFilters={hasFocusedReferredLocations}
             detailedProject={selectedProject ? selectedLvnzyProject : undefined}
             pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
             focusedDrivers={selectedProject ? undefined : mapDisplayDrivers}
@@ -1675,7 +1745,7 @@ export function BrickChatCore({
             onClick={() => {
               setShowMobileMap((prev) => {
                 const next = !prev;
-                if (next) setFocusedReferredLocation(null);
+                if (next) setFocusedReferredLocations([]);
                 return next;
               });
             }}
@@ -1746,7 +1816,7 @@ export function BrickChatCore({
                 // not tied to showMobileMap: hideAllFilters also disables
                 // driver filtering (see useMapFilters), so flipping it on
                 // close made every driver render during the slide-out
-                hideAllFilters={!!focusedReferredLocation}
+                hideAllFilters={hasFocusedReferredLocations}
                 detailedProject={
                   selectedProject ? selectedLvnzyProject : undefined
                 }

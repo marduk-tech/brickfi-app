@@ -5,17 +5,11 @@ import DynamicReactIcon, {
 } from "@/components/common/dynamic-react-icon";
 import { useFetchAllLivindexPlaces } from "@/hooks/use-livindex-places";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Flex, Tag, Typography } from "antd";
-import {
-  capitalize
-} from "@/libs/lvnzy-helper";
+import { Flex, Tag, Tooltip, Typography } from "antd";
+import { capitalize } from "@/libs/lvnzy-helper";
 import { useBrick360FontSize } from "./brick360/use-font-size";
 export type ReferredLocationType =
-  | "driver"
-  | "locality"
-  | "corridor"
-  | "micropocket"
-  | "";
+  "driver" | "locality" | "corridor" | "micropocket" | "";
 
 export interface ReferredLocationChipItem {
   /** Unique per-item key for React/selection - distinct from `id` since a landmark has no id of its own (see brickchat-client's getReferredLocationItems). */
@@ -46,10 +40,14 @@ interface ReferredLocationChipsProps {
   items: ReferredLocationChipItem[];
   /** Currently map-focused item's key (single-select) - highlights the matching chip. */
   selectedKey?: string | null;
-  /** Toggles a chip - selecting it again clears the focus. Not called for a landmark chip (no id, nothing to focus). */
+  /** Multi-select alternative to selectedKey - every chip whose key is in here is highlighted. */
+  selectedKeys?: string[];
+  /** Toggles a chip - selecting it again clears its focus. Not called for a landmark chip (no id, nothing to focus). */
   onToggle: (item: ReferredLocationChipItem) => void;
   /** Render inside running text (e.g. a summary sentence) - no row padding, sits on the text line. */
   inline?: boolean;
+  /** Show just the icon (label moves to a hover tooltip) - for refs inside running text that already names the place. */
+  iconOnly?: boolean;
 }
 
 // Combines a chat answer's brickfiDriverIds (raw LivIndexPlace ids, no label
@@ -60,8 +58,10 @@ interface ReferredLocationChipsProps {
 export default function ReferredLocationChips({
   items,
   selectedKey,
+  selectedKeys,
   onToggle,
   inline,
+  iconOnly,
 }: ReferredLocationChipsProps) {
   const unlabeledDriverIds = items
     .filter((item) => item.type === "driver" && !item.name)
@@ -71,8 +71,7 @@ export default function ReferredLocationChips({
     undefined,
     !!unlabeledDriverIds.length,
   );
-    const fs = useBrick360FontSize();
-  
+  const fs = useBrick360FontSize();
 
   // A bare brickfiDriverIds entry (no name of its own - see
   // ReferredLocationChipItem) that useFetchAllLivindexPlaces couldn't find a
@@ -116,7 +115,8 @@ export default function ReferredLocationChips({
           const label =
             item.name ||
             (isLoading ? "…" : drivers?.find((d) => d._id === item.id)?.name);
-          const isSelected = selectedKey === item.key;
+          const isSelected =
+            selectedKey === item.key || !!selectedKeys?.includes(item.key);
           // a landmark (no id) has no map layer to populate - show it for
           // context but don't make it look/act clickable
           const clickable = !!item.id;
@@ -124,14 +124,14 @@ export default function ReferredLocationChips({
           const displayLabel = item.keepLabelCase
             ? label || ""
             : capitalize(label || "");
-          return (
+          const chip = (
             <Flex
               key={item.key}
               align="center"
               gap={8}
               onClick={clickable ? () => onToggle(item) : undefined}
               style={{
-                padding: "1px 6px",
+                padding: iconOnly ? "3px 5px" : "1px 6px",
                 borderRadius: 12,
                 width: "auto",
                 maxWidth: CHIP_MAX_WIDTH,
@@ -139,10 +139,8 @@ export default function ReferredLocationChips({
                 whiteSpace: "nowrap",
                 cursor: clickable ? "pointer" : "default",
                 opacity: clickable ? 1 : 0.7,
-                backgroundColor: isSelected
-                  ? COLORS.primaryColor
-                  : "white",
-                  boxShadow: "0 0 1px rgba(0,0,0,0.4)",
+                backgroundColor: isSelected ? COLORS.primaryColor : "white",
+                boxShadow: "0 0 1px rgba(0,0,0,0.4)",
                 color: isSelected ? "white" : COLORS.textColorDark,
               }}
             >
@@ -154,30 +152,39 @@ export default function ReferredLocationChips({
                   color={isSelected ? "white" : COLORS.textColorDark}
                 ></DynamicReactIcon>
               </span>
-              <Flex align="center" gap={4} style={{ minWidth: 0 }}>
-                <Typography.Text
-                  ellipsis={{ tooltip: displayLabel }}
-                  style={{
-                    minWidth: 0,
-                    fontSize: fs.SUB_TEXT,
-                    color: isSelected ? "white" : COLORS.textColorMedium,
-                  }}
-                >
-                  {displayLabel}
-                </Typography.Text>
-                {item.suffix ? (
+              {iconOnly ? null : (
+                <Flex align="center" gap={4} style={{ minWidth: 0 }}>
                   <Typography.Text
+                    ellipsis={{ tooltip: displayLabel }}
                     style={{
-                      flexShrink: 0,
-                      fontSize: fs.HEADING_4,
-                      color: isSelected ? "white" : COLORS.textColorDark,
+                      minWidth: 0,
+                      fontSize: fs.SUB_TEXT,
+                      color: isSelected ? "white" : COLORS.textColorMedium,
                     }}
                   >
-                    {item.suffix}
+                    {displayLabel}
                   </Typography.Text>
-                ) : null}
-              </Flex>
+                  {item.suffix ? (
+                    <Typography.Text
+                      style={{
+                        flexShrink: 0,
+                        fontSize: fs.HEADING_4,
+                        color: isSelected ? "white" : COLORS.textColorDark,
+                      }}
+                    >
+                      {item.suffix}
+                    </Typography.Text>
+                  ) : null}
+                </Flex>
+              )}
             </Flex>
+          );
+          return iconOnly ? (
+            <Tooltip key={item.key} title={displayLabel || undefined}>
+              {chip}
+            </Tooltip>
+          ) : (
+            chip
           );
         })}
       </Flex>

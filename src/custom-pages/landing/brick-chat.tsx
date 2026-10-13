@@ -893,11 +893,14 @@ export default function BrickChat({
           <Typography.Text
             style={{
               textTransform: "uppercase",
-              fontSize: FONT_SIZE.HEADING_2,
+              fontSize: FONT_SIZE.HEADING_1 * .8,
               color: COLORS.LANDING.PINK,
+              marginRight: isMobile ? "auto": "initial", 
+              marginLeft: isMobile ? 24: 0,
+              marginBottom: 32,
             }}
           >
-            DATA BACKED & UNBIASED REAL ESTATE PLATFORM
+            DATA BACKED & UNBIASED {isMobile ? <br></br>: null}REAL ESTATE PLATFORM
           </Typography.Text>
           <img
             width={isMobile ? "90%" : "70%"}
@@ -990,9 +993,25 @@ export default function BrickChat({
           verticalPadding: 100,
           textColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: isMobile
-            ? "/images/landing/brick-chat/brickchat-features-mob.png"
-            : "/images/landing/brick-chat/brickchat-features.png",
-          primaryImageSize: isMobile ? "90%" : "65%",
+            ? "/images/landing/brick-chat/features-1-mob.png"
+            : "/images/landing/brick-chat/features-1.png",
+          primaryImageSize: isMobile ? "110%" : "75%",
+        }}
+      ></SectionCenter>
+      <SectionCenter
+        isMobile={isMobile}
+        sectionData={{
+          bgColor: COLORS.textColorDark,
+          sectionMaxWidth: "100%",
+          heading: (null),
+          subHeading: "",
+          centerSectionTextAlign: "left",
+          verticalPadding: 32,
+          textColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: isMobile
+            ? "/images/landing/brick-chat/features-2-mob.png"
+            : "/images/landing/brick-chat/features-2.png",
+          primaryImageSize: isMobile ? "110%" : "75%",
         }}
       ></SectionCenter>
 
