@@ -1,21 +1,20 @@
 "use client";
 
-import { AdminGuard } from "@/components/auth/admin-guard";
 import BrickChatResults, {
   BrickChatResultsSkeleton,
 } from "@/app/app/brickchat/brick-chat-results";
 import ChatTimeline, { TimelineStep } from "@/app/app/brickchat/chat-timeline";
-import { PillarMapConfig } from "./brick360/tabs";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
+import { LoginForm } from "@/components/login-forms";
 import { useDevice } from "@/hooks/use-device";
 import {
   useFetchAllLivindexPlaces,
   useFetchLvnzyProjectDrivers,
 } from "@/hooks/use-livindex-places";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
-import { useUser } from "@/hooks/use-user";
 import { usePinnedProjects } from "@/hooks/use-pinned-projects";
+import { useUser } from "@/hooks/use-user";
 import { useUpdateUserMutation } from "@/hooks/user-hooks";
 import { safeStorage } from "@/libs/browser-utils";
 import {
@@ -36,30 +35,32 @@ import {
   Form,
   Image,
   Input,
+  message,
   Modal,
   Spin,
   Tag,
   Tooltip,
   Typography,
-  message,
 } from "antd";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Brick360Inline } from "./brick360/brick360-inline";
+import { v4 as uuidV4 } from "uuid";
+import styles from "./brick-chat-results.module.css";
 import { BrickMapChat } from "./brick-map-chat";
+import { Brick360Inline } from "./brick360/brick360-inline";
+import { PillarMapConfig } from "./brick360/tabs";
+import { useBrick360FontSize } from "./brick360/use-font-size";
 import BrickchatFeedback from "./brickchat-feedback";
+import CollapsibleAnswer from "./collapsible-answer";
+import PinnedProjectResults from "./pinned-project-results";
 import ReferredLocationChips, {
   ReferredLocationChipItem,
   ReferredLocationType,
 } from "./referred-location-chips";
-import PinnedProjectResults from "./pinned-project-results";
-import CollapsibleAnswer from "./collapsible-answer";
 import StaticQueries from "./static-queries";
-import styles from "./brick-chat-results.module.css";
-import { useBrick360FontSize } from "./brick360/use-font-size";
 
 export interface ProjectResult {
   projectId: string;
@@ -195,8 +196,10 @@ const linkLocationRefs = (text: string) =>
         .join(" "),
   );
 
+// owner is either the signed-in user or, before sign in, the guest who
+// started the thread
 const fetchThreadHistory = async (
-  userId: string,
+  owner: { userId: string } | { guestId: string },
   threadId: string,
 ): Promise<ChatMessage[]> => {
   const res = await fetch(`${baseApiUrl}ai/explore-projects/history`, {
@@ -206,7 +209,7 @@ const fetchThreadHistory = async (
       "Content-Type": "application/json",
       "x-api-key": apiKey || "",
     },
-    body: JSON.stringify({ userId, threadId }),
+    body: JSON.stringify({ ...owner, threadId }),
   });
   if (!res.ok) throw new Error(`history ${res.status}`);
   const json = await res.json();
@@ -246,6 +249,70 @@ const openSharedThread = async (
   return { history: json?.data || [], threadId: json?.meta?.threadId };
 };
 
+const claimGuestThread = async (
+  userId: string,
+  guestId: string,
+  threadId: string,
+): Promise<void> => {
+  const res = await fetch(`${baseApiUrl}ai/explore-projects/claim-guest`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": apiKey || "",
+    },
+    body: JSON.stringify({ userId, guestId, threadId }),
+  });
+  if (!res.ok) throw new Error(`claim-guest ${res.status}`);
+};
+
+interface GuestChatEntry {
+  guestId: string;
+  threadId?: string;
+}
+
+const readGuestEntry = (): GuestChatEntry | null => {
+  try {
+    const raw = safeStorage.getItem(LocalStorageKeys.brickchatGuest);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const writeGuestEntry = (entry: GuestChatEntry | null) => {
+  try {
+    if (entry) {
+      safeStorage.setItem(
+        LocalStorageKeys.brickchatGuest,
+        JSON.stringify(entry),
+      );
+    } else {
+      safeStorage.removeItem(LocalStorageKeys.brickchatGuest);
+    }
+  } catch {}
+};
+
+const getOrCreateGuestId = () => {
+  const existing = readGuestEntry();
+  if (existing?.guestId) return existing.guestId;
+  const guestId = uuidV4();
+  writeGuestEntry({ guestId });
+  return guestId;
+};
+
+const hasStoredUser = () => {
+  try {
+    return !!safeStorage.getItem(LocalStorageKeys.user);
+  } catch {
+    return false;
+  }
+};
+
+const INTERNAL_ROLES = ["admin", "member"];
+
+const GUEST_LOGIN_PROMPT_DELAY_MS = 10000;
+
 // Streamed step ids that only occur when the answer will be a project list
 // (directAnswer false) - a discover search (vectorSearch) or paging through
 // one's results (formatResults, also "show me more"). See STEPS in the
@@ -281,8 +348,8 @@ export function BrickChatCore({
   autoStartQuestion,
   projectRef,
 }: BrickChatCoreProps) {
-    const fs = useBrick360FontSize();
-  
+  const fs = useBrick360FontSize();
+
   const [form] = Form.useForm();
   const { user, refetch: refetchUser } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
@@ -307,6 +374,32 @@ export function BrickChatCore({
   const [streamingSummary, setStreamingSummary] = useState<string>();
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
   const [showMobileMap, setShowMobileMap] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [claimingGuestThread, setClaimingGuestThread] = useState(false);
+
+  const isGuest = !user?._id && !hasStoredUser();
+  const isInternalUser = !!user?.role && INTERNAL_ROLES.includes(user.role);
+
+  const loginPromptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const clearLoginPromptTimer = () => {
+    if (loginPromptTimerRef.current) clearTimeout(loginPromptTimerRef.current);
+    loginPromptTimerRef.current = null;
+  };
+  const openLoginPrompt = () => {
+    clearLoginPromptTimer();
+    setLoginModalOpen(true);
+  };
+
+  const scheduleLoginPrompt = () => {
+    clearLoginPromptTimer();
+    loginPromptTimerRef.current = setTimeout(
+      () => setLoginModalOpen(true),
+      GUEST_LOGIN_PROMPT_DELAY_MS,
+    );
+  };
+  useEffect(() => clearLoginPromptTimer, []);
 
   const getMobileMapDrawerWidth = () =>
     typeof window !== "undefined" ? Math.round(window.innerWidth * 0.85) : 320;
@@ -565,7 +658,7 @@ export function BrickChatCore({
   // selected/active/loading and no history yet).
   useEffect(() => {
     if (autoStartFiredRef.current) return;
-    if (!autoStartQuestion || !user?._id) return;
+    if (!autoStartQuestion || (!user?._id && !isGuest)) return;
     if (
       selectedThreadId ||
       activeThreadId ||
@@ -581,6 +674,7 @@ export function BrickChatCore({
   }, [
     autoStartQuestion,
     user?._id,
+    isGuest,
     selectedThreadId,
     activeThreadId,
     chatHistory.length,
@@ -639,7 +733,18 @@ export function BrickChatCore({
       leavingThreadIdRef.current = null;
     }
 
-    if (!user?._id || !selectedThreadId || sharedBy) {
+    if (!selectedThreadId || sharedBy) {
+      return;
+    }
+
+    const guestEntry = readGuestEntry();
+    let owner: { userId: string } | { guestId: string };
+    if (user?._id) {
+      if (claimingGuestThread || guestEntry?.threadId) return;
+      owner = { userId: user._id };
+    } else if (isGuest && guestEntry?.threadId === selectedThreadId) {
+      owner = { guestId: guestEntry.guestId };
+    } else {
       return;
     }
 
@@ -657,11 +762,13 @@ export function BrickChatCore({
       setThreadyHistoryLoading(true);
 
       try {
-        const history = await fetchThreadHistory(user._id, selectedThreadId);
+        const history = await fetchThreadHistory(owner, selectedThreadId);
 
         if (cancelled) {
           return;
         }
+
+        if ("guestId" in owner) scheduleLoginPrompt();
 
         setChatHistory(history);
         setActiveThreadId(selectedThreadId);
@@ -710,7 +817,30 @@ export function BrickChatCore({
     selectedThreadId,
     sharedBy,
     user?._id,
+    isGuest,
+    claimingGuestThread,
   ]);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    clearLoginPromptTimer();
+    const guest = readGuestEntry();
+    if (!guest?.threadId) return;
+
+    setClaimingGuestThread(true);
+    claimGuestThread(user._id, guest.guestId, guest.threadId)
+      .catch((error) => {
+        console.error("Failed to save guest thread:", error);
+        message.error("Couldn't save this conversation to your account.");
+      })
+      .finally(() => {
+        writeGuestEntry(null);
+        refreshChatThreads();
+        setLoginModalOpen(false);
+        setClaimingGuestThread(false);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?._id]);
 
   // clone the thread into the current user and swap the URL to it.
   useEffect(() => {
@@ -793,10 +923,19 @@ export function BrickChatCore({
       return;
     }
 
-    if (!user?._id) {
-      message.error("User not found. Please refresh and try again.");
+    if (claimingGuestThread) return;
+
+    if (!user?._id && !isGuest) {
+      message.info("Loading your account, please try again in a moment.");
       return;
     }
+
+    // guests only get the one free query
+    if (isGuest && readGuestEntry()?.threadId) {
+      openLoginPrompt();
+      return;
+    }
+    const guestId = isGuest ? getOrCreateGuestId() : undefined;
 
     setCurrentQuestion(question);
     setChatLoading(true);
@@ -832,7 +971,7 @@ export function BrickChatCore({
         body: JSON.stringify({
           query: question,
           limit: 10,
-          userId: user._id,
+          ...(guestId ? { guestId } : { userId: user?._id }),
           threadId: activeThreadId,
           // null when nothing's open, so the backend clears last turn's
           selectedProject: openProjectName || null,
@@ -849,6 +988,16 @@ export function BrickChatCore({
             : {}),
         }),
       });
+
+      if (res.status === 401) {
+        const json = await res.json().catch(() => null);
+        if (json?.requiresLogin) {
+          // put the question back so it's there after they sign in
+          form.setFieldsValue({ question });
+          openLoginPrompt();
+          return;
+        }
+      }
 
       if (!res.ok || !res.body)
         throw new Error(`explore-projects ${res.status}`);
@@ -968,6 +1117,11 @@ export function BrickChatCore({
       if (!activeThreadId && resolvedThreadId) {
         setActiveThreadId(resolvedThreadId);
         syncThreadUrl(resolvedThreadId);
+      }
+
+      if (guestId && resolvedThreadId) {
+        writeGuestEntry({ guestId, threadId: resolvedThreadId });
+        scheduleLoginPrompt();
       }
 
       refreshChatThreads();
@@ -1138,7 +1292,7 @@ export function BrickChatCore({
       style={{
         width: "100%",
         maxWidth: 2000,
-        height: isMobile ? "calc(100vh - 100px)": "calc(100vh - 60px)",
+        height: isMobile ? "calc(100vh - 100px)" : "calc(100vh - 60px)",
         // mobile: no side padding here - the search form and chat panel
         // below carry their own 8px gutter instead, so everything (including
         // the inline Brick360 view) gets an even 8px on both sides
@@ -1202,7 +1356,7 @@ export function BrickChatCore({
                 threadId={activeThreadId || selectedThreadId}
                 userId={user?._id}
               />
-              {(activeThreadId || selectedThreadId) && (
+              {isInternalUser && (activeThreadId || selectedThreadId) && (
                 <Tooltip title="View in LangSmith">
                   <Button
                     type="text"
@@ -1255,13 +1409,19 @@ export function BrickChatCore({
               <Input
                 placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
                 size="large"
-                disabled={chatLoading || threadyHistoryLoading}
+                disabled={
+                  chatLoading || threadyHistoryLoading || claimingGuestThread
+                }
                 suffix={
                   <Button
                     type="text"
                     htmlType="submit"
                     icon={<BiSend size={20} />}
-                    disabled={chatLoading || threadyHistoryLoading}
+                    disabled={
+                      chatLoading ||
+                      threadyHistoryLoading ||
+                      claimingGuestThread
+                    }
                     style={{ color: COLORS.primaryColor }}
                   />
                 }
@@ -1392,87 +1552,85 @@ export function BrickChatCore({
 
                     {renderImages(messageItem.answer.images)}
                     {/* Map Chips */}
-                      <Flex
-                        align="center"
-                        gap={8}
-                        style={{
-                          marginBottom: 8,
-                          width: "100%",
-                          overflowX: "scroll",
-                          flexWrap: "nowrap",
-                          scrollbarWidth: "none",
-                        }}
-                      >
-                        {messageItem.answer.projectsList &&
-                        !!messageItem.answer.projectsList.length ? (
-                          <Flex justify="flex-end" style={{ flexShrink: 0 }}>
-                            <Button
-                              size="small"
-                              icon={
-                                <DynamicReactIcon
-                                  iconName="FaMapMarkedAlt"
-                                  iconSet="fa"
-                                  size={16}
-                                  color={
-                                    !hasFocusedReferredLocations &&
-                                    mapResultsIndex === index
-                                      ? "white"
-                                      : COLORS.textColorDark
-                                  }
-                                ></DynamicReactIcon>
-                              }
-                              type={
-                                mapResultsIndex === index
-                                  ? "primary"
-                                  : "default"
-                              }
-                              onClick={() => {
-                                setFocusedReferredLocations([]);
-                                if (isMobile) setShowMobileMap(true);
-                                setMapResultsIndex(index);
-                                // a fresh array reference even when re-selecting
-                                // the same list (e.g. after wandering off to a
-                                // driver/locality focus) - MapCenterer's
-                                // re-centering effect only re-fires when its
-                                // `projects` dependency actually changes
-                                // reference, and setProjectResults with the
-                                // exact same array object React already holds
-                                // is a no-op (React bails out of re-rendering
-                                // for an Object.is-identical value), so
-                                // re-clicking this button on an
-                                // already-selected list would otherwise never
-                                // reset the camera back to it.
-                                setProjectResults([
-                                  ...messageItem.answer.projectsList,
-                                ]);
-                              }}
-                              style={{
-                                fontSize: FONT_SIZE.PARA,
-                                height: 24,
-                                borderRadius: 16,
-                                border: `1px solid ${
-                                  !hasFocusedReferredLocations &&
-                                  mapResultsIndex === index
-                                    ? COLORS.primaryColor
-                                    : COLORS.borderColorMedium
-                                }`,
-                                backgroundColor:
-                                  !hasFocusedReferredLocations &&
-                                  mapResultsIndex === index
-                                    ? COLORS.primaryColor
-                                    : COLORS.bgColorLightBlue,
-                                color:
+                    <Flex
+                      align="center"
+                      gap={8}
+                      style={{
+                        marginBottom: 8,
+                        width: "100%",
+                        overflowX: "scroll",
+                        flexWrap: "nowrap",
+                        scrollbarWidth: "none",
+                      }}
+                    >
+                      {messageItem.answer.projectsList &&
+                      !!messageItem.answer.projectsList.length ? (
+                        <Flex justify="flex-end" style={{ flexShrink: 0 }}>
+                          <Button
+                            size="small"
+                            icon={
+                              <DynamicReactIcon
+                                iconName="FaMapMarkedAlt"
+                                iconSet="fa"
+                                size={16}
+                                color={
                                   !hasFocusedReferredLocations &&
                                   mapResultsIndex === index
                                     ? "white"
-                                    : COLORS.textColorDark,
-                              }}
-                            >
-                              {messageItem.answer.projectsList.length} Projects
-                            </Button>
-                          </Flex>
-                        ) : null}
-                      </Flex>
+                                    : COLORS.textColorDark
+                                }
+                              ></DynamicReactIcon>
+                            }
+                            type={
+                              mapResultsIndex === index ? "primary" : "default"
+                            }
+                            onClick={() => {
+                              setFocusedReferredLocations([]);
+                              if (isMobile) setShowMobileMap(true);
+                              setMapResultsIndex(index);
+                              // a fresh array reference even when re-selecting
+                              // the same list (e.g. after wandering off to a
+                              // driver/locality focus) - MapCenterer's
+                              // re-centering effect only re-fires when its
+                              // `projects` dependency actually changes
+                              // reference, and setProjectResults with the
+                              // exact same array object React already holds
+                              // is a no-op (React bails out of re-rendering
+                              // for an Object.is-identical value), so
+                              // re-clicking this button on an
+                              // already-selected list would otherwise never
+                              // reset the camera back to it.
+                              setProjectResults([
+                                ...messageItem.answer.projectsList,
+                              ]);
+                            }}
+                            style={{
+                              fontSize: FONT_SIZE.PARA,
+                              height: 24,
+                              borderRadius: 16,
+                              border: `1px solid ${
+                                !hasFocusedReferredLocations &&
+                                mapResultsIndex === index
+                                  ? COLORS.primaryColor
+                                  : COLORS.borderColorMedium
+                              }`,
+                              backgroundColor:
+                                !hasFocusedReferredLocations &&
+                                mapResultsIndex === index
+                                  ? COLORS.primaryColor
+                                  : COLORS.bgColorLightBlue,
+                              color:
+                                !hasFocusedReferredLocations &&
+                                mapResultsIndex === index
+                                  ? "white"
+                                  : COLORS.textColorDark,
+                            }}
+                          >
+                            {messageItem.answer.projectsList.length} Projects
+                          </Button>
+                        </Flex>
+                      ) : null}
+                    </Flex>
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
                         <BrickChatResults
@@ -1578,8 +1736,9 @@ export function BrickChatCore({
                     </CollapsibleAnswer>
 
                     {(() => {
-                      const referredLocationItems =
-                        getReferredLocationItems(messageItem.answer);
+                      const referredLocationItems = getReferredLocationItems(
+                        messageItem.answer,
+                      );
                       if (!referredLocationItems.length) return null;
                       const hasFocusable = referredLocationItems.some(
                         (i) => !!i.id,
@@ -1636,7 +1795,7 @@ export function BrickChatCore({
                         </Flex>
                       );
                     })()}
-                    
+
                     {messageItem.answer.followupPrompt ? (
                       <Typography.Text
                         style={{
@@ -1671,7 +1830,6 @@ export function BrickChatCore({
                     {stripLocationRefs(streamingSummary)}
                   </Markdown>
                 ) : null}
-                
               </Flex>
             )}
 
@@ -1694,8 +1852,15 @@ export function BrickChatCore({
                     if (config && isMobile) setShowMobileMap(true);
                   }}
                 />
-                <Typography.Text style={{fontWeight: 500, fontSize: fs.HEADING_2, marginLeft: 12}}>
-                  Ask any specific question about the project or compare it with other projects.
+                <Typography.Text
+                  style={{
+                    fontWeight: 500,
+                    fontSize: fs.HEADING_2,
+                    marginLeft: 12,
+                  }}
+                >
+                  Ask any specific question about the project or compare it with
+                  other projects.
                 </Typography.Text>
               </Flex>
             ) : null}
@@ -1837,6 +2002,37 @@ export function BrickChatCore({
         </>
       )}
       <Modal
+        open={loginModalOpen && !user?._id}
+        closable={false}
+        maskClosable={false}
+        keyboard={false}
+        footer={null}
+        style={{ padding: 0 }}
+        styles={{
+          mask: { backgroundColor: "rgba(0,0,0,0.25)" },
+        }}
+      >
+        <Flex vertical>
+          <Typography.Text
+            style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: 500 }}
+          >
+            Sign in to continue
+          </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.HEADING_3,
+              marginBottom: 24,
+              color: COLORS.textColorMedium,
+            }}
+          >
+            Login/Signup with your mobile number to keep this conversation going
+          </Typography.Text>
+          {/* useAuth invalidates a different query client than the app's,
+            so refetch the user here to pick up the new sign in */}
+          <LoginForm onMobVerified={() => refetchUser()} />
+        </Flex>
+      </Modal>
+      <Modal
         open={shareModalOpen}
         onCancel={() => setShareModalOpen(false)}
         footer={null}
@@ -1877,23 +2073,17 @@ export default function BrickChatClient(props: { projectRef?: string } = {}) {
   );
 }
 
-function BrickChatClientContent({
-  projectRef,
-}: {
-  projectRef?: string;
-}) {
+function BrickChatClientContent({ projectRef }: { projectRef?: string }) {
   // ?q= is set by the landing page search input - auto-submit it as the
   // first question of a fresh chat.
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q")?.trim() || undefined;
 
   return (
-    <AdminGuard allowedRoles={["admin", "member"]}>
-      <BrickChatCore
-        autoStartQuestion={initialQuery}
-        threadPathBase={BRICKCHAT_THREAD_PATH_BASE}
-        projectRef={projectRef}
-      />
-    </AdminGuard>
+    <BrickChatCore
+      autoStartQuestion={initialQuery}
+      threadPathBase={BRICKCHAT_THREAD_PATH_BASE}
+      projectRef={projectRef}
+    />
   );
 }

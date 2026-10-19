@@ -2,7 +2,7 @@
 
 import { Collapse, Drawer, Flex, Image, Layout, Modal, Spin, Typography } from "antd";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { CustomErrorBoundary } from "../components/common/custom-error-boundary";
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
@@ -31,6 +31,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   const [showUserDetailsForm, setShowUserDetailsForm] = useState(false);
   const { isMobile } = useDevice();
   const router = useRouter();
+  const pathname = usePathname();
+  // brickchat lets guests run one query and shows its own sign-in popup
+  const isBrickChatPath =
+    pathname === "/app/brickchat" || pathname.startsWith("/app/brickchat/");
   const {
     data: chatThreads,
     isLoading: chatThreadsLoading,
@@ -45,12 +49,15 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const userItem = safeStorage.getItem(LocalStorageKeys.user);
     const userLocal = userItem ? JSON.parse(userItem) : null;
-    if (!userLocal) {
+    if (!userLocal && pathname === "/app") {
+      setLoginModalOpen(false);
+      router.replace(`/app/brickchat${window.location.search}`);
+    } else if (!userLocal && !isBrickChatPath) {
       setLoginModalOpen(true);
     } else {
       setLoginModalOpen(false);
     }
-  }, []);
+  }, [isBrickChatPath, pathname, router]);
 
   useEffect(() => {
     if (user) {

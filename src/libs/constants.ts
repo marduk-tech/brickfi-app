@@ -33,6 +33,8 @@ export const LocalStorageKeys = {
   // set once the saved-projects strip in brickchat has been shown open on
   // a first visit - it starts collapsed on every visit after that
   pinnedProjectsSeen: "pinned_projects_seen",
+
+  brickchatGuest: "brickchat_guest",
 };
 
 export const env = process.env.NEXT_PUBLIC_ENV;
@@ -425,7 +427,7 @@ export const SurroundingElementLabels = {
   landfill: {
     label: "Landfill / Dumpsite",
     icon: { name: "FaDumpster", set: "fa" },
-  }
+  },
 };
 
 export const LandingConstants = {
@@ -490,7 +492,9 @@ export const DRIVER_CATEGORIES: Record<string, DriverCategory> = {
     onFilter: (filter: string, driver: IDriverPlace) => {
       if (filter == "metro") {
         return !!(
-          driver && driver.name && driver.name.toLowerCase().includes("metro")
+          driver &&
+          driver.name &&
+          driver.name.toLowerCase().includes("metro")
         );
       }
       if (filter == "kride") {
@@ -540,12 +544,14 @@ export const DRIVER_CATEGORIES: Record<string, DriverCategory> = {
       if (filter == "est-infra") {
         return (
           (["industrial-hitech", "transit", "micro-market"].includes(
-            driver.driver
+            driver.driver,
           ) &&
-          (driver.status === "post-launch" || driver.status === "launched") &&
-          (!driver.distance || driver.distance <= 30)) ||
-          (["industrial-general", "highway", "transit"].includes(driver.driver) &&
-          (driver.status === "post-launch") && 
+            (driver.status === "post-launch" || driver.status === "launched") &&
+            (!driver.distance || driver.distance <= 30)) ||
+          (["industrial-general", "highway", "transit"].includes(
+            driver.driver,
+          ) &&
+            driver.status === "post-launch" &&
             (!driver.distance || driver.distance <= 60))
         );
       }
@@ -555,7 +561,7 @@ export const DRIVER_CATEGORIES: Record<string, DriverCategory> = {
             driver.status !== "post-launch" &&
             (!driver.distance || driver.distance <= 25)) ||
           (["industrial-general"].includes(driver.driver) &&
-          (driver.status !== "post-launch") &&
+            driver.status !== "post-launch" &&
             (!driver.distance || driver.distance <= 60))
         );
       }
