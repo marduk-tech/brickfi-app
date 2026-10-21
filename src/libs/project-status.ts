@@ -1,7 +1,6 @@
 import moment from "moment";
 import { IconSetKey } from "../components/common/dynamic-react-icon";
 import { COLORS } from "../theme/style-constants";
-import { LvnzyProject } from "../types/LvnzyProject";
 
 export const PROJECT_STATUS = {
   READY_TO_MOVE: "Ready to Move",

@@ -465,11 +465,11 @@ export default function BrickChatResults({
       {contextHolder}
       {modalContextHolder}
       {orderResults(results, skipSort).map((project) => (
-        <Flex style={{ width: 225 }}>
+        <Flex style={{ width: 200 }}>
           <Card
             hoverable
             style={{
-              width: 225,
+              width: 200,
               borderRadius: 12,
               display: "block",
               overflow: "hidden",
@@ -535,7 +535,7 @@ export default function BrickChatResults({
               </Flex>
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_3,
+                  fontSize: FONT_SIZE.HEADING_4,
                   color: COLORS.textColorDark,
                   fontWeight: 500,
                 }}
@@ -559,7 +559,7 @@ export default function BrickChatResults({
               {!skipOneLiner && project.oneLiner && (
                 <Typography.Paragraph
                   style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontSize: FONT_SIZE.NOTE,
                     color: COLORS.textColorMedium,
                     padding: "4px",
                     lineHeight: "140%",

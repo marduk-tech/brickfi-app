@@ -3,6 +3,19 @@
   flex-direction: column;
   gap: 6px;
   margin: 4px 0;
+  /* offsetParent for the rows, so their offsetTop is measured from here */
+  position: relative;
+}
+
+/* more than VISIBLE_STEPS rows - older ones scroll up, faded at the top */
+.scrollable {
+  overflow-y: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to bottom, transparent, black 16px);
+}
+
+.scrollable::-webkit-scrollbar {
+  display: none;
 }
 
 .row {

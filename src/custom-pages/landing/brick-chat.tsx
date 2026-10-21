@@ -893,14 +893,15 @@ export default function BrickChat({
           <Typography.Text
             style={{
               textTransform: "uppercase",
-              fontSize: FONT_SIZE.HEADING_1 * .8,
+              fontSize: FONT_SIZE.HEADING_1 * 0.8,
               color: COLORS.LANDING.PINK,
-              marginRight: isMobile ? "auto": "initial", 
-              marginLeft: isMobile ? 24: 0,
+              marginRight: isMobile ? "auto" : "initial",
+              marginLeft: isMobile ? 24 : 0,
               marginBottom: 32,
             }}
           >
-            DATA BACKED & UNBIASED {isMobile ? <br></br>: null}REAL ESTATE PLATFORM
+            DATA BACKED & UNBIASED {isMobile ? <br></br> : null}REAL ESTATE
+            PLATFORM
           </Typography.Text>
           <img
             width={isMobile ? "90%" : "70%"}
@@ -1003,7 +1004,7 @@ export default function BrickChat({
         sectionData={{
           bgColor: COLORS.textColorDark,
           sectionMaxWidth: "100%",
-          heading: (null),
+          heading: null,
           subHeading: "",
           centerSectionTextAlign: "left",
           verticalPadding: 32,
@@ -1026,43 +1027,64 @@ export default function BrickChat({
           margin: "auto",
         }}
       >
-        <Flex vertical style={{ maxWidth: 1400, padding: "0 16px" }}>
-          <Typography.Text
-            style={{
-              fontSize: FONT_SIZE.HEADING_1,
-              lineHeight: "100%",
-              maxWidth: 800,
-              fontWeight: 500,
-              marginBottom: 16,
-              color: COLORS.primaryColor,
-            }}
-          >
-            BRICK360 FRAMEWORK
-          </Typography.Text>
-          <h2
-            style={{
-              fontSize: FONT_SIZE.HEADING_1 * 1.5,
-              lineHeight: "100%",
-              fontWeight: 300,
-              margin: 0,
-              marginBottom: 8,
-            }}
-          >
-            <span style={{ color: COLORS.LANDING.PINK, fontWeight: 500 }}>
-              What makes Brickfi different ?
-            </span>{" "}
-          </h2>
+        <Flex
+          vertical
+          style={{ maxWidth: 1400, padding: "0 16px", margin: "auto" }}
+        >
+          <Flex align="center" justify="center">
+            <h2
+              style={{
+                fontSize: isMobile
+                  ? FONT_SIZE.HEADING_1 * 1.25
+                  : FONT_SIZE.HEADING_1 * 1.75,
+                lineHeight: "100%",
+                fontWeight: 300,
+                margin: 0,
+                marginBottom: isMobile ? 32 : 64,
+              }}
+            >
+              <span style={{ color: COLORS.LANDING.PINK, fontWeight: 200 }}>
+                What makes Brickfi different ?
+              </span>{" "}
+            </h2>
+          </Flex>
+          <Flex vertical={isMobile} justify="center" gap={16} align="center">
+            <Flex>
+              <img
+                src="/images/landing/brick-chat/brick360-emblem.png"
+                height={90}
+                width="auto"
+              ></img>
+            </Flex>
+            <Flex vertical justify="center">
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_1 * 1.25,
+                  lineHeight: "100%",
+                  maxWidth: 800,
+                  fontWeight: 500,
+                  marginBottom: 8,
+                  marginTop: 16,
+                  color: COLORS.primaryColor,
+                }}
+              >
+                BRICK360 FRAMEWORK
+              </Typography.Text>
 
-          <Typography.Text
-            style={{
-              fontSize: FONT_SIZE.HEADING_1,
-              lineHeight: "100%",
-              maxWidth: 800,
-            }}
-          >
-            The most comprehensive, intelligent and verified-data backed
-            framework to rate and analyse real estate.
-          </Typography.Text>
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_3
+                    : FONT_SIZE.HEADING_2,
+                  lineHeight: "100%",
+                  maxWidth: 800,
+                }}
+              >
+                The most comprehensive, intelligent and verified-data backed
+                framework to rate and analyse real estate.
+              </Typography.Text>
+            </Flex>
+          </Flex>
         </Flex>
       </Flex>
 
@@ -1330,10 +1352,21 @@ export default function BrickChat({
           heading: (
             <Flex align="flex-start">
               <Flex align="center" gap={8}>
-              <DynamicReactIcon color={COLORS.textColorMedium} size={26} iconName="FaRegCircleQuestion" iconSet="fa6"></DynamicReactIcon>
-              <Typography.Text style={{ color: COLORS.textColorMedium, fontSize: FONT_SIZE.HEADING_1, fontWeight: 300 }}>
-                Frequently Asked Questions
-              </Typography.Text>
+                <DynamicReactIcon
+                  color={COLORS.textColorMedium}
+                  size={26}
+                  iconName="FaRegCircleQuestion"
+                  iconSet="fa6"
+                ></DynamicReactIcon>
+                <Typography.Text
+                  style={{
+                    color: COLORS.textColorMedium,
+                    fontSize: FONT_SIZE.HEADING_1,
+                    fontWeight: 300,
+                  }}
+                >
+                  Frequently Asked Questions
+                </Typography.Text>
               </Flex>
             </Flex>
           ),

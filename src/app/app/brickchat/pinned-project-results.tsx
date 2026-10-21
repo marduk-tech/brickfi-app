@@ -1,9 +1,10 @@
 "use client";
 
-import { CaretRightOutlined } from "@ant-design/icons";
+import { CaretRightOutlined, LoadingOutlined } from "@ant-design/icons";
 import { Collapse, Flex, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { safeStorage } from "@/libs/browser-utils";
+import { Loader } from "@/components/common/loader";
 import { LocalStorageKeys } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import BrickChatResults from "./brick-chat-results";
@@ -16,6 +17,7 @@ interface PinnedProjectResultsProps {
   results: ProjectResult[];
   description?: string;
   hasChatStarted: boolean;
+  isLoading?: boolean;
   onLocateProject?: (projectId: string) => void;
   onSelectProject?: (project: ProjectResult) => void;
   selectedProjectId?: string;
@@ -33,6 +35,7 @@ export default function PinnedProjectResults({
   results,
   description,
   hasChatStarted,
+  isLoading,
   onLocateProject,
   onSelectProject,
   selectedProjectId,
@@ -114,7 +117,9 @@ export default function PinnedProjectResults({
         className={styles.collapse}
         activeKey={expanded ? [PINNED_KEY] : []}
         onChange={(keys) =>
-          setExpanded((Array.isArray(keys) ? keys : [keys]).includes(PINNED_KEY))
+          setExpanded(
+            (Array.isArray(keys) ? keys : [keys]).includes(PINNED_KEY),
+          )
         }
         expandIcon={({ isActive }) => (
           <Flex
@@ -137,29 +142,43 @@ export default function PinnedProjectResults({
         items={[
           {
             key: PINNED_KEY,
-            label: (<Flex gap={6} align="center" >
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_4,
-                  color: COLORS.textColorLight,
-                }}
-              >
-                Your saved projects
-              </Typography.Text>
-               <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.SUB_TEXT,
-                  color: COLORS.textColorMedium,
-                  backgroundColor: COLORS.bgColorMedium,
-                  borderRadius: 4,
-                  width: 18,
-                  height: 18,
-                  textAlign: "center",
-                  fontWeight: 500
-                }}
-              >
-                {results.length}
-              </Typography.Text>
+            collapsible: isLoading ? "disabled" : undefined,
+            label: (
+              <Flex gap={6} align="center">
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.HEADING_4,
+                    color: COLORS.textColorLight,
+                  }}
+                >
+                  Your saved projects
+                </Typography.Text>
+                {isLoading ? (
+                  <Loader
+                  height={12}
+                    indicator={
+                      <LoadingOutlined
+                        spin
+                        style={{ fontSize: 12, color: COLORS.primaryColor }}
+                      />
+                    }
+                  />
+                ) : (
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.SUB_TEXT,
+                      color: COLORS.textColorMedium,
+                      backgroundColor: COLORS.bgColorMedium,
+                      borderRadius: 4,
+                      width: 18,
+                      height: 18,
+                      textAlign: "center",
+                      fontWeight: 500,
+                    }}
+                  >
+                    {results.length}
+                  </Typography.Text>
+                )}
               </Flex>
             ),
             children: !results.length ? (
@@ -176,7 +195,7 @@ export default function PinnedProjectResults({
                   border: `1px dashed ${COLORS.borderColor}`,
                   borderRadius: 8,
                   marginLeft: 32,
-                  marginTop: 16
+                  marginTop: 16,
                 }}
               />
             ) : (

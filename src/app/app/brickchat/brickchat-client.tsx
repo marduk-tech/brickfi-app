@@ -352,7 +352,7 @@ export function BrickChatCore({
   const fs = useBrick360FontSize();
 
   const [form] = Form.useForm();
-  const { user, refetch: refetchUser } = useUser();
+  const { user, isLoading: userLoading, refetch: refetchUser } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1353,6 +1353,33 @@ export function BrickChatCore({
                     />
                   </Tooltip>
                 )} */}
+              {/* hidden until the user query settles, so it doesn't flash
+                for a signed-in user whose profile is still loading */}
+              {isGuest && !userLoading && (
+                <Button
+                  size="small"
+                  type="text"
+                  style={{
+                    alignSelf: "center",
+                    // pushes it to the left edge, the rest stay right-aligned
+                    marginRight: "auto",
+                    color: COLORS.primaryColor,
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontWeight: 500,
+                  }}
+                  icon={
+                    <DynamicReactIcon
+                      iconName="FaUserAstronaut"
+                      iconSet="fa6"
+                      color={COLORS.primaryColor}
+                      size={12}
+                    />
+                  }
+                  onClick={openLoginPrompt}
+                >
+                  Sign Up To Continue
+                </Button>
+              )}
               <BrickchatFeedback
                 threadId={activeThreadId || selectedThreadId}
                 userId={user?._id}
@@ -1434,6 +1461,7 @@ export function BrickChatCore({
             results={pinnedProjectResults || []}
             description={pinnedProjectsDescription}
             hasChatStarted={!!chatHistory.length}
+            isLoading={pinnedProjectsLoading}
             onLocateProject={handleLocateProject}
             onSelectProject={handleSelectProject}
             selectedProjectId={selectedProject?.projectId}
@@ -1981,9 +2009,9 @@ export function BrickChatCore({
       )}
       <Modal
         open={loginModalOpen && !user?._id}
-        closable={false}
-        maskClosable={false}
-        keyboard={false}
+        // dismissable - a guest who closes it gets it back on their next
+        // submit (see the one-free-query check in handleSearch)
+        onCancel={() => setLoginModalOpen(false)}
         footer={null}
         style={{ padding: 0 }}
         styles={{

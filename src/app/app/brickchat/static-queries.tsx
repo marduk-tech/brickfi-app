@@ -10,9 +10,9 @@ interface StaticQueriesProps {
 }
 
 const SAMPLE_PROMPTS = [
-  "Looking for a 3BHK above 1200 sq.ft near Electronic City",
-  "Find me a plot at less than 6000 per sq.ft in North Bangalore",
-  "4BHK apartment above 2500 sq.ft with lake facing units",
+  "Looking for a 3BHK near Electronic City under 2 crore",
+  "Gated plot at less than 6000 per sq.ft in North Bangalore",
+  "4BHK under 3 crore with lake or forest facing views in East Bangalore",
 ];
 
 // Simple clickable list of pre-written queries - each one just fills the
