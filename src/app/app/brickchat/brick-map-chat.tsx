@@ -1,12 +1,12 @@
 "use client";
 
-import { Flex, Typography } from "antd";
-import { useMemo } from "react";
+import { Flex } from "antd";
+import { useMemo, useRef } from "react";
+import BrickChatResults from "./brick-chat-results";
 import { DRIVER_CATEGORIES } from "../../../libs/constants";
 import { IDriverPlace } from "../../../types/Project";
 import dynamic from "next/dynamic";
 import type { ProjectMarkerInput } from "../../../components/map-view-v2/map-view-v2";
-import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import type { LvnzyProject } from "../../../types/LvnzyProject";
 import type { PillarMapConfig } from "./brick360/tabs";
 import type { ProjectResult } from "./brickchat-client";
@@ -60,6 +60,8 @@ interface BrickMapChatProps {
   focusedLocalityIds?: string[];
   focusedCorridorIds?: string[];
   focusedMicroPocketIds?: string[];
+  /** "360 Details" on the project card shown when a project marker is clicked - same as BrickChatResults'. */
+  onSelectProject?: (project: ProjectResult) => void;
 }
 
 export function BrickMapChat({
@@ -72,6 +74,7 @@ export function BrickMapChat({
   focusedLocalityIds,
   focusedCorridorIds,
   focusedMicroPocketIds,
+  onSelectProject,
 }: BrickMapChatProps) {
   // No default "every driver in Bangalore" fetch - the base search-results
   // map only ever shows drivers when a caller explicitly supplies them (e.g.
@@ -85,26 +88,40 @@ export function BrickMapChat({
     }));
   }, [focusedDrivers]);
 
+  // Read through a ref so projectMarkers keeps its identity when the caller
+  // passes a new (inline) handler - MapCamera re-runs its focus pan/popup
+  // whenever the projects array changes.
+  const onSelectProjectRef = useRef(onSelectProject);
+  onSelectProjectRef.current = onSelectProject;
+
+  // Markers show the project name; clicking one opens the same card (and
+  // save / 360 Details actions) the chat's results list shows - minus
+  // locate-on-map, since it's already on the map.
   const projectMarkers = useMemo<ProjectMarkerInput[]>(() => {
+    const handleSelect = (project: ProjectResult) =>
+      onSelectProjectRef.current?.(project);
+
     return projects
       .filter((p) => !!p.projectLocation?.lat && !!p.projectLocation?.lng)
       .map((p) => ({
         id: p.projectId,
         location: p.projectLocation,
         type: "apartment",
+        name: p.projectName,
         modalContent: {
-          title: (
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.HEADING_1 * 0.9,
-                lineHeight: "100%",
-                marginBottom: 8,
-              }}
-            >
-              {p.projectName}
-            </Typography.Text>
+          title: p.projectName,
+          content: "",
+          customBody: (
+            // cancels the card's own 8px vertical margin (it's spaced for the
+            // results row) so the popup is exactly the card's size
+            <div style={{ margin: "-8px 0" }}>
+              <BrickChatResults
+                results={[p]}
+                skipSort
+                onSelectProject={handleSelect}
+              />
+            </div>
           ),
-          content: p.oneLiner || "",
         },
       }));
   }, [projects]);

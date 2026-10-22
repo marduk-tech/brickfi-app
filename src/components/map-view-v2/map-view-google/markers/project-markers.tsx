@@ -8,6 +8,7 @@ import { COLORS } from "../../../../theme/style-constants";
 import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
 import { ProjectMarkerInput } from "../../types";
 import { MarkerIcon } from "../marker-icon";
+import { ProjectNameLabel } from "../../project-name-label";
 
 interface ProjectMarkersProps {
   primaryProject?: any;
@@ -75,7 +76,7 @@ export function ProjectMarkers({
         </AdvancedMarker>
       )}
 
-      {/* ── Caller-supplied projects — home-type icon ── */}
+      {/* ── Caller-supplied projects — name label, or home-type icon when unnamed ── */}
       {projects?.map((p) => {
         if (!p.location?.lat || !p.location?.lng) return null;
         const isHighlighted =
@@ -89,14 +90,18 @@ export function ProjectMarkers({
               openModal(p.modalContent, { lat: p.location.lat, lng: p.location.lng })
             }
           >
-            <MarkerIcon
-              iconName={iconCfg.name}
-              iconSet={iconCfg.set}
-              iconBgColor="white"
-              iconColor={isHighlighted ? COLORS.textColorDark : COLORS.textColorLight}
-              borderColor={isHighlighted ? COLORS.primaryColor : COLORS.borderColor}
-              iconSize={18}
-            />
+            {p.name ? (
+              <ProjectNameLabel name={p.name} highlighted={isHighlighted} />
+            ) : (
+              <MarkerIcon
+                iconName={iconCfg.name}
+                iconSet={iconCfg.set}
+                iconBgColor="white"
+                iconColor={isHighlighted ? COLORS.textColorDark : COLORS.textColorLight}
+                borderColor={isHighlighted ? COLORS.primaryColor : COLORS.borderColor}
+                iconSize={18}
+              />
+            )}
           </AdvancedMarker>
         );
       })}

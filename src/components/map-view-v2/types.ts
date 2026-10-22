@@ -5,6 +5,8 @@ export interface ProjectMarkerInput {
   id: string;
   location: { lat: number; lng: number };
   type: string;
+  /** When set, the marker shows this name as a label instead of the home-type icon. */
+  name?: string;
   modalContent: MapModalContent;
 }
 

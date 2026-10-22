@@ -11,7 +11,7 @@ const LogoutButton = () => {
   return (
     <button
       onClick={() =>
-        logout({ logoutParams: { returnTo: safeWindow.location.origin } })
+        logout({ logoutParams: { returnTo: `${safeWindow.location.origin}/app` } })
       }
     >
       Log Out

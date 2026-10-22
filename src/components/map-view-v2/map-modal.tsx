@@ -14,6 +14,11 @@ export interface MapModalContent {
   content: string | ReactNode;
   subHeading?: ReactNode;
   footerContent?: ReactNode;
+  /**
+   * Rendered on its own in place of the title/tags/content layout, with no
+   * max-height - e.g. brickchat's project card (see BrickMapChat).
+   */
+  customBody?: ReactNode;
 }
 
 export interface MapModalPosition {
@@ -85,12 +90,21 @@ interface MapModalBodyProps {
 /** Title/tags/content block shared by the Leaflet popover panel and the Google InfoWindow. */
 export const MapModalBody = ({ content, onClose }: MapModalBodyProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  // Set by this element's (React) onMouseDown, which also fires for clicks in
+  // anything this content portals elsewhere - e.g. a confirm dialog opened
+  // from a customBody, which antd mounts under <body>, outside the DOM
+  // contains() check below. React handles the event before it bubbles to
+  // the document listener, so that listener sees the flag.
+  const mouseDownInsideRef = useRef(false);
 
   // Close on any click outside this content — works for both the Leaflet
   // Popup and Google InfoWindow, since both mount this into the live DOM.
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
+      const inside = mouseDownInsideRef.current;
+      mouseDownInsideRef.current = false;
       if (
+        !inside &&
         containerRef.current &&
         !containerRef.current.contains(e.target as Node)
       ) {
@@ -102,8 +116,22 @@ export const MapModalBody = ({ content, onClose }: MapModalBodyProps) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [onClose]);
 
+  if (content?.customBody) {
+    return (
+      <div
+        ref={containerRef}
+        onMouseDown={() => (mouseDownInsideRef.current = true)}
+      >
+        {content.customBody}
+      </div>
+    );
+  }
+
   return (
-    <div ref={containerRef}>
+    <div
+      ref={containerRef}
+      onMouseDown={() => (mouseDownInsideRef.current = true)}
+    >
       {/* <div
         onClick={onClose}
         style={{

@@ -4,10 +4,12 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { App as AntApp, ConfigProvider } from "antd";
 import { useEffect } from "react";
+import { isNativeApp } from "../libs/native-app";
 import { getQueryClient } from "../libs/query-client";
 import { extractUtmParams, saveUtmToHistory } from "../libs/utm-utils";
 import { antTheme } from "../theme/ant-theme";
 import PosthogProvider from "./common/posthog-provider";
+import { NativeAppBridge } from "./native-app-bridge";
 
 interface ClientProvidersProps {
   children: React.ReactNode;
@@ -27,6 +29,15 @@ export function ClientProviders({ children }: ClientProvidersProps) {
       "serviceWorker" in navigator &&
       process.env.NEXT_PUBLIC_DISABLE_SW !== "true"
     ) {
+      // The native app handles offline via Capacitor's errorPath instead
+      if (isNativeApp()) {
+        navigator.serviceWorker
+          .getRegistrations()
+          .then((registrations) => registrations.forEach((r) => r.unregister()));
+        return;
+      }
+
+
       const isDev = process.env.NODE_ENV === "development";
 
       navigator.serviceWorker
@@ -69,6 +80,7 @@ export function ClientProviders({ children }: ClientProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <PosthogProvider></PosthogProvider>
+      <NativeAppBridge />
       <ConfigProvider theme={antTheme}>
         <AntApp style={{ maxWidth: 2000, margin: "auto" }}>{children}</AntApp>
       </ConfigProvider>

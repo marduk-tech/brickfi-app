@@ -119,6 +119,8 @@ interface ExploreAnswer {
   followupPrompt?: string;
   /** Named place(s)/area(s) resolved this turn (project-distance.js's targetPlaces, location-analysis.js's locationNames) - see summarizeResolvedLocation in shared.js. */
   resolvedLocations?: ResolvedLocation[];
+  /** This turn's id in the backend's turn log - sent with feedback on this answer (see tagAnswerWithTurnId). Absent on answers saved before turns were tagged. */
+  turnId?: string;
 }
 
 interface ChatMessage {
@@ -1814,6 +1816,18 @@ export function BrickChatCore({
                         {messageItem.answer.followupPrompt}
                       </Typography.Text>
                     ) : null}
+
+                    {/* feedback on just this answer - only once it carries
+                      a turnId, so it can be tied to the turn's log */}
+                    {messageItem.answer.turnId ? (
+                      <Flex justify="flex-end">
+                        <BrickchatFeedback
+                          threadId={activeThreadId || selectedThreadId}
+                          userId={user?._id}
+                          turnId={messageItem.answer.turnId}
+                        />
+                      </Flex>
+                    ) : null}
                   </Flex>
                 </Flex>
               </Flex>
@@ -1890,6 +1904,7 @@ export function BrickChatCore({
           <BrickMapChat
             projects={projectResults || []}
             focusedProjectId={focusedProjectId}
+            onSelectProject={handleSelectProject}
             hideAllFilters={hasFocusedReferredLocations}
             detailedProject={selectedProject ? selectedLvnzyProject : undefined}
             pillarMapConfig={selectedProject ? pillarMapConfig : undefined}
@@ -1984,6 +1999,7 @@ export function BrickChatCore({
               <BrickMapChat
                 projects={projectResults || []}
                 focusedProjectId={focusedProjectId}
+                onSelectProject={handleSelectProject}
                 // not tied to showMobileMap: hideAllFilters also disables
                 // driver filtering (see useMapFilters), so flipping it on
                 // close made every driver render during the slide-out

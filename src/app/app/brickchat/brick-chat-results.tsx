@@ -608,7 +608,9 @@ export default function BrickChatResults({
                   </Flex>
                 )}
 
-                {project.projectLocation?.lat &&
+                {/* hidden without a handler - e.g. the card in a map marker's popup (BrickMapChat), where it's already on the map */}
+                {onLocateProject &&
+                  project.projectLocation?.lat &&
                   project.projectLocation?.lng && (
                     <Flex
                       align="center"

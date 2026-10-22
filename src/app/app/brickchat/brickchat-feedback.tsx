@@ -9,6 +9,7 @@ import {
   Flex,
   Input,
   Modal,
+  Select,
   Tooltip,
   Typography,
   Upload,
@@ -35,10 +36,51 @@ const uploadFeedbackImages = async (files: File[]): Promise<string[]> => {
   return (json?.results || []).map((r: { Location: string }) => r.Location);
 };
 
+// Same 1-5 scale as rating in brickchat-feedback.model.js (backend)
+type FeedbackRating = 1 | 2 | 3 | 4 | 5;
+
+const FEEDBACK_RATING_OPTIONS: {
+  value: FeedbackRating;
+  label: string;
+  icon: string;
+}[] = [
+  { value: 1, label: "Bad", icon: "MdSentimentVeryDissatisfied" },
+  { value: 2, label: "Needs work", icon: "MdSentimentDissatisfied" },
+  { value: 3, label: "Satisfactory", icon: "MdSentimentSatisfied" },
+  { value: 4, label: "Good", icon: "MdSentimentSatisfiedAlt" },
+  { value: 5, label: "Awesome", icon: "MdSentimentVerySatisfied" },
+];
+
+// Same values as the category enum in brickchat-feedback.model.js (backend)
+type FeedbackCategory =
+  | "wrong-intent"
+  | "wrong-project"
+  | "wrong-data"
+  | "hallucination"
+  | "missing-info"
+  | "too-long"
+  | "tone"
+  | "other";
+
+const FEEDBACK_CATEGORY_OPTIONS: { value: FeedbackCategory; label: string }[] =
+  [
+    { value: "wrong-intent", label: "Misunderstood my question" },
+    { value: "wrong-project", label: "Wrong project(s)" },
+    { value: "wrong-data", label: "Incorrect information" },
+    { value: "hallucination", label: "Made-up information" },
+    { value: "missing-info", label: "Missing information" },
+    { value: "too-long", label: "Too long" },
+    { value: "tone", label: "Tone or style" },
+    { value: "other", label: "Something else" },
+  ];
+
 const submitBrickchatFeedback = async (payload: {
   threadId: string;
+  turnId?: string;
   userId: string;
-  text: string;
+  rating?: FeedbackRating;
+  category?: FeedbackCategory;
+  text?: string;
   imageUrls?: string[];
 }): Promise<void> => {
   const res = await fetch(`${baseApiUrl}brickchat-feedback`, {
@@ -59,18 +101,26 @@ interface BrickchatFeedbackProps {
   /** Same thread id the "Share chat"/"View in LangSmith" toolbar buttons use - see brickchat-client.tsx. */
   threadId?: string;
   userId?: string;
+  /** The answer's own turnId (see ExploreAnswer) - set for feedback on one turn, omitted for the whole thread. */
+  turnId?: string;
 }
 
-// Self-contained "Give feedback" toolbar button + modal, meant to be dropped
-// into brickchat-client's toolbar alongside Share/LangSmith/New chat. Saved
-// to the brickchat_feedback collection (see brickchat-feedback.model.js in
-// the backend) - a separate, user-initiated note, not brickchat_logger's own
-// automatic turn-by-turn logging.
+// Self-contained feedback button + modal: in brickchat-client's toolbar
+// (alongside Share/LangSmith/New chat) for the thread as a whole, and under
+// each answer with that turn's turnId. Saved to the brickchat_feedback
+// collection (see brickchat-feedback.model.js in the backend) - a separate,
+// user-initiated note, not brickchat_logger's own automatic turn-by-turn
+// logging. Rating, category and text are each optional, but a rating or
+// some text is needed to submit (or a category, on a turn). Thread-level
+// feedback doesn't ask for a category - it's always sent as "other".
 export default function BrickchatFeedback({
   threadId,
   userId,
+  turnId,
 }: BrickchatFeedbackProps) {
   const [feedbackModalOpen, setFeedbackModalOpen] = useState(false);
+  const [feedbackRating, setFeedbackRating] = useState<FeedbackRating>();
+  const [feedbackCategory, setFeedbackCategory] = useState<FeedbackCategory>();
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackFileList, setFeedbackFileList] = useState<UploadFile[]>([]);
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
@@ -85,7 +135,17 @@ export default function BrickchatFeedback({
     return null;
   }
 
+  // the category is only asked for on a turn - thread-level feedback always
+  // goes in as "other", which shouldn't make an otherwise empty form valid
+  const askCategory = !!turnId;
+  const canSubmit =
+    !!feedbackRating ||
+    (askCategory && !!feedbackCategory) ||
+    !!feedbackText.trim();
+
   const handleOpenFeedback = () => {
+    setFeedbackRating(undefined);
+    setFeedbackCategory(undefined);
     setFeedbackText("");
     setFeedbackFileList([]);
     setFeedbackModalOpen(true);
@@ -93,7 +153,7 @@ export default function BrickchatFeedback({
 
   const handleSubmitFeedback = async () => {
     const text = feedbackText.trim();
-    if (!threadId || !userId || !text) {
+    if (!threadId || !userId || !canSubmit) {
       return;
     }
 
@@ -105,7 +165,15 @@ export default function BrickchatFeedback({
       const imageUrls = files.length
         ? await uploadFeedbackImages(files)
         : undefined;
-      await submitBrickchatFeedback({ threadId, userId, text, imageUrls });
+      await submitBrickchatFeedback({
+        threadId,
+        turnId,
+        userId,
+        rating: feedbackRating,
+        category: askCategory ? feedbackCategory : "other",
+        text: text || undefined,
+        imageUrls,
+      });
       message.success("Thanks for the feedback!");
       setFeedbackModalOpen(false);
     } catch (error) {
@@ -118,7 +186,7 @@ export default function BrickchatFeedback({
 
   return (
     <>
-      <Tooltip title="Give feedback">
+      <Tooltip title={turnId ? "Feedback on this answer" : "Give feedback"}>
         <Button
           type="text"
           style={{
@@ -147,22 +215,86 @@ export default function BrickchatFeedback({
         footer={null}
         closable
         mask={false}
-        title="Give feedback"
+        title={turnId ? "Rate this answer" : "Rate this conversation"}
         styles={{ content: { padding: 24 } }}
       >
         <Flex vertical gap={12}>
           <Typography.Paragraph
-            style={{ color: COLORS.textColorMedium, marginBottom: 0 }}
+            style={{ color: COLORS.textColorLight, marginBottom: 16, fontSize: FONT_SIZE.HEADING_4 }}
           >
-            What's working well, or what should we fix? Screenshots help
+            What&apos;s working well, or what should we fix? Screenshots help
             too.
           </Typography.Paragraph>
+          <Flex justify="space-between" gap={4}>
+            {FEEDBACK_RATING_OPTIONS.map(({ value, label, icon }) => {
+              const selected = feedbackRating === value;
+              const color = selected
+                ? COLORS.primaryColor
+                : COLORS.textColorLight;
+              return (
+                <Button
+                  key={value}
+                  type="text"
+                  aria-label={label}
+                  aria-pressed={selected}
+                  onClick={() =>
+                    setFeedbackRating(selected ? undefined : value)
+                  }
+                  disabled={feedbackSubmitting}
+                  style={{
+                    flex: 1,
+                    height: "auto",
+                    padding: "8px 4px",
+                    border: `1px solid ${selected ? COLORS.primaryColor : "transparent"}`,
+                    backgroundColor: selected
+                      ? COLORS.bgColorLightBlue
+                      : undefined,
+                  }}
+                >
+                  <Flex vertical align="center" gap={4}>
+                    <DynamicReactIcon
+                      iconName={icon}
+                      iconSet="md"
+                      size={28}
+                      color={color}
+                    />
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.SUB_TEXT,
+                        color: selected
+                          ? COLORS.primaryColor
+                          : COLORS.textColorMedium,
+                        // antd buttons don't wrap - let a label take two
+                        // lines on a narrow screen rather than overflow
+                        whiteSpace: "normal",
+                        textAlign: "center",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      {label}
+                    </Typography.Text>
+                  </Flex>
+                </Button>
+              );
+            })}
+          </Flex>
+          {askCategory ? (
+            <Select
+              allowClear
+              placeholder="What was it about? (optional)"
+              options={FEEDBACK_CATEGORY_OPTIONS}
+              value={feedbackCategory}
+              onChange={(value) => setFeedbackCategory(value)}
+              disabled={feedbackSubmitting}
+            />
+          ) : null}
           <Input.TextArea
             rows={4}
             placeholder="Tell us what happened..."
             value={feedbackText}
             onChange={(e) => setFeedbackText(e.target.value)}
             disabled={feedbackSubmitting}
+            style={{ resize: "none" }}
           />
           <Upload
             listType="picture-card"
@@ -175,6 +307,7 @@ export default function BrickchatFeedback({
             maxCount={MAX_FEEDBACK_IMAGES}
             accept="image/*"
             disabled={feedbackSubmitting}
+            style={{height: 100, width: 100}}
           >
             {feedbackFileList.length < MAX_FEEDBACK_IMAGES ? (
               <Flex vertical align="center" gap={2}>
@@ -186,7 +319,7 @@ export default function BrickchatFeedback({
                 />
                 <Typography.Text
                   style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontSize: FONT_SIZE.NOTE,
                     color: COLORS.textColorMedium,
                   }}
                 >
@@ -205,7 +338,7 @@ export default function BrickchatFeedback({
             <Button
               type="primary"
               loading={feedbackSubmitting}
-              disabled={!feedbackText.trim()}
+              disabled={!canSubmit}
               onClick={handleSubmitFeedback}
             >
               Submit

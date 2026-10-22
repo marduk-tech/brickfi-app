@@ -4,6 +4,7 @@ import { Marker } from "react-leaflet";
 import { capitalize } from "../../../libs/lvnzy-helper";
 import { COLORS } from "../../../theme/style-constants";
 import { MapModalContent, MapModalGeoPosition } from "../map-modal";
+import { getProjectNameIcon } from "../project-name-label";
 import { ProjectMarkerInput } from "../types";
 
 interface ProjectMarkersProps {
@@ -90,9 +91,10 @@ export const ProjectMarkers = ({
         highlightedHomeTypes.length === 0 ||
         highlightedHomeTypes.includes(p.type);
 
-      const markerIcon =
-        (isHighlighted && projectMarkerIconsByHomeType?.[p.type]) ||
-        projectMarkerIcon;
+      const markerIcon = p.name
+        ? getProjectNameIcon(p.name, isHighlighted)
+        : (isHighlighted && projectMarkerIconsByHomeType?.[p.type]) ||
+          projectMarkerIcon;
 
       markers.push(
         <Marker

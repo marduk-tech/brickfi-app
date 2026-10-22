@@ -1,7 +1,7 @@
 {
   "name": "Brickfi - Smart Property Search",
   "short_name": "Brickfi",
-  "start_url": "/",
+  "start_url": "/app",
   "scope": "/",
   "display": "standalone",
   "description": "The smartest way to buy real estate. Get comprehensive Brick360 reports around property, investment, builder and more for any property in Bangalore.",

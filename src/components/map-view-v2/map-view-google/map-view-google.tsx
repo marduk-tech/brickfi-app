@@ -307,11 +307,18 @@ function MapViewGoogleInner({
 
           {isOpen && modalPosition && (
             <InfoWindow
+              // remount when switching between card and text popups so the
+              // className is applied fresh
+              key={modalContent?.customBody ? "card" : "text"}
               position={modalPosition}
               onCloseClick={closeModal}
               onClose={closeModal}
               pixelOffset={[0, -10]}
-              style={{ width: 320 }}
+              // card popups size to the card (see .map-card-popup in globals.css)
+              style={modalContent?.customBody ? undefined : { width: 320 }}
+              className={modalContent?.customBody ? "map-card-popup" : undefined}
+              // no header row / close icon - clicking outside closes it (MapModalBody), same as map-view-v2
+              headerDisabled
             >
               <MapModalBody content={modalContent} onClose={closeModal} />
             </InfoWindow>

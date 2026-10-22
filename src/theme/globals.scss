@@ -286,3 +286,48 @@ input#mobileNumber {
     }
   }
 }
+
+/* Map popups whose MapModalContent has a customBody (e.g. brickchat's project
+   card): the popup container is made invisible - no background, shadow,
+   padding or scrollbars - so only the card and the tail arrow pointing at
+   the marker show; it's closed by clicking outside it. Google: className lands on the
+   InfoWindow's content div, hence :has() on its ancestors; Leaflet: className
+   is on .leaflet-popup. */
+.gm-style-iw-c:has(.map-card-popup) {
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 12px !important;
+}
+/* visible, not hidden/scroll: Google's containers clip and scroll by
+   default, which shows a scrollbar and cuts off the card's shadow */
+.gm-style-iw-c:has(.map-card-popup),
+.gm-style-iw-d:has(.map-card-popup) {
+  overflow: visible !important;
+  max-height: none !important;
+}
+.leaflet-popup.map-card-popup .leaflet-popup-content-wrapper {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 12px;
+}
+.leaflet-popup.map-card-popup .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+  line-height: normal;
+}
+/* with no container, the card is the only surface: one soft shadow for
+   contrast against the map, instead of its own border/hover shadow */
+.map-card-popup .ant-card {
+  border: none !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
+}
+/* the single card never needs to scroll - hide the results row's scrollbar */
+.map-card-popup,
+.map-card-popup * {
+  scrollbar-width: none;
+}
+.map-card-popup ::-webkit-scrollbar {
+  display: none;
+}

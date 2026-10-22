@@ -6,7 +6,7 @@ import { useState } from "react";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { queryClient } from "../libs/query-client";
-import { safeStorage } from "../libs/browser-utils";
+import { safeStorage, safeWindow } from "../libs/browser-utils";
 import { getUtmHistory, clearUtmHistory } from "../libs/utm-utils";
 
 export type LoginStatus =
@@ -108,6 +108,11 @@ export function useAuth() {
         queryKey: [queryKeys.user],
       });
       return true;
+    },
+
+    onSuccess: () => {
+      // Full reload so every cached user state is dropped
+      safeWindow.location.assign("/app");
     },
 
     onError: (error) => {

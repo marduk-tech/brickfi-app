@@ -20,12 +20,8 @@ export default function ProfilePage() {
   const { logout } = useAuth();
 
   const handleLogout = () => {
-    logout.mutate();
-    // router.push("/app");
-    // router.refresh();
-    window.open(`${window.location.origin}/app`,"_blank");
-
     setIsLogoutModalVisible(false);
+    logout.mutate();
   };
 
   const [showProfileEditForm, setShowProfileEditForm] = useState(false);

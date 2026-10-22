@@ -457,8 +457,15 @@ const MapViewV2Inner = ({
 
           {infoModalOpen && modalPosition && (
             <Popup
+              // className is a creation-time option - remount when switching
+              // between card and text popups
+              key={modalContent?.customBody ? "card" : "text"}
               position={[modalPosition.lat, modalPosition.lng]}
               maxWidth={320}
+              // no close icon - clicking outside closes it (MapModalBody), same as map-view-google
+              closeButton={false}
+              // card popups size to the card (see .map-card-popup in globals.css)
+              className={modalContent?.customBody ? "map-card-popup" : undefined}
               eventHandlers={{ remove: closeModal }}
             >
               <MapModalBody content={modalContent} onClose={closeModal} />
