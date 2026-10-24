@@ -251,6 +251,54 @@ export default function BrickChat({
     return () => window.removeEventListener("resize", detect);
   }, []);
 
+  // Mobile: the stats image is wider than the screen, so it sits in a
+  // horizontally scrollable container that auto-scrolls left in a seamless
+  // loop (the image is rendered twice; we wrap back by one copy's width).
+  // Auto-scroll pauses while the user is touching it.
+  const statsScrollRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!isMobile) return;
+    const el = statsScrollRef.current;
+    if (!el) return;
+
+    let frame: number;
+    let paused = false;
+    let resumeTimer: ReturnType<typeof setTimeout>;
+    let pos = el.scrollLeft;
+
+    const step = () => {
+      const loopWidth = el.scrollWidth / 2;
+      if (!paused && loopWidth > el.clientWidth) {
+        pos += 0.8;
+        if (pos >= loopWidth) pos -= loopWidth;
+        el.scrollLeft = pos;
+      }
+      frame = requestAnimationFrame(step);
+    };
+
+    const pause = () => {
+      paused = true;
+      clearTimeout(resumeTimer);
+    };
+    const resume = () => {
+      clearTimeout(resumeTimer);
+      resumeTimer = setTimeout(() => {
+        pos = el.scrollLeft;
+        paused = false;
+      }, 2000);
+    };
+
+    el.addEventListener("touchstart", pause, { passive: true });
+    el.addEventListener("touchend", resume);
+    frame = requestAnimationFrame(step);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(resumeTimer);
+      el.removeEventListener("touchstart", pause);
+      el.removeEventListener("touchend", resume);
+    };
+  }, [isMobile]);
+
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
 
@@ -880,11 +928,7 @@ export default function BrickChat({
             >
               How You Explore Real Estate
             </h2>
-            <Typography.Text>
-              Forget the old way of finding homes with sales pitches
-Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to choose from.
-
-            </Typography.Text>
+            
           </Flex>
           </Flex>
           
@@ -903,15 +947,37 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
             DATA BACKED & UNBIASED {isMobile ? <br></br> : null}REAL ESTATE
             PLATFORM
           </Typography.Text> */}
-          <img
-            width={isMobile ? "90%" : "70%"}
-            style={{ margin: "auto", marginBottom: 100 }}
-            src={
-              isMobile
-                ? "/images/landing/brick-chat/brickchat-stats-2-mob.png"
-                : "/images/landing/brick-chat/brickchat-stats-2.png"
-            }
-          />
+          {isMobile ? (
+            <div
+              ref={statsScrollRef}
+              style={{
+                width: "100%",
+                margin: "auto",
+                marginBottom: 100,
+                overflowX: "auto",
+                overflowY: "hidden",
+                WebkitOverflowScrolling: "touch",
+                scrollbarWidth: "none",
+              }}
+            >
+              <div style={{ display: "flex", width: "max-content" }}>
+                {[0, 1].map((i) => (
+                  <img
+                    key={i}
+                    aria-hidden={i === 1}
+                    style={{ height: 240, width: "auto", maxWidth: "none", display: "block" }}
+                    src="/images/landing/brick-chat/brickchat-stats-2.png"
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <img
+              width="70%"
+              style={{ margin: "auto", marginBottom: 100 }}
+              src="/images/landing/brick-chat/brickchat-stats-2.png"
+            />
+          )}
         </Flex>
       </Flex>
       <SectionLeft
@@ -930,20 +996,13 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
                   margin: 0,
                 }}
               >
-                Searching for the Right Home can be Risky & Confusing.
+                What makes Brickfi Different ?
               </h2>
-              <h2
-                style={{
-                  fontSize: isMobile ? 36 : 46,
-                  lineHeight: "100%",
-                  fontWeight: 800,
-                  margin: 0,
-                  marginTop: 24,
-                  color: COLORS.primaryColor,
-                }}
-              >
-                Brickfi Gives You Clarity & Confidence
-              </h2>
+             <Typography.Text style={{fontSize: FONT_SIZE.HEADING_2, color: "white"}}>
+              Forget the old way of finding homes with sales pitches
+Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to choose from.
+
+            </Typography.Text>
             </Flex>
           ),
           subHeading: "",
@@ -984,11 +1043,11 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
               }}
             >
               <span style={{ color: COLORS.LANDING.PINK, fontWeight: 200 }}>
-                What makes Brickfi different ?
+                How we Evaluate each Project ?
               </span>{" "}
             </h2>
           </Flex>
-          <Flex vertical={isMobile} justify={isMobile ? "flex-start": "center"} gap={16} align="flex-start">
+          <Flex vertical={isMobile} justify={isMobile ? "flex-start": "center"} gap={16} align={isMobile ? "flex-start": "center"}>
             <Flex>
               <img
                 src="/images/landing/brick-chat/brick360-emblem.png"
@@ -1020,7 +1079,7 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
                   maxWidth: 800,
                 }}
               >
-                The Brick360 Framework is based on 4-pillar analysis. Built from verified government and public data. 
+                The Brick360 Framework rates every project based on a 4-pillar analysis. Built from verified government and public data. 
 So you can spot the risks and avoid future problems.
 
               </Typography.Text>
@@ -1183,7 +1242,7 @@ So you can spot the risks and avoid future problems.
           heading: null,
           subHeading: "",
           centerSectionTextAlign: "left",
-          verticalPadding: 32,
+          verticalPadding: 1,
           textColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/features-2-mob.png"
