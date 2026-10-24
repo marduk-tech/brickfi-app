@@ -340,7 +340,7 @@ export default function BrickChat({
             e.preventDefault();
             submitSearch();
           }}
-          placeholder="Start searching today.."
+          placeholder="Describe your Dream Home Today.."
           aria-label="Search properties"
           variant="borderless"
           style={{
@@ -1392,7 +1392,7 @@ So you can spot the risks and avoid future problems.
                   }}
                 >
                   <Flex align="center" gap={16}>
-                    Try Brickfi Today
+                    Describe You Dream Home Today
                     <FlippingIcons
                       count={2}
                       size={16}
