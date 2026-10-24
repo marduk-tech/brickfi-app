@@ -9,6 +9,7 @@ import {
   Divider,
   Flex,
   Input,
+  InputRef,
   Tag,
   Typography,
 } from "antd";
@@ -82,6 +83,11 @@ const SAMPLE_QUERIES: {
     ],
   },
 ];
+
+// SAMPLE_QUERIES split across the two scrolling rows under the search input.
+const QUERY_ROWS = [0, 1].map((r) =>
+  SAMPLE_QUERIES.filter((_, i) => i % 2 === r)
+);
 
 // Unique icons from SAMPLE_QUERIES, in order of first appearance.
 const CTA_ICONS = SAMPLE_QUERIES.flatMap((q) => q.icons).filter(
@@ -172,106 +178,6 @@ function FlippingIcons({
   );
 }
 
-const TYPE_DELAY_MS = 20;
-const DELETE_DELAY_MS = 15;
-const HOLD_DELAY_MS = 1800;
-
-// Cycles through SAMPLE_QUERIES, typing each one out character by character.
-// Kept as its own component so the per-character ticks don't re-render the page.
-function TypingPlaceholder({ isMobile }: { isMobile: boolean }) {
-  const [queryIndex, setQueryIndex] = useState(0);
-  const [charCount, setCharCount] = useState(0);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [reduceMotion, setReduceMotion] = useState(false);
-
-  useEffect(() => {
-    setReduceMotion(
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-    );
-  }, []);
-
-  const query = SAMPLE_QUERIES[queryIndex];
-
-  useEffect(() => {
-    if (reduceMotion) {
-      const t = setTimeout(
-        () => setQueryIndex((i) => (i + 1) % SAMPLE_QUERIES.length),
-        HOLD_DELAY_MS * 2,
-      );
-      return () => clearTimeout(t);
-    }
-
-    let t: ReturnType<typeof setTimeout>;
-    if (!isDeleting && charCount < query.text.length) {
-      t = setTimeout(() => setCharCount((c) => c + 1), TYPE_DELAY_MS);
-    } else if (!isDeleting) {
-      t = setTimeout(() => setIsDeleting(true), HOLD_DELAY_MS);
-    } else if (charCount > 0) {
-      t = setTimeout(() => setCharCount((c) => c - 1), DELETE_DELAY_MS);
-    } else {
-      setIsDeleting(false);
-      setQueryIndex((i) => (i + 1) % SAMPLE_QUERIES.length);
-      return;
-    }
-    return () => clearTimeout(t);
-  }, [charCount, isDeleting, query, reduceMotion]);
-
-  return (
-    <div
-      aria-hidden
-      style={{
-        position: "absolute",
-        inset: 0,
-        display: "flex",
-        flexDirection: isMobile ? "column" : "row",
-        alignItems: isMobile ? "flex-start" : "center",
-        justifyContent: isMobile ? "center" : "flex-start",
-        gap: 8,
-        padding: "0 24px",
-        pointerEvents: "none",
-        overflow: "hidden",
-      }}
-    >
-      <Flex gap={4} style={{ flexShrink: 0 }}>
-        {query.icons.map((icon) => (
-          <Flex
-            key={`${icon.iconSet}-${icon.iconName}`}
-            style={{
-              backgroundColor: COLORS.LANDING.PINK,
-              borderRadius: "50%",
-              padding: 3,
-            }}
-          >
-            <DynamicReactIcon
-              iconName={icon.iconName}
-              iconSet={icon.iconSet}
-              size={isMobile ? 12 : 14}
-              color="white"
-            />
-          </Flex>
-        ))}
-      </Flex>
-      <span
-        style={{
-          fontSize: isMobile ? FONT_SIZE.HEADING_3 : FONT_SIZE.HEADING_3,
-          lineHeight: "120%",
-          color: COLORS.textColorDark,
-          opacity: 0.8,
-          fontWeight: 500,
-          textAlign: "left",
-          display: "-webkit-box",
-          WebkitLineClamp: isMobile ? 3 : 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        }}
-      >
-        {reduceMotion ? query.text : query.text.slice(0, charCount)}
-        <span className={styles.typingCaret} />
-      </span>
-    </div>
-  );
-}
-
 const REPORT_FEATURES: {
   label: string;
   iconName: string;
@@ -353,7 +259,7 @@ export default function BrickChat({
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const searchInputRef = useRef<InputRef>(null);
   // Needs at least two words before the query is worth sending.
   const isSearchQueryValid = /\S+\s+\S+/.test(searchQuery);
 
@@ -365,27 +271,22 @@ export default function BrickChat({
   };
 
   const getSearchInput = () => {
-    // Animated sample queries stand in for the placeholder until the user
-    // focuses the box or starts typing.
-    const showTypingPlaceholder = !searchQuery && !isSearchFocused;
     return (
       <div
         style={{
           position: "relative",
           marginTop: 32,
-          marginBottom: isMobile ? 32 : 0,
           width: "100%",
           maxWidth: 800,
         }}
       >
         <Input
+          ref={searchInputRef}
           className={styles.searchInput}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onPressEnter={submitSearch}
-          onFocus={() => setIsSearchFocused(true)}
-          onBlur={() => setIsSearchFocused(false)}
-          placeholder={showTypingPlaceholder ? "" : "Start Searching Today"}
+          placeholder="Start searching today.."
           aria-label="Search properties"
           variant="borderless"
           suffix={
@@ -401,7 +302,7 @@ export default function BrickChat({
             ) : null
           }
           style={{
-            height: isMobile ? 112 : 64,
+            height: 64,
             borderRadius: 24,
             backgroundColor: "white",
             boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
@@ -412,11 +313,95 @@ export default function BrickChat({
             input: {
               fontSize: FONT_SIZE.HEADING_2,
               color: COLORS.textColorDark,
-              textAlign: "center",
+              textAlign: "left",
             },
           }}
         />
-        {showTypingPlaceholder && <TypingPlaceholder isMobile={isMobile} />}
+      </div>
+    );
+  };
+
+  // Sample queries in two full-width scrolling rows; clicking one fills the
+  // search input. Rendered outside the (left-aligned, capped-width) hero
+  // section so it can span the page edge to edge.
+  const getSampleQueryRows = () => {
+    return (
+      <div
+        className={styles.queryMarquee}
+        style={{
+          // pull up into the section's bottom padding: 16px below the input
+          marginTop: -8,
+          marginBottom: isMobile ? 32 : 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          padding: "4px 0 8px",
+        }}
+      >
+        {QUERY_ROWS.map((row, rowIndex) => (
+          <div
+            key={rowIndex}
+            className={styles.queryMarqueeRow}
+            style={{
+              // keep both rows moving at the same speed despite different widths
+              animationDuration: `${
+                row.reduce((n, q) => n + q.text.length, 0) * 0.15
+              }s`,
+            }}
+          >
+            {/* Rendered twice so the -50% translate loops seamlessly */}
+            {[...row, ...row].map((q, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-hidden={i >= row.length}
+                tabIndex={i >= row.length ? -1 : undefined}
+                onClick={() => {
+                  setSearchQuery(q.text);
+                  searchInputRef.current?.focus();
+                }}
+                style={{
+                  flexShrink: 0,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "6px 12px 6px 6px",
+                  borderRadius: 999,
+                  border: "none",
+                  backgroundColor: "white",
+                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+                  color: COLORS.textColorDark,
+                  fontSize: FONT_SIZE.PARA,
+                  fontWeight: 500,
+                  lineHeight: "130%",
+                  whiteSpace: "nowrap",
+                  cursor: "pointer",
+                }}
+              >
+                <Flex gap={4} style={{ flexShrink: 0 }}>
+                  {q.icons.map((icon) => (
+                    <Flex
+                      key={`${icon.iconSet}-${icon.iconName}`}
+                      style={{
+                        backgroundColor: COLORS.LANDING.PINK,
+                        borderRadius: "50%",
+                        padding: 3,
+                      }}
+                    >
+                      <DynamicReactIcon
+                        iconName={icon.iconName}
+                        iconSet={icon.iconSet}
+                        size={12}
+                        color="white"
+                      />
+                    </Flex>
+                  ))}
+                </Flex>
+                {q.text}
+              </button>
+            ))}
+          </div>
+        ))}
       </div>
     );
   };
@@ -799,6 +784,7 @@ export default function BrickChat({
           ),
         }}
       ></SectionCenter>
+      {getSampleQueryRows()}
 
       <Flex
         vertical
@@ -829,22 +815,22 @@ export default function BrickChat({
           />
         )}
       </Flex>
-      <Flex vertical>
+      <Flex vertical gap={isMobile ? 16 : 32} style={{marginTop: 32}}>
         <Flex
-          vertical={isMobile}
+          vertical
           style={{
             maxWidth: isMobile ? "90%" : "80%",
             margin: "auto",
             marginBottom: isMobile ? 32 : 0,
           }}
-          gap={isMobile ? 16 : 40}
+          
         >
-          {isMobile && (
+          <Flex align="center" gap={isMobile ? 0 : 32} vertical={isMobile}>
             <img
-              width={isMobile ? 125 : 250}
+              width={isMobile ? 125 : 200}
               style={{
                 margin: isMobile ? 16 : "auto",
-                marginTop: isMobile ? 0 : 64,
+                marginTop: 0,
               }}
               src={
                 isMobile
@@ -852,18 +838,17 @@ export default function BrickChat({
                   : "/images/landing/brick-chat/brickchat-stats.png"
               }
             />
-          )}
           <Flex vertical style={{ width: "100%", margin: "auto" }}>
             <h2
               style={{
-                fontSize: isMobile ? 40 : 54,
+                fontSize: isMobile ? 40 : 50,
                 color: COLORS.textColorDark,
                 lineHeight: "100%",
                 fontWeight: 800,
                 margin: 0,
               }}
             >
-              Brickfi is Redefining.
+              Brickfi is Redefining,
             </h2>
             <h2
               style={{
@@ -876,21 +861,17 @@ export default function BrickChat({
             >
               How You Explore Real Estate
             </h2>
+            <Typography.Text>
+              Forget the old way of finding homes with sales pitches
+Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to choose from.
+
+            </Typography.Text>
           </Flex>
-          {!isMobile && (
-            <img
-              width={isMobile ? 175 : 250}
-              style={{ margin: "auto", marginBottom: 100, marginTop: 64 }}
-              src={
-                isMobile
-                  ? "/images/landing/brick-chat/brickchat-stats.png"
-                  : "/images/landing/brick-chat/brickchat-stats.png"
-              }
-            />
-          )}
+          </Flex>
+          
         </Flex>
         <Flex vertical align="center">
-          <Typography.Text
+          {/* <Typography.Text
             style={{
               textTransform: "uppercase",
               fontSize: FONT_SIZE.HEADING_1 * 0.8,
@@ -902,7 +883,7 @@ export default function BrickChat({
           >
             DATA BACKED & UNBIASED {isMobile ? <br></br> : null}REAL ESTATE
             PLATFORM
-          </Typography.Text>
+          </Typography.Text> */}
           <img
             width={isMobile ? "90%" : "70%"}
             style={{ margin: "auto", marginBottom: 100 }}
@@ -923,18 +904,18 @@ export default function BrickChat({
             <Flex vertical>
               <h2
                 style={{
-                  fontSize: isMobile ? 40 : 50,
+                  fontSize: isMobile ? 36 : 46,
                   color: COLORS.LANDING.LIGHT_PINK,
                   lineHeight: "100%",
                   fontWeight: 800,
                   margin: 0,
                 }}
               >
-                Finding the Right Home can be Risky & Confusing.
+                Searching for the Right Home can be Risky & Confusing.
               </h2>
               <h2
                 style={{
-                  fontSize: isMobile ? 40 : 50,
+                  fontSize: isMobile ? 36 : 46,
                   lineHeight: "100%",
                   fontWeight: 800,
                   margin: 0,
@@ -956,6 +937,182 @@ export default function BrickChat({
           primaryImageSize: isMobile ? "90%" : "80%",
         }}
       ></SectionLeft>
+          <Flex
+        align="flex-start"
+        justify="flex-start"
+        style={{
+          backgroundColor: COLORS.LANDING.LIGHT_PINK,
+          padding: "100px 0",
+          fontWeight: 200,
+          width: isMobile ? "90%:" : "80%",
+          margin: "auto",
+        }}
+      >
+        <Flex
+          vertical
+          style={{ maxWidth: 1400, padding: "0 16px", margin: "auto" }}
+        >
+          <Flex align="center" justify="center">
+            <h2
+              style={{
+                fontSize: isMobile
+                  ? FONT_SIZE.HEADING_1 * 1.25
+                  : FONT_SIZE.HEADING_1 * 1.75,
+                lineHeight: "100%",
+                fontWeight: 300,
+                margin: 0,
+                marginBottom: isMobile ? 32 : 64,
+              }}
+            >
+              <span style={{ color: COLORS.LANDING.PINK, fontWeight: 200 }}>
+                What makes Brickfi different ?
+              </span>{" "}
+            </h2>
+          </Flex>
+          <Flex vertical={isMobile} justify="center" gap={16} align="center">
+            <Flex>
+              <img
+                src="/images/landing/brick-chat/brick360-emblem.png"
+                height={90}
+                width="auto"
+              ></img>
+            </Flex>
+            <Flex vertical justify="center">
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_1 * 1.25,
+                  lineHeight: "100%",
+                  maxWidth: 800,
+                  fontWeight: 500,
+                  marginBottom: 8,
+                  marginTop: 16,
+                  color: COLORS.primaryColor,
+                }}
+              >
+                BRICK360 FRAMEWORK
+              </Typography.Text>
+
+              <Typography.Text
+                style={{
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_3
+                    : FONT_SIZE.HEADING_2,
+                  lineHeight: "120%",
+                  maxWidth: 800,
+                }}
+              >
+                The Brick360 Framework is based on 4-pillar analysis. Built from verified government and public data. 
+So you can spot the risks and avoid future problems.
+
+              </Typography.Text>
+            </Flex>
+          </Flex>
+        </Flex>
+      </Flex>
+
+      <Flex
+        gap={isMobile ? 16 : 8}
+        wrap={isMobile ? "wrap" : undefined}
+        justify="center"
+        align="center"
+        style={{
+          padding: isMobile ? "16px" : "16px 0",
+          marginBottom: 32,
+          flexShrink: 0,
+        }}
+      >
+        {REPORT_FEATURES.map((feature, index) => {
+          const isActive = index === activeFeature;
+          return (
+            <Button
+              key={feature.label}
+              shape="round"
+              onClick={() => featureCarouselRef.current?.goTo(index)}
+              style={{
+                flexShrink: 0,
+                height: 32,
+                padding: "0 14px",
+                fontSize: 13,
+                backgroundColor: isActive ? COLORS.textColorDark : "white",
+                border: 0,
+                fontWeight: 500,
+                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
+                borderColor: isActive
+                  ? COLORS.textColorDark
+                  : COLORS.textColorVeryLight,
+                color: isActive ? "#fff" : COLORS.textColorMedium,
+              }}
+            >
+              <Flex align="center" gap={6}>
+                <DynamicReactIcon
+                  iconName={feature.iconName}
+                  iconSet={feature.iconSet}
+                  size={14}
+                  color={isActive ? "#fff" : COLORS.textColorMedium}
+                />
+                {feature.label}
+              </Flex>
+            </Button>
+          );
+        })}
+      </Flex>
+
+       <Carousel
+        ref={featureCarouselRef}
+        autoplay
+        autoplaySpeed={4000}
+        dots={false}
+        beforeChange={(_, next) => setActiveFeature(next)}
+      >
+        {REPORT_FEATURES.map(
+          ({ title, headingMarginBottom, subHeading, mainImgUrl }) => (
+            <div key={title}>
+              <div
+                className={`${styles.featureFrame} ${
+                  isMobile ? styles.featureFrameMobile : ""
+                }`}
+              >
+                <div className={styles.featureCell}>
+                  <img src={mainImgUrl} alt={title} style={{ width: "100%" }} />
+                </div>
+                <div className={styles.featureCell}>
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_1,
+                      lineHeight: "100%",
+                      margin: 0,
+                      marginBottom: headingMarginBottom ?? 0,
+                    }}
+                  >
+                    {title}
+                  </Typography.Text>
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.HEADING_3,
+                      color: COLORS.textColorMedium,
+                      fontWeight: 300,
+                    }}
+                  >
+                    {subHeading}
+                  </Typography.Text>
+                </div>
+                {/* dots where the frame lines meet */}
+                <span className={`${styles.frameDot} ${styles.dotTopLeft}`} />
+                <span className={`${styles.frameDot} ${styles.dotTopMid}`} />
+                <span className={`${styles.frameDot} ${styles.dotTopRight}`} />
+                <span
+                  className={`${styles.frameDot} ${styles.dotBottomLeft}`}
+                />
+                <span className={`${styles.frameDot} ${styles.dotBottomMid}`} />
+                <span
+                  className={`${styles.frameDot} ${styles.dotBottomRight}`}
+                />
+              </div>
+            </div>
+          ),
+        )}
+      </Carousel>
+
 
       <SectionCenter
         isMobile={isMobile}
@@ -1016,180 +1173,8 @@ export default function BrickChat({
         }}
       ></SectionCenter>
 
-      <Flex
-        align="flex-start"
-        justify="flex-start"
-        style={{
-          backgroundColor: COLORS.LANDING.LIGHT_PINK,
-          padding: "100px 0",
-          fontWeight: 200,
-          width: isMobile ? "90%:" : "80%",
-          margin: "auto",
-        }}
-      >
-        <Flex
-          vertical
-          style={{ maxWidth: 1400, padding: "0 16px", margin: "auto" }}
-        >
-          <Flex align="center" justify="center">
-            <h2
-              style={{
-                fontSize: isMobile
-                  ? FONT_SIZE.HEADING_1 * 1.25
-                  : FONT_SIZE.HEADING_1 * 1.75,
-                lineHeight: "100%",
-                fontWeight: 300,
-                margin: 0,
-                marginBottom: isMobile ? 32 : 64,
-              }}
-            >
-              <span style={{ color: COLORS.LANDING.PINK, fontWeight: 200 }}>
-                What makes Brickfi different ?
-              </span>{" "}
-            </h2>
-          </Flex>
-          <Flex vertical={isMobile} justify="center" gap={16} align="center">
-            <Flex>
-              <img
-                src="/images/landing/brick-chat/brick360-emblem.png"
-                height={90}
-                width="auto"
-              ></img>
-            </Flex>
-            <Flex vertical justify="center">
-              <Typography.Text
-                style={{
-                  fontSize: FONT_SIZE.HEADING_1 * 1.25,
-                  lineHeight: "100%",
-                  maxWidth: 800,
-                  fontWeight: 500,
-                  marginBottom: 8,
-                  marginTop: 16,
-                  color: COLORS.primaryColor,
-                }}
-              >
-                BRICK360 FRAMEWORK
-              </Typography.Text>
-
-              <Typography.Text
-                style={{
-                  fontSize: isMobile
-                    ? FONT_SIZE.HEADING_3
-                    : FONT_SIZE.HEADING_2,
-                  lineHeight: "100%",
-                  maxWidth: 800,
-                }}
-              >
-                The most comprehensive, intelligent and verified-data backed
-                framework to rate and analyse real estate.
-              </Typography.Text>
-            </Flex>
-          </Flex>
-        </Flex>
-      </Flex>
-
-      <Flex
-        gap={isMobile ? 16 : 8}
-        wrap={isMobile ? "wrap" : undefined}
-        justify="center"
-        align="center"
-        style={{
-          padding: isMobile ? "16px" : "16px 0",
-          marginBottom: 32,
-          flexShrink: 0,
-        }}
-      >
-        {REPORT_FEATURES.map((feature, index) => {
-          const isActive = index === activeFeature;
-          return (
-            <Button
-              key={feature.label}
-              shape="round"
-              onClick={() => featureCarouselRef.current?.goTo(index)}
-              style={{
-                flexShrink: 0,
-                height: 32,
-                padding: "0 14px",
-                fontSize: 13,
-                backgroundColor: isActive ? COLORS.textColorDark : "white",
-                border: 0,
-                fontWeight: 500,
-                boxShadow: "0 2px 6px rgba(0, 0, 0, 0.08)",
-                borderColor: isActive
-                  ? COLORS.textColorDark
-                  : COLORS.textColorVeryLight,
-                color: isActive ? "#fff" : COLORS.textColorMedium,
-              }}
-            >
-              <Flex align="center" gap={6}>
-                <DynamicReactIcon
-                  iconName={feature.iconName}
-                  iconSet={feature.iconSet}
-                  size={14}
-                  color={isActive ? "#fff" : COLORS.textColorMedium}
-                />
-                {feature.label}
-              </Flex>
-            </Button>
-          );
-        })}
-      </Flex>
-
-      <Carousel
-        ref={featureCarouselRef}
-        autoplay
-        autoplaySpeed={4000}
-        dots={false}
-        beforeChange={(_, next) => setActiveFeature(next)}
-      >
-        {REPORT_FEATURES.map(
-          ({ title, headingMarginBottom, subHeading, mainImgUrl }) => (
-            <div key={title}>
-              <div
-                className={`${styles.featureFrame} ${
-                  isMobile ? styles.featureFrameMobile : ""
-                }`}
-              >
-                <div className={styles.featureCell}>
-                  <img src={mainImgUrl} alt={title} style={{ width: "100%" }} />
-                </div>
-                <div className={styles.featureCell}>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_1,
-                      lineHeight: "100%",
-                      margin: 0,
-                      marginBottom: headingMarginBottom ?? 0,
-                    }}
-                  >
-                    {title}
-                  </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_3,
-                      color: COLORS.textColorMedium,
-                      fontWeight: 300,
-                    }}
-                  >
-                    {subHeading}
-                  </Typography.Text>
-                </div>
-                {/* dots where the frame lines meet */}
-                <span className={`${styles.frameDot} ${styles.dotTopLeft}`} />
-                <span className={`${styles.frameDot} ${styles.dotTopMid}`} />
-                <span className={`${styles.frameDot} ${styles.dotTopRight}`} />
-                <span
-                  className={`${styles.frameDot} ${styles.dotBottomLeft}`}
-                />
-                <span className={`${styles.frameDot} ${styles.dotBottomMid}`} />
-                <span
-                  className={`${styles.frameDot} ${styles.dotBottomRight}`}
-                />
-              </div>
-            </div>
-          ),
-        )}
-      </Carousel>
+  
+     
 
       <Flex align="center" justify="center">
         <img

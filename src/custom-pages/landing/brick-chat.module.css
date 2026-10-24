@@ -40,6 +40,37 @@
   }
 }
 
+/* Sample-query chips under the search input: two rows, each its own
+   loop; duration is set inline per row. */
+.queryMarquee {
+  /* in the page root's fixed-height column flex, overflow makes min-height 0;
+     without this the rows collapse (see .featureFilters) */
+  flex-shrink: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.queryMarqueeRow {
+  display: flex;
+  gap: 16px;
+  width: max-content;
+  animation: queryMarquee 30s linear infinite;
+}
+
+.queryMarquee:hover .queryMarqueeRow {
+  animation-play-state: paused;
+}
+
+@keyframes queryMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* half the row = one full copy of the chips + half a gap */
+    transform: translateX(calc(-50% - 8px));
+  }
+}
+
 .typingCaret {
   display: inline-block;
   width: 2px;
@@ -61,10 +92,12 @@
     animation: none;
   }
 
-  .marquee {
+  .marquee,
+  .queryMarquee {
     overflow-x: auto;
   }
-  .marqueeTrack {
+  .marqueeTrack,
+  .queryMarqueeRow {
     animation: none;
   }
 }
