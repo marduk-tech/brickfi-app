@@ -989,10 +989,10 @@ export default function BrickChat({
             <Flex vertical>
               <h2
                 style={{
-                  fontSize: isMobile ? 36 : 46,
+                  fontSize: isMobile ? 40 : 54,
                   color: COLORS.LANDING.LIGHT_PINK,
                   lineHeight: "100%",
-                  fontWeight: 800,
+                  fontWeight: 200,
                   margin: 0,
                 }}
               >
@@ -1007,7 +1007,7 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
           ),
           subHeading: "",
           centerSectionTextAlign: "left",
-          verticalPadding: 100,
+          verticalPadding: isMobile ? 48: 100,
           textColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/brickchat-vs-broker.png"
@@ -1047,7 +1047,7 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
               </span>{" "}
             </h2>
           </Flex>
-          <Flex vertical={isMobile} justify={isMobile ? "flex-start": "center"} gap={16} align={isMobile ? "flex-start": "center"}>
+          <Flex justify={isMobile ? "flex-start": "center"} gap={16} align={isMobile ? "flex-start": "center"}>
             <Flex>
               <img
                 src="/images/landing/brick-chat/brick360-emblem.png"
@@ -1063,7 +1063,7 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
                   maxWidth: 800,
                   fontWeight: 500,
                   marginBottom: 8,
-                  marginTop: 16,
+                  marginTop: 0,
                   color: COLORS.primaryColor,
                 }}
               >
@@ -1198,7 +1198,7 @@ So you can spot the risks and avoid future problems.
           bgColor: COLORS.textColorDark,
           sectionMaxWidth: "100%",
           heading: (
-            <Flex vertical align="center">
+            <Flex vertical align={isMobile ? "flex-start": "center"}>
               <h2
                 style={{
                   fontSize: isMobile ? 40 : 54,
@@ -1208,8 +1208,7 @@ So you can spot the risks and avoid future problems.
                   marginBottom: 0,
                   color: COLORS.primaryColor,
                 }}
-              >
-              The Research ToolSet
+              >The Research ToolSet
               </h2>
               <h2
                 style={{
