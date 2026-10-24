@@ -311,9 +311,10 @@ export default function BrickChat({
           }}
           styles={{
             input: {
-              fontSize: FONT_SIZE.HEADING_2,
+              fontSize: FONT_SIZE.HEADING_2*.8,
               color: COLORS.textColorDark,
               textAlign: "left",
+              fontWeight: 500
             },
           }}
         />
@@ -1131,7 +1132,7 @@ So you can spot the risks and avoid future problems.
                   color: COLORS.primaryColor,
                 }}
               >
-                With The Research ToolSet
+              The Research ToolSet
               </h2>
               <h2
                 style={{
@@ -1142,7 +1143,7 @@ So you can spot the risks and avoid future problems.
                   margin: 0,
                 }}
               >
-                To Make it Easy & Efficient
+                That Gives You an Edge
               </h2>
             </Flex>
           ),
