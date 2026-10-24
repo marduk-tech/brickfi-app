@@ -943,7 +943,7 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
         justify="flex-start"
         style={{
           backgroundColor: COLORS.LANDING.LIGHT_PINK,
-          padding: "100px 0",
+          padding: "100px 0 32px 0",
           fontWeight: 200,
           width: isMobile ? "90%:" : "80%",
           margin: "auto",
@@ -970,7 +970,7 @@ Brickfi gives you an unbiased list and legit data, facts & trade-offs for YOU to
               </span>{" "}
             </h2>
           </Flex>
-          <Flex vertical={isMobile} justify="center" gap={16} align="center">
+          <Flex vertical={isMobile} justify={isMobile ? "flex-start": "center"} gap={16} align="flex-start">
             <Flex>
               <img
                 src="/images/landing/brick-chat/brick360-emblem.png"
