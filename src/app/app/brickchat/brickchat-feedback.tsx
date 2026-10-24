@@ -39,6 +39,10 @@ const uploadFeedbackImages = async (files: File[]): Promise<string[]> => {
 // Same 1-5 scale as rating in brickchat-feedback.model.js (backend)
 type FeedbackRating = 1 | 2 | 3 | 4 | 5;
 
+// thread-level thumbs, as ratings on the same scale
+const THUMBS_UP_RATING: FeedbackRating = 4;
+const THUMBS_DOWN_RATING: FeedbackRating = 2;
+
 const FEEDBACK_RATING_OPTIONS: {
   value: FeedbackRating;
   label: string;
@@ -110,9 +114,11 @@ interface BrickchatFeedbackProps {
 // each answer with that turn's turnId. Saved to the brickchat_feedback
 // collection (see brickchat-feedback.model.js in the backend) - a separate,
 // user-initiated note, not brickchat_logger's own automatic turn-by-turn
-// logging. Rating, category and text are each optional, but a rating or
-// some text is needed to submit (or a category, on a turn). Thread-level
-// feedback doesn't ask for a category - it's always sent as "other".
+// logging. On a turn there's no rating - just an optional category and
+// text, one of which is needed to submit. For the thread,
+// it's a thumbs up / thumbs down pair instead: each opens the modal with its
+// rating already picked (4 / 2, changeable there) and doesn't ask for a
+// category - it's always sent as "other".
 export default function BrickchatFeedback({
   threadId,
   userId,
@@ -143,8 +149,8 @@ export default function BrickchatFeedback({
     (askCategory && !!feedbackCategory) ||
     !!feedbackText.trim();
 
-  const handleOpenFeedback = () => {
-    setFeedbackRating(undefined);
+  const handleOpenFeedback = (rating?: FeedbackRating) => {
+    setFeedbackRating(rating);
     setFeedbackCategory(undefined);
     setFeedbackText("");
     setFeedbackFileList([]);
@@ -186,26 +192,26 @@ export default function BrickchatFeedback({
 
   return (
     <>
-      <Tooltip title={turnId ? "Feedback on this answer" : "Give feedback"}>
-        <Button
-          type="text"
-          style={{
-            padding: "8px 0",
-            height: "auto",
-            width: 32,
-            lineHeight: 1,
-          }}
-          icon={
-            <DynamicReactIcon
-              iconName="MdOutlineFeedback"
-              iconSet="md"
-              color={COLORS.textColorMedium}
-              size={18}
-            />
-          }
-          onClick={handleOpenFeedback}
+      {turnId ? (
+        <FeedbackIconButton
+          tooltip="Feedback on this answer"
+          iconName="MdOutlineFeedback"
+          onClick={() => handleOpenFeedback()}
         />
-      </Tooltip>
+      ) : (
+        <>
+          <FeedbackIconButton
+            tooltip="Good conversation"
+            iconName="MdOutlineThumbUp"
+            onClick={() => handleOpenFeedback(THUMBS_UP_RATING)}
+          />
+          <FeedbackIconButton
+            tooltip="Needs work"
+            iconName="MdOutlineThumbDown"
+            onClick={() => handleOpenFeedback(THUMBS_DOWN_RATING)}
+          />
+        </>
+      )}
 
       <Modal
         open={feedbackModalOpen}
@@ -215,69 +221,78 @@ export default function BrickchatFeedback({
         footer={null}
         closable
         mask={false}
-        title={turnId ? "Rate this answer" : "Rate this conversation"}
+        title={turnId ? "Feedback on this answer" : "Rate this conversation"}
         styles={{ content: { padding: 24 } }}
       >
         <Flex vertical gap={12}>
           <Typography.Paragraph
-            style={{ color: COLORS.textColorLight, marginBottom: 16, fontSize: FONT_SIZE.HEADING_4 }}
+            style={{
+              color: COLORS.textColorLight,
+              marginBottom: 16,
+              fontSize: FONT_SIZE.HEADING_4,
+            }}
           >
             What&apos;s working well, or what should we fix? Screenshots help
             too.
           </Typography.Paragraph>
-          <Flex justify="space-between" gap={4}>
-            {FEEDBACK_RATING_OPTIONS.map(({ value, label, icon }) => {
-              const selected = feedbackRating === value;
-              const color = selected
-                ? COLORS.primaryColor
-                : COLORS.textColorLight;
-              return (
-                <Button
-                  key={value}
-                  type="text"
-                  aria-label={label}
-                  aria-pressed={selected}
-                  onClick={() =>
-                    setFeedbackRating(selected ? undefined : value)
-                  }
-                  disabled={feedbackSubmitting}
-                  style={{
-                    flex: 1,
-                    height: "auto",
-                    padding: "8px 4px",
-                    border: `1px solid ${selected ? COLORS.primaryColor : "transparent"}`,
-                    backgroundColor: selected
-                      ? COLORS.bgColorLightBlue
-                      : undefined,
-                  }}
-                >
-                  <Flex vertical align="center" gap={4}>
-                    <DynamicReactIcon
-                      iconName={icon}
-                      iconSet="md"
-                      size={28}
-                      color={color}
-                    />
-                    <Typography.Text
-                      style={{
-                        fontSize: FONT_SIZE.SUB_TEXT,
-                        color: selected
-                          ? COLORS.primaryColor
-                          : COLORS.textColorMedium,
-                        // antd buttons don't wrap - let a label take two
-                        // lines on a narrow screen rather than overflow
-                        whiteSpace: "normal",
-                        textAlign: "center",
-                        lineHeight: 1.2,
-                      }}
-                    >
-                      {label}
-                    </Typography.Text>
-                  </Flex>
-                </Button>
-              );
-            })}
-          </Flex>
+          {/* thread only - the thumb that opened this pre-selects a rating */}
+          {!turnId ? (
+            <Flex justify="space-between" gap={4}>
+              {FEEDBACK_RATING_OPTIONS.map(({ value, label, icon }) => {
+                const selected = feedbackRating === value;
+                const color = selected
+                  ? COLORS.primaryColor
+                  : COLORS.textColorLight;
+                return (
+                  <Button
+                    key={value}
+                    type="text"
+                    aria-label={label}
+                    aria-pressed={selected}
+                    onClick={() =>
+                      setFeedbackRating(selected ? undefined : value)
+                    }
+                    disabled={feedbackSubmitting}
+                    style={{
+                      flex: 1,
+                      height: "auto",
+                      padding: "8px 4px",
+                      border: `1px solid ${
+                        selected ? COLORS.primaryColor : "transparent"
+                      }`,
+                      backgroundColor: selected
+                        ? COLORS.bgColorLightBlue
+                        : undefined,
+                    }}
+                  >
+                    <Flex vertical align="center" gap={4}>
+                      <DynamicReactIcon
+                        iconName={icon}
+                        iconSet="md"
+                        size={28}
+                        color={color}
+                      />
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.SUB_TEXT,
+                          color: selected
+                            ? COLORS.primaryColor
+                            : COLORS.textColorMedium,
+                          // antd buttons don't wrap - let a label take two
+                          // lines on a narrow screen rather than overflow
+                          whiteSpace: "normal",
+                          textAlign: "center",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {label}
+                      </Typography.Text>
+                    </Flex>
+                  </Button>
+                );
+              })}
+            </Flex>
+          ) : null}
           {askCategory ? (
             <Select
               allowClear
@@ -307,7 +322,7 @@ export default function BrickchatFeedback({
             maxCount={MAX_FEEDBACK_IMAGES}
             accept="image/*"
             disabled={feedbackSubmitting}
-            style={{height: 100, width: 100}}
+            style={{ height: 100, width: 100 }}
           >
             {feedbackFileList.length < MAX_FEEDBACK_IMAGES ? (
               <Flex vertical align="center" gap={2}>
@@ -347,5 +362,39 @@ export default function BrickchatFeedback({
         </Flex>
       </Modal>
     </>
+  );
+}
+
+function FeedbackIconButton({
+  tooltip,
+  iconName,
+  onClick,
+}: {
+  tooltip: string;
+  iconName: string;
+  onClick: () => void;
+}) {
+  return (
+    <Tooltip title={tooltip}>
+      <Button
+        type="text"
+        aria-label={tooltip}
+        style={{
+          padding: "8px 0",
+          height: "auto",
+          width: 32,
+          lineHeight: 1,
+        }}
+        icon={
+          <DynamicReactIcon
+            iconName={iconName}
+            iconSet="md"
+            color={COLORS.textColorMedium}
+            size={18}
+          />
+        }
+        onClick={onClick}
+      />
+    </Tooltip>
   );
 }
