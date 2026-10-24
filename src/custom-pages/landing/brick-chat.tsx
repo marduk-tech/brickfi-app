@@ -9,12 +9,12 @@ import {
   Divider,
   Flex,
   Input,
-  InputRef,
   Tag,
   Typography,
 } from "antd";
 import { ReactNode, useEffect, useRef, useState } from "react";
 import type { CarouselRef } from "antd/es/carousel";
+import type { TextAreaRef } from "antd/es/input/TextArea";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
 import { useWindowDimensions } from "../../hooks/use-browser-safe";
 import { COLORS, FONT_SIZE } from "../../theme/style-constants";
@@ -259,7 +259,7 @@ export default function BrickChat({
   }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef<InputRef>(null);
+  const searchInputRef = useRef<TextAreaRef>(null);
   // Needs at least two words before the query is worth sending.
   const isSearchQueryValid = /\S+\s+\S+/.test(searchQuery);
 
@@ -280,44 +280,47 @@ export default function BrickChat({
           maxWidth: 800,
         }}
       >
-        <Input
+        <Input.TextArea
           ref={searchInputRef}
           className={styles.searchInput}
+          rows={2}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onPressEnter={submitSearch}
+          onPressEnter={(e) => {
+            // Enter submits; Shift+Enter adds a new line
+            if (e.shiftKey) return;
+            e.preventDefault();
+            submitSearch();
+          }}
           placeholder="Start searching today.."
           aria-label="Search properties"
           variant="borderless"
-          suffix={
-            searchQuery ? (
-              <Button
-                type="primary"
-                shape="round"
-                icon={<SendOutlined />}
-                disabled={!isSearchQueryValid}
-                onClick={submitSearch}
-                aria-label="Send"
-              />
-            ) : null
-          }
           style={{
-            height: 64,
             borderRadius: 24,
             backgroundColor: "white",
             boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
-            padding: "0 12px 0 24px",
+            // right padding leaves room for the send button
+            padding: "16px 64px 16px 24px",
             width: "100%",
-          }}
-          styles={{
-            input: {
-              fontSize: FONT_SIZE.HEADING_2*.8,
-              color: COLORS.textColorDark,
-              textAlign: "left",
-              fontWeight: 500
-            },
+            resize: "none",
+            fontSize: isMobile ? FONT_SIZE.HEADING_4: FONT_SIZE.HEADING_3,
+            lineHeight: "140%",
+            color: COLORS.textColorDark,
+            textAlign: "left",
+            fontWeight: 500,
           }}
         />
+        {searchQuery ? (
+          <Button
+            type="primary"
+            shape="round"
+            icon={<SendOutlined />}
+            disabled={!isSearchQueryValid}
+            onClick={submitSearch}
+            aria-label="Send"
+            style={{ position: "absolute", right: 12, bottom: 12, marginLeft: 4 }}
+          />
+        ) : null}
       </div>
     );
   };
@@ -344,9 +347,11 @@ export default function BrickChat({
             key={rowIndex}
             className={styles.queryMarqueeRow}
             style={{
-              // keep both rows moving at the same speed despite different widths
+              // keep both rows moving at the same speed despite different
+              // widths (mobile chips are two lines, so about half as wide)
               animationDuration: `${
-                row.reduce((n, q) => n + q.text.length, 0) * 0.15
+                row.reduce((n, q) => n + q.text.length, 0) *
+                (isMobile ? 0.1 : 0.15)
               }s`,
             }}
           >
@@ -364,10 +369,12 @@ export default function BrickChat({
                 style={{
                   flexShrink: 0,
                   display: "inline-flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "6px 12px 6px 6px",
-                  borderRadius: 999,
+                  // mobile: icons stacked below the text
+                  flexDirection: isMobile ? "column-reverse" : "row",
+                  alignItems: isMobile ? "flex-start" : "center",
+                  gap: isMobile ? 6 : 8,
+                  padding: isMobile ? "8px 12px" : "6px 12px 6px 6px",
+                  borderRadius: isMobile ? 20 : 999,
                   border: "none",
                   backgroundColor: "white",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
@@ -375,7 +382,8 @@ export default function BrickChat({
                   fontSize: FONT_SIZE.PARA,
                   fontWeight: 500,
                   lineHeight: "130%",
-                  whiteSpace: "nowrap",
+                  textAlign: "left",
+                  whiteSpace: isMobile ? "normal" : "nowrap",
                   cursor: "pointer",
                 }}
               >
@@ -398,7 +406,17 @@ export default function BrickChat({
                     </Flex>
                   ))}
                 </Flex>
-                {q.text}
+                <span
+                  style={
+                    // mobile: sized to about half the text so it wraps to
+                    // two lines without cutting anything off
+                    isMobile
+                      ? { width: `${Math.ceil(q.text.length / 2) + 2}ch` }
+                      : undefined
+                  }
+                >
+                  {q.text}
+                </span>
               </button>
             ))}
           </div>
@@ -729,7 +747,7 @@ export default function BrickChat({
             <Flex vertical>
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_2,
+                  fontSize: isMobile ? FONT_SIZE.HEADING_3 : FONT_SIZE.HEADING_2,
                   marginTop: 8,
                   marginBottom: 0,
                   lineHeight: "120%",
