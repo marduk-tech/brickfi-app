@@ -38,6 +38,8 @@ const DeveloperStats = ({ lvnzyProject }: { lvnzyProject?: LvnzyProject }) => {
     0,
   );
 
+  return null;
+
   return (
     <StatCardRow>
       <StatCard label="RERA REGISTERED PROJECTS">

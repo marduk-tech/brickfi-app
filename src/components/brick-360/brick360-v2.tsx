@@ -1,40 +1,15 @@
 "use client";
 
-import { Flex, Tabs, Tour, TourProps, Typography } from "antd";
-import { useParams } from "next/navigation";
-import { ReactNode, useEffect, useRef, useState } from "react";
-import {
-  useFetchLvnzyProjectById,
-  useFetchLvnzyProjectBySlug,
-} from "../../hooks/use-lvnzy-project";
-import DynamicReactIcon from "../common/dynamic-react-icon";
+import { Flex } from "antd";
+import { useEffect, useRef, useState } from "react";
+import { useFetchLvnzyProjectBySlug } from "../../hooks/use-lvnzy-project";
 
+import { Brick360Inline } from "@/app/app/brickchat/brick360/brick360-inline";
 import { useWindowDimensions } from "@/hooks/use-browser-safe";
 import { useDevice } from "@/hooks/use-device";
-import {
-  BRICK360_CATEGORY,
-  Brick360CategoryInfo,
-  Brick360DataPoints,
-  LocalStorageKeys,
-} from "../../libs/constants";
-import { captureAnalyticsEvent } from "../../libs/lvnzy-helper";
-import {
-  COLORS,
-  FONT_SIZE,
-  HORIZONTAL_PADDING,
-} from "../../theme/style-constants";
+import { HORIZONTAL_PADDING } from "../../theme/style-constants";
 import { LvnzyProject } from "../../types/LvnzyProject";
-import { Brick360Tab } from "./brick-360-tab";
-import Brick360Chat from "./brick360-chat";
-import { ConfigurationsModal } from "./configurations-modal";
 import { FakeProgress } from "./fake-progress";
-import { MapTab } from "./map-tab";
-import { MediaTab } from "./media-tab";
-import { PricePointModal } from "./price-point-modal";
-import { ProjectHeader } from "./project-header";
-import TimelineTab from "./timeline-tab";
-import TimelineTabV2 from "./timeline-tab-v2";
-import { UnitsTab } from "./units-tab";
 
 const FAKE_TIMER_SECS = 500;
 
@@ -43,158 +18,24 @@ interface Brick360v2Props {
   projectData?: LvnzyProject;
 }
 
+// Standalone brick360 page - renders the same Brick360Inline view brickchat
+// embeds (tabs, header, media strip, tour), just full-page and without a
+// close button. Only the loading progress bar is specific to this page.
 export function Brick360v2({ slug, projectData }: Brick360v2Props) {
   const { isMobile } = useDevice();
   const { width } = useWindowDimensions();
-
-  const brick360ChatRef = useRef<{
-    expandChat: () => void;
-  } | null>(null);
 
   const { data: fetchedProject, isLoading: lvnzyProjectIsLoading } =
     useFetchLvnzyProjectBySlug(slug, !projectData);
   const lvnzyProject = projectData || fetchedProject;
 
-  const scoreParamTourRef = useRef(null);
-  const pmtPlanTourRef = useRef(null);
-
-  const [tourSteps, setTourSteps] = useState<TourProps["steps"]>([]);
-
-  useEffect(() => {
-    if (!lvnzyProject) {
-      return;
-    }
-    captureAnalyticsEvent("report-view", {
-      projectName: lvnzyProject?.meta.projectName,
-      projectId: lvnzyProject?._id,
-    });
-    const tempTourSteps: TourProps["steps"] = [];
-    tempTourSteps?.push({
-      title: (
-        <Typography.Text
-          style={{ fontSize: FONT_SIZE.HEADING_3, color: "white" }}
-        >
-          Click card to know more details
-        </Typography.Text>
-      ),
-      description: (
-        <Flex vertical align="center" gap={8}>
-          <img
-            src="/images/tour-1.png"
-            alt="see rating details"
-            width={300}
-            style={{
-              border: `3px solid ${COLORS.borderColorDark}`,
-              borderRadius: 8,
-            }}
-          ></img>
-          <Typography.Text
-            style={{ width: 300, fontSize: FONT_SIZE.HEADING_2 }}
-          >
-            Click{" "}
-            <span
-              style={{
-                backgroundColor: COLORS.bgColorMedium,
-                padding: "1px 4px",
-                fontSize: FONT_SIZE.PARA,
-                fontWeight: "bold",
-                marginTop: -2
-              }}
-            >
-              +
-            </span>{" "}
-            here to see more details of this rating including map view.
-          </Typography.Text>
-        </Flex>
-      ),
-      placement: "bottom",
-      type: "default",
-      target: () => scoreParamTourRef.current,
-    });
-    if (
-      !!pmtPlanTourRef &&
-      !!lvnzyProject.originalProjectId?.info?.financialPlan
-    ) {
-      tempTourSteps?.push({
-        title: (
-          <Typography.Text
-            style={{ fontSize: FONT_SIZE.HEADING_3, color: "white" }}
-          >
-            Click card to know more details
-          </Typography.Text>
-        ),
-        description: (
-          <Flex vertical align="center" gap={8}>
-            <img
-              src="/images/tour-2.png"
-              alt="see rating details"
-              width={300}
-              style={{
-                border: `3px solid ${COLORS.borderColorDark}`,
-                borderRadius: 8,
-              }}
-            ></img>
-            <Typography.Text
-              style={{ width: 300, fontSize: FONT_SIZE.HEADING_2 }}
-            >
-              Click to see payment plan details.
-            </Typography.Text>
-          </Flex>
-        ),
-        placement: "bottom",
-        type: "default",
-        target: () => pmtPlanTourRef.current,
-      });
-    }
-    setTourSteps(tempTourSteps);
-  }, [lvnzyProject]);
-  const [tourOpen, setTourOpen] = useState(false);
-
-  useEffect(() => {
-    if (localStorage.getItem(LocalStorageKeys.tour) !== "tour-done") {
-    setTimeout(() => {
-      setTourOpen(true);
-    }, 2000);
-    }
-  }, []);
-
-  const [scoreParams, setScoreParams] = useState<any[]>([]);
-  const [selectedTabKey, setSelectedTabKey] = useState<string>("brick360");
-  const tabKeyInitialized = useRef(false);
-
-  useEffect(() => {
-    if (lvnzyProject && !tabKeyInitialized.current) {
-      tabKeyInitialized.current = true;
-      setSelectedTabKey(lvnzyProject?.score?.summary ? "brick360" : "units");
-    }
-  }, [lvnzyProject]);
-
-  const [selectedDataPointCategory, setSelectedDataPointCategory] =
-    useState<any>();
-  const [selectedDataPointSubCategory, setSelectedDataPointSubCategory] =
-    useState<any>();
-
-  const [selectedDataPoint, setSelectedDataPoint] = useState<any>();
   const [fakeTimeoutProgress, setFakeTimeoutProgress] = useState<any>(10);
-  const [selectedDataPointTitle, setSelectedDataPointTitle] = useState("");
   const [fakeInterval, setFakeInterval] = useState<any>();
 
   const isLvnzyProjectLoadingRef = useRef(lvnzyProjectIsLoading);
   useEffect(() => {
     isLvnzyProjectLoadingRef.current = lvnzyProjectIsLoading;
   }, [lvnzyProjectIsLoading]);
-
-  // Get data category icon
-  const getDataCategoryIcon = (iconName: string, iconSet: any) => {
-    return (
-      <DynamicReactIcon
-        iconName={iconName}
-        iconSet={iconSet}
-        color={COLORS.textColorDark}
-        size={20}
-      ></DynamicReactIcon>
-    );
-  };
 
   // Fake timeout and progress
   useEffect(() => {
@@ -213,85 +54,6 @@ export function Brick360v2({ slug, projectData }: Brick360v2Props) {
     }
   }, []);
 
-  // Setting main data points category
-  useEffect(() => {
-    if (lvnzyProject) {
-      const params = [];
-
-      for (const key in BRICK360_CATEGORY) {
-        const cat = BRICK360_CATEGORY[key as keyof typeof BRICK360_CATEGORY];
-        const catInfo = Brick360CategoryInfo[cat];
-        if (!catInfo.disabled) {
-          params.push({
-            title: catInfo.title,
-            key: key,
-            icon: getDataCategoryIcon(catInfo.iconName, catInfo.iconSet),
-            dataPoints: lvnzyProject.score?.[cat]
-              ? Object.entries(lvnzyProject.score[cat]).filter(
-                  (e) => e && e.length && (e as any)[1].rating
-                )
-              : [],
-          });
-        }
-      }
-      setScoreParams(params);
-    }
-  }, [lvnzyProject]);
-
-  function renderTabHeader(
-    title: string,
-    iconName: string,
-    iconSet: any,
-    tabKey: string
-  ) {
-    return (
-      <Flex
-        gap={0}
-        align="center"
-        vertical
-        style={{ position: "relative", padding: 0 }}
-      >
-        {tabKey == "units" &&
-        lvnzyProject &&
-        lvnzyProject.originalProjectId?.info?.financialPlan ? (
-          <Flex style={{ position: "absolute", right: -2, top: -8 }}>
-            <DynamicReactIcon
-              iconName="BiSolidOffer"
-              iconSet="bi"
-              size={16}
-              color={
-                selectedTabKey == tabKey
-                  ? COLORS.primaryColor
-                  : COLORS.textColorMedium
-              }
-            ></DynamicReactIcon>
-          </Flex>
-        ) : null}
-        <DynamicReactIcon
-          iconName={iconName}
-          iconSet={iconSet}
-          color={
-            selectedTabKey == tabKey
-              ? COLORS.primaryColor
-              : COLORS.textColorMedium
-          }
-          size={28}
-        ></DynamicReactIcon>
-        <Typography.Text
-          style={{
-            fontSize: FONT_SIZE.SUB_TEXT,
-            color:
-              selectedTabKey == tabKey
-                ? COLORS.primaryColor
-                : COLORS.textColorMedium,
-          }}
-        >
-          {title}
-        </Typography.Text>
-      </Flex>
-    );
-  }
-
   if (lvnzyProjectIsLoading) {
     return <FakeProgress progress={fakeTimeoutProgress} projectName={""} />;
   }
@@ -305,129 +67,7 @@ export function Brick360v2({ slug, projectData }: Brick360v2Props) {
         width: isMobile ? "100%" : width - HORIZONTAL_PADDING * 2,
       }}
     >
-      <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
-
-      <Tabs
-        tabBarGutter={40}
-        activeKey={selectedTabKey}
-        onChange={(activeKey: string) => {
-          captureAnalyticsEvent("tab-navigate", {
-            tabName: activeKey,
-            projectName: lvnzyProject?.meta.projectName,
-            projectId: lvnzyProject?._id,
-          });
-          setSelectedTabKey(activeKey);
-        }}
-        tabBarStyle={{}}
-        style={{ padding: "0 8px" }}
-        items={[
-          ...[
-            {
-              key: "brick360",
-              label: renderTabHeader(
-                "Brick 360",
-                "TbView360Number",
-                "tb",
-                "brick360"
-              ),
-              children:
-                selectedTabKey === "brick360" ? (
-                  <Brick360Tab
-                    lvnzyProject={lvnzyProject}
-                    scoreParams={scoreParams}
-                    ref={scoreParamTourRef}
-                    onDataPointClick={(sc, item) => {
-                      brick360ChatRef.current?.expandChat();
-                      setSelectedDataPointCategory(sc.key);
-                      setSelectedDataPointSubCategory((item as any)[0]);
-                      setSelectedDataPoint((item as any)[1]);
-                      setSelectedDataPointTitle(
-                        `${sc.title} > ${
-                          (Brick360DataPoints as any)[sc.key][(item as any)[0]][
-                            "label"
-                          ]
-                        }`
-                      );
-                    }}
-                  />
-                ) : null,
-            },
-            {
-              key: "units",
-              label: renderTabHeader(
-                "Price/Units",
-                "RiLayout2Fill",
-                "ri",
-                "units"
-              ),
-              children:
-                selectedTabKey === "units" ? (
-                  <UnitsTab lvnzyProject={lvnzyProject} />
-                ) : null,
-            },
-            {
-              key: "map",
-              label: renderTabHeader(
-                "Map",
-                "LiaMapMarkedAltSolid",
-                "lia",
-                "map"
-              ),
-              children:
-                selectedTabKey === "map" ? (
-                  <MapTab lvnzyProject={lvnzyProject} />
-                ) : null,
-            },
-            {
-              key: "media",
-              label: renderTabHeader("Media", "PiImagesDuotone", "pi", "media"),
-              children:
-                selectedTabKey === "media" ? (
-                  <MediaTab lvnzyProject={lvnzyProject} />
-                ) : null,
-            },
-          ],
-          ...((lvnzyProject?.meta?.projectTimelines?.length ?? 0) > 0
-            ? [
-                {
-                  key: "timeline",
-                  label: renderTabHeader(
-                    "Timeline",
-                    "LuCalendarRange",
-                    "lu",
-                    "timeline"
-                  ),
-                  children:
-                    selectedTabKey === "timeline" ? (
-                      <TimelineTabV2 lvnzyProject={lvnzyProject} />
-                    ) : null,
-                },
-              ]
-            : []),
-        ]}
-      ></Tabs>
-
-      {selectedTabKey == "brick360" ? (
-        <Brick360Chat
-          ref={brick360ChatRef}
-          lvnzyProject={lvnzyProject!}
-          dataPoint={{
-            selectedDataPointTitle,
-            selectedDataPointCategory,
-            selectedDataPoint,
-            selectedDataPointSubCategory,
-          }}
-        />
-      ) : null}
-
-      <Tour
-        open={tourOpen}
-        onClose={() => {
-          setTourOpen(false);
-          localStorage.setItem(LocalStorageKeys.tour, "tour-done");
-        }}
-        steps={tourSteps}
-      />
+      <Brick360Inline slug={slug} projectData={lvnzyProject} />
     </Flex>
   );
 }

@@ -190,7 +190,7 @@ export const ProjectGalleryV2 = ({
               padding: "4px 12px",
               borderRadius: 16,
               fontWeight: 500,
-              fontSize: FONT_SIZE.HEADING_3,
+              fontSize: FONT_SIZE.HEADING_4,
               backgroundColor:
                 selectedTag === tag ? COLORS.primaryColor : "white",
               color: selectedTag === tag ? "white" : COLORS.textColorMedium,

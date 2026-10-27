@@ -63,6 +63,16 @@ import ReferredLocationChips, {
 } from "./referred-location-chips";
 import ThreadLinksButton from "./thread-links-button";
 import StaticQueries from "./static-queries";
+import {
+  ActiveOfferingFlow,
+  FollowupOffering,
+  OfferingCtaButtons,
+  OfferingFlowContext,
+  OfferingFlowDialog,
+  OfferingTicket,
+  threadTicketsQueryKey,
+  useThreadTickets,
+} from "./offering-flows";
 
 export interface ProjectResult {
   projectId: string;
@@ -113,11 +123,17 @@ interface ExploreAnswer {
   summary: string;
   directAnswer: boolean;
   nextSetCount?: number;
+  /** Project-list answers: how many projects match the search's criteria outright - can be more than the list shows, or fewer when relaxed criteria filled it out. Null when unknown. See searchMeta in brick-explore-agent.js. */
+  totalCount?: number | null;
   images?: ExploreImagesGroup[];
   /** brickfiId(s) of driver/infra records (schools, transit, tech parks etc) the answer discussed - see synthesize.js. */
   brickfiDriverIds?: string[];
   /** LLM-suggested next step/question for this turn, e.g. "Want me to compare these?" - see synthesize.js. Empty when there's no sensible follow-up. */
   followupPrompt?: string;
+  /** A Brickfi offering whose CTA buttons go under this answer - followupPrompt is then its pitch, or the answer is about the offering itself. See resolveFollowupOffering in synthesize.js. */
+  followupOffering?: FollowupOffering | null;
+  /** Set on old "[Submitted: ...]" request records the backend used to add to threads - not shown any more (requests show as a card where their offering's buttons were, see useThreadTickets). */
+  offeringTicket?: unknown;
   /** Named place(s)/area(s) resolved this turn (project-distance.js's targetPlaces, location-analysis.js's locationNames) - see summarizeResolvedLocation in shared.js. */
   resolvedLocations?: ResolvedLocation[];
   /** This turn's id in the backend's turn log - sent with feedback on this answer (see tagAnswerWithTurnId). Absent on answers saved before turns were tagged. */
@@ -1213,6 +1229,63 @@ export function BrickChatCore({
     }
   };
 
+  // --- Brickfi offerings (see offering-flows.tsx) ---
+
+  // the CTA flow open in its dialog, if any
+  const [activeOfferingFlow, setActiveOfferingFlow] =
+    useState<ActiveOfferingFlow | null>(null);
+
+  // what a flow can prefill from: projects in this conversation (the open
+  // one, then the latest answers' cards first, then saved ones) and the
+  // signed-in user's contact
+  const offeringFlowContext = useMemo<OfferingFlowContext>(() => {
+    const seen = new Set<string>();
+    const projects: OfferingFlowContext["projects"] = [];
+    const add = (p?: { projectId: string; projectName: string } | null) => {
+      if (!p?.projectId || !p.projectName || seen.has(p.projectId)) return;
+      seen.add(p.projectId);
+      projects.push({ projectId: p.projectId, projectName: p.projectName });
+    };
+    add(selectedProject);
+    [...chatHistory]
+      .reverse()
+      .forEach((m) => (m.answer.projectsList || []).forEach(add));
+    (pinnedProjectResults || []).forEach(add);
+    return {
+      projects,
+      mobile: user?.mobile || undefined,
+      countryCode: user?.countryCode || undefined,
+      name: user?.name || undefined,
+    };
+  }, [selectedProject, chatHistory, pinnedProjectResults, user]);
+
+  // a ticket is created for the thread's owner - the signed-in user, or the
+  // guest who started it
+  const offeringTicketOwner = user?._id
+    ? { userId: user._id }
+    : { guestId: readGuestEntry()?.guestId };
+
+  // this thread's requests with their live status, and the latest one per
+  // offering - shown as a card in place of that offering's CTA buttons (see
+  // OfferingCtaButtons)
+  const offeringThreadId = activeThreadId || selectedThreadId;
+  const threadTickets = useThreadTickets(offeringTicketOwner, offeringThreadId);
+  const offeringTicketsByKey = useMemo(() => {
+    const byKey: Record<string, OfferingTicket> = {};
+    // oldest first, so the latest request per offering wins
+    (threadTickets || []).forEach((t) => (byKey[t.offeringKey] = t));
+    return byKey;
+  }, [threadTickets]);
+
+  // show the new request straight away - its card replaces the buttons it
+  // was raised from
+  const handleOfferingSubmitted = (ticket: OfferingTicket) => {
+    queryClient.setQueryData<OfferingTicket[]>(
+      threadTicketsQueryKey(offeringThreadId),
+      (prev) => [...(prev || []), ticket],
+    );
+  };
+
   const renderImages = (imagesGroups?: ExploreImagesGroup[]) => {
     const items = (imagesGroups || []).flatMap((group) =>
       group.images.map((image) => ({
@@ -1528,7 +1601,13 @@ export function BrickChatCore({
           ) : null}
 
           <Flex vertical gap={24} style={{ marginBottom: 24, width: "100%" }}>
-            {chatHistory.map((messageItem, index) => (
+            {chatHistory.map((messageItem, index) =>
+              messageItem.answer.offeringTicket ? (
+                // an old "[Submitted: ...]" request record the backend used
+                // to add to the thread - the request now shows as a card
+                // where its offering's buttons were, so this isn't shown
+                null
+              ) : (
               <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
                 {renderQuestion(messageItem.question)}
 
@@ -1644,6 +1723,22 @@ export function BrickChatCore({
                             {messageItem.answer.projectsList.length} Projects
                           </Button>
                         </Flex>
+                      ) : null}
+                      {messageItem.answer.totalCount != null &&
+                      !!messageItem.answer.projectsList?.length ? (
+                        <Typography.Text
+                          style={{
+                            flexShrink: 0,
+                            fontSize: FONT_SIZE.SUB_TEXT,
+                            color: COLORS.textColorMedium,
+                          }}
+                        >
+                          {messageItem.answer.totalCount}{" "}
+                          {messageItem.answer.totalCount === 1
+                            ? "project matches"
+                            : "projects match"}{" "}
+                          your criteria
+                        </Typography.Text>
                       ) : null}
                     </Flex>
                     {!messageItem.answer.directAnswer ? (
@@ -1824,6 +1919,24 @@ export function BrickChatCore({
                       </Typography.Text>
                     ) : null}
 
+                    {messageItem.answer.followupOffering ? (
+                      <OfferingCtaButtons
+                        offeringKey={messageItem.answer.followupOffering.key}
+                        existingTicket={
+                          offeringTicketsByKey[
+                            messageItem.answer.followupOffering.key
+                          ]
+                        }
+                        onStart={(offering, cta) =>
+                          setActiveOfferingFlow({
+                            offering,
+                            cta,
+                            turnId: messageItem.answer.turnId,
+                          })
+                        }
+                      />
+                    ) : null}
+
                     {/* feedback on just this answer - only once it carries
                       a turnId, so it can be tied to the turn's log */}
                     {messageItem.answer.turnId ? (
@@ -1838,7 +1951,8 @@ export function BrickChatCore({
                   </Flex>
                 </Flex>
               </Flex>
-            ))}
+              ),
+            )}
 
             {currentQuestion && chatLoading && (
               <Flex vertical gap={12}>
@@ -2030,6 +2144,14 @@ export function BrickChatCore({
           </Drawer>
         </>
       )}
+      <OfferingFlowDialog
+        flow={activeOfferingFlow}
+        context={offeringFlowContext}
+        owner={offeringTicketOwner}
+        threadId={activeThreadId || selectedThreadId}
+        onClose={() => setActiveOfferingFlow(null)}
+        onSubmitted={handleOfferingSubmitted}
+      />
       <Modal
         open={loginModalOpen && !user?._id}
         // dismissable - a guest who closes it gets it back on their next

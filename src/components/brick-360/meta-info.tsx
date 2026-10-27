@@ -131,7 +131,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
             />
             <Typography.Text
               style={{
-                fontSize:isMobile ? FONT_SIZE.SUB_TEXT : FONT_SIZE.HEADING_4,
+                fontSize:isMobile ? FONT_SIZE.SUB_TEXT : FONT_SIZE.SUB_TEXT,
                 margin: 0,
                 color: COLORS.textColorDark,
               }}
@@ -159,7 +159,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           />
           <Typography.Text
             style={{
-              fontSize:isMobile ? FONT_SIZE.SUB_TEXT : FONT_SIZE.HEADING_4,
+              fontSize:isMobile ? FONT_SIZE.SUB_TEXT : FONT_SIZE.SUB_TEXT,
               fontWeight: 500,
               color: COLORS.textColorDark,
             }}

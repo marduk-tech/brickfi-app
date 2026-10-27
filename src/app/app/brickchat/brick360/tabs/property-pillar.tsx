@@ -34,7 +34,7 @@ const getTotalFloors = (lvnzyProject: any, fs: Brick360FontSize) => {
     return (
       <Typography.Text
         style={{
-          fontSize: fs.HEADING_2,
+          fontSize: fs.HEADING_3,
           fontWeight: 500,
           color: COLORS.textColorMedium,
         }}
@@ -64,7 +64,7 @@ const getMinMaxSize = (configs: any[], fs: Brick360FontSize) => {
     return (
       <Typography.Text
         style={{
-          fontSize: fs.HEADING_2,
+          fontSize: fs.HEADING_3,
           fontWeight: 500,
           color: COLORS.textColorMedium,
         }}
@@ -207,13 +207,13 @@ const TaggedImageCard = ({
           align="center"
           justify="center"
           style={{
-            minWidth: 18,
-            height: 18,
-            padding: "0 4px",
+            minWidth: 15,
+            height: 15,
+            padding: "0 2px",
             borderRadius: 9,
-            backgroundColor: COLORS.textColorMedium,
+            backgroundColor: COLORS.textColorLight,
             color: "white",
-            fontSize: FONT_SIZE.SUB_TEXT,
+            fontSize: FONT_SIZE.NOTE,
             fontWeight: 500,
             lineHeight: 1,
           }}
