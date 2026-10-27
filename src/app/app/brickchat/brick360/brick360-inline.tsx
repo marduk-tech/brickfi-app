@@ -420,7 +420,7 @@ export function Brick360Inline({
       ) : null}
    {previewImages.length ? (
         <div
-          style={{ margin: "28px 0 16px 0", padding: "0 8px 0", position: "relative" }}
+          style={{ margin: "36px 0 16px 0", padding: "0 8px 0", position: "relative" }}
         >
           <Flex
             gap={8}
