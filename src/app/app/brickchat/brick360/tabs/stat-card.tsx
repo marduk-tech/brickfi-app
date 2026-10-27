@@ -13,7 +13,7 @@ export const STAT_CARD_STYLE: CSSProperties = {
   borderRadius: 8,
   backgroundColor: "white",
   width: "fit-content",
-  border: `1px solid ${COLORS.borderColor}`,
+  border: `1px solid ${COLORS.borderColorMedium}`,
   padding: 8,
   minWidth: 100,
   // keep full size in the horizontally scrolling StatCardRow

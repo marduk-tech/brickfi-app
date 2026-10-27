@@ -1,12 +1,34 @@
-/* Tab bar: a single bottom line under the tab titles (antd's own
-   .ant-tabs-nav::before), with the active tab's underline (antd's ink bar)
-   sitting exactly on top of it - antd already positions the two to overlap.
-   Colours come in as CSS variables set on the <Tabs> in brick360-inline.tsx
-   (--tab-bar-border-color / --tab-active-color), so they track COLORS. */
-.tabsNoNavBorder :global(.ant-tabs-nav::before) {
-  border-bottom: 1px solid var(--tab-bar-border-color) !important;
+/* Tab bar (see tabBarRef in brick360-inline.tsx): one row of tab buttons
+   that scrolls sideways natively - swipe, trackpad or mouse wheel - with the
+   selected tab scrolled to the middle. No scrollbar, no overflow menu and no
+   underline: the selected tab is marked by its label's own colour. */
+.tabBar {
+  position: relative; /* tab offsetLeft is measured from here */
+  display: flex;
+  gap: 16px;
+  padding: 0 8px;
+  margin-bottom: 0px;
+  margin-top: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
 
-.tabsNoNavBorder :global(.ant-tabs-ink-bar) {
-  background: var(--tab-active-color) !important;
+.tabBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabButton {
+  flex-shrink: 0;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tabButton:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 6px;
 }

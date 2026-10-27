@@ -2,6 +2,7 @@
 
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
+import { useDevice } from "@/hooks/use-device";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Typography } from "antd";
 import { useRouter } from "next/navigation";
@@ -18,6 +19,9 @@ export default function Brick360Redirect({ target }: { target: string }) {
     return () => clearTimeout(timer);
   }, [router, target]);
 
+  const { isMobile } = useDevice();
+
+
   return (
     <Flex
       vertical
@@ -27,7 +31,7 @@ export default function Brick360Redirect({ target }: { target: string }) {
       justify="center"
     >
       <Loader />
-      <Flex align="center" gap={8}>
+      <Flex vertical={isMobile} align="center" gap={8}>
         
         <DynamicReactIcon
           iconName="TbNorthStar"

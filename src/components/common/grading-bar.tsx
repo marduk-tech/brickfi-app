@@ -25,9 +25,9 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
     // Define color stops
     const colors = [
       { stop: 0, color: [255, 76, 5] }, // Red-Orange
-      { stop: 40, color: [251, 120, 5] }, // Orange-Yellow
-      { stop: 65, color: [251, 151, 12] }, // Yellow Greenish
-      { stop: 80, color: [209, 223, 1] }, // Greenish
+      { stop: 30, color: [251, 120, 5] }, // Orange-Yellow
+      { stop: 55, color: [251, 151, 12] }, // Yellow Greenish
+      { stop: 70, color: [209, 223, 1] }, // Greenish
       { stop: 100, color: [50, 142, 110] }, // Dark Green
     ];
 
@@ -95,7 +95,7 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
         style={{
           color: COLORS.textColorDark,
           backgroundColor: "white",
-          padding: "2px 8px",
+          padding: "1px 4px",
           marginBottom: 4,
           borderRadius: 8,
           border: `1px solid ${COLORS.borderColor}`
@@ -107,7 +107,7 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
         
          <Typography.Text
           style={{
-            fontSize: fs.HEADING_3,
+            fontSize: fs.HEADING_4,
             fontWeight: 300,
             color: value ? COLORS.textColorDark: COLORS.textColorLight,
           }}

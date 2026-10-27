@@ -445,7 +445,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
         !!dataPointSelected;
 
       return (
-        <Flex vertical style={{ paddingTop: 8 }}>
+        <Flex vertical style={{ paddingTop: 0 }}>
           {/* <Flex style={{ width: "100", display: "inline", margin: "8px 0" }}>
             <Typography.Text
               style={{
@@ -461,13 +461,13 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
 
           {renderDataPointExtra?.(dataPointKey)}
 
-          <Flex vertical gap={16} style={{ marginBottom: 24, marginTop: 8 }}>
+          <Flex vertical gap={16} style={{ marginBottom: 8, marginTop: 8, backgroundColor: "white", padding: "4px 8px", borderRadius: 8 }}>
             {(dataPoint?.reasoning || []).map((r: string, i: number) => (
               <Flex key={i} style={{ maxWidth: 850 }}>
                 <div
                   dangerouslySetInnerHTML={{ __html: r }}
                   className="reasoning"
-                  style={{ fontSize: fs.HEADING_3, margin: 0 }}
+                  style={{ fontSize: fs.HEADING_4, margin: 0 }}
                 ></div>
               </Flex>
             ))}
@@ -652,12 +652,13 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                           <Flex align="center" gap={8} style={{ minWidth: 0 }}>
                             <Typography.Text
                               style={{
-                                fontSize: fs.HEADING_2,
+                                fontSize: fs.HEADING_3,
                                 color:
                                   item[1].rating > 0
                                     ? COLORS.textColorDark
                                     : COLORS.textColorLight,
                                 fontWeight: 500,
+                                marginLeft: 4
                               }}
                             >
                               {capitalize(
@@ -667,14 +668,33 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                               )}
                             </Typography.Text>
                             <RatingBar value={item[1].rating}></RatingBar>
+                            {hasMap ? (
+                              <Flex style={{marginLeft: "auto"}}>
+                                <ReferredLocationChips
+                                  items={[
+                                    {
+                                      key,
+                                      id: key,
+                                      type: "",
+                                      name: isActive
+                                        ? "Showing on Map"
+                                        : "See on Map",
+                                      keepLabelCase: true,
+                                      
+                                    },
+                                  ]}
+                                  selectedKey={isActive ? key : null}
+                                  onToggle={() => handleSeeOnMap(key)}
+                                /></Flex>
+                              ) : null}
                           </Flex>
                         </div>
-                        {(() => {
+                          {(() => {
                           const actions = renderDataPointActions?.(
                             item[0],
                             mapFocus,
                           );
-                          if (!hasMap && !actions) return null;
+                          if (!actions) return null;
                           return (
                             <Flex
                               align="center"
@@ -687,27 +707,11 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                 scrollbarWidth: "none",
                               }}
                             >
-                              {hasMap ? (
-                                <ReferredLocationChips
-                                  items={[
-                                    {
-                                      key,
-                                      id: key,
-                                      type: "",
-                                      name: isActive
-                                        ? "Showing on Map"
-                                        : "See on Map",
-                                      keepLabelCase: true,
-                                    },
-                                  ]}
-                                  selectedKey={isActive ? key : null}
-                                  onToggle={() => handleSeeOnMap(key)}
-                                />
-                              ) : null}
                               {actions}
                             </Flex>
                           );
                         })()}
+                      
                         {renderDataPointDetail(item[0], item[1])}
                       </Flex>
                     );
@@ -731,7 +735,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                 <Flex style={{ marginRight: 4 }}>
                   <DynamicReactIcon
                     color={COLORS.textColorMedium}
-                    size={22}
+                    size={20}
                     iconName="MdVerifiedUser"
                     iconSet="md"
                   ></DynamicReactIcon>

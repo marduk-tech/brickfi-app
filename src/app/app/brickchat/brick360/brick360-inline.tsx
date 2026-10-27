@@ -2,7 +2,7 @@
 
 import { useBrick360FontSize } from "./use-font-size";
 import { Button, Flex, Modal, Tabs, Tour, TourProps, Typography } from "antd";
-import { CSSProperties, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
@@ -72,8 +72,12 @@ const tabOrderIndex = (key: string) => {
 interface Brick360InlineProps {
   slug: string;
   projectData?: LvnzyProject;
-  /** Closes this view and returns to the underlying brickchat conversation. */
-  onClose: () => void;
+  /**
+   * Closes this view and returns to the underlying brickchat conversation.
+   * Omitted on the standalone brick360 page (see brick360-v2.tsx), which
+   * has nothing to close back to - the close button is hidden then.
+   */
+  onClose?: () => void;
   /** Forwarded from the pillar tabs - see tabs/pillar-base.tsx and brick-map-chat.tsx. */
   onMapConfigChange?: (config: PillarMapConfig | null) => void;
 }
@@ -94,6 +98,7 @@ export function Brick360Inline({
 }: Brick360InlineProps) {
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => {
+    if (!onClose) return;
     setIsClosing(true);
     setTimeout(onClose, CLOSE_FADE_MS);
   };
@@ -264,6 +269,26 @@ export function Brick360Inline({
       : []),
   ].sort((a, b) => tabOrderIndex(a.key) - tabOrderIndex(b.key));
 
+  // The tab bar is our own natively scrolling row (antd's tab bar scrolls by
+  // a transform it recalculates on every change, only ever just far enough
+  // to reveal a tab, so it can't centre one). Whenever the selected tab
+  // changes - a click, or the initial pick once the project loads - scroll
+  // it to the middle of the bar.
+  const tabBarRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const bar = tabBarRef.current;
+    const tab = bar?.querySelector<HTMLElement>(
+      `[data-tab-key="${selectedTabKey}"]`,
+    );
+    if (!bar || !tab) return;
+    // offsetLeft is relative to the bar (it's position: relative), and
+    // scrollTo clamps to the ends, so the first/last tabs just sit at the edge
+    bar.scrollTo({
+      left: tab.offsetLeft - (bar.clientWidth - tab.offsetWidth) / 2,
+      behavior: "smooth",
+    });
+  }, [selectedTabKey]);
+
   const handleTabChange = (key: string) => {
     captureAnalyticsEvent("tab-navigate", {
       tabName: key,
@@ -287,8 +312,8 @@ export function Brick360Inline({
           style={{
             padding:
               isActive && selectedTabKey !== HIGHLIGHTS_TAB_KEY && categoryScore
-                ? "0px 0 0px 12px"
-                : "2px 12px",
+                ? "0px 0 0px 8px"
+                : "2px 8px",
           }}
           vertical
         >
@@ -297,14 +322,15 @@ export function Brick360Inline({
               iconName={tab.iconName}
               iconSet={tab.iconSet}
               color={isActive ? COLORS.primaryColor : COLORS.textColorMedium}
-              size={isMobile ? 28: 32}
+              size={isMobile ? 20: 24}
             ></DynamicReactIcon>
           </Flex>
           <Flex align="center" gap={4}>
             <Typography.Text
               style={{
-                fontSize: fs.HEADING_3,
-                fontWeight: 400,
+                // the selected tab's label is bolder and 10% larger
+                fontSize: isActive ? fs.HEADING_4 * 1.1 : fs.HEADING_4,
+                fontWeight: isActive ? 600 : 400,
                 color: isActive ? COLORS.primaryColor : COLORS.textColorMedium,
               }}
             >
@@ -366,41 +392,40 @@ export function Brick360Inline({
         border: `2px solid ${COLORS.borderColor}`,
         backgroundColor: COLORS.bgColor,
         borderRadius: 12,
-        padding: isMobile ? "16px 4px" : "24px 8px",
+        padding: isMobile ? "8px 4px" : "8px 4px",
         opacity: isClosing ? 0 : 1,
         transition: `opacity ${CLOSE_FADE_MS}ms ease`,
         position: "relative",
       }}
     >
-      <Flex
-        justify="flex-end"
-        style={{ position: "absolute", right: 0, top: 0 }}
-      >
-        <Button
-          type="text"
-          icon={
-            <DynamicReactIcon
-              iconName="IoCloseCircle"
-              iconSet="io5"
-              size={24}
-              color={COLORS.textColorMedium}
-            ></DynamicReactIcon>
-          }
-          onClick={handleClose}
-        />
-      </Flex>
-
-      <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
-
-      {previewImages.length ? (
+      {onClose ? (
+        <Flex
+          justify="flex-end"
+          style={{ position: "absolute", right: 0, top: 0 }}
+        >
+          <Button
+            type="text"
+            icon={
+              <DynamicReactIcon
+                iconName="IoCloseCircle"
+                iconSet="io5"
+                size={24}
+                color={COLORS.textColorMedium}
+              ></DynamicReactIcon>
+            }
+            onClick={handleClose}
+          />
+        </Flex>
+      ) : null}
+   {previewImages.length ? (
         <div
-          style={{ margin: "8px 0", padding: "0 8px 0", position: "relative" }}
+          style={{ margin: "28px 0 16px 0", padding: "0 8px 0", position: "relative" }}
         >
           <Flex
             gap={8}
             style={{
               width: "100%",
-              height: isMobile ? 100: 150,
+              height: isMobile ? 100: 125,
               overflowX: "scroll",
               scrollbarWidth: "none",
             }}
@@ -417,7 +442,7 @@ export function Brick360Inline({
                   flexShrink: 0,
                   borderRadius: 8,
                   objectFit: "cover",
-                  border: `2px solid ${COLORS.borderColor}`,
+                  border: `1px solid ${COLORS.borderColorMedium}`,
                 }}
               />
             ))}
@@ -446,26 +471,36 @@ export function Brick360Inline({
           </Button>
         </div>
       ) : null}
+      <ProjectHeader ref={pmtPlanTourRef} lvnzyProject={lvnzyProject} />
 
+   
+
+      {/* tab bar - see tabBarRef above for why it isn't antd's */}
+      <div ref={tabBarRef} role="tablist" className={styles.tabBar}>
+        {tabItems.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            role="tab"
+            aria-selected={item.key === selectedTabKey}
+            data-tab-key={item.key}
+            className={styles.tabButton}
+            onClick={() =>
+              item.key !== selectedTabKey && handleTabChange(item.key)
+            }
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {/* only the selected tab's content - the bar above replaces antd's */}
       <Tabs
         activeKey={selectedTabKey}
-        onChange={handleTabChange}
         items={tabItems}
         destroyOnHidden
-        className={styles.tabsNoNavBorder}
-        // gap between tab buttons (antd's default is 32px)
-        tabBarGutter={isMobile ? 16: 24}
-        // colours for the tab bar's bottom line and the active tab's
-        // underline on it (see brick360-inline.module.css)
-        style={
-          {
-            padding: "0 8px",
-            marginTop: 0,
-            marginLeft: 0,
-            "--tab-bar-border-color": COLORS.borderColor,
-            "--tab-active-color": COLORS.primaryColor,
-          } as CSSProperties
-        }
+        renderTabBar={() => <></>}
+        style={{ padding: "0 8px", marginTop: 0, marginLeft: 0 }}
       />
 
       <Modal
@@ -474,12 +509,14 @@ export function Brick360Inline({
         footer={null}
         title=""
         width={900}
+        // 50px from the top of the viewport (antd's default is 100px)
+        style={{ top: 50 }}
         destroyOnHidden
         styles={{
           // capped at 800px, or less on short screens so the modal never
           // runs off the viewport - the media list scrolls inside
           body: {
-            maxHeight: "min(700px, calc(100vh - 120px))",
+            maxHeight: "min(600px, calc(100vh - 125px))",
             overflowY: "auto",
             scrollbarWidth: "none",
           },

@@ -41,10 +41,10 @@ export function Brick360Highlights({
         gap={4}
         vertical
       >
-        <Flex vertical style={{ padding: "8px 4px" }}>
+        <Flex vertical style={{ padding: "8px 4px", backgroundColor:"white", borderRadius: 8 }}>
           <Flex align="center" gap={4}>
             <DynamicReactIcon
-              size={isPro ? 20 : 24}
+              size={isPro ? 16 : 20}
               iconName={isPro ? "FaRegLaugh" : "PiSmileySadBold"}
               iconSet={isPro ? "fa" : "pi"}
               color={isPro ? COLORS.primaryColor : COLORS.redIdentifier}
@@ -52,8 +52,8 @@ export function Brick360Highlights({
             <Typography.Text
               style={{
                 fontWeight: 500,
-                fontSize: fs.HEADING_2,
-                lineHeight: "110%",
+                fontSize: fs.HEADING_3,
+                lineHeight: "120%",
                 marginTop: 2
               }}
             >
@@ -65,12 +65,12 @@ export function Brick360Highlights({
               dangerouslySetInnerHTML={{ __html: content }}
               className={`reasoning ${isPro ? "" : "con"}`}
               style={{
-                fontSize: fs.HEADING_3,
+                fontSize: fs.HEADING_4,
                 margin: 0,
                 width: vertical ? "100%" : 275,
                 color: COLORS.textColorMedium,
                 textWrap: "wrap",
-                marginTop: 8
+                marginTop: 8,
               }}
             ></div>
           ) : null}
