@@ -2,6 +2,12 @@ import { Flex } from "antd";
 import React from "react";
 import { COLORS } from "../../theme/style-constants";
 
+const hexToRgb = (hex: string): number[] =>
+  [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+const rgbToHex = (r: number, g: number, b: number): string =>
+  `#${[r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")}`.toUpperCase();
+
 interface RatingBarProps {
   value: number;
 }
@@ -20,12 +26,12 @@ const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
 
     // Define color stops
     const colors = [
-      { stop: 0, color: [255, 76, 5] }, // Red-Orange
-      { stop: 25, color: [255, 120, 5] }, // Orange-Yellow
-      { stop: 50, color: [255, 149, 107] }, // Yellow Greenish
-      { stop: 75, color: [248, 237, 140] }, // Greenish
-      { stop: 100, color: [50, 142, 110] }, // Dark Green
-    ];
+      { stop: 0, color: "#f98518" }, // Red-Orange
+      { stop: 30, color: "#f4c119" }, // Orange-Yellow
+      { stop: 50, color: "#eee732" }, // Yellow Greenish
+      { stop: 70, color: "#bdf163" }, // Greenish
+      { stop: 100, color: "#0cd68f" }, // Dark Green
+    ].map(({ stop, color }) => ({ stop, color: hexToRgb(color) }));
 
     // Find two nearest stops
     for (let i = 0; i < colors.length - 1; i++) {
@@ -39,12 +45,12 @@ const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
         const g = interpolate(start.color[1], end.color[1], factor);
         const b = interpolate(start.color[2], end.color[2], factor);
 
-        return `rgb(${r}, ${g}, ${b})`;
+        return rgbToHex(r, g, b);
       }
     }
 
     // Default fallback (should never hit)
-    return "rgb(255, 105, 97)";
+    return "#FF6961";
   };
   return (
     <Flex gap={0.8} style={{ display: "flex" }}>

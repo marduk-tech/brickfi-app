@@ -645,6 +645,26 @@ export function BrickChatCore({
     selectedLvnzyProject,
   ]);
 
+  // When a project is selected, bring its Brick360Inline view's top into view
+  // - first the loader while it loads, then the view once loaded. It renders
+  // below the chat history, so without this the user may land mid-history or
+  // at the view's bottom. The ref sits on whichever of the two is rendered.
+  const brick360InlineTopRef = useRef<HTMLDivElement | null>(null);
+  const brick360InlineShown =
+    !!selectedProject &&
+    (selectedLvnzyProjectLoading || !!selectedLvnzyProject);
+  useEffect(() => {
+    if (!brick360InlineShown) return;
+    brick360InlineTopRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, [
+    brick360InlineShown,
+    selectedLvnzyProjectLoading,
+    selectedProject?.projectId,
+  ]);
+
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [shareLink, setShareLink] = useState<string>();
   const [sharePreparing, setSharePreparing] = useState(false);
@@ -1975,9 +1995,11 @@ export function BrickChatCore({
             )}
 
             {selectedProject && selectedLvnzyProjectLoading ? (
-              <Loader />
+              <div ref={brick360InlineTopRef}>
+                <Loader />
+              </div>
             ) : selectedProject && selectedLvnzyProject ? (
-              <Flex vertical gap={32}>
+              <Flex vertical gap={32} ref={brick360InlineTopRef}>
                 <Brick360Inline
                   key={selectedProject.projectId}
                   slug={selectedProject.projectSlug || ""}
@@ -1996,7 +2018,7 @@ export function BrickChatCore({
                 <Typography.Text
                   style={{
                     fontWeight: 500,
-                    fontSize: fs.HEADING_2,
+                    fontSize: fs.HEADING_3,
                     marginLeft: 12,
                   }}
                 >

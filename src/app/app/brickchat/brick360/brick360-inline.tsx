@@ -396,6 +396,7 @@ export function Brick360Inline({
         opacity: isClosing ? 0 : 1,
         transition: `opacity ${CLOSE_FADE_MS}ms ease`,
         position: "relative",
+        minHeight: 500
       }}
     >
       {onClose ? (
@@ -432,16 +433,19 @@ export function Brick360Inline({
             onClick={() => openGallery()}
           >
             {previewImages.map((m: any, i: number) => (
-              <img
+              <div
                 key={m._id || m.image.url || i}
-                src={m.image.url}
-                alt={m.image.tags?.[0] || "project media"}
+                role="img"
+                aria-label={m.image.tags?.[0] || "project media"}
                 style={{
                   height: "100%",
-                  width: "auto",
+                  minWidth: 110,
                   flexShrink: 0,
                   borderRadius: 8,
-                  objectFit: "cover",
+                  backgroundImage: `url("${m.image.url}")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
                   border: `1px solid ${COLORS.borderColorMedium}`,
                 }}
               />

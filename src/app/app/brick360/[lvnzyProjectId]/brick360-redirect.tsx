@@ -26,12 +26,12 @@ export default function Brick360Redirect({ target }: { target: string }) {
     <Flex
       vertical
       gap={16}
-      style={{ marginTop: 200 }}
+      style={{ marginTop: isMobile ? 100:200 }}
       align="center"
       justify="center"
     >
-      <Loader />
-      <Flex vertical={isMobile} align="center" gap={8}>
+    
+      <Flex vertical={isMobile} align="center" gap={8} style={{padding: isMobile ? "0 16px": 0}}>
         
         <DynamicReactIcon
           iconName="TbNorthStar"
@@ -53,6 +53,7 @@ export default function Brick360Redirect({ target }: { target: string }) {
         </Typography.Text>
         </Flex>
       </Flex>
+        <Loader />
     </Flex>
   );
 }

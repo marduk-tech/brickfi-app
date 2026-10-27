@@ -4,6 +4,12 @@ import { Flex, Typography } from "antd";
 import DynamicReactIcon from "./dynamic-react-icon";
 import { useBrick360FontSize } from "@/app/app/brickchat/brick360/use-font-size";
 
+const hexToRgb = (hex: string): number[] =>
+  [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+const rgbToHex = (r: number, g: number, b: number): string =>
+  `#${[r, g, b].map((c) => c.toString(16).padStart(2, "0")).join("")}`.toUpperCase();
+
 type GradientBarProps = {
   value: number;
   showBadgeOnly?: boolean;
@@ -24,12 +30,12 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
 
     // Define color stops
     const colors = [
-      { stop: 0, color: [255, 76, 5] }, // Red-Orange
-      { stop: 30, color: [251, 120, 5] }, // Orange-Yellow
-      { stop: 55, color: [251, 151, 12] }, // Yellow Greenish
-      { stop: 70, color: [209, 223, 1] }, // Greenish
-      { stop: 100, color: [50, 142, 110] }, // Dark Green
-    ];
+      { stop: 0, color: "#f98518" }, // Red-Orange
+      { stop: 30, color: "#f4c119" }, // Orange-Yellow
+      { stop: 50, color: "#eee732" }, // Yellow Greenish
+      { stop: 70, color: "#bdf163" }, // Greenish
+      { stop: 100, color: "#0cd68f" }, // Dark Green
+    ].map(({ stop, color }) => ({ stop, color: hexToRgb(color) }));
 
     // Find two nearest stops
     for (let i = 0; i < colors.length - 1; i++) {
@@ -43,12 +49,12 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
         const g = interpolate(start.color[1], end.color[1], factor);
         const b = interpolate(start.color[2], end.color[2], factor);
 
-        return `rgb(${r}, ${g}, ${b})`;
+        return rgbToHex(r, g, b);
       }
     }
 
     // Default fallback (should never hit)
-    return "rgb(255, 105, 97)";
+    return "#FF6961";
   };
 
   const getSmileyIcon = (value: number, size?: number): any => {
@@ -96,7 +102,7 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
           color: COLORS.textColorDark,
           backgroundColor: "white",
           padding: "1px 4px",
-          marginBottom: 4,
+          marginBottom: 0,
           borderRadius: 8,
           border: `1px solid ${COLORS.borderColor}`
         }}

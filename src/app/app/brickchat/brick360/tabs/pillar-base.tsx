@@ -1,6 +1,7 @@
 "use client";
 
 import { useBrick360FontSize } from "../use-font-size";
+import { ExclamationCircleFilled } from "@ant-design/icons";
 import { Alert, Flex, Form, Tag, Typography, message } from "antd";
 import { makeStreamingJsonRequest } from "http-streaming-request";
 import { sha256 } from "js-sha256";
@@ -12,6 +13,7 @@ import { useUser } from "@/hooks/use-user";
 import { axiosApiInstance } from "@/libs/axios-api-Instance";
 import {
   baseApiUrl,
+  BRICK360_CATEGORY,
   Brick360CategoryInfo,
   Brick360DataPoints,
   DRIVER_CATEGORIES,
@@ -461,7 +463,17 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
 
           {renderDataPointExtra?.(dataPointKey)}
 
-          <Flex vertical gap={16} style={{ marginBottom: 8, marginTop: 8, backgroundColor: "white", padding: "4px 8px", borderRadius: 8 }}>
+          <Flex
+            vertical
+            gap={16}
+            style={{
+              marginBottom: 8,
+              marginTop: 8,
+              backgroundColor: "white",
+              padding: "4px 8px",
+              borderRadius: 8,
+            }}
+          >
             {(dataPoint?.reasoning || []).map((r: string, i: number) => (
               <Flex key={i} style={{ maxWidth: 850 }}>
                 <div
@@ -645,7 +657,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                         vertical
                         key={key}
                         style={{
-                          paddingLeft: 8,
+                          paddingLeft: 0,
                         }}
                       >
                         <div ref={index === 0 ? ref : null}>
@@ -658,7 +670,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                     ? COLORS.textColorDark
                                     : COLORS.textColorLight,
                                 fontWeight: 500,
-                                marginLeft: 4
+                                marginLeft: 4,
                               }}
                             >
                               {capitalize(
@@ -669,7 +681,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                             </Typography.Text>
                             <RatingBar value={item[1].rating}></RatingBar>
                             {hasMap ? (
-                              <Flex style={{marginLeft: "auto"}}>
+                              <Flex style={{ marginLeft: "auto" }}>
                                 <ReferredLocationChips
                                   items={[
                                     {
@@ -680,16 +692,16 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                         ? "Showing on Map"
                                         : "See on Map",
                                       keepLabelCase: true,
-                                      
                                     },
                                   ]}
                                   selectedKey={isActive ? key : null}
                                   onToggle={() => handleSeeOnMap(key)}
-                                /></Flex>
-                              ) : null}
+                                />
+                              </Flex>
+                            ) : null}
                           </Flex>
                         </div>
-                          {(() => {
+                        {(() => {
                           const actions = renderDataPointActions?.(
                             item[0],
                             mapFocus,
@@ -711,7 +723,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                             </Flex>
                           );
                         })()}
-                      
+
                         {renderDataPointDetail(item[0], item[1])}
                       </Flex>
                     );
@@ -719,18 +731,45 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                 </Flex>
               </Flex>
             ) : (
-              <Flex style={{ marginTop: 16 }}>
-                <Alert
-                  showIcon
-                  message={
-                    noDataPlaceholder ??
-                    (Brick360DataPoints as any)[sc.key]?.noDataPlaceholder
-                  }
-                  type="warning"
-                />
+              <Flex vertical gap={0} align="center" style={{ marginTop: 24, marginBottom: 24}}>
+                <DynamicReactIcon
+                  size={32}
+                  iconName="TbFaceIdError"
+                  iconSet="tb"
+                  color={COLORS.textColorMedium}
+                ></DynamicReactIcon>
+                <Flex
+                  gap={2}
+                  vertical
+                  style={{
+                   marginTop: 16,
+                    marginLeft: 16,
+                    padding: "8px 16px",
+                    backgroundColor: "white",
+                    maxWidth: 400,
+                    borderRadius: 8,
+                    border:`1px dashed ${COLORS.borderColorDark}`
+                  }}
+                >
+                  {categoryKey == BRICK360_CATEGORY.developer ? (
+                    <Typography.Text
+                      style={{
+                        textTransform: "uppercase",
+                        fontSize: FONT_SIZE.SUB_TEXT,
+                        color: COLORS.primaryColor,
+                      }}
+                    >
+                      {lvnzyProject?.originalProjectId?.info?.developerId?.name}
+                    </Typography.Text>
+                  ) : null}
+                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+                    {noDataPlaceholder ??
+                      (Brick360DataPoints as any)[sc.key]?.noDataPlaceholder}
+                  </Typography.Text>
+                </Flex>
               </Flex>
             )}
-            {pillarSources.length ? (
+            {orderedDataPoints.length && pillarSources.length ? (
               <Flex wrap gap={4} align="center" style={{ marginTop: 16 }}>
                 <Flex style={{ marginRight: 4 }}>
                   <DynamicReactIcon
