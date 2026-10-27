@@ -53,6 +53,7 @@ import { BrickMapChat } from "./brick-map-chat";
 import { Brick360Inline } from "./brick360/brick360-inline";
 import { PillarMapConfig } from "./brick360/tabs";
 import { useBrick360FontSize } from "./brick360/use-font-size";
+import BookmarkThreadButton from "./bookmark-thread-button";
 import BrickchatFeedback from "./brickchat-feedback";
 import CollapsibleAnswer from "./collapsible-answer";
 import PinnedProjectResults from "./pinned-project-results";
@@ -1386,6 +1387,12 @@ export function BrickChatCore({
                 threadId={activeThreadId || selectedThreadId}
                 userId={user?._id}
               />
+              {user?._id && (activeThreadId || selectedThreadId) && (
+                <BookmarkThreadButton
+                  threadId={(activeThreadId || selectedThreadId) as string}
+                  userId={user._id}
+                />
+              )}
               {isInternalUser && (activeThreadId || selectedThreadId) && (
                 <ThreadLinksButton
                   threadId={(activeThreadId || selectedThreadId) as string}

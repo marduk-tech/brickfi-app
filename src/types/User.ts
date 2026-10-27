@@ -11,6 +11,7 @@ export interface ChatThread {
   isShareable?: boolean;
   sharedOriginallyBy?: string;
   sharedFromThreadId?: string;
+  isBookmarked?: boolean;
 }
 
 export interface SavedLvnzyProjectCollection {

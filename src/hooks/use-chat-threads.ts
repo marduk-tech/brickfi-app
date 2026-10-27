@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { message } from "antd";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
 import { queryKeys } from "../libs/constants";
 import { ChatThread } from "../types/User";
@@ -29,5 +30,49 @@ export function useFetchChatThreads(userId?: string) {
     queryFn: () => fetchChatThreads(userId!),
     enabled: !!userId,
     refetchOnWindowFocus: false,
+  });
+}
+
+export function useToggleThreadBookmark(userId?: string) {
+  const queryClient = useQueryClient();
+  const queryKey = [queryKeys.getChatThreads, userId];
+
+  return useMutation({
+    mutationFn: async ({
+      threadId,
+      isBookmarked,
+    }: {
+      threadId: string;
+      isBookmarked: boolean;
+    }) => {
+      await axiosApiInstance.post("ai/explore-projects/bookmark", {
+        userId,
+        threadId,
+        isBookmarked,
+      });
+    },
+
+    onMutate: async ({ threadId, isBookmarked }) => {
+      await queryClient.cancelQueries({ queryKey });
+      const previous = queryClient.getQueryData<ChatThread[]>(queryKey);
+      queryClient.setQueryData<ChatThread[]>(queryKey, (threads) =>
+        threads?.map((t) =>
+          t.thread_id === threadId ? { ...t, isBookmarked } : t,
+        ),
+      );
+      return { previous };
+    },
+
+    onError: (error, _vars, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(queryKey, context.previous);
+      }
+      console.error("Failed to update bookmark:", error);
+      message.error("Couldn't update bookmark. Please try again.");
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey });
+    },
   });
 }

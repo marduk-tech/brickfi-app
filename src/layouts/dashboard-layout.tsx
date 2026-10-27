@@ -19,8 +19,69 @@ import {
   HORIZONTAL_PADDING,
 } from "../theme/style-constants";
 import { NavLink } from "../types/Common";
+import { ChatThread } from "../types/User";
 
 const { Header, Content } = Layout;
+
+const ThreadList: React.FC<{
+  threads: ChatThread[];
+  loading: boolean;
+  emptyText: string;
+  onSelect: (threadId: string) => void;
+}> = ({ threads, loading, emptyText, onSelect }) => {
+  if (loading) {
+    return (
+      <Flex align="center" gap={8}>
+        <Spin size="small" />
+        <Typography.Text
+          type="secondary"
+          style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+        >
+          Loading...
+        </Typography.Text>
+      </Flex>
+    );
+  }
+
+  if (!threads.length) {
+    return (
+      <Typography.Text type="secondary" style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+        {emptyText}
+      </Typography.Text>
+    );
+  }
+
+  return (
+    <Flex vertical style={{ maxHeight: 300, overflowY: "auto" }}>
+      {threads.map((thread, index) => (
+        <Flex
+          key={thread.thread_id}
+          vertical
+          gap={2}
+          onClick={() => onSelect(thread.thread_id)}
+          style={{
+            cursor: "pointer",
+            padding: "8px 0",
+            borderBottom:
+              index === threads.length - 1
+                ? "none"
+                : `1px solid ${COLORS.borderColorMedium}`,
+          }}
+        >
+          <Typography.Text ellipsis style={{ fontSize: FONT_SIZE.PARA }}>
+            {thread.thread_title}
+          </Typography.Text>
+          <Typography.Text
+            type="secondary"
+            style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+          >
+            {formatThreadDate(thread.createdAt)}
+          </Typography.Text>
+        </Flex>
+      ))}
+    </Flex>
+  );
+};
 
 export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -40,6 +101,12 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     isLoading: chatThreadsLoading,
     refetch: refetchChatThreads,
   } = useFetchChatThreads(user?._id);
+  const bookmarkedThreads = chatThreads?.filter((t) => t.isBookmarked) ?? [];
+
+  const openThread = (threadId: string) => {
+    setSidebarOpen(false);
+    router.push(`/app/brickchat/${encodeURIComponent(threadId)}`);
+  };
 
   const { lvnzyProjectId, collectionId } = useParams<{
     lvnzyProjectId: string;
@@ -330,65 +397,27 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   defaultActiveKey={[]}
                   items={[
                     {
+                      key: "bookmarked",
+                      label: "Bookmarked",
+                      children: (
+                        <ThreadList
+                          threads={bookmarkedThreads}
+                          loading={chatThreadsLoading}
+                          emptyText="No bookmarked chats yet."
+                          onSelect={openThread}
+                        />
+                      ),
+                    },
+                    {
                       key: "recent-chats",
                       label: "Recent Chats",
-                      children: chatThreadsLoading ? (
-                        <Flex align="center" gap={8}>
-                          <Spin size="small" />
-                          <Typography.Text
-                            type="secondary"
-                            style={{ fontSize: FONT_SIZE.SUB_TEXT }}
-                          >
-                            Loading...
-                          </Typography.Text>
-                        </Flex>
-                      ) : !chatThreads?.length ? (
-                        <Typography.Text
-                          type="secondary"
-                          style={{ fontSize: FONT_SIZE.SUB_TEXT }}
-                        >
-                          No recent chats yet.
-                        </Typography.Text>
-                      ) : (
-                        <Flex
-                          vertical
-                          style={{ maxHeight: 300, overflowY: "auto" }}
-                        >
-                          {chatThreads.map((thread, index) => (
-                            <Flex
-                              key={thread.thread_id}
-                              vertical
-                              gap={2}
-                              onClick={() => {
-                                setSidebarOpen(false);
-                                router.push(
-                                  `/app/brickchat/${encodeURIComponent(thread.thread_id)}`,
-                                );
-                              }}
-                              style={{
-                                cursor: "pointer",
-                                padding: "8px 0",
-                                borderBottom:
-                                  index === chatThreads.length - 1
-                                    ? "none"
-                                    : `1px solid ${COLORS.borderColorMedium}`,
-                              }}
-                            >
-                              <Typography.Text
-                                ellipsis
-                                style={{ fontSize: FONT_SIZE.PARA }}
-                              >
-                                {thread.thread_title}
-                              </Typography.Text>
-                              <Typography.Text
-                                type="secondary"
-                                style={{ fontSize: FONT_SIZE.SUB_TEXT }}
-                              >
-                                {formatThreadDate(thread.createdAt)}
-                              </Typography.Text>
-                            </Flex>
-                          ))}
-                        </Flex>
+                      children: (
+                        <ThreadList
+                          threads={chatThreads ?? []}
+                          loading={chatThreadsLoading}
+                          emptyText="No recent chats yet."
+                          onSelect={openThread}
+                        />
                       ),
                     },
                   ]}
