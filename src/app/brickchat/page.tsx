@@ -1,5 +1,6 @@
 import BrickAssistLandingV2 from "@/custom-pages/landing/brick-assist-landing-v2";
 import BrickChat from "@/custom-pages/landing/brick-chat";
+import BrickChatv2 from "@/custom-pages/landing/brick-chat-v2";
 import { SEO_CONTENT } from "@/libs/constants";
 import { Metadata } from "next";
 import { headers } from "next/headers";
@@ -90,5 +91,5 @@ export default async function BrickAssistPage() {
   const headersList = await headers();
   const ua = headersList.get("user-agent") ?? "";
   const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
-  return <BrickChat initialIsMobile={isMobileSSR} />;
+  return <BrickChatv2 initialIsMobile={isMobileSSR} />;
 }

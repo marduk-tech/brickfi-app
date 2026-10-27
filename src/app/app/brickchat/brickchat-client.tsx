@@ -1570,13 +1570,14 @@ export function BrickChatCore({
             collapseOnSelect={true}
           />
           {showWelcome ? (
-            <Flex vertical>
-              <Flex vertical>
+            <Flex vertical style={{marginTop:32}}>
+              <Flex vertical align="center">
                 <Typography.Text
                   style={{
                     marginBottom: 0,
-                    fontSize: FONT_SIZE.HEADING_2,
-                    fontWeight: 600,
+                    fontSize: FONT_SIZE.HEADING_1,
+                    fontWeight: 200,
+                    textAlign:"left",
                   }}
                 >
                   Welcome to Brickfi
@@ -1584,8 +1585,11 @@ export function BrickChatCore({
                 <Typography.Text
                   style={{
                     marginBottom: 24,
-                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontSize: FONT_SIZE.HEADING_4,
                     color: COLORS.textColorLight,
+                    textAlign:"center",
+                    lineHeight: "100%",
+                    maxWidth: isMobile ? "95%": "70%"
                   }}
                 >
                   Start your home search with Brickfi. Just enter your

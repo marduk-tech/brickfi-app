@@ -426,26 +426,22 @@ export function Brick360Inline({
             gap={8}
             style={{
               width: "100%",
-              height: isMobile ? 100: 125,
+              height: isMobile ? 75: 100,
               overflowX: "scroll",
               scrollbarWidth: "none",
             }}
             onClick={() => openGallery()}
           >
             {previewImages.map((m: any, i: number) => (
-              <div
+              <img
                 key={m._id || m.image.url || i}
-                role="img"
-                aria-label={m.image.tags?.[0] || "project media"}
+                src={m.image.url}
+                alt={m.image.tags?.[0] || "project media"}
                 style={{
                   height: "100%",
-                  minWidth: 110,
+                  width: "auto",
                   flexShrink: 0,
                   borderRadius: 8,
-                  backgroundImage: `url("${m.image.url}")`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
                   border: `1px solid ${COLORS.borderColorMedium}`,
                 }}
               />
@@ -480,7 +476,17 @@ export function Brick360Inline({
    
 
       {/* tab bar - see tabBarRef above for why it isn't antd's */}
-      <div ref={tabBarRef} role="tablist" className={styles.tabBar}>
+      <div
+        ref={tabBarRef}
+        role="tablist"
+        className={styles.tabBar}
+        style={{
+          // shadow along the bottom edge, fading upwards into the bar
+          boxShadow: "inset 0 -4px 4px -4px rgba(0, 0, 0, 0.15)",
+          marginBottom: 16,
+          marginTop: 16,
+        }}
+      >
         {tabItems.map((item) => (
           <button
             key={item.key}
