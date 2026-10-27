@@ -1,7 +1,11 @@
 "use client";
 
-import { CaretRightOutlined, LoadingOutlined } from "@ant-design/icons";
-import { Collapse, Flex, Typography } from "antd";
+import {
+  CaretRightOutlined,
+  HeartFilled,
+  LoadingOutlined,
+} from "@ant-design/icons";
+import { Badge, Collapse, Flex, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { safeStorage } from "@/libs/browser-utils";
 import { Loader } from "@/components/common/loader";
@@ -85,6 +89,7 @@ export default function PinnedProjectResults({
         zIndex: 2,
         backgroundColor: "white",
         paddingBottom: 12,
+        marginTop:16
       }}
     >
       {description && !hasChatStarted ? (
@@ -130,7 +135,7 @@ export default function PinnedProjectResults({
               height: 20,
               flexShrink: 0,
               borderRadius: "50%",
-              backgroundColor: COLORS.primaryColor,
+              backgroundColor: COLORS.textColorMedium,
             }}
           >
             <CaretRightOutlined
@@ -164,20 +169,29 @@ export default function PinnedProjectResults({
                     }
                   />
                 ) : (
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.SUB_TEXT,
-                      color: COLORS.textColorMedium,
-                      backgroundColor: COLORS.bgColorMedium,
-                      borderRadius: 4,
-                      width: 18,
-                      height: 18,
-                      textAlign: "center",
-                      fontWeight: 500,
+                  <Badge
+                    count={results.length}
+                    showZero
+                    size="small"
+                    color={COLORS.textColorMedium}
+                    offset={[2, 0]}
+                    // smaller than the small badge's default 12px, with the
+                    // circle shrunk to match
+                    styles={{
+                      indicator: {
+                        fontSize: 7.2,
+                        color: "white",
+                        height: 12,
+                        minWidth: 12,
+                        lineHeight: "12px",
+                        padding: "0 2px",
+                      },
                     }}
                   >
-                    {results.length}
-                  </Typography.Text>
+                    <HeartFilled
+                      style={{ fontSize: 18, color: COLORS.LANDING.PINK }}
+                    />
+                  </Badge>
                 )}
               </Flex>
             ),

@@ -1592,8 +1592,7 @@ export function BrickChatCore({
                     maxWidth: isMobile ? "95%": "70%"
                   }}
                 >
-                  Start your home search with Brickfi. Just enter your
-                  requirement and let Brickfi do the work.
+                  What would you like to ask me today ?
                 </Typography.Text>
               </Flex>
 
