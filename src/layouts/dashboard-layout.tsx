@@ -76,6 +76,7 @@ const ThreadList: React.FC<{
             style={{ fontSize: FONT_SIZE.SUB_TEXT }}
           >
             {formatThreadDate(thread.createdAt)}
+            {thread.archivedAt ? " · Archived" : ""}
           </Typography.Text>
         </Flex>
       ))}
