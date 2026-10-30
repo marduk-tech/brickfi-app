@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusOutlined, SendOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   Carousel,
@@ -312,7 +312,11 @@ export default function BrickChatv2({
   const isSearchQueryValid = /\S+\s+\S+/.test(searchQuery);
 
   const submitSearch = () => {
-    if (!isSearchQueryValid) return;
+    // the button is always enabled - send the user back to the input instead
+    if (!isSearchQueryValid) {
+      searchInputRef.current?.focus();
+      return;
+    }
     const query = searchQuery.trim();
     captureAnalyticsEvent("brickchat-landing-search", { query });
     safeWindow.location.href = `/app/brickchat?q=${encodeURIComponent(query)}`;
@@ -320,18 +324,21 @@ export default function BrickChatv2({
 
   const getSearchInput = () => {
     return (
-      <div
+      // desktop: button beside the input; mobile: on its own line below it
+      <Flex
+        vertical={isMobile}
+        gap={16}
+        align={isMobile ? "stretch" : "flex-end"}
         style={{
-          position: "relative",
           marginTop: 32,
           width: "100%",
-          maxWidth: 800,
+          maxWidth: 900,
         }}
       >
         <Input.TextArea
           ref={searchInputRef}
           className={styles.searchInput}
-          rows={2}
+          rows={3}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onPressEnter={(e) => {
@@ -340,15 +347,14 @@ export default function BrickChatv2({
             e.preventDefault();
             submitSearch();
           }}
-          placeholder="Describe your Dream Home Today.."
+          placeholder="What kind of home are you looking for?"
           aria-label="Search properties"
           variant="borderless"
           style={{
             borderRadius: 24,
             backgroundColor: "white",
             boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
-            // right padding leaves room for the send button
-            padding: "16px 64px 16px 24px",
+            padding: "16px 24px",
             width: "100%",
             resize: "none",
             fontSize: isMobile ? FONT_SIZE.HEADING_4: FONT_SIZE.HEADING_3,
@@ -358,18 +364,20 @@ export default function BrickChatv2({
             fontWeight: 500,
           }}
         />
-        {searchQuery ? (
-          <Button
-            type="primary"
-            shape="round"
-            icon={<SendOutlined />}
-            disabled={!isSearchQueryValid}
-            onClick={submitSearch}
-            aria-label="Send"
-            style={{ position: "absolute", right: 12, bottom: 12, marginLeft: 4 }}
-          />
-        ) : null}
-      </div>
+        <Button
+          type="primary"
+          shape="round"
+          icon={<ArrowRightOutlined />}
+          iconPosition="end"
+          onClick={submitSearch}
+          style={{ flexShrink: 0,  }}
+        >
+          <Flex align="center" gap={8} style={{padding: "12px 4px"}}>
+            Explore Brickfi
+            <FlippingIcons count={2} size={14} color={COLORS.primaryColor} />
+          </Flex>
+        </Button>
+      </Flex>
     );
   };
 
@@ -382,12 +390,14 @@ export default function BrickChatv2({
         className={styles.queryMarquee}
         style={{
           // pull up into the section's bottom padding: 16px below the input
-          marginTop: -8,
+          marginTop: 16,
           marginBottom: isMobile ? 32 : 0,
           display: "flex",
           flexDirection: "column",
-          gap: 16,
-          padding: "4px 0 8px",
+          gap: 24,
+          // a dark band behind the (white) chips
+          padding: "24px 0",
+          backgroundColor: COLORS.textColorDark,
         }}
       >
         {QUERY_ROWS.map((row, rowIndex) => (
@@ -396,10 +406,9 @@ export default function BrickChatv2({
             className={styles.queryMarqueeRow}
             style={{
               // keep both rows moving at the same speed despite different
-              // widths (mobile chips are two lines, so about half as wide)
+              // widths (chips are two lines, so about half the text wide)
               animationDuration: `${
-                row.reduce((n, q) => n + q.text.length, 0) *
-                (isMobile ? 0.1 : 0.15)
+                row.reduce((n, q) => n + q.text.length, 0) * 0.1
               }s`,
             }}
           >
@@ -417,12 +426,12 @@ export default function BrickChatv2({
                 style={{
                   flexShrink: 0,
                   display: "inline-flex",
-                  // mobile: icons stacked below the text
-                  flexDirection: isMobile ? "column-reverse" : "row",
-                  alignItems: isMobile ? "flex-start" : "center",
-                  gap: isMobile ? 6 : 8,
-                  padding: isMobile ? "8px 12px" : "6px 12px 6px 6px",
-                  borderRadius: isMobile ? 20 : 999,
+                  // icons stacked below the text
+                  flexDirection: "column-reverse",
+                  alignItems: "flex-start",
+                  gap: 6,
+                  padding: "8px 12px",
+                  borderRadius: 20,
                   border: "none",
                   backgroundColor: "white",
                   boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
@@ -431,7 +440,7 @@ export default function BrickChatv2({
                   fontWeight: 500,
                   lineHeight: "130%",
                   textAlign: "left",
-                  whiteSpace: isMobile ? "normal" : "nowrap",
+                  whiteSpace: "normal",
                   cursor: "pointer",
                 }}
               >
@@ -455,13 +464,11 @@ export default function BrickChatv2({
                   ))}
                 </Flex>
                 <span
-                  style={
-                    // mobile: sized to about half the text so it wraps to
-                    // two lines without cutting anything off
-                    isMobile
-                      ? { width: `${Math.ceil(q.text.length / 2) + 2}ch` }
-                      : undefined
-                  }
+                  style={{
+                    // sized to about half the text so it wraps to two lines
+                    // without cutting anything off
+                    width: `${Math.ceil(q.text.length / 2) + 2}ch`,
+                  }}
                 >
                   {q.text}
                 </span>
@@ -785,7 +792,7 @@ export default function BrickChatv2({
                   margin: 0,
                 }}
               >
-                The Only Broker You Need<br></br> For Your Home Search
+                Find The Home You Need<br></br> Without Brokers or Spam
               </h1>
             </Flex>
           ),
@@ -801,20 +808,18 @@ export default function BrickChatv2({
                   lineHeight: "120%",
                 }}
               >
-                Describe your dream home in your own words. Our AI scans
-                thousands of properties and data points to deliver tailored
-                recommendations and detailed analysis.
+                Tell Brickfi what you're looking for. Discover matching properties across Bangalore and get 360 assessment around builder, property, location and pricing.
               </Typography.Text>
               <Flex wrap gap={8} style={{ marginTop: 16 }}>
                 {(
                   [
                     {
-                      label: "AI Matchmaking",
+                      label: "2000+ Properties",
                       iconName: "PiMagicWand",
                       iconSet: "pi",
                     },
                     {
-                      label: "Legit Data Source",
+                      label: "Verified Data",
                       iconName: "MdVerifiedUser",
                       iconSet: "md",
                     },
@@ -830,7 +835,9 @@ export default function BrickChatv2({
                     style={{
                       margin: 0,
                       color: COLORS.LANDING.LIGHT_PINK,
-                      backgroundColor: COLORS.primaryColor,
+                      backgroundColor: COLORS.LANDING.PINK,
+                      border: 0,
+                      borderRadius: 8
                     }}
                   >
                     <Flex align="center" gap={4}>
@@ -1000,7 +1007,7 @@ export default function BrickChatv2({
                 What makes Brickfi <span style={{color: "white", backgroundColor: COLORS.primaryColor, padding: "0 4px"}}>Different ?</span> 
               </h2>
              <Typography.Text style={{fontSize: FONT_SIZE.HEADING_2, color: "white"}}>
-              Brickfi is not your average <span >neighborhood broker</span> or a yet another <span>good-for-nothing property website</span>. 
+              Brickfi is not your average <span >neighborhood broker</span> or a yet another <span>"Yellow Pages" styled websites</span>. 
               Brickfi is the best in class real estate platform that believes in <span>data, unbiased advise</span> and absolute <span >buyer side assistance</span>. 
 
             </Typography.Text>
@@ -1391,12 +1398,13 @@ export default function BrickChatv2({
                   }}
                 >
                   <Flex align="center" gap={16}>
-                    Describe You Dream Home Today
+                    Explore Brickfi
                     <FlippingIcons
                       count={2}
                       size={16}
                       color={COLORS.primaryColor}
                     />
+                    <ArrowRightOutlined />
                   </Flex>
                 </Button>
               </Flex>

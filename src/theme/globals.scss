@@ -331,3 +331,13 @@ input#mobileNumber {
 .map-card-popup ::-webkit-scrollbar {
   display: none;
 }
+
+/* Scrolls without a visible scrollbar, so the scrollbar takes no width -
+   e.g. the brickchat offering modal's body */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
