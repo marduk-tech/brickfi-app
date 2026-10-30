@@ -221,7 +221,7 @@ const linkLocationRefs = (text: string) =>
 const fetchThreadHistory = async (
   owner: { userId: string } | { guestId: string },
   threadId: string,
-): Promise<ChatMessage[]> => {
+): Promise<{ history: ChatMessage[]; archived: boolean }> => {
   const res = await fetch(`${baseApiUrl}ai/explore-projects/history`, {
     method: "POST",
     cache: "no-store",
@@ -233,7 +233,7 @@ const fetchThreadHistory = async (
   });
   if (!res.ok) throw new Error(`history ${res.status}`);
   const json = await res.json();
-  return json?.data || [];
+  return { history: json?.data || [], archived: !!json?.meta?.archived };
 };
 
 // Flag a thread shareable
@@ -396,6 +396,10 @@ export function BrickChatCore({
   const [showMobileMap, setShowMobileMap] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [claimingGuestThread, setClaimingGuestThread] = useState(false);
+  // set when the open thread is archived (read-only)
+  const [archivedThreadId, setArchivedThreadId] = useState<string | null>(
+    null,
+  );
 
   const isGuest = !user?._id && !hasStoredUser();
   const isInternalUser = !!user?.role && INTERNAL_ROLES.includes(user.role);
@@ -686,6 +690,10 @@ export function BrickChatCore({
   // Independent of PinnedProjectResults (always rendered above this, see
   // the JSX below) - shows whenever there's no conversation actually in
   // progress, regardless of whether a pinned/default project list exists.
+  const isArchivedThread =
+    !!archivedThreadId &&
+    archivedThreadId === (activeThreadId || selectedThreadId);
+
   const showWelcome =
     !selectedThreadId &&
     !activeThreadId &&
@@ -802,11 +810,16 @@ export function BrickChatCore({
       setThreadyHistoryLoading(true);
 
       try {
-        const history = await fetchThreadHistory(owner, selectedThreadId);
+        const { history, archived } = await fetchThreadHistory(
+          owner,
+          selectedThreadId,
+        );
 
         if (cancelled) {
           return;
         }
+
+        setArchivedThreadId(archived ? selectedThreadId : null);
 
         if ("guestId" in owner) scheduleLoginPrompt();
 
@@ -963,7 +976,7 @@ export function BrickChatCore({
       return;
     }
 
-    if (claimingGuestThread) return;
+    if (claimingGuestThread || isArchivedThread) return;
 
     if (!user?._id && !isGuest) {
       message.info("Loading your account, please try again in a moment.");
@@ -1035,6 +1048,15 @@ export function BrickChatCore({
           // put the question back so it's there after they sign in
           form.setFieldsValue({ question });
           openLoginPrompt();
+          return;
+        }
+      }
+
+      // archived while open
+      if (res.status === 410) {
+        const json = await res.json().catch(() => null);
+        if (json?.archived && activeThreadId) {
+          setArchivedThreadId(activeThreadId);
           return;
         }
       }
@@ -1512,12 +1534,39 @@ export function BrickChatCore({
                 />
               </Tooltip>
             </Flex>
+            {isArchivedThread && (
+              <Flex
+                align="center"
+                justify="space-between"
+                gap={8}
+                style={{ marginBottom: 8 }}
+              >
+                <Typography.Text
+                  style={{
+                    fontSize: FONT_SIZE.PARA,
+                    color: COLORS.textColorMedium,
+                  }}
+                >
+                  This conversation is archived and can no longer be continued.
+                </Typography.Text>
+                <Button size="small" onClick={handleNewChat}>
+                  New chat
+                </Button>
+              </Flex>
+            )}
             <Form.Item name="question" style={{ marginBottom: 0 }}>
               <Input
-                placeholder="Search for projects... (e.g., 'apartments near Whitefield')"
+                placeholder={
+                  isArchivedThread
+                    ? "Start a new chat to ask more"
+                    : "Search for projects... (e.g., 'apartments near Whitefield')"
+                }
                 size="large"
                 disabled={
-                  chatLoading || threadyHistoryLoading || claimingGuestThread
+                  chatLoading ||
+                  threadyHistoryLoading ||
+                  claimingGuestThread ||
+                  isArchivedThread
                 }
                 suffix={
                   <Button
@@ -1527,7 +1576,8 @@ export function BrickChatCore({
                     disabled={
                       chatLoading ||
                       threadyHistoryLoading ||
-                      claimingGuestThread
+                      claimingGuestThread ||
+                      isArchivedThread
                     }
                     style={{ color: COLORS.primaryColor }}
                   />

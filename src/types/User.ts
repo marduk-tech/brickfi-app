@@ -12,6 +12,7 @@ export interface ChatThread {
   sharedOriginallyBy?: string;
   sharedFromThreadId?: string;
   isBookmarked?: boolean;
+  archivedAt?: string | null;
 }
 
 export interface SavedLvnzyProjectCollection {
