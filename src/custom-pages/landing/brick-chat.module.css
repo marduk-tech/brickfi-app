@@ -219,3 +219,27 @@
     animation: none;
   }
 }
+
+/* FAQ answers, rendered from markdown */
+.faqAnswer p,
+.faqAnswer ul,
+.faqAnswer ol {
+  margin: 0 0 12px;
+}
+
+.faqAnswer ul,
+.faqAnswer ol {
+  padding-left: 20px;
+}
+
+.faqAnswer li {
+  margin-bottom: 6px;
+}
+
+.faqAnswer > :last-child {
+  margin-bottom: 0;
+}
+
+.faqAnswer strong {
+  font-weight: 600;
+}

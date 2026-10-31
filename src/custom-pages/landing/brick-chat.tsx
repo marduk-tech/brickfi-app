@@ -12,7 +12,9 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { CarouselRef } from "antd/es/carousel";
 import type { TextAreaRef } from "antd/es/input/TextArea";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
@@ -27,6 +29,33 @@ import DynamicReactIcon, {
 } from "@/components/common/dynamic-react-icon";
 import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import styles from "./brick-chat.module.css";
+
+const FAQs = [
+{
+"question": "How is Brickfi different from other brokers and channel partners?",
+"answer": "\nTraditional brokers and channel partners typically work with a limited set of builders and projects, and their recommendations are often influenced by the inventory they represent and associated commissions or incentives. Property listing portals offer wider catalogues, but their visibility is often driven by paid promotions and advertising rather than buyer requirements.\n\nBrickfi takes a different approach by starting with your budget, preferred locations, lifestyle, and investment objectives, using custom-trained AI to scan all RERA registered projects. Shortlisted projects are then evaluated through our Brick360 intelligence engine, covering:\n* Builder credibility\n* Neighbourhood potential\n* Pricing\n* Project specifications\n* Potential risks\n\nInstead of restricting you to an agent's inventory or marketing budgets, Brickfi gives you a comprehensive, buyer-first view of the market to help you find and evaluate properties that make sense for you.\n"
+},
+{
+"question": "Is Brickfi free for customers? What is included in the services?",
+"answer": "\nYes, customers can use Brickfi to discover properties, explore recommendations, and access property insights without paying for the discovery experience.\n\nOur services include:\n* **Personalised property discovery:** Find properties based on your budget, preferred locations, configuration, workplace, and other requirements.\n* **Property shortlisting:** Get recommendations with clear explanations of how each property matches your requirements.\n* **Brick360 Property Reports:** Understand a project's strengths, limitations, and important considerations through detailed research on the builder, location, pricing, and project.\n* **Expert consultation:** Speak to our team to clarify doubts, discuss shortlisted properties, and plan site visits.\n* **End-to-end buying assistance:** Get support throughout the buying journey from shortlisting to site visits, legal checks, home loan assistance, cost assessment, and more.\n\nAny charges applicable to specific services or third-party engagements (like legal checks in specific cases) will be communicated upfront.\n"
+},
+{
+"question": "How do you evaluate a neighbourhood?",
+"answer": "\nEvaluating a neighbourhood requires looking at multiple parameters to understand how suitable an area is for your lifestyle and daily needs:\n\n* **Connectivity:** Access to major roads, metro stations, public transport, and important employment hubs.\n* **Social infrastructure:** Proximity to schools, hospitals, supermarkets, shopping areas, and other essential facilities.\n* **Liveability:** Traffic conditions, road access, water availability, surrounding development, noise, and other factors that influence everyday living.\n* **Infrastructure and development:** Existing infrastructure as well as planned roads, metro connectivity, and other developments that could influence the area.\n* **Surrounding environment:** Land use, nearby commercial or industrial activity, open spaces, and potential environmental concerns.\n\nWe bring these insights together to help you understand the advantages and disadvantages of a neighbourhood, rather than judging it on its popularity or marketing claims alone.\n"
+},
+{
+"question": "How do you know if an area has good growth potential?",
+"answer": "\nAn area's growth potential depends on factors that influence its future demand, connectivity, and liveability, rather than just past price increases. Our assessment considers:\n\n* **Upcoming infrastructure:** Planned metro lines, road expansions, expressways, and other connectivity improvements.\n* **Employment cluster:** Existing and emerging IT parks, business districts, and employment hubs that drive housing demand.\n* **Social infrastructure:** Development of schools, hospitals, retail, and other facilities making an area more attractive to residents.\n* **Residential development:** New projects, developer activity, supply pipeline, and overall pace of development.\n* **Price trends:** Historical price movement and comparison with neighbouring micro-markets to understand if current prices already reflect expected growth.\n* **Rental demand:** Tenant demand, proximity to employment hubs, and potential rental yields.\n\nGrowth potential is an assessment, not a guarantee of future price appreciation. Planned infrastructure and proposed developments are also distinguished from projects already operational.\n"
+},
+{
+"question": "How do you check the credibility of a builder?",
+"answer": "\nA builder's reputation is critical before purchasing a property. We evaluate developers by examining:\n\n* **Delivery track record:** Whether earlier projects were delivered on time or experienced significant delays, and the ratio of on-time vs. delayed projects.\n* **Customer complaints:** Available complaints, disputes, and litigation involving the builder or its projects.\n* **Regulatory compliance:** Relevant RERA registrations, project approvals, and regulatory records.\n* **Construction and project quality:** The quality of completed developments, maintenance standards, and overall execution.\n* **Financial and business background:** Available information about the promoter, associated entities, and business track record.\n\nWe pull information from legitimate sources like RERA, public documents, and project disclosures to help you understand a builder's track record and identify potential red or green flags.\n"
+},
+{
+"question": "How do I know if the price quoted for a flat is fair?",
+"answer": "\nA property's quoted price should be evaluated against comparable properties and the value it offers, rather than just the price per square foot. What we analyse includes:\n\n* **Comparable properties:** Prices of similar projects in the same micro-market, considering configuration, size, development stage, and positioning.\n* **Location premium:** Whether the property commands a reasonable premium based on connectivity, infrastructure, and neighbourhood quality.\n* **Builder premium:** Whether the developer's reputation, construction quality, and delivery track record justify the price.\n* **Project specifications:** Amenities, open spaces, density, construction quality, and other features influencing property value.\n* **Price trends:** How the quoted price compares with historical trends and competing projects in the area.\n* **All-inclusive cost:** Base price, floor rise, preferential location charges, parking, taxes, registration, and other applicable costs.\n\nThe goal is to help you understand what you are paying for, whether any premium is justified, and where there is room to negotiate.\n"
+}
+];
 
 const SAMPLE_QUERIES: {
   text: string;
@@ -568,11 +597,16 @@ export default function BrickChat({
     );
   };
 
-  const getFaqText = (text: string | ReactNode) => {
+  // FAQ answers are markdown (paragraphs, bullet lists, bold) - a div, not a
+  // p, since the rendered markdown brings its own p/ul elements
+  const getFaqText = (markdown: string) => {
     return (
-      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_4 }}>
-        {typeof text == "string" ? text : <>{text}</>}
-      </p>
+      <div
+        className={styles.faqAnswer}
+        style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_4 }}
+      >
+        <Markdown remarkPlugins={[remarkGfm]}>{markdown}</Markdown>
+      </div>
     );
   };
   const faqPanelStyle = {
@@ -582,78 +616,12 @@ export default function BrickChat({
     border: "none",
     borderBottom: `1px solid ${COLORS.textColorVeryLight}`,
   };
-  const faqs: CollapseProps["items"] = [
-    {
-      key: "1",
-      label: getFaqHeading("How do I search for a home on Brickfi?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Describe what you're looking for in plain English — budget, location, priorities, anything that matters to you and your family. No filters, no forms.",
-      ),
-    },
-    {
-      key: "2",
-      label: getFaqHeading("How does the AI decide what to recommend?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "It matches your stated priorities against live projects across Bangalore and shortlists what genuinely fits — not what's being pushed the hardest.",
-      ),
-    },
-    {
-      // TODO: confirm this claim is fully accurate before shipping.
-      key: "3",
-      label: getFaqHeading(
-        "Do you have any tie-up with builders or brokers that affects recommendations?",
-      ),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "No — recommendations are matched to your criteria, not to any builder or broker arrangement.",
-      ),
-    },
-    {
-      key: "4",
-      label: getFaqHeading("Is the Discovery tool free to use?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Yes, searching and getting shortlisted recommendations is free.",
-      ),
-    },
-    {
-      key: "5",
-      label: getFaqHeading(
-        "What is the Brick360 Report, and where does the data come from?",
-      ),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "An independent report for any RERA-registered property in Bangalore, covering legal standing, pricing, builder history, layout, and location — sourced from verified government and public records like RERA, BBMP, Open City, and Open Street, not brochures.",
-      ),
-    },
-    {
-      // TODO: add the current free-report limit and turnaround time before shipping.
-      key: "6",
-      label: getFaqHeading("Is the report free, and how long does it take?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "You can generate free reports for RERA-registered properties in Bangalore.",
-      ),
-    },
-    {
-      key: "7",
-      label: getFaqHeading("What kind of red flags can the report reveal?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Legal issues like disputed land or unclear title, past builder delays and complaints, pricing out of line with the market, and location concerns no listing would mention — like nearby drains, high-tension lines, or transit noise.",
-      ),
-    },
-    {
-      key: "8",
-      label: getFaqHeading("Can I compare multiple properties side by side?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Yes — generate reports for different projects and compare them directly on price, legal standing, builder history, and location.",
-      ),
-    },
-  ];
+  const faqs: CollapseProps["items"] = FAQs.map((faq, i) => ({
+    key: String(i + 1),
+    label: getFaqHeading(faq.question),
+    style: faqPanelStyle,
+    children: getFaqText(faq.answer),
+  }));
 
   const renderProcessStep = (data: any) => {
     const padding = isMobile ? 8 : 16;
