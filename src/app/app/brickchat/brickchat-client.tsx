@@ -24,6 +24,7 @@ import {
   queryKeys,
 } from "@/libs/constants";
 import { addProjectToDefaultCollection } from "@/libs/lvnzy-helper";
+import { ProjectPhaseTimeline } from "@/libs/project-status";
 import { getLvnzyProjectDisplayCard } from "@/queries/lvnzy-projects";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { useQueryClient } from "@tanstack/react-query";
@@ -63,6 +64,7 @@ import ReferredLocationChips, {
 } from "./referred-location-chips";
 import ThreadLinksButton from "./thread-links-button";
 import StaticQueries from "./static-queries";
+import { ISurroundingElement } from "@/types/Project";
 import {
   ActiveOfferingFlow,
   FollowupOffering,
@@ -70,9 +72,11 @@ import {
   OfferingFlowContext,
   OfferingFlowDialog,
   OfferingTicket,
+  OfferingTicketCard,
+  OfferingTicketUpdate,
   threadTicketsQueryKey,
   useThreadTickets,
-} from "./offering-flows";
+} from "./offerings";
 
 export interface ProjectResult {
   projectId: string;
@@ -86,6 +90,8 @@ export interface ProjectResult {
   projectUnitTypes?: Array<number>;
   projectAvgSquareFootPrice?: number;
   projectCorridor?: string;
+  projectMicroPocket?: string;
+  projectTimelines?: ProjectPhaseTimeline[];
   projectHomeTypes?: Array<string>;
   sizeBuiltupMin?: number;
   rankScore: number;
@@ -115,7 +121,9 @@ interface ResolvedLocation {
   lat: number;
   lng: number;
   /** empty for a direct-maps-geocoded landmark - see summarizeResolvedLocation in shared.js. */
-  type: "driver" | "locality" | "corridor" | "micropocket" | "";
+  type: "driver" | "locality" | "corridor" | "micropocket" | "surroundings" | "";
+  /** "surroundings" only - the project's surrounding elements (id is then the project's id) - see project-surroundings.js. */
+  data?: ISurroundingElement[];
 }
 
 interface ExploreAnswer {
@@ -138,10 +146,15 @@ interface ExploreAnswer {
   resolvedLocations?: ResolvedLocation[];
   /** This turn's id in the backend's turn log - sent with feedback on this answer (see tagAnswerWithTurnId). Absent on answers saved before turns were tagged. */
   turnId?: string;
+  /** Requests raised from this answer's offering CTA - noted on it by the backend (see noteTicketOnAnswer). When set, the answer shows the request's card instead of the CTA buttons. */
+  offeringTickets?: { ticketId: string; offeringKey: string }[];
+  /** Set on a message the backend posts when ops updates a request (see postTicketUpdates) - shown as request cards above the message, whose text is ops' reply (empty for a status-only change). */
+  ticketUpdates?: OfferingTicketUpdate[];
 }
 
 interface ChatMessage {
-  question: string;
+  /** null on a message posted outside a turn (ticket status updates) */
+  question: string | null;
   answer: ExploreAnswer;
   steps?: TimelineStep[];
   durationMs?: number;
@@ -167,7 +180,13 @@ const getReferredLocationItems = (
       : `landmark:${loc.name}:${loc.lat}:${loc.lng}`;
     if (seenKeys.has(key)) return;
     seenKeys.add(key);
-    items.push({ key, id: loc.id, type: loc.type, name: loc.name });
+    items.push({
+      key,
+      id: loc.id,
+      type: loc.type,
+      name: loc.name,
+      data: loc.data,
+    });
   });
 
   (answer.brickfiDriverIds || []).forEach((id) => {
@@ -520,6 +539,11 @@ export function BrickChatCore({
   const focusedLocalityIds = focusedIdsOfType("locality");
   const focusedCorridorIds = focusedIdsOfType("corridor");
   const focusedMicroPocketIds = focusedIdsOfType("micropocket");
+  // surroundings chips carry their elements inline (item.data) rather than
+  // an id to fetch - every selected one's elements are plotted together
+  const focusedSurroundingElements = focusedReferredLocations
+    .filter((i) => i.type === "surroundings")
+    .flatMap((i) => i.data || []);
 
   // Default to the drivers relevant to the current results list; once any
   // chip is selected the map shows only the selected drivers (none if only
@@ -1271,7 +1295,7 @@ export function BrickChatCore({
     }
   };
 
-  // --- Brickfi offerings (see offering-flows.tsx) ---
+  // --- Brickfi offerings (see offerings/) ---
 
   // the CTA flow open in its dialog, if any
   const [activeOfferingFlow, setActiveOfferingFlow] =
@@ -1682,7 +1706,11 @@ export function BrickChatCore({
                 null
               ) : (
               <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
-                {renderQuestion(messageItem.question)}
+                {/* no question on a message posted outside a turn (ticket
+                  status updates) */}
+                {messageItem.question
+                  ? renderQuestion(messageItem.question)
+                  : null}
 
                 <Flex
                   vertical
@@ -1861,6 +1889,23 @@ export function BrickChatCore({
                       </Flex>
                     ) : null}
 
+                    {/* a ticket status update posted to the thread (see
+                      postTicketUpdates) - its request card(s) above the
+                      message */}
+                    {messageItem.answer.ticketUpdates?.length ? (
+                      <Flex vertical gap={8} style={{ marginBottom: 12 }}>
+                        {messageItem.answer.ticketUpdates.map((update) => (
+                          <OfferingTicketCard
+                            key={`${update.ticketId}-${update.status}`}
+                            ticket={update}
+                            details={threadTickets?.find(
+                              (t) => t.ticketId === update.ticketId,
+                            )}
+                          />
+                        ))}
+                      </Flex>
+                    ) : null}
+
                     {/* earlier turns clamp to 300px behind "See more" so
                       the thread stays scannable; the latest turn always
                       shows in full */}
@@ -1874,8 +1919,8 @@ export function BrickChatCore({
                           p: ({ children }) => (
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_4,
-                                fontWeight: 500,
+                                fontSize: FONT_SIZE.HEADING_4 * .9,
+                                fontWeight: 400,
                                 marginBottom: 16,
                                 display: "block",
                                 maxWidth: 850,
@@ -1992,23 +2037,35 @@ export function BrickChatCore({
                       </Typography.Text>
                     ) : null}
 
-                    {messageItem.answer.followupOffering ? (
+                    {messageItem.answer.followupOffering ? (() => {
+                      const offeringKey = messageItem.answer.followupOffering.key;
+                      // the request raised from this very answer, if any
+                      const notedTicket = messageItem.answer.offeringTickets?.find(
+                        (t) => t.offeringKey === offeringKey,
+                      );
+                      return (
                       <OfferingCtaButtons
-                        offeringKey={messageItem.answer.followupOffering.key}
+                        offeringKey={offeringKey}
+                        ticketNoted={!!notedTicket}
                         existingTicket={
-                          offeringTicketsByKey[
-                            messageItem.answer.followupOffering.key
-                          ]
+                          (notedTicket &&
+                            threadTickets?.find(
+                              (t) => t.ticketId === notedTicket.ticketId,
+                            )) ||
+                          offeringTicketsByKey[offeringKey]
                         }
                         onStart={(offering, cta) =>
                           setActiveOfferingFlow({
                             offering,
                             cta,
                             turnId: messageItem.answer.turnId,
+                            offeringContext:
+                              messageItem.answer.followupOffering?.context,
                           })
                         }
                       />
-                    ) : null}
+                      );
+                    })() : null}
 
                     {/* feedback on just this answer - only once it carries
                       a turnId, so it can be tied to the turn's log */}
@@ -2114,6 +2171,9 @@ export function BrickChatCore({
             focusedMicroPocketIds={
               selectedProject ? undefined : focusedMicroPocketIds
             }
+            focusedSurroundingElements={
+              selectedProject ? undefined : focusedSurroundingElements
+            }
           />
         </Flex>
       )}
@@ -2213,6 +2273,9 @@ export function BrickChatCore({
                 }
                 focusedMicroPocketIds={
                   selectedProject ? undefined : focusedMicroPocketIds
+                }
+                focusedSurroundingElements={
+                  selectedProject ? undefined : focusedSurroundingElements
                 }
               />
             </Flex>

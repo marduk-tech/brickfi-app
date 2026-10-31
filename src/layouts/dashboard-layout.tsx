@@ -103,6 +103,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     refetch: refetchChatThreads,
   } = useFetchChatThreads(user?._id);
   const bookmarkedThreads = chatThreads?.filter((t) => t.isBookmarked) ?? [];
+  // listed under "Saved" instead, so not repeated in the recent list
+  const unbookmarkedThreads = chatThreads?.filter((t) => !t.isBookmarked) ?? [];
 
   const openThread = (threadId: string) => {
     setSidebarOpen(false);
@@ -398,27 +400,46 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   defaultActiveKey={[]}
                   items={[
                     {
-                      key: "bookmarked",
-                      label: "Bookmarked",
-                      children: (
-                        <ThreadList
-                          threads={bookmarkedThreads}
-                          loading={chatThreadsLoading}
-                          emptyText="No bookmarked chats yet."
-                          onSelect={openThread}
-                        />
-                      ),
-                    },
-                    {
                       key: "recent-chats",
                       label: "Recent Chats",
                       children: (
-                        <ThreadList
-                          threads={chatThreads ?? []}
-                          loading={chatThreadsLoading}
-                          emptyText="No recent chats yet."
-                          onSelect={openThread}
-                        />
+                        <Flex vertical gap={16}>
+                          {/* bookmarked chats first, under their own header */}
+                          {!chatThreadsLoading && bookmarkedThreads.length > 0 && (
+                            <Flex vertical gap={4}>
+                              <Flex align="center" gap={4}>
+                                <DynamicReactIcon
+                                  iconName="MdBookmark"
+                                  iconSet="md"
+                                  size={14}
+                                  color={COLORS.textColorDark}
+                                />
+                                <Typography.Text
+                                  strong
+                                  style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                                >
+                                  Saved
+                                </Typography.Text>
+                              </Flex>
+                              <ThreadList
+                                threads={bookmarkedThreads}
+                                loading={false}
+                                emptyText=""
+                                onSelect={openThread}
+                              />
+                            </Flex>
+                          )}
+                          <ThreadList
+                            threads={unbookmarkedThreads}
+                            loading={chatThreadsLoading}
+                            emptyText={
+                              bookmarkedThreads.length
+                                ? "No other recent chats."
+                                : "No recent chats yet."
+                            }
+                            onSelect={openThread}
+                          />
+                        </Flex>
                       ),
                     },
                   ]}

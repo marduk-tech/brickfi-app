@@ -444,24 +444,34 @@ export default function BrickChatv2({
                   cursor: "pointer",
                 }}
               >
-                <Flex gap={4} style={{ flexShrink: 0 }}>
-                  {q.icons.map((icon) => (
-                    <Flex
-                      key={`${icon.iconSet}-${icon.iconName}`}
-                      style={{
-                        backgroundColor: COLORS.LANDING.PINK,
-                        borderRadius: "50%",
-                        padding: 3,
-                      }}
-                    >
-                      <DynamicReactIcon
-                        iconName={icon.iconName}
-                        iconSet={icon.iconSet}
-                        size={12}
-                        color="white"
-                      />
-                    </Flex>
-                  ))}
+                {/* icons on the left, arrow on the bottom right */}
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  style={{ flexShrink: 0, alignSelf: "stretch" }}
+                >
+                  <Flex gap={4}>
+                    {q.icons.map((icon) => (
+                      <Flex
+                        key={`${icon.iconSet}-${icon.iconName}`}
+                        style={{
+                          backgroundColor: COLORS.LANDING.PINK,
+                          borderRadius: "50%",
+                          padding: 3,
+                        }}
+                      >
+                        <DynamicReactIcon
+                          iconName={icon.iconName}
+                          iconSet={icon.iconSet}
+                          size={12}
+                          color="white"
+                        />
+                      </Flex>
+                    ))}
+                  </Flex>
+                  <ArrowRightOutlined
+                    style={{ fontSize: 12, color: COLORS.textColorDark }}
+                  />
                 </Flex>
                 <span
                   style={{

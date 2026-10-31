@@ -44,6 +44,8 @@ interface MapViewWrapperProps {
   focusedProjectId?: string | null;
   fullSize: boolean;
   surroundingElements?: ISurroundingElement[];
+  /** See MapViewGoogle's focusSurroundingElements. */
+  focusSurroundingElements?: boolean;
   projectsNearby?: {
     projectName: string;
     sqftCost: number;

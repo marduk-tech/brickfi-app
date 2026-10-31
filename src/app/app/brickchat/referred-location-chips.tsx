@@ -8,8 +8,9 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Tag, Tooltip, Typography } from "antd";
 import { capitalize } from "@/libs/lvnzy-helper";
 import { useBrick360FontSize } from "./brick360/use-font-size";
+import { ISurroundingElement } from "@/types/Project";
 export type ReferredLocationType =
-  "driver" | "locality" | "corridor" | "micropocket" | "";
+  "driver" | "locality" | "corridor" | "micropocket" | "surroundings" | "";
 
 export interface ReferredLocationChipItem {
   /** Unique per-item key for React/selection - distinct from `id` since a landmark has no id of its own (see brickchat-client's getReferredLocationItems). */
@@ -25,6 +26,8 @@ export interface ReferredLocationChipItem {
   keepLabelCase?: boolean;
   /** Text after the label that's never truncated (e.g. "6 mins") - only the label gets the ellipsis. */
   suffix?: string;
+  /** What the chip plots when there's no catalog record to fetch by id - a "surroundings" chip's project surroundings (see project-surroundings.js), passed to the map as surroundingElements. */
+  data?: ISurroundingElement[];
 }
 
 // chips never grow past this - the label is cut with an ellipsis instead
@@ -140,7 +143,7 @@ export default function ReferredLocationChips({
                 cursor: clickable ? "pointer" : "default",
                 opacity: clickable ? 1 : 0.7,
                 backgroundColor: isSelected ? COLORS.primaryColor : "white",
-                boxShadow: "0 0 1px rgba(0,0,0,0.4)",
+                border: `0.5px solid ${isSelected ?COLORS.primaryColor : COLORS.borderColorDark}`,
                 color: isSelected ? "white" : COLORS.textColorDark,
               }}
             >

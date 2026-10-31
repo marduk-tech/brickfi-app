@@ -46,6 +46,8 @@ export interface MapViewGoogleProps {
   focusedProjectId?: string | null;
   fullSize?: boolean;
   surroundingElements?: ISurroundingElement[];
+  /** Frame surroundingElements into view whenever they change (e.g. a brickchat "surroundings" chip) - off by default so detail views keep their own project-centred framing. */
+  focusSurroundingElements?: boolean;
   projectsNearby?: {
     projectName: string;
     sqftCost: number;
@@ -106,6 +108,7 @@ function MapViewGoogleInner({
   projects,
   focusedProjectId,
   surroundingElements,
+  focusSurroundingElements,
   projectsNearby,
   projectSqftPricing,
   showLocalities,
@@ -226,6 +229,9 @@ function MapViewGoogleInner({
             corridors={corridors}
             microPockets={microPockets}
             drivers={drivers}
+            surroundingElements={
+              focusSurroundingElements ? surroundingElements : undefined
+            }
           />
           {onMapReady && <MapReady onMapReady={onMapReady} />}
 

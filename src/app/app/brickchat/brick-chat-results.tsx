@@ -6,6 +6,10 @@ import { useUpdateUserMutation } from "@/hooks/user-hooks";
 import { safeStorage } from "@/libs/browser-utils";
 import { LocalStorageKeys } from "@/libs/constants";
 import {
+  computeProjectStatusFromTimelines,
+  PROJECT_STATUS_CONFIG,
+} from "@/libs/project-status";
+import {
   capitalize,
   getSaveCollectionIndex,
   removeDuplicatesAndPrepend,
@@ -24,7 +28,9 @@ import {
 } from "antd";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import DynamicReactIcon from "../../../components/common/dynamic-react-icon";
+import DynamicReactIcon, {
+  IconSetKey,
+} from "../../../components/common/dynamic-react-icon";
 import ProjectImageCarousel from "./project-image-carousel";
 import styles from "./brick-chat-results.module.css";
 
@@ -113,19 +119,54 @@ const orderResults = (
   return [...ranked.filter((p) => !isWeak(p)), ...ranked.filter(isWeak)];
 };
 
-const MatchTag = ({
-  match,
+const getMatchConfig = (project: ProjectResult) => {
+  const match = parseOneLiner(project.oneLiner).match;
+  return match ? MATCH_LEVEL_CONFIG[match] : undefined;
+};
+
+// small rounded tag on a project card - its micro-pocket/corridor and match
+// level; `color` is an antd Tag color (preset or hex), default grey if unset
+const MetaTag = ({
+  label,
+  color,
+  bgColor,
+  icon,
   style,
 }: {
-  match?: MatchLevel;
+  label?: string;
+  color?: string;
+  bgColor?: string;
+  // drawn in the tag's own text color
+  icon?: { iconSet: IconSetKey; iconName: string };
   style?: React.CSSProperties;
 }) =>
-  match ? (
+  label ? (
     <Tag
-      color={MATCH_LEVEL_CONFIG[match].color}
-      style={{ borderRadius: 8, fontSize: FONT_SIZE.NOTE, ...style }}
+      color={color}
+      style={{
+        borderRadius: 8,
+        fontSize: FONT_SIZE.NOTE,
+        // antd's Tag line-height (20px) is what sets its height, not padding
+        lineHeight: "20px",
+        padding: "0 6px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 2,
+        marginRight: 2,
+        border: 0,
+        backgroundColor: bgColor || COLORS.bgColorMedium,
+        ...style,
+      }}
     >
-      {MATCH_LEVEL_CONFIG[match].label}
+      {icon && (
+        <DynamicReactIcon
+          iconSet={icon.iconSet}
+          iconName={icon.iconName}
+          size={12}
+          color="currentColor"
+        />
+      )}
+      {label}
     </Tag>
   ) : null;
 
@@ -440,8 +481,8 @@ export default function BrickChatResults({
                         <DynamicReactIcon
                           iconName={
                             savedIds.includes(project.lvnzyProjectId)
-                              ? "MdOutlineBookmark"
-                              : "MdOutlineBookmarkBorder"
+                              ? "MdFavorite"
+                              : "MdFavoriteBorder"
                           }
                           iconSet="md"
                           size={16}
@@ -469,7 +510,7 @@ export default function BrickChatResults({
           <Card
             hoverable
             style={{
-              width: 200,
+              width: 225,
               borderRadius: 12,
               display: "block",
               overflow: "hidden",
@@ -511,27 +552,40 @@ export default function BrickChatResults({
                     <Typography.Text type="secondary">No Image</Typography.Text>
                   </Flex>
                 )}
+                <MetaTag
+                  label={getMatchConfig(project)?.label}
+                  color={getMatchConfig(project)?.color}
+                  bgColor="white"
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    margin: 0,
+                    zIndex: 1,
+                  }}
+                />
               </div>
             }
           >
             <Flex style={{ padding: 4 }} gap={0} vertical>
-              <Flex wrap>
-                <Tag
-                  style={{
-                    fontSize: FONT_SIZE.NOTE,
-                    color: COLORS.textColorDark,
-                    padding: "0 4px",
-                    marginTop: 8,
-                    backgroundColor: COLORS.bgColor,
-                    borderRadius: 8,
-                  }}
-                >
-                  {project.projectCorridor}
-                </Tag>
-                <MatchTag
-                  match={parseOneLiner(project.oneLiner).match}
-                  style={{ padding: "0 4px", marginTop: 8 }}
+              <Flex style={{width: "100%", overflowX: "scroll", scrollbarWidth: "none"}}>
+                <MetaTag
+                  label={project.projectMicroPocket || project.projectCorridor}
+                  icon={{ iconSet: "ri", iconName: "RiRoadMapLine" }}
+                  style={{ marginTop: 8 }}
                 />
+                {(() => {
+                  const status = computeProjectStatusFromTimelines(
+                    project.projectTimelines,
+                  );
+                  return status ? (
+                    <MetaTag
+                      label={status}
+                      icon={PROJECT_STATUS_CONFIG[status]}
+                      style={{ marginTop: 8 }}
+                    />
+                  ) : null;
+                })()}
               </Flex>
               <Typography.Text
                 style={{
@@ -543,7 +597,7 @@ export default function BrickChatResults({
               >
                 {project.projectName}
               </Typography.Text>
-              {getProjectMetadata(project) && (
+              {/* {getProjectMetadata(project) && (
                 <Typography.Text
                   style={{
                     fontSize: FONT_SIZE.SUB_TEXT,
@@ -554,24 +608,24 @@ export default function BrickChatResults({
                 >
                   {getProjectMetadata(project)}
                 </Typography.Text>
-              )}
+              )} */}
 
               {!skipOneLiner && project.oneLiner && (
                 <Typography.Paragraph
                   style={{
-                    fontSize: FONT_SIZE.NOTE,
+                    fontSize: FONT_SIZE.SUB_TEXT,
                     color: COLORS.textColorMedium,
                     padding: "4px",
-                    lineHeight: "140%",
+                    lineHeight: "130%",
                     borderRadius: 4,
-                    marginTop: 4,
+                    marginTop: 0,
                     marginBottom: 2,
                     fontWeight: 400,
                     backgroundColor: COLORS.bgColor,
                     cursor: "pointer",
                   }}
                   ellipsis={{
-                    rows: 2,
+                    rows: 4,
                     tooltip: parseOneLiner(project.oneLiner).text,
                   }}
                   onClick={(e) => handleShowOneLiner(e, project)}
@@ -598,8 +652,8 @@ export default function BrickChatResults({
                     <DynamicReactIcon
                       iconName={
                         savedIds.includes(project.lvnzyProjectId)
-                          ? "MdOutlineBookmark"
-                          : "MdOutlineBookmarkBorder"
+                          ? "MdFavorite"
+                          : "MdFavoriteBorder"
                       }
                       iconSet="md"
                       size={16}
