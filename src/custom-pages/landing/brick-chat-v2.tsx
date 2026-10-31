@@ -428,13 +428,13 @@ export default function BrickChatv2({
         style={{
           // pull up into the section's bottom padding: 16px below the input
           marginTop: 16,
-          marginBottom: isMobile ? 32 : 0,
+          marginBottom: 0,
           display: "flex",
           flexDirection: "column",
           gap: 24,
-          // a dark band behind the (white) chips
+          // continues the hero section's light pink behind the chips
           padding: "24px 0",
-          backgroundColor: COLORS.textColorDark,
+          backgroundColor: COLORS.LANDING.LIGHT_PINK,
         }}
       >
         {QUERY_ROWS.map((row, rowIndex) => (
@@ -469,9 +469,12 @@ export default function BrickChatv2({
                   gap: 6,
                   padding: "8px 12px",
                   borderRadius: 20,
-                  border: "none",
+                  // white on the near-white band - the border keeps the chip's
+                  // edge visible
+                  border: `1px solid ${COLORS.textColorVeryLight}`,
                   backgroundColor: "white",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+                  // PINK at ~25% opacity (hex alpha "40")
+                  boxShadow: `0 2px 8px ${COLORS.LANDING.PINK}40`,
                   color: COLORS.textColorDark,
                   fontSize: FONT_SIZE.PARA,
                   fontWeight: 500,
@@ -860,7 +863,7 @@ export default function BrickChatv2({
           heading: (
             <Flex align="flex-start" gap={isMobile ? 0 : 32} vertical>
               <img
-                width={isMobile ? 125 : 225}
+                width={isMobile ? 200 : 225}
                 style={{
                   margin: 16,
                   marginTop: 0,
@@ -900,12 +903,12 @@ export default function BrickChatv2({
           ),
           subHeading: "",
           centerSectionTextAlign: "left",
-          verticalPadding: isMobile ? 48 : 100,
+          verticalPadding: isMobile ? 100 : 100,
           textColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/platform-usps.png"
             : "/images/landing/brick-chat/platform-usps.png",
-          primaryImageSize: isMobile ? "90%" : "90%",
+          primaryImageSize: isMobile ? "100%" : "90%",
         }}
       ></SectionLeft>
       <Flex vertical gap={isMobile ? 16 : 32} style={{ marginTop: 32 }}>
@@ -1021,13 +1024,11 @@ export default function BrickChatv2({
                 </span>
               </h2>
               <Typography.Text
-                style={{ fontSize: FONT_SIZE.HEADING_2, color: "white" }}
+                style={{ fontSize: FONT_SIZE.HEADING_3, color: "white", lineHeight: "130%" }}
               >
-                Brickfi is not your average <span>neighborhood broker</span> or
-                a yet another <span>"Yellow Pages" styled websites</span>.
-                Brickfi is the best in class real estate platform that believes
-                in <span>data, unbiased advise</span> and absolute{" "}
-                <span>buyer side assistance</span>.
+                Traditional brokers show you what earns them a fee. Listing sites rank whoever pays the most. Brickfi searches the entire market for what actually fits your needs—unbiased data, intelligent insights, zero spam 
+                <br></br><br></br>Stop choosing from just 5 broker options or ad-boosted listings. Brickfi scans every available property in the market to deliver personalized, 100% unbiased matches—backed by data, not commissions. 
+
               </Typography.Text>
             </Flex>
           ),
@@ -1038,7 +1039,7 @@ export default function BrickChatv2({
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/brickchat-vs-broker.png"
             : "/images/landing/brick-chat/brickchat-vs-broker.png",
-          primaryImageSize: isMobile ? "90%" : "80%",
+          primaryImageSize: isMobile ? "100%" : "80%",
         }}
       ></SectionLeft>
       <Flex
@@ -1268,7 +1269,7 @@ export default function BrickChatv2({
                   textTransform: "uppercase",
                   color: COLORS.primaryColor,
                   textAlign: "left",
-                  fontSize: FONT_SIZE.HEADING_2,
+                  fontSize: FONT_SIZE.HEADING_3,
                   margin: 0,
                 }}
               >
@@ -1278,8 +1279,9 @@ export default function BrickChatv2({
                 style={{
                   color: COLORS.textColorDark,
                   textAlign: "left",
-                  fontSize: FONT_SIZE.HEADING_1,
+                  fontSize: isMobile ? FONT_SIZE.HEADING_1*.9 : FONT_SIZE.HEADING_1,
                   margin: 0,
+                  fontWeight: 300
                 }}
               >
                 Why are we building Brickfi ?
@@ -1403,7 +1405,7 @@ export default function BrickChatv2({
                 <Typography.Text
                   style={{
                     color: COLORS.textColorMedium,
-                    fontSize: FONT_SIZE.HEADING_1,
+                    fontSize: isMobile ? FONT_SIZE.HEADING_1 * .8: FONT_SIZE.HEADING_1,
                     fontWeight: 300,
                   }}
                 >
