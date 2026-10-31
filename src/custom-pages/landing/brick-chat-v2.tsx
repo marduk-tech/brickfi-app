@@ -92,7 +92,7 @@ const SAMPLE_QUERIES: {
     ],
   },
   {
-    text: "I need a community for kids outdoor activities in less than 2 crore",
+    text: "I need apartment community for kids outdoor activities in less than 2 crore",
     icons: [
       { iconName: "MdChildCare", iconSet: "md" },
       { iconName: "PiTree", iconSet: "pi" },
@@ -406,7 +406,15 @@ export default function BrickChatv2({
           shape="round"
           icon={<ArrowRightOutlined />}
           iconPosition="end"
-          onClick={submitSearch}
+          onClick={() => {
+            // nothing typed - the button is then just the way into the app,
+            // same as the bottom "Explore Brickfi" button
+            if (!searchQuery.trim()) {
+              safeWindow.location.href = "/app";
+              return;
+            }
+            submitSearch();
+          }}
           style={{ flexShrink: 0 }}
         >
           <Flex align="center" gap={8} style={{ padding: "12px 4px" }}>
@@ -885,7 +893,7 @@ export default function BrickChatv2({
                     margin: 0,
                   }}
                 >
-                  The Platform That Exists For You,
+                  The Platform That Works For You,
                 </h2>
                 <h2
                   style={{
