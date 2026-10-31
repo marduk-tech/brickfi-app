@@ -154,6 +154,7 @@ const MetaTag = ({
         gap: 2,
         marginRight: 2,
         border: 0,
+        fontWeight: 500,
         backgroundColor: bgColor || COLORS.bgColorMedium,
         ...style,
       }}
@@ -614,14 +615,12 @@ export default function BrickChatResults({
                 <Typography.Paragraph
                   style={{
                     fontSize: FONT_SIZE.SUB_TEXT,
-                    color: COLORS.textColorMedium,
-                    padding: "4px",
+                    color: COLORS.textColorLight,
                     lineHeight: "130%",
                     borderRadius: 4,
                     marginTop: 0,
-                    marginBottom: 2,
+                    marginBottom: 8,
                     fontWeight: 400,
-                    backgroundColor: COLORS.bgColor,
                     cursor: "pointer",
                   }}
                   ellipsis={{
