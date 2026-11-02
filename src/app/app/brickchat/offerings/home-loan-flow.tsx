@@ -49,8 +49,8 @@ interface AmbakMasterOption {
 }
 
 interface AmbakMasterdata {
-  loan_type?: AmbakMasterOption[];
-  profession?: AmbakMasterOption[];
+  loan_type: AmbakMasterOption[];
+  profession: AmbakMasterOption[];
 }
 
 // Nested the way Ambak's offers endpoint validates it - see
@@ -138,17 +138,6 @@ type HomeLoanFormValues = Omit<LeadDetails, "Fullfilment_type"> &
 const HOME_LOAN = 1;
 const LAP = 2;
 
-// Used when master data can't be fetched - values from Ambak's guide
-const FALLBACK_LOAN_TYPES: AmbakMasterOption[] = [
-  { id: "1", label: "Home Loan" },
-  { id: "2", label: "LAP" },
-];
-const FALLBACK_PROFESSIONS: AmbakMasterOption[] = [
-  { id: "1", label: "Salaried" },
-  { id: "2", label: "Self-Employed Professional" },
-  { id: "3", label: "Self-Employed non-Professional" },
-];
-
 const YES_NO = [
   { value: "Yes", label: "Yes" },
   { value: "No", label: "No" },
@@ -219,11 +208,11 @@ const HOME_LOAN_SECTION_FIELDS: Record<string, string[]> = {
   ],
 };
 
-const masterOptions = (
-  list: AmbakMasterOption[] | undefined,
-  fallback: AmbakMasterOption[],
-) =>
-  (list?.length ? list : fallback).map((o) => ({
+// Only Ambak's own master data - no fallback list, since a made-up id would
+// be accepted by the form and rejected (or misread) by Ambak. Empty until
+// master data loads; checking eligibility is blocked until then.
+const masterOptions = (list: AmbakMasterOption[] | undefined) =>
+  (list ?? []).map((o) => ({
     value: Number(o.id),
     label: o.label,
   }));
@@ -296,7 +285,12 @@ const getAmbakMasterdata = async (): Promise<AmbakMasterdata> => {
     headers: { "x-api-key": apiKey || "" },
   });
   if (!res.ok) throw new Error(`ambak masterdata ${res.status}`);
-  return res.json();
+  const data: Partial<AmbakMasterdata> = await res.json();
+  // the form only offers Ambak's ids, so a missing list is an error, not empty
+  if (!data.loan_type?.length || !data.profession?.length) {
+    throw new Error("ambak masterdata missing loan_type or profession");
+  }
+  return data as AmbakMasterdata;
 };
 
 // Response is { status, statusText, message, data: AmbakOffer[] }
@@ -479,7 +473,9 @@ export default function HomeLoanFlow({
   const {
     data: masterdata,
     isLoading: masterLoading,
+    isFetching: masterFetching,
     error: masterError,
+    refetch: refetchMasterdata,
   } = useQuery({
     queryKey: ["ambak-masterdata"],
     queryFn: getAmbakMasterdata,
@@ -500,14 +496,8 @@ export default function HomeLoanFlow({
     | YesNo
     | undefined;
 
-  const loanTypeOptions = masterOptions(
-    masterdata?.loan_type,
-    FALLBACK_LOAN_TYPES,
-  );
-  const professionOptions = masterOptions(
-    masterdata?.profession,
-    FALLBACK_PROFESSIONS,
-  );
+  const loanTypeOptions = masterOptions(masterdata?.loan_type);
+  const professionOptions = masterOptions(masterdata?.profession);
 
   const checkEligibility = (values: HomeLoanFormValues) => {
     const payload = buildAmbakPayload(values);
@@ -890,10 +880,19 @@ export default function HomeLoanFlow({
       <div style={{ display: step === "requirements" ? "block" : "none" }}>
         {masterError && (
           <Alert
-            type="warning"
+            type="error"
             showIcon
             style={{ marginBottom: 12 }}
-            message="Couldn't load the latest options - showing the default loan types and professions"
+            message="Couldn't load the loan types and professions - try again to check eligibility"
+            action={
+              <Button
+                size="small"
+                loading={masterFetching}
+                onClick={() => refetchMasterdata()}
+              >
+                Retry
+              </Button>
+            }
           />
         )}
         <Form
@@ -928,6 +927,7 @@ export default function HomeLoanFlow({
             submitting={false}
             onCancel={onCancel}
             submitLabel="Check eligibility"
+            disabled={!masterdata}
           />
         </Form>
       </div>

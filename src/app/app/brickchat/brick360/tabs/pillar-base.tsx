@@ -751,7 +751,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                     border:`1px dashed ${COLORS.borderColorDark}`
                   }}
                 >
-                  {categoryKey == BRICK360_CATEGORY.developer ? (
+                  {categoryKey == BRICK360_CATEGORY.developer && !!lvnzyProject?.originalProjectId?.info?.developerId? (
                     <Typography.Text
                       style={{
                         textTransform: "uppercase",
@@ -762,7 +762,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                       {lvnzyProject?.originalProjectId?.info?.developerId?.name}
                     </Typography.Text>
                   ) : null}
-                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorMedium }}>
                     {noDataPlaceholder ??
                       (Brick360DataPoints as any)[sc.key]?.noDataPlaceholder}
                   </Typography.Text>
