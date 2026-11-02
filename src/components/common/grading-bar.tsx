@@ -104,7 +104,7 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
           padding: "1px 4px",
           marginBottom: 0,
           borderRadius: 8,
-          border: `1px solid ${COLORS.borderColor}`
+          border: `1px solid ${COLORS.borderColorMedium}`
         }}
         gap={4}
         align="center"
@@ -114,7 +114,7 @@ const GradientBar: React.FC<GradientBarProps> = ({ value, showBadgeOnly,showSmil
          <Typography.Text
           style={{
             fontSize: fs.HEADING_4,
-            fontWeight: 300,
+            fontWeight: 500,
             color: value ? COLORS.textColorDark: COLORS.textColorLight,
           }}
         >

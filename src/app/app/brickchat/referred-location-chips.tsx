@@ -32,7 +32,7 @@ export interface ReferredLocationChipItem {
 
 // chips never grow past this - the label is cut with an ellipsis instead
 // (full label in a tooltip); icon and suffix always stay whole
-const CHIP_MAX_WIDTH = 250;
+const CHIP_MAX_WIDTH = 200;
 
 const DEFAULT_CHIP_ICON: { name: string; set: IconSetKey } = {
   name: "FaMapMarkedAlt",
@@ -143,7 +143,7 @@ export default function ReferredLocationChips({
                 cursor: clickable ? "pointer" : "default",
                 opacity: clickable ? 1 : 0.7,
                 backgroundColor: isSelected ? COLORS.primaryColor : "white",
-                border: `0.5px solid ${isSelected ?COLORS.primaryColor : COLORS.borderColorDark}`,
+                border: `1px solid ${isSelected ?COLORS.primaryColor : COLORS.borderColorMedium}`,
                 color: isSelected ? "white" : COLORS.textColorDark,
               }}
             >
@@ -161,18 +161,21 @@ export default function ReferredLocationChips({
                     ellipsis={{ tooltip: displayLabel }}
                     style={{
                       minWidth: 0,
-                      fontSize: fs.SUB_TEXT,
+                      fontSize: FONT_SIZE.NOTE,
+                      fontWeight: 500,
                       color: isSelected ? "white" : COLORS.textColorMedium,
                     }}
                   >
-                    {displayLabel}
+                    {capitalize(displayLabel)}
                   </Typography.Text>
                   {item.suffix ? (
                     <Typography.Text
                       style={{
                         flexShrink: 0,
-                        fontSize: fs.HEADING_4,
-                        color: isSelected ? "white" : COLORS.textColorDark,
+                        fontSize: FONT_SIZE.NOTE,
+                        fontWeight: 500,
+                        marginLeft: 2,
+                        color: isSelected ? "white" : COLORS.textColorMedium,
                       }}
                     >
                       {item.suffix}

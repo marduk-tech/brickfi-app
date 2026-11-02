@@ -669,8 +669,9 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                   item[1].rating > 0
                                     ? COLORS.textColorDark
                                     : COLORS.textColorLight,
-                                fontWeight: 500,
+                                fontWeight: 600,
                                 marginLeft: 4,
+                                textTransform: "uppercase"
                               }}
                             >
                               {capitalize(
@@ -679,46 +680,52 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                 ],
                               )}
                             </Typography.Text>
-                            <RatingBar value={item[1].rating}></RatingBar>
-                            {hasMap ? (
-                              <Flex style={{ marginLeft: "auto" }}>
-                                <ReferredLocationChips
-                                  items={[
-                                    {
-                                      key,
-                                      id: key,
-                                      type: "",
-                                      name: isActive
-                                        ? "Showing on Map"
-                                        : "See on Map",
-                                      keepLabelCase: true,
-                                    },
-                                  ]}
-                                  selectedKey={isActive ? key : null}
-                                  onToggle={() => handleSeeOnMap(key)}
-                                />
-                              </Flex>
-                            ) : null}
+                            {/* pushed to the right end of the criteria row */}
+                            <Flex style={{ marginLeft: "auto", flexShrink: 0 }}>
+                              <RatingBar value={item[1].rating}></RatingBar>
+                            </Flex>
                           </Flex>
                         </div>
+                        {/* See on Map, then the data point's own chips (e.g.
+                            locations), in one scrollable row under the name */}
                         {(() => {
                           const actions = renderDataPointActions?.(
                             item[0],
                             mapFocus,
                           );
-                          if (!actions) return null;
+                          if (!hasMap && !actions) return null;
                           return (
                             <Flex
                               align="center"
                               gap={8}
                               style={{
                                 marginTop: 6,
+                                marginLeft: 4,
                                 overflowX: "auto",
                                 flexWrap: "nowrap",
                                 paddingBottom: 2,
                                 scrollbarWidth: "none",
                               }}
                             >
+                              {hasMap ? (
+                                <Flex style={{ flexShrink: 0 }}>
+                                  <ReferredLocationChips
+                                    items={[
+                                      {
+                                        key,
+                                        id: key,
+                                        type: "",
+                                        name: isActive
+                                          ? "Showing on Map"
+                                          : "See on Map",
+                                        keepLabelCase: true,
+                                      },
+                                    ]}
+                                    selectedKey={isActive ? key : null}
+                                    onToggle={() => handleSeeOnMap(key)}
+                                  />
+                                </Flex>
+                              ) : null}
                               {actions}
                             </Flex>
                           );

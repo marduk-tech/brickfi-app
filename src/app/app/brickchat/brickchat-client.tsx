@@ -580,6 +580,14 @@ export function BrickChatCore({
   // it by id/slug, open it, and save it to the user's default collection
   // (refetching the user re-derives the pinned list with it included).
   const handledProjectRefRef = useRef<string | undefined>(undefined);
+  // Set once projectRef's project is opened (or found missing) - until then
+  // the welcome message is held back so it doesn't flash before the
+  // project opens. Guests never get projectRef handled, so they don't wait.
+  const [resolvedProjectRef, setResolvedProjectRef] = useState<string>();
+  const projectRefPending =
+    !!projectRef &&
+    resolvedProjectRef !== projectRef &&
+    (userLoading || !!user?._id);
   useEffect(() => {
     if (!projectRef || !user?._id || pinnedProjectsLoading) return;
     if (handledProjectRefRef.current === projectRef) return;
@@ -593,11 +601,15 @@ export function BrickChatCore({
     );
     if (pinned) {
       handleSelectProject(pinned);
+      setResolvedProjectRef(projectRef);
       return;
     }
 
     const openAndSaveProject = async () => {
-      const project = await getLvnzyProjectDisplayCard(projectRef);
+      const project = await getLvnzyProjectDisplayCard(projectRef).catch(
+        () => undefined,
+      );
+      setResolvedProjectRef(projectRef);
       if (!project) {
         message.error("Project not found.");
         return;
@@ -724,7 +736,8 @@ export function BrickChatCore({
     !chatHistory.length &&
     !threadyHistoryLoading &&
     !chatLoading &&
-    !selectedProject;
+    !selectedProject &&
+    !projectRefPending;
 
   // Auto-submit autoStartQuestion once, only when landing fresh (no thread
   // selected/active/loading and no history yet).
@@ -1686,6 +1699,9 @@ export function BrickChatCore({
                 </Flex>
               </Flex>
             </Flex>
+          ) : projectRefPending && !selectedProject ? (
+            // 40% smaller than the default Loader
+            <Loader height={75} style={{ transform: "scale(0.6)" }} />
           ) : null}
 
           {threadyHistoryLoading && !chatHistory.length ? (

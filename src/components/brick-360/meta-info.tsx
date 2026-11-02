@@ -110,11 +110,11 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           }}
         >
           {unitTypesText},{" "}
-          <span style={{ display: "inline-flex", verticalAlign: "middle" }}>
+          <span style={{ display: "inline-flex", verticalAlign: "middle", marginTop: -2 }}>
             <DynamicReactIcon
               iconSet="fa6"
               iconName="FaIndianRupeeSign"
-              size={16}
+              size={12}
               color={COLORS.textColorMedium}
             />
           </span>
