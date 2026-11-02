@@ -230,6 +230,18 @@ export default function BrickChatResults({
     const isSaved = savedIds.includes(lvnzyId);
 
     modal.confirm({
+      // the saved-projects heart instead of antd's default warning sign;
+      // antd only spaces its own icons, hence the margin
+      icon: (
+        <span style={{ display: "inline-flex", marginInlineEnd: 12, marginTop: 2 }}>
+          <DynamicReactIcon
+            iconName="MdFavorite"
+            iconSet="md"
+            size={22}
+            color={COLORS.primaryColor}
+          />
+        </span>
+      ),
       title: isSaved ? "Remove from saved projects?" : "Save this project?",
       content: isSaved
         ? `Remove "${project.projectName}" from your saved projects?`
@@ -312,6 +324,10 @@ export default function BrickChatResults({
       maskClosable: true,
     });
   };
+
+  // reflects what a click on the heart will do
+  const saveTooltip = (lvnzyProjectId: string) =>
+    savedIds.includes(lvnzyProjectId) ? "Remove from saved" : "Save project";
 
   const handleLocateOnMap = (e: React.MouseEvent, project: ProjectResult) => {
     // cards are wrapped in a Link - don't navigate on icon click
@@ -465,31 +481,33 @@ export default function BrickChatResults({
                 )}
                   <Flex align="center" gap={4} style={{ marginLeft: "auto" }}>
                     {project.lvnzyProjectId && (
-                      <Flex
-                        align="center"
-                        justify="center"
-                        onClick={(e) => handleToggleSave(e, project)}
-                        style={{
-                          width: 24,
-                          height: 24,
-                          flexShrink: 0,
-                          borderRadius: "50%",
-                          backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <DynamicReactIcon
-                          iconName={
-                            savedIds.includes(project.lvnzyProjectId)
-                              ? "MdFavorite"
-                              : "MdFavoriteBorder"
-                          }
-                          iconSet="md"
-                          size={16}
-                          color={COLORS.textColorDark}
-                        />
-                      </Flex>
+                      <Tooltip title={saveTooltip(project.lvnzyProjectId)}>
+                        <Flex
+                          align="center"
+                          justify="center"
+                          onClick={(e) => handleToggleSave(e, project)}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            flexShrink: 0,
+                            borderRadius: "50%",
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <DynamicReactIcon
+                            iconName={
+                              savedIds.includes(project.lvnzyProjectId)
+                                ? "MdFavorite"
+                                : "MdFavoriteBorder"
+                            }
+                            iconSet="md"
+                            size={16}
+                            color={COLORS.textColorDark}
+                          />
+                        </Flex>
+                      </Tooltip>
                     )}
                   </Flex>
                 </Flex>
@@ -634,41 +652,11 @@ export default function BrickChatResults({
               )}
               <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
                 {project.lvnzyProjectId && (
-                  <Flex
-                    align="center"
-                    justify="center"
-                    onClick={(e) => handleToggleSave(e, project)}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      flexShrink: 0,
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName={
-                        savedIds.includes(project.lvnzyProjectId)
-                          ? "MdFavorite"
-                          : "MdFavoriteBorder"
-                      }
-                      iconSet="md"
-                      size={16}
-                      color={COLORS.primaryColor}
-                    />
-                  </Flex>
-                )}
-
-                {/* hidden without a handler - e.g. the card in a map marker's popup (BrickMapChat), where it's already on the map */}
-                {onLocateProject &&
-                  project.projectLocation?.lat &&
-                  project.projectLocation?.lng && (
+                  <Tooltip title={saveTooltip(project.lvnzyProjectId)}>
                     <Flex
                       align="center"
                       justify="center"
-                      onClick={(e) => handleLocateOnMap(e, project)}
+                      onClick={(e) => handleToggleSave(e, project)}
                       style={{
                         width: 20,
                         height: 20,
@@ -680,34 +668,70 @@ export default function BrickChatResults({
                       }}
                     >
                       <DynamicReactIcon
-                        iconName="IoLocateOutline"
-                        iconSet="io5"
-                        size={18}
+                        iconName={
+                          savedIds.includes(project.lvnzyProjectId)
+                            ? "MdFavorite"
+                            : "MdFavoriteBorder"
+                        }
+                        iconSet="md"
+                        size={16}
                         color={COLORS.primaryColor}
                       />
                     </Flex>
+                  </Tooltip>
+                )}
+
+                {/* hidden without a handler - e.g. the card in a map marker's popup (BrickMapChat), where it's already on the map */}
+                {onLocateProject &&
+                  project.projectLocation?.lat &&
+                  project.projectLocation?.lng && (
+                    <Tooltip title="Locate on map">
+                      <Flex
+                        align="center"
+                        justify="center"
+                        onClick={(e) => handleLocateOnMap(e, project)}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          flexShrink: 0,
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <DynamicReactIcon
+                          iconName="IoLocateOutline"
+                          iconSet="io5"
+                          size={18}
+                          color={COLORS.primaryColor}
+                        />
+                      </Flex>
+                    </Tooltip>
                   )}
 
                 {project.isDeveloperPartner && (
-                  <Flex
-                    align="center"
-                    justify="center"
-                    style={{
-                      width: 20,
-                      height: 20,
-                      flexShrink: 0,
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName="FaPeopleArrows"
-                      iconSet="fa6"
-                      size={14}
-                      color={COLORS.primaryColor}
-                    />
-                  </Flex>
+                  <Tooltip title="Brickfi Builder Buy Available">
+                    <Flex
+                      align="center"
+                      justify="center"
+                      style={{
+                        width: 20,
+                        height: 20,
+                        flexShrink: 0,
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      }}
+                    >
+                      <DynamicReactIcon
+                        iconName="FaPeopleArrows"
+                        iconSet="fa6"
+                        size={14}
+                        color={COLORS.primaryColor}
+                      />
+                    </Flex>
+                  </Tooltip>
                 )}
 
                 {onSelectProject && (

@@ -1519,7 +1519,7 @@ export function BrickChatCore({
                   }
                   onClick={openLoginPrompt}
                 >
-                  Sign Up To Continue
+                  {showWelcome ? "Sign In": "Sign In To Continue"}
                 </Button>
               )}
               <BrickchatFeedback
