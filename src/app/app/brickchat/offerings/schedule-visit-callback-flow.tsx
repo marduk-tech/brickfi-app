@@ -1,7 +1,6 @@
 "use client";
 
-import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { DatePicker, Flex, Form, Input, Select, Switch, Typography } from "antd";
+import { DatePicker, Flex, Form, Input, Select, Switch } from "antd";
 import {
   ContactConsent,
   contactFrom,
@@ -10,6 +9,7 @@ import {
   FlowFooter,
   MobileField,
   queryLabel,
+  ToggleSection,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
 
@@ -91,71 +91,66 @@ export default function ScheduleVisitCallbackFlow({
           borderRadius: 8,
         }}
       >
-        <Flex
-          align="center"
-          justify="space-between"
-          gap={12}
-          style={{ marginBottom: 16 }}
+        <ToggleSection
+          title="Looking to schedule a visit?"
+          note="We will arrange a visit at your convenient time and get back with a confirmation."
+          open={scheduleVisit}
+          toggle={
+            <Form.Item name="scheduleVisit" valuePropName="checked" noStyle>
+              <Switch />
+            </Form.Item>
+          }
         >
-           <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}>Looking to schedule a visit?</Typography.Text>
-          <Form.Item name="scheduleVisit" valuePropName="checked" noStyle>
-            <Switch />
+          <Form.Item
+            name="projectIds"
+            label={fieldLabel("Which project(s) would you like to visit?")}
+            rules={[{ required: true, message: "Please choose a project" }]}
+          >
+            <Select
+              mode="multiple"
+              placeholder="Select projects"
+              options={[
+                ...context.projects.map((p) => ({
+                  label: p.projectName,
+                  value: p.projectId,
+                })),
+                {
+                  label: "Other (mention in your query)",
+                  value: OTHER_PROJECT,
+                },
+              ]}
+              optionFilterProp="label"
+            />
           </Form.Item>
-        </Flex>
-
-        {scheduleVisit && (
-          <>
-            <Form.Item
-              name="projectIds"
-              label={fieldLabel("Which project(s) would you like to visit?")}
-              rules={[{ required: true, message: "Please choose a project" }]}
-            >
-              <Select
-                mode="multiple"
-                placeholder="Select projects"
-                options={[
-                  ...context.projects.map((p) => ({
-                    label: p.projectName,
-                    value: p.projectId,
-                  })),
-                  {
-                    label: "Other (mention in your query)",
-                    value: OTHER_PROJECT,
-                  },
-                ]}
-                optionFilterProp="label"
-              />
-            </Form.Item>
-            <Form.Item
-              name="visitDate"
-              label={fieldLabel("Preferred visit date")}
-              rules={[{ required: true, message: "Please choose a date" }]}
-            >
-              <DatePicker
-                format="DD MMM YYYY"
-                style={{ width: "100%" }}
-                disabledDate={(current) =>
-                  !!current && current.valueOf() < startOfToday()
-                }
-                inputReadOnly
-              />
-            </Form.Item>
-            <Form.Item
-              name="visitTime"
-              label={fieldLabel("Preferred time")}
-              rules={[{ required: true, message: "Please choose a time" }]}
-            >
-              <Select placeholder="Select a time" options={VISIT_TIME_SLOTS} />
-            </Form.Item>
-          </>
-        )}
+          <Form.Item
+            name="visitDate"
+            label={fieldLabel("Preferred visit date")}
+            rules={[{ required: true, message: "Please choose a date" }]}
+          >
+            <DatePicker
+              format="DD MMM YYYY"
+              style={{ width: "100%" }}
+              disabledDate={(current) =>
+                !!current && current.valueOf() < startOfToday()
+              }
+              inputReadOnly
+            />
+          </Form.Item>
+          <Form.Item
+            name="visitTime"
+            label={fieldLabel("Preferred time")}
+            rules={[{ required: true, message: "Please choose a time" }]}
+          >
+            <Select placeholder="Select a time" options={VISIT_TIME_SLOTS} />
+          </Form.Item>
+        </ToggleSection>
 
         <Form.Item
           name="query"
           label={queryLabel(
             otherProject
-              ? "Type in your query (mention the project)"
-              : "Type in your query (optional)",
+              ? "Create a Task for Me (mention the project)"
+              : "Create a Task for Me",
           )}
           rules={[
             {
@@ -168,11 +163,7 @@ export default function ScheduleVisitCallbackFlow({
           <Input.TextArea
             autoSize={{ minRows: 2, maxRows: 6 }}
             maxLength={1000}
-            placeholder={
-              otherProject
-                ? "e.g. the project's name and location, plus any questions"
-                : "e.g. preferred time to call, configurations you're considering, or any questions"
-            }
+            placeholder="Enter your query"
           />
         </Form.Item>
 

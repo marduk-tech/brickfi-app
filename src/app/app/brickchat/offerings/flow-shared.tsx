@@ -12,6 +12,73 @@ export const fieldLabel = (text: string) => (
   </Typography.Text>
 );
 
+// What a section does, right under its heading - the same small grey text
+// for the visit switch, the query box and the expert-call checkbox
+export function FieldNote({ children }: { children: React.ReactNode }) {
+  return (
+    <Typography.Text
+      style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}
+    >
+      {children}
+    </Typography.Text>
+  );
+}
+
+// A bordered, switch-expanded block (the visit request, home loan offers):
+// heading + note with the switch on the right, its fields below while on.
+// `keepMounted` hides rather than unmounts the fields when off, for a block
+// whose entered state should survive toggling (it mustn't hold fields the
+// enclosing form validates, or they'd block submit while hidden)
+export function ToggleSection({
+  title,
+  note,
+  toggle,
+  open,
+  keepMounted = false,
+  children,
+}: {
+  title: React.ReactNode;
+  note?: React.ReactNode;
+  /** the Switch - a Form.Item-wrapped one, or a controlled one */
+  toggle: React.ReactNode;
+  open: boolean;
+  keepMounted?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <Flex
+      vertical
+      style={{
+        border: `1px solid ${COLORS.borderColor}`,
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 16,
+      }}
+    >
+      <Flex align="center" justify="space-between" gap={12}>
+        <Flex vertical gap={2}>
+          {typeof title === "string" ? (
+            <Typography.Text
+              style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}
+            >
+              {title}
+            </Typography.Text>
+          ) : (
+            title
+          )}
+          {note ? <FieldNote>{note}</FieldNote> : null}
+        </Flex>
+        {toggle}
+      </Flex>
+      {open || keepMounted ? (
+        <div style={{ marginTop: 16, display: open ? undefined : "none" }}>
+          {children}
+        </div>
+      ) : null}
+    </Flex>
+  );
+}
+
 // Every flow's query-box label - larger than the other fields' labels, with
 // what happens to a typed-in query right under it (above the box)
 export const queryLabel = (text: string) => (
@@ -19,26 +86,35 @@ export const queryLabel = (text: string) => (
     <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}>
       {text}
     </Typography.Text>
-    <Typography.Text
-      style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}
-    >
-      I will reply to your query directly through a message within 24-48 hrs.
-      No additional calls.
-    </Typography.Text>
+    <FieldNote>
+      Just type in your query. I will work on it and reply to your query
+      directly through a message within 24-48 hrs. No additional calls.
+    </FieldNote>
   </Flex>
 );
 
-// The askExpertToContact checkbox every flow ends with, with what ticking it
-// means underneath
+// The askExpertToContact checkbox every flow ends with - the box on its own
+// line, its label (clickable, via htmlFor) and what ticking it means below
+const EXPERT_CALL_ID = "askExpertToContact";
+
 export function ExpertCallField() {
   return (
-    <Form.Item
-      name="askExpertToContact"
-      valuePropName="checked"
-      extra="A free 15 min call will be scheduled at your convenience."
-    >
-      <Checkbox>Schedule a Free 15 min consultation with Brickfi Expert</Checkbox>
-    </Form.Item>
+    <Flex vertical gap={2} style={{ marginTop: 16, marginBottom: 24 }}>
+      <Form.Item name="askExpertToContact" valuePropName="checked" noStyle>
+        <Checkbox id={EXPERT_CALL_ID} />
+      </Form.Item>
+      <label htmlFor={EXPERT_CALL_ID} style={{ cursor: "pointer" }}>
+        <Typography.Text
+          style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}
+        >
+          Free 15 min Consultation with Brickfi Expert
+        </Typography.Text>
+      </label>
+      <FieldNote>
+        A free 15 min call with a Brickfi Expert will be scheduled at your
+        convenience.
+      </FieldNote>
+    </Flex>
   );
 }
 

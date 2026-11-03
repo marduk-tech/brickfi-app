@@ -19,6 +19,7 @@ import {
   Row,
   Select,
   Skeleton,
+  Switch,
   Tabs,
   Tag,
   Typography,
@@ -34,6 +35,7 @@ import {
   FlowFooter,
   MobileField,
   queryLabel,
+  ToggleSection,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
@@ -483,6 +485,9 @@ export default function HomeLoanFlow({
   const [contactForm] = Form.useForm();
   const [step, setStep] = useState<"requirements" | "offers">("requirements");
   const [section, setSection] = useState("lead");
+  // the "Provide Details to See Offers" switch - off by default, the
+  // question alone is enough to raise a request
+  const [showOffers, setShowOffers] = useState(false);
   // what the shown offers were fetched for - goes on the ticket with them
   const [lastPayload, setLastPayload] = useState<AmbakOffersRequest | null>(
     null,
@@ -520,8 +525,9 @@ export default function HomeLoanFlow({
   // offers fetched for the details last checked - they go on the request
   const seenOffers = offersMutation.isSuccess && !!lastPayload;
   // something to act on: a question, a request for an expert to call, or
-  // the offers the user checked
-  const canSubmit = !!query.trim() || askExpert || seenOffers;
+  // the offers the user checked (while the offers switch is still on)
+  const canSubmit =
+    !!query.trim() || askExpert || (showOffers && seenOffers);
 
   const loanTypeOptions = masterOptions(masterdata?.loan_type);
   const professionOptions = masterOptions(masterdata?.profession);
@@ -991,38 +997,40 @@ export default function HomeLoanFlow({
   // footer below submits this form by its name
   return (
     <>
-      {/* collapsed by default - the question alone is enough to raise a
-          request */}
-      <Collapse
-        size="small"
-        style={{ marginBottom: 24, marginTop: 16 }}
-        items={[
-          {
-            key: "eligibility",
-            label: (
-              <Flex gap={8} align="center">
-                <Typography.Text
-                  style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}
-                >
-                  Provide Details to See Offers
-                </Typography.Text>
-                <DynamicReactIcon
-                  iconName="BiSolidOffer"
-                  iconSet="bi"
-                  size={24}
-                  color={COLORS.textColorDark}
-                ></DynamicReactIcon>
-              </Flex>
-            ),
-            // scrolls on its own, so the question below stays in view
-            children: (
-              <div style={{ maxHeight: "45vh", overflowY: "auto" }}>
-                {eligibilityPanel}
-              </div>
-            ),
-          },
-        ]}
-      />
+      {/* kept mounted while off so what was entered (and any offers) is
+          still there when switched back on - it's a separate form, so its
+          hidden fields never block the request's submit */}
+      <ToggleSection
+        title={
+          <Flex gap={8} align="center">
+            <Typography.Text
+              style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}
+            >
+              Provide Details to See Offers
+            </Typography.Text>
+            <DynamicReactIcon
+              iconName="BiSolidOffer"
+              iconSet="bi"
+              size={24}
+              color={COLORS.textColorDark}
+            ></DynamicReactIcon>
+          </Flex>
+        }
+        open={showOffers}
+        keepMounted
+        toggle={
+          <Switch
+            checked={showOffers}
+            onChange={setShowOffers}
+            disabled={submitting}
+          />
+        }
+      >
+        {/* scrolls on its own, so the question below stays in view */}
+        <div style={{ maxHeight: "45vh", overflowY: "auto" }}>
+          {eligibilityPanel}
+        </div>
+      </ToggleSection>
 
       <Form
         form={contactForm}
@@ -1033,23 +1041,27 @@ export default function HomeLoanFlow({
         initialValues={{ askExpertToContact: false }}
         onFinish={(values) => {
           const userQuery = values.query?.trim();
+          // switching "Provide Details to See Offers" off leaves its details
+          // and offers out of the ticket
+          const sendOffers = showOffers && seenOffers;
           const ticketQuery = [
             userQuery,
-            seenOffers && lastPayload ? homeLoanQuery(lastPayload, offers) : "",
+            sendOffers && lastPayload ? homeLoanQuery(lastPayload, offers) : "",
           ]
             .filter(Boolean)
             .join("\n\n");
           // whatever was entered under "Provide Details to See Offers", even
-          // if the check was never run (its fields only mount once the panel
-          // is opened, so untouched means nothing was entered)
-          const loanDetails = form.isFieldsTouched()
-            ? enteredLoanDetails(form.getFieldsValue())
-            : null;
+          // if the check was never run (its fields only mount once the
+          // switch is first turned on, so untouched means nothing entered)
+          const loanDetails =
+            showOffers && form.isFieldsTouched()
+              ? enteredLoanDetails(form.getFieldsValue())
+              : null;
           onSubmit({
             ...(ticketQuery ? { query: ticketQuery } : {}),
             ...(loanDetails && { loanDetails }),
             // only when the user checked eligibility before raising it
-            ...(seenOffers && {
+            ...(sendOffers && {
               eligibilityRequest: lastPayload,
               offers: offers.map((o) => ({
                 bankName: o.bankName,
@@ -1076,13 +1088,13 @@ export default function HomeLoanFlow({
         >
           <Form.Item
             name="query"
-            label={queryLabel("Type in your query (optional)")}
+            label={queryLabel("Create a Task for Me")}
             style={{ marginBottom: 12 }}
           >
             <Input.TextArea
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={1000}
-              placeholder="e.g. how much loan you can get, comparing bank offers, or a balance transfer"
+              placeholder="Enter your query"
             />
           </Form.Item>
 

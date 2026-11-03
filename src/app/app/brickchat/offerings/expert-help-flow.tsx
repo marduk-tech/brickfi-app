@@ -68,7 +68,7 @@ export default function ExpertHelpFlow({
           <Input.TextArea
             autoSize={{ minRows: 3, maxRows: 6 }}
             maxLength={1000}
-            placeholder="e.g. details on a project, or anything else we can help with"
+            placeholder="Enter your query"
           />
         </Form.Item>
 

@@ -1,12 +1,11 @@
 "use client";
 
 import { COLORS } from "@/theme/style-constants";
-import { Flex, Form, Input, Radio } from "antd";
+import { Flex, Form, Input } from "antd";
 import {
   ContactConsent,
   contactFrom,
   ExpertCallField,
-  fieldLabel,
   FlowFooter,
   MobileField,
   queryLabel,
@@ -38,7 +37,6 @@ export default function LegalConsultationFlow({
       initialValues={{ askExpertToContact: false }}
       onFinish={(values) =>
         onSubmit({
-          propertyStage: values.propertyStage,
           ...(values.query?.trim() ? { query: values.query.trim() } : {}),
           askExpertToContact: !!values.askExpertToContact,
           consentToContact: true,
@@ -55,25 +53,14 @@ export default function LegalConsultationFlow({
         }}
       >
         <Form.Item
-          name="propertyStage"
-          label={fieldLabel("Is the property under construction or a resale?")}
-          rules={[{ required: true, message: "Please choose one" }]}
-        >
-          <Radio.Group>
-            <Radio value="under-construction">Under construction</Radio>
-            <Radio value="resale">Resale</Radio>
-          </Radio.Group>
-        </Form.Item>
-
-        <Form.Item
           name="query"
-          label={queryLabel("Type in your query (optional)")}
+          label={queryLabel("Create a Task for Me")}
           style={{ marginBottom: 12 }}
         >
           <Input.TextArea
             autoSize={{ minRows: 3, maxRows: 6 }}
             maxLength={1000}
-            placeholder="e.g. title verification, reviewing the sale agreement, or a specific legal question"
+            placeholder="Enter your query"
           />
         </Form.Item>
 
