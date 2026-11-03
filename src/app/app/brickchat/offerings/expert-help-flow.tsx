@@ -1,13 +1,14 @@
 "use client";
 
 import { COLORS } from "@/theme/style-constants";
-import { Checkbox, Flex, Form, Input } from "antd";
+import { Flex, Form, Input } from "antd";
 import {
   ContactConsent,
   contactFrom,
-  fieldLabel,
+  ExpertCallField,
   FlowFooter,
   MobileField,
+  queryLabel,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
 
@@ -61,7 +62,7 @@ export default function ExpertHelpFlow({
       >
         <Form.Item
           name="query"
-          label={fieldLabel("What would you like us to do?")}
+          label={queryLabel("What would you like us to do?")}
           style={{ marginBottom: 12 }}
         >
           <Input.TextArea
@@ -71,9 +72,7 @@ export default function ExpertHelpFlow({
           />
         </Form.Item>
 
-        <Form.Item name="askExpertToContact" valuePropName="checked">
-          <Checkbox>Ask a Brickfi expert to contact me</Checkbox>
-        </Form.Item>
+        <ExpertCallField />
 
         <MobileField context={context} />
       </Flex>
@@ -83,7 +82,6 @@ export default function ExpertHelpFlow({
       <FlowFooter
         submitting={submitting}
         onCancel={onCancel}
-        submitLabel="Raise Request"
         disabled={!canSubmit}
       />
     </Form>

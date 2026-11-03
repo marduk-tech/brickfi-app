@@ -18,6 +18,19 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // retired landing pages - sent to the home page (redirects run before the
+  // filesystem routes, so their page.tsx files are never reached)
+  async redirects() {
+    return [
+      "/brickassist",
+      "/brkassistv2",
+      "/buy-with-brickfi",
+      "/requestreport",
+      "/callback-request",
+    ].map(
+      (source) => ({ source, destination: "/", permanent: false }),
+    );
+  },
 };
 
 export default nextConfig;

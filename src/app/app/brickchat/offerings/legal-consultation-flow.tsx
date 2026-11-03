@@ -1,13 +1,15 @@
 "use client";
 
 import { COLORS } from "@/theme/style-constants";
-import { Checkbox, Flex, Form, Input, Radio } from "antd";
+import { Flex, Form, Input, Radio } from "antd";
 import {
   ContactConsent,
   contactFrom,
+  ExpertCallField,
   fieldLabel,
   FlowFooter,
   MobileField,
+  queryLabel,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
 
@@ -65,7 +67,7 @@ export default function LegalConsultationFlow({
 
         <Form.Item
           name="query"
-          label={fieldLabel("Type in your question")}
+          label={queryLabel("Type in your query (optional)")}
           style={{ marginBottom: 12 }}
         >
           <Input.TextArea
@@ -75,9 +77,7 @@ export default function LegalConsultationFlow({
           />
         </Form.Item>
 
-        <Form.Item name="askExpertToContact" valuePropName="checked">
-          <Checkbox>Ask a Brickfi expert to contact me</Checkbox>
-        </Form.Item>
+        <ExpertCallField />
 
         <MobileField context={context} />
       </Flex>
@@ -87,7 +87,6 @@ export default function LegalConsultationFlow({
       <FlowFooter
         submitting={submitting}
         onCancel={onCancel}
-        submitLabel="Raise Request"
         disabled={!canSubmit}
       />
     </Form>

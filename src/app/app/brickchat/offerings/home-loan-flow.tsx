@@ -13,6 +13,7 @@ import {
   Empty,
   Flex,
   Form,
+  Input,
   InputNumber,
   Radio,
   Row,
@@ -28,17 +29,21 @@ import { postJson } from "./api";
 import {
   ContactConsent,
   contactFrom,
+  ExpertCallField,
   fieldLabel,
   FlowFooter,
   MobileField,
+  queryLabel,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
+import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 // ---------------------------------------------------------------------------
-// bkfi-home-loan (Brickfi Home Loans) - checks eligibility against Ambak's
-// bank offers (proxied by services, /third-party/ambak/*), then raises a
-// request with what was entered and the offers seen. Same steps and fields as
-// the admin app's ambak-home-loan-tab.tsx.
+// bkfi-home-loan (Brickfi Home Loans) - raises a request with the user's
+// question, like the legal/expert flows, plus - when they opened "Check
+// eligibility & see offers" - what was entered there and the bank offers
+// Ambak returned (proxied by services, /third-party/ambak/*). Same steps and
+// fields as the admin app's ambak-home-loan-tab.tsx.
 // ---------------------------------------------------------------------------
 
 type YesNo = "Yes" | "No";
@@ -161,13 +166,21 @@ const HL_PROPERTY_SUB_TYPES = toOptions([
 ]);
 const HL_AGREEMENT_TYPES = toOptions(["Freehold", "Leasehold", "Regularised"]);
 const LAP_PROPERTY_SUB_TYPES = toOptions(["plot", "ready to move"]);
-const LAP_PROPERTY_USAGES = toOptions(["residential", "commercial", "industrial"]);
+const LAP_PROPERTY_USAGES = toOptions([
+  "residential",
+  "commercial",
+  "industrial",
+]);
 const LAP_OCCUPANCY_STATUSES = toOptions([
   "Self_occupied",
   "vacant",
   "Given_on_rent",
 ]);
 const PAYMENT_MODES = toOptions(["cash", "account"]);
+
+// Tabs left out of this flow for now - their fields aren't mounted (the
+// form doesn't preserve unmounted fields), so they're left out of the request
+const HIDDEN_SECTIONS = new Set(["property", "income", "coApplicant"]);
 
 // Which tab each field lives on, so a failed submit can jump to the first error
 const HOME_LOAN_SECTION_FIELDS: Record<string, string[]> = {
@@ -234,6 +247,11 @@ const compact = <T extends object>(obj: T): T =>
       ([, v]) => v !== undefined && v !== null && v !== "",
     ),
   ) as T;
+
+// The eligibility form as the user filled it in, for the ticket - partial is
+// fine, unlike buildAmbakPayload's request
+const enteredLoanDetails = (v: Partial<HomeLoanFormValues>) =>
+  compact({ ...v, dob: v.dob?.format("DD/MM/YYYY") });
 
 const buildAmbakPayload = (v: HomeLoanFormValues): AmbakOffersRequest => {
   const isLap = v.loan_type === LAP;
@@ -305,9 +323,7 @@ const getAmbakOffers = async (
 };
 
 const sortByRoi = (offers: AmbakOffer[]) =>
-  [...offers].sort(
-    (a, b) => (a.minRoi ?? Infinity) - (b.minRoi ?? Infinity),
-  );
+  [...offers].sort((a, b) => (a.minRoi ?? Infinity) - (b.minRoi ?? Infinity));
 
 const formatRoi = (offer: AmbakOffer) =>
   offer.minRoi === undefined
@@ -318,7 +334,8 @@ const formatRoi = (offer: AmbakOffer) =>
 
 // The ticket's "Your request" line - what was asked and what came back
 const homeLoanQuery = (payload: AmbakOffersRequest, offers: AmbakOffer[]) => {
-  const loan = payload.loan_type === "2" ? "Loan against property" : "Home loan";
+  const loan =
+    payload.loan_type === "2" ? "Loan against property" : "Home loan";
   const ask = `${loan} of ${formatINR(payload.lead_details.loan_amount)} over ${
     payload.lead_details.max_tenure
   } yrs`;
@@ -396,9 +413,7 @@ function HomeLoanOfferCard({ offer }: { offer: AmbakOffer }) {
           {statBlock("Tenure", tenure === undefined ? "-" : `${tenure} yrs`)}
         </Col>
       </Row>
-      {offer.calculationBase ||
-      offer.is_apf_approved ||
-      concessions.length ? (
+      {offer.calculationBase || offer.is_apf_approved || concessions.length ? (
         <Flex wrap gap={4}>
           {offer.calculationBase && (
             <Tag color="blue">{offer.calculationBase}</Tag>
@@ -414,7 +429,10 @@ function HomeLoanOfferCard({ offer }: { offer: AmbakOffer }) {
       {offer.uspData?.map((u) => (
         <Typography.Text
           key={u.usp_text}
-          style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorMedium }}
+          style={{
+            fontSize: FONT_SIZE.SUB_TEXT,
+            color: COLORS.textColorMedium,
+          }}
         >
           {u.usp_text.trim()}
         </Typography.Text>
@@ -496,6 +514,15 @@ export default function HomeLoanFlow({
     | YesNo
     | undefined;
 
+  const query: string = Form.useWatch("query", contactForm) || "";
+  const askExpert: boolean =
+    Form.useWatch("askExpertToContact", contactForm) || false;
+  // offers fetched for the details last checked - they go on the request
+  const seenOffers = offersMutation.isSuccess && !!lastPayload;
+  // something to act on: a question, a request for an expert to call, or
+  // the offers the user checked
+  const canSubmit = !!query.trim() || askExpert || seenOffers;
+
   const loanTypeOptions = masterOptions(masterdata?.loan_type);
   const professionOptions = masterOptions(masterdata?.profession);
 
@@ -524,7 +551,7 @@ export default function HomeLoanFlow({
       label: "Your details",
       children: (
         <Row gutter={12}>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="loan_type"
               label={fieldLabel("Loan type")}
@@ -537,7 +564,7 @@ export default function HomeLoanFlow({
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="profession"
               label={fieldLabel("Profession")}
@@ -550,7 +577,7 @@ export default function HomeLoanFlow({
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="loan_amount"
               label={fieldLabel("Loan amount")}
@@ -559,7 +586,7 @@ export default function HomeLoanFlow({
               {amountInput}
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="max_tenure"
               label={fieldLabel("Tenure (years)")}
@@ -568,7 +595,7 @@ export default function HomeLoanFlow({
               <InputNumber min={1} max={40} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="cibil_score"
               label={fieldLabel("CIBIL score")}
@@ -577,7 +604,7 @@ export default function HomeLoanFlow({
               <InputNumber min={300} max={900} style={{ width: "100%" }} />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="dob"
               label={fieldLabel("Date of birth")}
@@ -590,7 +617,7 @@ export default function HomeLoanFlow({
               />
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="monthly_salary"
               label={fieldLabel("Net monthly salary")}
@@ -599,7 +626,7 @@ export default function HomeLoanFlow({
               {amountInput}
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="gross_monthly_salary"
               label={fieldLabel("Gross monthly salary")}
@@ -608,7 +635,7 @@ export default function HomeLoanFlow({
               {amountInput}
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="existing_emi_amount"
               label={fieldLabel("Existing EMI")}
@@ -617,7 +644,7 @@ export default function HomeLoanFlow({
               {amountInput}
             </Form.Item>
           </Col>
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="emi_ending_six_month"
               label={fieldLabel("EMI ending in 6 months")}
@@ -626,14 +653,14 @@ export default function HomeLoanFlow({
               {amountInput}
             </Form.Item>
           </Col>
-          <Col span={24}>
-            <Form.Item
-              name="is_property_decided"
-              label={fieldLabel("Have you decided on the property?")}
-            >
-              <Radio.Group options={YES_NO} optionType="button" />
-            </Form.Item>
-          </Col>
+          {/* hidden for now - still mounted, so its "No" default is sent */}
+          <Form.Item
+            name="is_property_decided"
+            label={fieldLabel("Have you decided on the property?")}
+            hidden
+          >
+            <Radio.Group options={YES_NO} optionType="button" />
+          </Form.Item>
         </Row>
       ),
     },
@@ -648,7 +675,7 @@ export default function HomeLoanFlow({
       ) : (
         <Row gutter={12} key={loanType}>
           {loanType === HOME_LOAN && (
-            <Col span={12}>
+            <Col xs={24} sm={12}>
               <Form.Item
                 name="expected_market_value"
                 label={fieldLabel("Expected market value")}
@@ -663,7 +690,7 @@ export default function HomeLoanFlow({
               </Form.Item>
             </Col>
           )}
-          <Col span={12}>
+          <Col xs={24} sm={12}>
             <Form.Item
               name="property_city"
               label={fieldLabel("Property city ID")}
@@ -674,7 +701,7 @@ export default function HomeLoanFlow({
           </Col>
           {loanType === HOME_LOAN ? (
             <>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="property_type"
                   label={fieldLabel("Property type")}
@@ -682,7 +709,7 @@ export default function HomeLoanFlow({
                   <Select allowClear options={HL_PROPERTY_TYPES} />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="property_sub_type"
                   label={fieldLabel("Property sub type")}
@@ -690,7 +717,7 @@ export default function HomeLoanFlow({
                   <Select allowClear options={HL_PROPERTY_SUB_TYPES} />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="agreement_type"
                   label={fieldLabel("Agreement type")}
@@ -701,7 +728,7 @@ export default function HomeLoanFlow({
             </>
           ) : (
             <>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="property_sub_type"
                   label={fieldLabel("Property sub type")}
@@ -709,7 +736,7 @@ export default function HomeLoanFlow({
                   <Select allowClear options={LAP_PROPERTY_SUB_TYPES} />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="property_usage"
                   label={fieldLabel("Property usage")}
@@ -718,7 +745,7 @@ export default function HomeLoanFlow({
                   <Select allowClear options={LAP_PROPERTY_USAGES} />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="occupancy_status"
                   label={fieldLabel("Occupancy status")}
@@ -746,7 +773,7 @@ export default function HomeLoanFlow({
           </Col>
           {additionalIncome === "Yes" && (
             <>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="rent_amount"
                   label={fieldLabel("Monthly rent income")}
@@ -754,7 +781,7 @@ export default function HomeLoanFlow({
                   {amountInput}
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="monthly_incentives_amount"
                   label={fieldLabel("Monthly incentives")}
@@ -762,7 +789,7 @@ export default function HomeLoanFlow({
                   {amountInput}
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="annual_bonus_amount"
                   label={fieldLabel("Annual bonus")}
@@ -770,7 +797,7 @@ export default function HomeLoanFlow({
                   {amountInput}
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="monthly_reimbursements_amount"
                   label={fieldLabel("Monthly reimbursements")}
@@ -778,7 +805,7 @@ export default function HomeLoanFlow({
                   {amountInput}
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="payment_mode"
                   label={fieldLabel("Payment mode")}
@@ -806,7 +833,7 @@ export default function HomeLoanFlow({
           </Col>
           {coApplicantIncome === "Yes" && (
             <>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="ca_profession"
                   label={fieldLabel("Co-applicant profession")}
@@ -818,7 +845,7 @@ export default function HomeLoanFlow({
                   />
                 </Form.Item>
               </Col>
-              <Col span={12}>
+              <Col xs={24} sm={12}>
                 <Form.Item
                   name="ca_gross_monthly_salary"
                   label={fieldLabel("Co-applicant gross monthly salary")}
@@ -831,7 +858,9 @@ export default function HomeLoanFlow({
         </Row>
       ),
     },
-  ].map((s) => ({ ...s, forceRender: true })); // keep every tab mounted so all fields validate on submit
+  ]
+    .filter((s) => !HIDDEN_SECTIONS.has(s.key))
+    .map((s) => ({ ...s, forceRender: true })); // keep every tab mounted so all fields validate on submit
 
   const offersStep = () => {
     if (offersMutation.isPending)
@@ -852,9 +881,7 @@ export default function HomeLoanFlow({
         />
       );
     if (!offers.length)
-      return (
-        <Empty description="No eligible bank offers for these details" />
-      );
+      return <Empty description="No eligible bank offers for these details" />;
     return (
       <Flex vertical gap={12}>
         <Typography.Text
@@ -873,7 +900,7 @@ export default function HomeLoanFlow({
     );
   };
 
-  return (
+  const eligibilityPanel = (
     <>
       {/* kept mounted on the offers step, so "Edit details" comes back to
           what was entered */}
@@ -900,6 +927,7 @@ export default function HomeLoanFlow({
           layout="vertical"
           requiredMark={false}
           preserve={false}
+          disabled={submitting}
           initialValues={{
             is_property_decided: "No",
             is_additional_income: "No",
@@ -912,7 +940,6 @@ export default function HomeLoanFlow({
             vertical
             style={{
               padding: "0 8px",
-              backgroundColor: COLORS.bgColorBlue,
               borderRadius: 8,
             }}
           >
@@ -922,43 +949,22 @@ export default function HomeLoanFlow({
               items={sections}
               size="small"
             />
+            {/* the Other income tab is hidden, but its "No" default is still
+                sent, as before */}
+            {HIDDEN_SECTIONS.has("income") && (
+              <Form.Item name="is_additional_income" hidden noStyle />
+            )}
           </Flex>
-          <FlowFooter
-            submitting={false}
-            onCancel={onCancel}
-            submitLabel="Check eligibility"
-            disabled={!masterdata}
-          />
+          <Flex justify="flex-end" style={{ marginTop: 8 }}>
+            <Button type="primary" htmlType="submit" disabled={!masterdata}>
+              Check eligibility
+            </Button>
+          </Flex>
         </Form>
       </div>
 
       {step === "offers" && (
-        <Form
-          form={contactForm}
-          layout="vertical"
-          requiredMark={false}
-          disabled={submitting}
-          onFinish={(values) =>
-            onSubmit({
-              ...(lastPayload
-                ? { query: homeLoanQuery(lastPayload, offers) }
-                : {}),
-              eligibilityRequest: lastPayload,
-              offers: offers.map((o) => ({
-                bankName: o.bankName,
-                bankId: o.bankId,
-                minRoi: o.minRoi,
-                maxRoi: o.maxRoi,
-                monthlyEMI: o.monthlyEMI,
-                eligibleLoanAmount: o.eligibalLoanAmount,
-                tenure: o.finalMaxTenure ?? o.maxTenure,
-              })),
-              askExpertToContact: true,
-              consentToContact: true,
-              contact: contactFrom(context, values),
-            })
-          }
-        >
+        <>
           <Flex
             align="center"
             justify="space-between"
@@ -976,23 +982,124 @@ export default function HomeLoanFlow({
           </Flex>
           {/* the modal body scrolls, see OfferingFlowDialog */}
           {offersStep()}
-
-          {!offersMutation.isPending && (
-            <Flex vertical style={{ marginTop: 16 }}>
-              <MobileField context={context} />
-            </Flex>
-          )}
-
-          <ContactConsent />
-
-          <FlowFooter
-            submitting={submitting}
-            onCancel={onCancel}
-            submitLabel="Talk to a loan expert"
-            disabled={offersMutation.isPending}
-          />
-        </Form>
+        </>
       )}
+    </>
+  );
+
+  // the eligibility form is a sibling, not nested (forms can't be), so the
+  // footer below submits this form by its name
+  return (
+    <>
+      {/* collapsed by default - the question alone is enough to raise a
+          request */}
+      <Collapse
+        size="small"
+        style={{ marginBottom: 24, marginTop: 16 }}
+        items={[
+          {
+            key: "eligibility",
+            label: (
+              <Flex gap={8} align="center">
+                <Typography.Text
+                  style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}
+                >
+                  Provide Details to See Offers
+                </Typography.Text>
+                <DynamicReactIcon
+                  iconName="BiSolidOffer"
+                  iconSet="bi"
+                  size={24}
+                  color={COLORS.textColorDark}
+                ></DynamicReactIcon>
+              </Flex>
+            ),
+            // scrolls on its own, so the question below stays in view
+            children: (
+              <div style={{ maxHeight: "45vh", overflowY: "auto" }}>
+                {eligibilityPanel}
+              </div>
+            ),
+          },
+        ]}
+      />
+
+      <Form
+        form={contactForm}
+        name="homeLoanRequest"
+        layout="vertical"
+        requiredMark={false}
+        disabled={submitting}
+        initialValues={{ askExpertToContact: false }}
+        onFinish={(values) => {
+          const userQuery = values.query?.trim();
+          const ticketQuery = [
+            userQuery,
+            seenOffers && lastPayload ? homeLoanQuery(lastPayload, offers) : "",
+          ]
+            .filter(Boolean)
+            .join("\n\n");
+          // whatever was entered under "Provide Details to See Offers", even
+          // if the check was never run (its fields only mount once the panel
+          // is opened, so untouched means nothing was entered)
+          const loanDetails = form.isFieldsTouched()
+            ? enteredLoanDetails(form.getFieldsValue())
+            : null;
+          onSubmit({
+            ...(ticketQuery ? { query: ticketQuery } : {}),
+            ...(loanDetails && { loanDetails }),
+            // only when the user checked eligibility before raising it
+            ...(seenOffers && {
+              eligibilityRequest: lastPayload,
+              offers: offers.map((o) => ({
+                bankName: o.bankName,
+                bankId: o.bankId,
+                minRoi: o.minRoi,
+                maxRoi: o.maxRoi,
+                monthlyEMI: o.monthlyEMI,
+                eligibleLoanAmount: o.eligibalLoanAmount,
+                tenure: o.finalMaxTenure ?? o.maxTenure,
+              })),
+            }),
+            askExpertToContact: !!values.askExpertToContact,
+            consentToContact: true,
+            contact: contactFrom(context, values),
+          });
+        }}
+      >
+        <Flex
+          vertical
+          style={{
+            padding: 8,
+            borderRadius: 8,
+          }}
+        >
+          <Form.Item
+            name="query"
+            label={queryLabel("Type in your query (optional)")}
+            style={{ marginBottom: 12 }}
+          >
+            <Input.TextArea
+              autoSize={{ minRows: 3, maxRows: 6 }}
+              maxLength={1000}
+              placeholder="e.g. how much loan you can get, comparing bank offers, or a balance transfer"
+            />
+          </Form.Item>
+
+          <ExpertCallField />
+
+          <MobileField context={context} />
+        </Flex>
+      </Form>
+
+      <ContactConsent />
+
+      <FlowFooter
+        form="homeLoanRequest"
+        submitting={submitting}
+        onCancel={onCancel}
+        disabled={!canSubmit || offersMutation.isPending}
+      />
     </>
   );
 }

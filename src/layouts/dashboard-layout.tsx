@@ -164,18 +164,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     },
     {
       key: "consult",
-      title: "Brickfi Assist",
-      link: LandingConstants.brickAssistLink,
-      icon: { name: "RiHomeSmileFill", set: "ri" },
-    },
-    {
-      key: "about",
-      title: "Request Brick360 Report",
-      link: LandingConstants.genReportFormLink,
-      icon: { name: "HiDocumentReport", set: "hi" },
-    },
-    {
-      key: "consult",
       title: "Brickfi Blog",
       link: "/app/profile",
       icon: { name: "FaBookOpen", set: "fa6" },
@@ -188,17 +176,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     },
     {
       key: "chat",
-      title: "Brick Chat",
+      title: "Brickfi Ai",
       disabled: !user || user.role !== "admin" ,
-      link: "/app/brickchat",
+      link: "/app",
       icon: { name: "MdChat", set: "md" },
-    },
-    {
-      key: "chat-history",
-      title: "Chat History",
-      disabled: true,
-      link: "/user-sessions",
-      icon: { name: "RiHistoryLine", set: "ri" },
     },
   ];
 

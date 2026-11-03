@@ -193,7 +193,7 @@ export default function OfferingTicketCard({
       </Typography.Text>
       {/* <div style={{ marginLeft: "auto" }}>{statusTag(ticket.status)}</div> */}
       <div style={{marginLeft:"auto"}}> <Tag
-    color={"blue"}
+    color={COLORS.greenIdentifier}
     bordered={false}
     style={{ margin: 0 }}
   >

@@ -1,7 +1,7 @@
 "use client";
 
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Button, Flex, Form, Input, Typography } from "antd";
+import { Button, Checkbox, Flex, Form, Input, Typography } from "antd";
 import type { OfferingFlowContext } from "./types";
 
 // Form pieces shared by the offering flows
@@ -11,6 +11,36 @@ export const fieldLabel = (text: string) => (
     {text}
   </Typography.Text>
 );
+
+// Every flow's query-box label - larger than the other fields' labels, with
+// what happens to a typed-in query right under it (above the box)
+export const queryLabel = (text: string) => (
+  <Flex vertical gap={2}>
+    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}>
+      {text}
+    </Typography.Text>
+    <Typography.Text
+      style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}
+    >
+      I will reply to your query directly through a message within 24-48 hrs.
+      No additional calls.
+    </Typography.Text>
+  </Flex>
+);
+
+// The askExpertToContact checkbox every flow ends with, with what ticking it
+// means underneath
+export function ExpertCallField() {
+  return (
+    <Form.Item
+      name="askExpertToContact"
+      valuePropName="checked"
+      extra="A free 15 min call will be scheduled at your convenience."
+    >
+      <Checkbox>Schedule a Free 15 min consultation with Brickfi Expert</Checkbox>
+    </Form.Item>
+  );
+}
 
 // The contact a ticket carries - the signed-in user's own number, or one the
 // guest types in (asked for by MobileField below)
@@ -44,17 +74,19 @@ export function MobileField({ context }: { context: OfferingFlowContext }) {
   );
 }
 
+// every flow submits with the same "Raise Request" button
 export function FlowFooter({
   submitting,
   onCancel,
-  submitLabel,
   disabled = false,
+  form,
 }: {
   submitting: boolean;
   onCancel: () => void;
-  submitLabel: string;
   /** e.g. until the flow has something to act on */
   disabled?: boolean;
+  /** the Form's name, when the footer is rendered outside that form */
+  form?: string;
 }) {
   return (
     <Flex justify="flex-end" gap={8} style={{ marginTop: 8 }}>
@@ -64,10 +96,11 @@ export function FlowFooter({
       <Button
         type="primary"
         htmlType="submit"
+        form={form}
         loading={submitting}
         disabled={disabled}
       >
-        {submitLabel}
+        Raise Request
       </Button>
     </Flex>
   );

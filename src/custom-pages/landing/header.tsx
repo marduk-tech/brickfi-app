@@ -19,14 +19,6 @@ const LandingHeader: React.FC<{
   const isMobile = isMobileProp ?? isMobileDetected;
   const navItems = [
     {
-      link: "/",
-      label: "Brick360 Report",
-    },
-    {
-      link: LandingConstants.brickAssistLink,
-      label: "Brickfi Assist",
-    },
-    {
       link: LandingConstants.blogLink,
       label: "Blog",
     },
