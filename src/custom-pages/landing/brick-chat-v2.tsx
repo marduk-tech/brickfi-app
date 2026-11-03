@@ -1112,7 +1112,7 @@ export default function BrickChatv2({
               }}
             >
               <span style={{ color: COLORS.LANDING.PINK, fontWeight: 200 }}>
-                What makes Brickfi{" "}
+                How does Brickfi{" "}
                 <span
                   style={{
                     color: "white",
@@ -1120,8 +1120,9 @@ export default function BrickChatv2({
                     padding: "0 4px",
                   }}
                 >
-                  Possible?
+                  Evaluates 
                 </span>
+                Any Project?
               </span>{" "}
             </h2>
           </Flex>
