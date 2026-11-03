@@ -52,7 +52,7 @@ export default function OfferingCtaButtons({
         wrap
         style={{
           marginTop: 16,
-          width: 200,
+          width: 235,
           borderRadius: 8,
           border: `1px solid ${COLORS.borderColor}`,
         }}
@@ -76,7 +76,7 @@ export default function OfferingCtaButtons({
                 />
               ) : null}
               <Typography.Text
-                style={{ fontSize: FONT_SIZE.HEADING_4, lineHeight: "110%" }}
+                style={{ color: COLORS.textColorMedium,  fontSize: FONT_SIZE.HEADING_4, lineHeight: "140%" }}
               >
                 {cta.description}
               </Typography.Text>

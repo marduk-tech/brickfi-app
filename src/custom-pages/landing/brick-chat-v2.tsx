@@ -229,8 +229,16 @@ const REPORT_FEATURES: {
     iconName: "SiHomebridge",
     iconSet: "si",
     title: "Property Layout & Design",
-    subHeading:
-      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Don't judge a property by its brochure (said someone); Brick360 looks at numbers like <span style={{fontWeight: 600}}>open space, unit density, unit distribution, amenities mix</span> and more to give a deeper insights into property layout.</Typography.Text>,
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Don't judge a property by its brochure (said someone); Brick360 looks at
+        numbers like{" "}
+        <span style={{ fontWeight: 600 }}>
+          open space, unit density, unit distribution, amenities mix
+        </span>{" "}
+        and more to give a deeper insights into property layout.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-layout.png",
   },
   {
@@ -238,8 +246,16 @@ const REPORT_FEATURES: {
     iconName: "FaMapLocation",
     iconSet: "fa6",
     title: "Location Dissection to Assess Livability & Future Growth.",
-    subHeading:
-      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Analysing livability is more than just checking the nearest mall. We go deeper to understand <span style={{fontWeight: 600}}>road connectivity, workplace distribution, type of schools</span> nearby and more.</Typography.Text>,
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Analysing livability is more than just checking the nearest mall. We go
+        deeper to understand{" "}
+        <span style={{ fontWeight: 600 }}>
+          road connectivity, workplace distribution, type of schools
+        </span>{" "}
+        nearby and more.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-location.png",
   },
   {
@@ -248,8 +264,15 @@ const REPORT_FEATURES: {
     iconSet: "tb",
     title: "Builder Track Records, Complaints & Delays",
     headingMarginBottom: 16,
-    subHeading:
-      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Trust more than builder's words; look at their <span style={{fontWeight: 600}}>past projects, customer complaints, timely delivery, scale, diversity</span> to get a sense of execution risks and credibility.</Typography.Text>,
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Trust more than builder's words; look at their{" "}
+        <span style={{ fontWeight: 600 }}>
+          past projects, customer complaints, timely delivery, scale, diversity
+        </span>{" "}
+        to get a sense of execution risks and credibility.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-builder.png",
   },
   {
@@ -257,8 +280,16 @@ const REPORT_FEATURES: {
     iconName: "FaMoneyBills",
     iconSet: "fa6",
     title: "Financials Assessment including Price Point, Rental Yield.",
-    subHeading:
-      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Making the right financial decisions becomes all the more necessary. Assess the <span style={{fontWeight: 600}}>price point, rental yield and growth potential</span> with upto date pricing information.</Typography.Text>,
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Making the right financial decisions becomes all the more necessary.
+        Assess the{" "}
+        <span style={{ fontWeight: 600 }}>
+          price point, rental yield and growth potential
+        </span>{" "}
+        with upto date pricing information.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-financials.png",
   },
 ];
@@ -418,8 +449,8 @@ export default function BrickChatv2({
           style={{ flexShrink: 0 }}
         >
           <Flex align="center" gap={8} style={{ padding: "12px 4px" }}>
-            Ask Brickfi
             <FlippingIcons count={2} size={14} color={COLORS.primaryColor} />
+            Ask Brickfi
           </Flex>
         </Button>
       </Flex>
@@ -920,37 +951,35 @@ export default function BrickChatv2({
         }}
       ></SectionLeft>
       <Flex vertical gap={isMobile ? 16 : 32} style={{ marginTop: 32 }}>
-        
-        
-          <Flex
-            vertical
-            align="center"
-            justify="center"
-            style={{ width: "100%", marginTop: 32 }}
-          >
-            {/* <Typography.Text>Have a Real Estate Query ? Just Brickfi it!</Typography.Text> */}
-            {isMobile ? (
-              <img
-                width="90%"
-                style={{ marginTop: 16, marginBottom: "64px" }}
-                src="/images/landing/brick-chat/landing-demo-mob.png"
-              />
-            ) : (
-              // muted + playsInline are what let browsers autoplay it, like the GIF it replaces
-              <video
-                width="80%"
-                style={{ marginTop: 16, marginBottom: "64px" }}
-                src="/images/landing/brick-chat/landing-demo.mp4"
-                poster="/images/landing/brick-chat/landing-demo.png"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                aria-label="Brickfi AI demo"
-              />
-            )}
-          </Flex>
+        <Flex
+          vertical
+          align="center"
+          justify="center"
+          style={{ width: "100%", marginTop: 32 }}
+        >
+          {/* <Typography.Text>Have a Real Estate Query ? Just Brickfi it!</Typography.Text> */}
+          {isMobile ? (
+            <img
+              width="90%"
+              style={{ marginTop: 16, marginBottom: "64px" }}
+              src="/images/landing/brick-chat/landing-demo-mob.png"
+            />
+          ) : (
+            // muted + playsInline are what let browsers autoplay it, like the GIF it replaces
+            <video
+              width="80%"
+              style={{ marginTop: 16, marginBottom: "64px" }}
+              src="/images/landing/brick-chat/landing-demo.mp4"
+              poster="/images/landing/brick-chat/landing-demo.png"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-label="Brickfi AI demo"
+            />
+          )}
+        </Flex>
         <Flex vertical align="center">
           {/* <Typography.Text
             style={{
@@ -1032,10 +1061,16 @@ export default function BrickChatv2({
                 </span>
               </h2>
               <Typography.Text
-                style={{ fontSize: FONT_SIZE.HEADING_3, color: "white", lineHeight: "130%" }}
+                style={{
+                  fontSize: FONT_SIZE.HEADING_3,
+                  color: "white",
+                  lineHeight: "130%",
+                }}
               >
-                Traditional brokers show you what earns them a fee. Listing sites rank whoever pays the most. Brickfi searches the entire market for what actually fits your needs—unbiased insights, intelligent discovery and no spam.
-
+                Traditional brokers show you what earns them a fee. Listing
+                sites rank whoever pays the most. Brickfi searches the entire
+                market for what actually fits your needs—unbiased insights,
+                intelligent discovery and no spam.
               </Typography.Text>
             </Flex>
           ),
@@ -1214,7 +1249,7 @@ export default function BrickChatv2({
                   >
                     {title}
                   </Typography.Text>
-                    {subHeading}
+                  {subHeading}
                 </div>
                 {/* dots where the frame lines meet */}
                 <span className={`${styles.frameDot} ${styles.dotTopLeft}`} />
@@ -1232,7 +1267,6 @@ export default function BrickChatv2({
           ),
         )}
       </Carousel>
-
 
       <Flex align="center" justify="center">
         <img
@@ -1280,9 +1314,11 @@ export default function BrickChatv2({
                 style={{
                   color: COLORS.textColorDark,
                   textAlign: "left",
-                  fontSize: isMobile ? FONT_SIZE.HEADING_1*.9 : FONT_SIZE.HEADING_1,
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 0.9
+                    : FONT_SIZE.HEADING_1,
                   margin: 0,
-                  fontWeight: 300
+                  fontWeight: 300,
                 }}
               >
                 Why are we building Brickfi ?
@@ -1374,12 +1410,12 @@ export default function BrickChatv2({
                   }}
                 >
                   <Flex align="center" gap={16}>
-                    Ask Brickfi
                     <FlippingIcons
                       count={2}
                       size={16}
                       color={COLORS.primaryColor}
                     />
+                    Ask Brickfi
                     <ArrowRightOutlined />
                   </Flex>
                 </Button>
@@ -1406,7 +1442,9 @@ export default function BrickChatv2({
                 <Typography.Text
                   style={{
                     color: COLORS.textColorMedium,
-                    fontSize: isMobile ? FONT_SIZE.HEADING_1 * .8: FONT_SIZE.HEADING_1,
+                    fontSize: isMobile
+                      ? FONT_SIZE.HEADING_1 * 0.8
+                      : FONT_SIZE.HEADING_1,
                     fontWeight: 300,
                   }}
                 >
