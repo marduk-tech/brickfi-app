@@ -694,7 +694,7 @@ export const SEO_CONTENT = {
   companyUrl: "https://www.brickfi.in/",
   companyLogo: "https://www.brickfi.in/images/brickfi-logo.png",
   companyDescription:
-    "The smartest way to buy real estate. Get a comprehensive Brick360 report around property, investment, builder and more for any property in Bangalore.",
+    "Find The Home You Need Without Brokers or Spam. Tell Brickfi what you're looking for. Discover matching properties across Bangalore and get 360 assessment around builder, property, location and pricing.",
 };
 
 export const FAQ_360 = [

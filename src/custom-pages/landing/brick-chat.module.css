@@ -137,6 +137,18 @@
   padding: 24px 32px;
 }
 
+/* fixed-size image cell so slides don't shift height between features */
+.featureImageCell {
+  height: 420px;
+  align-items: center;
+  overflow: hidden;
+}
+
+.featureImageCell img {
+  width: 90%;
+  height: auto;
+}
+
 .featureCell + .featureCell {
   border-left: 1px solid var(--frame-line);
 }
@@ -183,6 +195,10 @@
 
 .featureFrameMobile .featureCell {
   padding: 16px;
+}
+
+.featureFrameMobile .featureImageCell {
+  height: 280px;
 }
 
 .featureFrameMobile .featureCell + .featureCell {

@@ -1,34 +1,33 @@
-import ReportLanding from "@/custom-pages/landing/report-landing";
-import { FAQ_360, SEO_CONTENT } from "@/libs/constants";
-import type { Metadata } from "next";
+import BrickChatv2 from "@/custom-pages/landing/brick-chat-v2";
+import { SEO_CONTENT } from "@/libs/constants";
+import { Metadata } from "next";
 import { headers } from "next/headers";
 
 const META_DESCR =
-  "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";
-const META_TITLE =
-  "Brickfi | Get a 360 Report Card for any property in Bangalore";
+  "Tell Brickfi what you're looking for. Discover matching properties across Bangalore and get 360 assessment around builder, property, location and pricing.";
+const META_TITLE = "Brickfi AI | Find The Home You Need Without Brokers or Spam.";
+const META_URL = "https://www.brickfi.in/brickassist";
+
 export const metadata: Metadata = {
   title: META_TITLE,
   description: META_DESCR,
+  keywords: [
+    "real estate",
+    "property",
+    "bangalore",
+    "investment",
+    "brick360",
+    "brickfi",
+    "home buying",
+    "property analysis",
+  ],
   other: {
     "application/ld+json": JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebPage",
-      url: "https://www.brickfi.in/brick360",
+      url: META_URL,
       name: META_TITLE,
       description: META_DESCR,
-      mainEntity: [
-        FAQ_360.map((q) => {
-          return {
-            "@type": "Question",
-            name: q.question,
-            acceptedAnswer: {
-              "@type": "Answer",
-              text: q.answer,
-            },
-          };
-        }),
-      ],
       publisher: {
         "@type": "Organization",
         name: SEO_CONTENT.companyName,
@@ -41,37 +40,27 @@ export const metadata: Metadata = {
       inLanguage: "en-IN",
     }),
   },
-  keywords: [
-    "real estate",
-    "property",
-    "bangalore",
-    "investment",
-    "brick360",
-    "brickfi",
-    "home buying",
-    "property analysis",
-  ],
   authors: [{ name: "Brickfi" }],
   creator: "Brickfi",
   publisher: "Brickfi",
   formatDetection: {
     telephone: false,
   },
-  metadataBase: new URL("https://www.brickfi.in"),
+  metadataBase: new URL(META_URL),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     title: META_TITLE,
     description: META_DESCR,
-    url: "https://www.brickfi.in",
+    url: META_URL,
     siteName: "Brickfi",
     images: [
       {
-        url: "/images/brick360-preview.png",
+        url: "/images/brickassist-preview.png",
         width: 1200,
         height: 630,
-        alt: "Brickfi | Get a 360 Report Card across any property in Bangalore",
+        alt: META_TITLE,
       },
     ],
     locale: "en_IN",
@@ -81,7 +70,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: META_TITLE,
     description: META_DESCR,
-    images: ["/images/brick360-preview.png"],
+    images: ["/images/brickassist-preview.png"],
   },
   robots: {
     index: true,
@@ -96,11 +85,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ReportLandingPage() {
+export default async function BrickAssistPage() {
   const headersList = await headers();
   const ua = headersList.get("user-agent") ?? "";
   const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
-
-  console.log("isMobileSSR:", isMobileSSR);
-  return <ReportLanding initialIsMobile={isMobileSSR} />;
+  return <BrickChatv2 initialIsMobile={isMobileSSR} />;
 }

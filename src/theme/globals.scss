@@ -275,16 +275,84 @@ input#mobileNumber {
       }
 
   ul {
+    padding-left: 24px;
     li {
       padding-left: 4px;
       margin-bottom: 10px;
       font-size: 14;
-      
 
       ul {
         padding-left: 24px;
       }
     }
+  }
+
+  /* GFM tables: bordered, top-aligned cells at paragraph size; block +
+     overflow-x lets a wide table scroll instead of overflowing the answer */
+  table {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 13.5px;
+    line-height: 1.5;
+  }
+
+  th,
+  td {
+    border: 1px solid rgba(45, 63, 78, 0.15);
+    padding: 6px 10px;
+    vertical-align: top;
+  }
+
+  th {
+    font-weight: 600;
+    text-align: left;
+    background-color: rgba(45, 63, 78, 0.04);
+  }
+
+  td strong {
+    white-space: nowrap;
+  }
+}
+
+/* Google Maps InfoWindow: its content div scrolls both ways by default, so
+   anything wider than a narrow (mobile) popup showed a horizontal scrollbar.
+   Content wraps instead (see .map-modal-body); vertical scrolling is left
+   to MapModalBody's own max-height. */
+.gm-style-iw-d {
+  overflow-x: hidden !important;
+}
+
+/* MapModalBody's text popups: wrap everything to the popup's width rather
+   than overflowing it - long words/URLs, tags, markdown tables, code, images */
+.map-modal-body {
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+
+  .ant-tag {
+    white-space: normal;
+    max-width: 100%;
+  }
+
+  img,
+  video,
+  iframe,
+  table,
+  pre {
+    max-width: 100%;
+  }
+
+  table {
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  pre,
+  code {
+    white-space: pre-wrap;
   }
 }
 

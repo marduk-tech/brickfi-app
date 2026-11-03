@@ -12,7 +12,7 @@ import { ISurroundingElement } from "../../../types/Project";
 import { CategoryFilters } from "../map-filters/category-filters";
 import { DriverFilters } from "../map-filters/driver-filters";
 import { SurroundingFilters } from "../map-filters/surrounding-filters";
-import { MapModalBody } from "../map-modal";
+import { getMapPopupWidth, MapModalBody } from "../map-modal";
 import { fetchTravelDurationElement } from "../map-utils";
 import {
   MapViewContextProvider,
@@ -125,6 +125,13 @@ function MapViewGoogleInner({
 }: MapViewGoogleProps & { primaryProject?: any }) {
   const { isOpen, content: modalContent, position: modalPosition, openModal, closeModal } = useMapModal();
 
+  // the map's width, read when a text popup renders (the modal opening
+  // re-renders this) - see getMapPopupWidth
+  const mapWrapperRef = React.useRef<HTMLDivElement>(null);
+  const textPopupWidth = modalContent?.customBody
+    ? undefined
+    : getMapPopupWidth(mapWrapperRef.current?.clientWidth ?? Infinity);
+
   const {
     selectedCategory,
     setSelectedCategory,
@@ -199,7 +206,7 @@ function MapViewGoogleInner({
         projectId={lvnzyProjectId}
       />
 
-      <div style={{ flex: 1, position: "relative" }}>
+      <div ref={mapWrapperRef} style={{ flex: 1, position: "relative" }}>
         <Map
           mapId={MAP_ID}
           defaultCenter={{ lat: 12.969999, lng: 77.587841 }}
@@ -321,7 +328,12 @@ function MapViewGoogleInner({
               onClose={closeModal}
               pixelOffset={[0, -10]}
               // card popups size to the card (see .map-card-popup in globals.css)
-              style={modalContent?.customBody ? undefined : { width: 320 }}
+              // Text popups: a fixed width from the map's own size (narrower
+              // on mobile) - the same width map-view-v2's popup gets. Set as
+              // min/maxWidth, not a style width, so Google lays it out and
+              // the content wraps instead of being clipped.
+              minWidth={textPopupWidth}
+              maxWidth={textPopupWidth}
               className={modalContent?.customBody ? "map-card-popup" : undefined}
               // no header row / close icon - clicking outside closes it (MapModalBody), same as map-view-v2
               headerDisabled

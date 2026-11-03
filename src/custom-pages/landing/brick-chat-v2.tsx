@@ -12,7 +12,7 @@ import {
   Tag,
   Typography,
 } from "antd";
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { CarouselRef } from "antd/es/carousel";
@@ -221,7 +221,7 @@ const REPORT_FEATURES: {
   iconSet: IconSetKey;
   title: string;
   headingMarginBottom?: number;
-  subHeading: string;
+  subHeading: ReactNode;
   mainImgUrl: string;
 }[] = [
   {
@@ -230,7 +230,7 @@ const REPORT_FEATURES: {
     iconSet: "si",
     title: "Property Layout & Design",
     subHeading:
-      "Don't judge a property by its brochure (said someone); Brick360 looks at numbers like open space, unit density, unit distribution, amenities mix and more to give a deeper insights into property layout.",
+      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Don't judge a property by its brochure (said someone); Brick360 looks at numbers like <span style={{fontWeight: 600}}>open space, unit density, unit distribution, amenities mix</span> and more to give a deeper insights into property layout.</Typography.Text>,
     mainImgUrl: "/images/landing/report-feature-layout.png",
   },
   {
@@ -239,7 +239,7 @@ const REPORT_FEATURES: {
     iconSet: "fa6",
     title: "Location Dissection to Assess Livability & Future Growth.",
     subHeading:
-      "Analysing livability is more than just checking the nearest mall. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
+      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Analysing livability is more than just checking the nearest mall. We go deeper to understand <span style={{fontWeight: 600}}>road connectivity, workplace distribution, type of schools</span> nearby and more.</Typography.Text>,
     mainImgUrl: "/images/landing/report-feature-location.png",
   },
   {
@@ -249,7 +249,7 @@ const REPORT_FEATURES: {
     title: "Builder Track Records, Complaints & Delays",
     headingMarginBottom: 16,
     subHeading:
-      "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity to get a sense of execution risks and credibility.",
+      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Trust more than builder's words; look at their <span style={{fontWeight: 600}}>past projects, customer complaints, timely delivery, scale, diversity</span> to get a sense of execution risks and credibility.</Typography.Text>,
     mainImgUrl: "/images/landing/report-feature-builder.png",
   },
   {
@@ -258,7 +258,7 @@ const REPORT_FEATURES: {
     iconSet: "fa6",
     title: "Financials Assessment including Price Point, Rental Yield.",
     subHeading:
-      "Making the right financial decisions becomes all the more necessary. Assess the price point, rental yield and growth potential with upto date pricing information. ",
+      <Typography.Text style={{fontSize: FONT_SIZE.HEADING_3}}>Making the right financial decisions becomes all the more necessary. Assess the <span style={{fontWeight: 600}}>price point, rental yield and growth potential</span> with upto date pricing information.</Typography.Text>,
     mainImgUrl: "/images/landing/report-feature-financials.png",
   },
 ];
@@ -1199,8 +1199,10 @@ export default function BrickChatv2({
                   isMobile ? styles.featureFrameMobile : ""
                 }`}
               >
-                <div className={styles.featureCell}>
-                  <img src={mainImgUrl} alt={title} style={{ width: "100%" }} />
+                <div
+                  className={`${styles.featureCell} ${styles.featureImageCell}`}
+                >
+                  <img src={mainImgUrl} alt={title} />
                 </div>
                 <div className={styles.featureCell}>
                   <Typography.Text
@@ -1213,15 +1215,7 @@ export default function BrickChatv2({
                   >
                     {title}
                   </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_3,
-                      color: COLORS.textColorMedium,
-                      fontWeight: 300,
-                    }}
-                  >
                     {subHeading}
-                  </Typography.Text>
                 </div>
                 {/* dots where the frame lines meet */}
                 <span className={`${styles.frameDot} ${styles.dotTopLeft}`} />

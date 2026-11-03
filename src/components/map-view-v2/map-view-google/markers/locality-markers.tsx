@@ -11,7 +11,10 @@ interface LocalityMarkersProps {
   openModal: (content: MapModalContent, position?: MapModalGeoPosition) => void;
 }
 
-export function LocalityMarkers({ localities, openModal }: LocalityMarkersProps) {
+export function LocalityMarkers({
+  localities,
+  openModal,
+}: LocalityMarkersProps) {
   return (
     <>
       {localities
@@ -19,13 +22,16 @@ export function LocalityMarkers({ localities, openModal }: LocalityMarkersProps)
         .map((locality) => (
           <AdvancedMarker
             key={`locality-${locality._id}`}
-            position={{ lat: locality.location.lat, lng: locality.location.lng }}
+            position={{
+              lat: locality.location.lat,
+              lng: locality.location.lng,
+            }}
             onClick={() =>
               openModal(
                 {
                   title: locality.name,
                   content: "",
-                  tags: [{ label: "Growth corridor", color: COLORS.textColorDark }],
+                  tags: [{ label: "Locality", color: COLORS.textColorDark }],
                 },
                 { lat: locality.location.lat, lng: locality.location.lng },
               )
