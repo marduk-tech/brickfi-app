@@ -374,7 +374,7 @@ export default function BrickChatResults({
     const orderedResults = orderResults(results, skipSort);
 
     return (
-      <Flex className={styles.scrollContainer} gap={8}>
+      <Flex className={styles.scrollContainer} gap={8} >
         {contextHolder}
         {modalContextHolder}
         {orderedResults.map((project) => (
@@ -546,7 +546,7 @@ export default function BrickChatResults({
   }
 
   return (
-    <Flex className={styles.scrollContainer} gap={16}>
+    <Flex className={styles.scrollContainer} gap={16} style={{marginBottom: 16 }}>
       {contextHolder}
       {modalContextHolder}
       {orderResults(results, skipSort).map((project) => (
@@ -556,12 +556,23 @@ export default function BrickChatResults({
             style={{
               width: 225,
               borderRadius: 12,
-              display: "block",
+              // column so the body fills the card - the row stretches every
+              // card to the tallest one, and the action row below is pinned
+              // to the bottom however tall the one-liner is
+              display: "flex",
+              flexDirection: "column",
               overflow: "hidden",
               margin: "8px 0",
               border: `0.5px solid ${COLORS.borderColor}`,
             }}
-            styles={{ body: { padding: 0 } }}
+            styles={{
+              body: {
+                padding: 0,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+              },
+            }}
             cover={
               <div
                 style={{
@@ -611,7 +622,7 @@ export default function BrickChatResults({
               </div>
             }
           >
-            <Flex style={{ padding: 4 }} gap={0} vertical>
+            <Flex style={{ padding: 4, flex: 1 }} gap={0} vertical>
               <Flex style={{width: "100%", overflowX: "scroll", scrollbarWidth: "none"}}>
                 <MetaTag
                   label={project.projectMicroPocket || project.projectCorridor}
@@ -675,7 +686,10 @@ export default function BrickChatResults({
                   {parseOneLiner(project.oneLiner).text}
                 </Typography.Paragraph>
               )}
-              <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
+              <Flex
+                style={{ width: "100%", marginTop: "auto", paddingTop: 8 }}
+                gap={4}
+              >
                 {project.lvnzyProjectId && (
                   <Tooltip title={saveTooltip(project.lvnzyProjectId)}>
                     <Flex
@@ -776,11 +790,13 @@ export default function BrickChatResults({
                       flexShrink: 0,
                       padding: "2px 4px",
                       borderRadius: 4,
-                      backgroundColor: COLORS.primaryColor,
+                      backgroundColor: COLORS.textColorDark,
                       boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
                       cursor: "pointer",
                       color: "white",
                       fontSize: FONT_SIZE.SUB_TEXT,
+                      marginRight: 4, 
+                      marginBottom: 4
                     }}
                   >
                     {/* <DynamicReactIcon

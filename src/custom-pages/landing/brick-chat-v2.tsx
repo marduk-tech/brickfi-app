@@ -418,7 +418,7 @@ export default function BrickChatv2({
           style={{ flexShrink: 0 }}
         >
           <Flex align="center" gap={8} style={{ padding: "12px 4px" }}>
-            Explore Brickfi
+            Ask Brickfi
             <FlippingIcons count={2} size={14} color={COLORS.primaryColor} />
           </Flex>
         </Button>
@@ -1374,7 +1374,7 @@ export default function BrickChatv2({
                   }}
                 >
                   <Flex align="center" gap={16}>
-                    Explore Brickfi
+                    Ask Brickfi
                     <FlippingIcons
                       count={2}
                       size={16}

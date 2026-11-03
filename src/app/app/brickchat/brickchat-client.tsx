@@ -133,6 +133,8 @@ interface ExploreAnswer {
   nextSetCount?: number;
   /** Project-list answers: how many projects match the search's criteria outright - can be more than the list shows, or fewer when relaxed criteria filled it out. Null when unknown. See searchMeta in brick-explore-agent.js. */
   totalCount?: number | null;
+  /** Project-list answers: how many of the search's projects have been shown so far across "show me more" pages, this turn's included. Null when unknown (older answers). See synthesize.js. */
+  shownCount?: number | null;
   images?: ExploreImagesGroup[];
   /** brickfiId(s) of driver/infra records (schools, transit, tech parks etc) the answer discussed - see synthesize.js. */
   brickfiDriverIds?: string[];
@@ -168,6 +170,10 @@ interface ChatMessage {
 // resolvedLocations takes priority on a shared id (e.g. "distance to Sampige
 // Line" both names the driver in the answer AND resolves it as a
 // targetPlace) since it already carries a name for free, no fetch needed.
+// key (and stand-in id, so the chip is clickable) of the "See All Projects"
+// chip at the head of the "See on map" row
+const ALL_PROJECTS_CHIP_KEY = "all-projects";
+
 const getReferredLocationItems = (
   answer: ExploreAnswer,
 ): ReferredLocationChipItem[] => {
@@ -1762,102 +1768,6 @@ export function BrickChatCore({
                     ) : null} */}
 
                     {renderImages(messageItem.answer.images)}
-                    {/* Map Chips */}
-                    <Flex
-                      align="center"
-                      gap={8}
-                      style={{
-                        marginBottom: 8,
-                        width: "100%",
-                        overflowX: "scroll",
-                        flexWrap: "nowrap",
-                        scrollbarWidth: "none",
-                      }}
-                    >
-                      {messageItem.answer.projectsList &&
-                      !!messageItem.answer.projectsList.length ? (
-                        <Flex justify="flex-end" style={{ flexShrink: 0 }}>
-                          <Button
-                            size="small"
-                            icon={
-                              <DynamicReactIcon
-                                iconName="FaMapMarkedAlt"
-                                iconSet="fa"
-                                size={16}
-                                color={
-                                  !hasFocusedReferredLocations &&
-                                  mapResultsIndex === index
-                                    ? "white"
-                                    : COLORS.textColorDark
-                                }
-                              ></DynamicReactIcon>
-                            }
-                            type={
-                              mapResultsIndex === index ? "primary" : "default"
-                            }
-                            onClick={() => {
-                              setFocusedReferredLocations([]);
-                              if (isMobile) setShowMobileMap(true);
-                              setMapResultsIndex(index);
-                              // a fresh array reference even when re-selecting
-                              // the same list (e.g. after wandering off to a
-                              // driver/locality focus) - MapCenterer's
-                              // re-centering effect only re-fires when its
-                              // `projects` dependency actually changes
-                              // reference, and setProjectResults with the
-                              // exact same array object React already holds
-                              // is a no-op (React bails out of re-rendering
-                              // for an Object.is-identical value), so
-                              // re-clicking this button on an
-                              // already-selected list would otherwise never
-                              // reset the camera back to it.
-                              setProjectResults([
-                                ...messageItem.answer.projectsList,
-                              ]);
-                            }}
-                            style={{
-                              fontSize: FONT_SIZE.PARA,
-                              height: 24,
-                              borderRadius: 16,
-                              border: `1px solid ${
-                                !hasFocusedReferredLocations &&
-                                mapResultsIndex === index
-                                  ? COLORS.primaryColor
-                                  : COLORS.borderColorMedium
-                              }`,
-                              backgroundColor:
-                                !hasFocusedReferredLocations &&
-                                mapResultsIndex === index
-                                  ? COLORS.primaryColor
-                                  : COLORS.bgColorLightBlue,
-                              color:
-                                !hasFocusedReferredLocations &&
-                                mapResultsIndex === index
-                                  ? "white"
-                                  : COLORS.textColorDark,
-                            }}
-                          >
-                            {messageItem.answer.projectsList.length} Projects
-                          </Button>
-                        </Flex>
-                      ) : null}
-                      {messageItem.answer.totalCount != null &&
-                      !!messageItem.answer.projectsList?.length ? (
-                        <Typography.Text
-                          style={{
-                            flexShrink: 0,
-                            fontSize: FONT_SIZE.SUB_TEXT,
-                            color: COLORS.textColorMedium,
-                          }}
-                        >
-                          {messageItem.answer.totalCount}{" "}
-                          {messageItem.answer.totalCount === 1
-                            ? "project matches"
-                            : "projects match"}{" "}
-                          your criteria
-                        </Typography.Text>
-                      ) : null}
-                    </Flex>
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
                         <BrickChatResults
@@ -1868,6 +1778,23 @@ export function BrickChatCore({
                           onSelectProject={handleSelectProject}
                           selectedProjectId={selectedProject?.projectId}
                         />
+                        {/* out of the whole result set (shown + still to
+                          page through), not totalCount - relaxed matches
+                          can push the shown count past it */}
+                        {messageItem.answer.shownCount != null &&
+                        !!messageItem.answer.projectsList?.length ? (
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.SUB_TEXT,
+                              color: COLORS.textColorMedium,
+                            }}
+                          >
+                            Showing {messageItem.answer.shownCount} out of{" "}
+                            {messageItem.answer.shownCount +
+                              (messageItem.answer.nextSetCount ?? 0)}{" "}
+                            projects
+                          </Typography.Text>
+                        ) : null}
                         {!chatLoading &&
                           (messageItem.answer.nextSetCount ?? 0) > 0 &&
                           index === chatHistory.length - 1 && (
@@ -1983,10 +1910,43 @@ export function BrickChatCore({
                       const referredLocationItems = getReferredLocationItems(
                         messageItem.answer,
                       );
-                      if (!referredLocationItems.length) return null;
+                      // "See All Projects" leads the row - plots this
+                      // answer's project list (not a referred location, so
+                      // handled here rather than in getReferredLocationItems)
+                      const projectsItem: ReferredLocationChipItem | null =
+                        messageItem.answer.projectsList?.length
+                          ? {
+                              key: ALL_PROJECTS_CHIP_KEY,
+                              id: ALL_PROJECTS_CHIP_KEY,
+                              type: "",
+                              name: "See All Projects",
+                              keepLabelCase: true,
+                            }
+                          : null;
+                      const chipItems = projectsItem
+                        ? [projectsItem, ...referredLocationItems]
+                        : referredLocationItems;
+                      if (!chipItems.length) return null;
                       const hasFocusable = referredLocationItems.some(
                         (i) => !!i.id,
                       );
+                      // the map always plots the active list's projects, so
+                      // this stays selected alongside any location chips
+                      // focused on top of it
+                      const projectsSelected = mapResultsIndex === index;
+                      const handleShowAllProjects = () => {
+                        if (isMobile) setShowMobileMap(true);
+                        setMapResultsIndex(index);
+                        // a fresh array reference even when re-selecting the
+                        // same list (e.g. after wandering off to a
+                        // driver/locality focus) - MapCenterer's re-centering
+                        // effect only re-fires when its `projects` dependency
+                        // changes reference, and setting the exact array
+                        // React already holds is a no-op, so re-clicking on
+                        // an already-selected list would otherwise never
+                        // reset the camera back to it.
+                        setProjectResults([...messageItem.answer.projectsList]);
+                      };
                       return (
                         <Flex vertical gap={4} style={{ marginBottom: 2 }}>
                           <Flex align="center" gap={6}>
@@ -2031,9 +1991,20 @@ export function BrickChatCore({
                             }}
                           >
                             <ReferredLocationChips
-                              items={referredLocationItems}
-                              selectedKeys={focusedReferredLocationKeys}
-                              onToggle={handleToggleReferredLocation}
+                              items={chipItems}
+                              selectedKeys={
+                                projectsSelected
+                                  ? [
+                                      ALL_PROJECTS_CHIP_KEY,
+                                      ...focusedReferredLocationKeys,
+                                    ]
+                                  : focusedReferredLocationKeys
+                              }
+                              onToggle={(item) =>
+                                item.key === ALL_PROJECTS_CHIP_KEY
+                                  ? handleShowAllProjects()
+                                  : handleToggleReferredLocation(item)
+                              }
                             />
                           </Flex>
                         </Flex>

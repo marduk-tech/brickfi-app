@@ -52,7 +52,7 @@ function MicroPocketPolygons({ microPockets, openModal }: MicroPocketMarkersProp
           {
             title: microPocket.name,
             content: microPocket.description ?? "",
-            tags: [{ label: "Micro pocket", color: COLORS.textColorMedium }],
+            tags: [{ label: "Corridor", color: COLORS.textColorMedium }],
           },
           e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
         )

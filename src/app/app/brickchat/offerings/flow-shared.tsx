@@ -87,7 +87,7 @@ export function ContactConsent() {
         <span style={{ fontSize: FONT_SIZE.HEADING_3 }}>☑</span>The Brickfi Team
         never intends to reach out unless necessary. Only when additional
         information is required or a detailed discussion is required, we will
-        initial a call. By creating this request, you agree to be contacted by a
+        initiate a call. By creating this request, you agree to be contacted by a
         Brickfi Expert only with respect to your query.
       </Typography.Text>
     </Flex>
