@@ -17,6 +17,7 @@ import {
 } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import {
+  Button,
   Card,
   Flex,
   message,
@@ -305,23 +306,47 @@ export default function BrickChatResults({
     e.preventDefault();
     e.stopPropagation();
 
-    modal.info({
+    const instance = modal.info({
       title: project.projectName,
       content: (
-        <Typography.Paragraph
-          style={{
-            fontSize: FONT_SIZE.PARA,
-            color: COLORS.textColorMedium,
-            lineHeight: "140%",
-            marginBottom: 0,
-          }}
-        >
-          {parseOneLiner(project.oneLiner).text}
-        </Typography.Paragraph>
+        <Flex vertical align="flex-start" gap={8}>
+          <MetaTag
+            label={getMatchConfig(project)?.label}
+            color={getMatchConfig(project)?.color}
+            bgColor="white"
+            style={{border: `1px solid ${COLORS.borderColorMedium}`}}
+          />
+          <Typography.Paragraph
+            style={{
+              fontSize: FONT_SIZE.PARA,
+              color: COLORS.textColorMedium,
+              lineHeight: "140%",
+              marginBottom: 0,
+            }}
+          >
+            {parseOneLiner(project.oneLiner).text}
+          </Typography.Paragraph>
+        </Flex>
       ),
       icon: null,
-      okText: "Close",
       maskClosable: true,
+      closable: true,
+      // "See 360 Details" bottom-left (same action as the card's button);
+      // closing is via the cross or the mask
+      footer: onSelectProject ? (
+        <Flex align="center" style={{ marginTop: 16 }}>
+          <Button
+            type="default"
+            size="small"
+            onClick={() => {
+              instance.destroy();
+              onSelectProject(project);
+            }}
+          >
+            See 360 Details
+          </Button>
+        </Flex>
+      ) : null,
     });
   };
 

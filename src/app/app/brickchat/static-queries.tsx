@@ -13,7 +13,7 @@ interface StaticQueriesProps {
 }
 
 // Icons follow the same style as SAMPLE_QUERIES on the landing page
-// (custom-pages/landing/brick-chat.tsx).
+// (custom-pages/landing/brick-chat-v2.tsx).
 const SAMPLE_PROMPTS: {
   text: string;
   icons: { iconName: string; iconSet: IconSetKey }[];

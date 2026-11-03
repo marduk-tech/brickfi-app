@@ -1034,8 +1034,7 @@ export default function BrickChatv2({
               <Typography.Text
                 style={{ fontSize: FONT_SIZE.HEADING_3, color: "white", lineHeight: "130%" }}
               >
-                Traditional brokers show you what earns them a fee. Listing sites rank whoever pays the most. Brickfi searches the entire market for what actually fits your needs—unbiased data, intelligent insights, zero spam 
-                <br></br><br></br>Stop choosing from just 5 broker options or ad-boosted listings. Brickfi scans every available property in the market to deliver personalized, 100% unbiased matches—backed by data, not commissions. 
+                Traditional brokers show you what earns them a fee. Listing sites rank whoever pays the most. Brickfi searches the entire market for what actually fits your needs—unbiased insights, intelligent discovery and no spam.
 
               </Typography.Text>
             </Flex>
@@ -1249,10 +1248,10 @@ export default function BrickChatv2({
           bgColor: COLORS.LANDING.LIGHT_PINK,
           heading: "",
           subHeading: "",
-          primaryImageSize: isMobile ? "100%" : "80%",
+          primaryImageSize: isMobile ? "100%" : "70%",
           mainImgUrl: isMobile
-            ? "/images/landing/brickassistv2/6-mob.png"
-            : "/images/landing/brickassistv2/6.png",
+            ? "/images/landing/brick-chat/testimonial-mob.png"
+            : "/images/landing/brick-chat/testimonial.png",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
           verticalPadding: isMobile ? 32 : 100,
