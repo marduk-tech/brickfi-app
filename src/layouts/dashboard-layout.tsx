@@ -265,12 +265,18 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
       </Modal>
       <Layout
         style={{
-          minHeight: "100vh",
+          // dvh tracks the visible viewport on mobile (excludes browser
+          // address/tool bars), unlike vh which can overflow the screen
+          height: "100dvh",
+          overflow: "hidden",
         }}
       >
         <Layout
           style={{
             backgroundColor: "#FFF",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
           }}
         >
           <Header
@@ -278,6 +284,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
               background: "transparent",
               height: "60px",
               padding: "0 8px",
+              flexShrink: 0,
             }}
           >
             <Flex
@@ -442,12 +449,13 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
           {loginModalOpen || showUserDetailsForm ? null : (
             <Content
               style={{
-                margin: "auto",
                 backgroundColor: "#FFF",
                 width: "100%",
                 padding: isMobile ? 0 : `0 ${HORIZONTAL_PADDING}px`,
-                height: "calc(100vh - 300px)",
-                overflowY: "scroll",
+                // fill whatever is left below the header and scroll within it
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
                 scrollbarWidth: "none",
               }}
             >

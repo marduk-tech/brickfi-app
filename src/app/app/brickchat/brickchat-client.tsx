@@ -1454,7 +1454,8 @@ export function BrickChatCore({
       style={{
         width: "100%",
         maxWidth: 2000,
-        height: isMobile ? "calc(100vh - 100px)" : "calc(100vh - 60px)",
+        // fill the dashboard layout's content area (already sized below the header)
+        height: "100%",
         // mobile: no side padding here - the search form and chat panel
         // below carry their own 8px gutter instead, so everything (including
         // the inline Brick360 view) gets an even 8px on both sides
