@@ -42,7 +42,14 @@ export const useMapFilters = (
   >([]);
 
   // Computed states
-  const showCategorySelection = Boolean(categories && categories.length > 1);
+  // Categories only narrow drivers and surroundings - with neither passed
+  // (e.g. brickchat's map before anything is searched) there's nothing for
+  // the chips to act on.
+  const showCategorySelection = Boolean(
+    categories &&
+      categories.length > 1 &&
+      (drivers?.length || surroundingElements?.length),
+  );
   // Every driver-layer renderer (micro-market/transit/road/simple/polygon
   // drivers, in both the Street and Google map variants) uses this flag to
   // decide whether to gate markers by category membership at all, separately

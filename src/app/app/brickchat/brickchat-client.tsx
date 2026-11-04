@@ -374,10 +374,10 @@ interface BrickChatCoreProps {
   threadPathBase?: string;
   /**
    * When set and there's no thread already open (no thread id, no history),
-   * automatically submits this question on mount instead of waiting for the
-   * user to type - e.g. the landing page's ?q= search.
+   * fills the search box with this question on mount, for the user to edit or
+   * send - e.g. the landing page's ?q= search.
    */
-  autoStartQuestion?: string;
+  initialQuestion?: string;
   /**
    * A project to open in the inline 360 view on load (the /app/<projectRef>
    * route) - an lvnzyProjectId, slug or originalProjectId. Opened straight
@@ -389,12 +389,13 @@ interface BrickChatCoreProps {
 
 export function BrickChatCore({
   threadPathBase,
-  autoStartQuestion,
+  initialQuestion,
   projectRef,
 }: BrickChatCoreProps) {
   const fs = useBrick360FontSize();
 
   const [form] = Form.useForm();
+  const questionValue: string | undefined = Form.useWatch("question", form);
   const { user, isLoading: userLoading, refetch: refetchUser } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const pathname = usePathname();
@@ -715,7 +716,7 @@ export function BrickChatCore({
   const [shareLink, setShareLink] = useState<string>();
   const [sharePreparing, setSharePreparing] = useState(false);
 
-  const autoStartFiredRef = useRef(false);
+  const initialQuestionFilledRef = useRef(false);
 
   // With threadPathBase, the open thread lives in the path
   // (/app/brickchat/<threadId>) - read from usePathname rather than the
@@ -745,11 +746,11 @@ export function BrickChatCore({
     !selectedProject &&
     !projectRefPending;
 
-  // Auto-submit autoStartQuestion once, only when landing fresh (no thread
-  // selected/active/loading and no history yet).
+  // Fill the search box with initialQuestion once, only when landing fresh (no
+  // thread selected/active/loading and no history yet).
   useEffect(() => {
-    if (autoStartFiredRef.current) return;
-    if (!autoStartQuestion || (!user?._id && !isGuest)) return;
+    if (initialQuestionFilledRef.current) return;
+    if (!initialQuestion || (!user?._id && !isGuest)) return;
     if (
       selectedThreadId ||
       activeThreadId ||
@@ -759,11 +760,10 @@ export function BrickChatCore({
       return;
     }
 
-    autoStartFiredRef.current = true;
-    form.setFieldsValue({ question: autoStartQuestion });
-    form.submit();
+    initialQuestionFilledRef.current = true;
+    form.setFieldsValue({ question: initialQuestion });
   }, [
-    autoStartQuestion,
+    initialQuestion,
     user?._id,
     isGuest,
     selectedThreadId,
@@ -785,7 +785,7 @@ export function BrickChatCore({
   ) => {
     if (!threadPathBase) return;
     const params = new URLSearchParams(searchParams.toString());
-    // ?q= has already been consumed as autoStartQuestion - drop it so it
+    // ?q= has already been consumed as initialQuestion - drop it so it
     // doesn't linger in (or get shared via) the thread URL.
     params.delete("q");
     dropParams.forEach((p) => params.delete(p));
@@ -1628,46 +1628,61 @@ export function BrickChatCore({
                 </Button>
               </Flex>
             )}
-            <Form.Item name="question" style={{ marginBottom: 0 }}>
-              <Input
-                placeholder={
-                  isArchivedThread
-                    ? "Start a new chat to ask more"
-                    : "Search for projects... (e.g., 'apartments near Whitefield')"
-                }
-                size="large"
+            <div style={{ position: "relative" }}>
+              <Form.Item name="question" style={{ marginBottom: 0 }}>
+                <Input.TextArea
+                  placeholder={
+                    isArchivedThread
+                      ? "Start a new chat to ask more"
+                      : "Enter what you are looking for"
+                  }
+                  autoSize={{ minRows: 1, maxRows: 2 }}
+                  disabled={
+                    chatLoading ||
+                    threadyHistoryLoading ||
+                    claimingGuestThread ||
+                    isArchivedThread
+                  }
+                  style={{
+                    boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                    // 50px tall on one row, with room for the send button
+                    padding: "12px 48px 12px 16px",
+                    lineHeight: "24px",
+                    resize: "none",
+                    backgroundColor: "white",
+                    border: "1px solid",
+                    borderColor: COLORS.borderColorMedium,
+                    borderRadius: 16,
+                    fontSize: FONT_SIZE.HEADING_4,
+                  }}
+                  // Enter sends, Shift+Enter starts a new line
+                  onPressEnter={(e) => {
+                    if (e.shiftKey) return;
+                    e.preventDefault();
+                    form.submit();
+                  }}
+                />
+              </Form.Item>
+              <Button
+                type="text"
+                htmlType="submit"
+                icon={<BiSend size={20} />}
                 disabled={
                   chatLoading ||
                   threadyHistoryLoading ||
                   claimingGuestThread ||
-                  isArchivedThread
-                }
-                suffix={
-                  <Button
-                    type="text"
-                    htmlType="submit"
-                    icon={<BiSend size={20} />}
-                    disabled={
-                      chatLoading ||
-                      threadyHistoryLoading ||
-                      claimingGuestThread ||
-                      isArchivedThread
-                    }
-                    style={{ color: COLORS.primaryColor }}
-                  />
+                  isArchivedThread ||
+                  (questionValue?.trim().length ?? 0) < 10
                 }
                 style={{
-                  boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-                  height: 50,
-                  backgroundColor: "white",
-                  border: "1px solid",
-                  borderColor: COLORS.borderColorMedium,
-                  borderRadius: 16,
-                  fontSize: FONT_SIZE.HEADING_4,
+                  position: "absolute",
+                  right: 0,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: COLORS.primaryColor,
                 }}
-                onPressEnter={() => form.submit()}
               />
-            </Form.Item>
+            </div>
           </Form>
         ) : null}
         <Flex
@@ -1680,19 +1695,21 @@ export function BrickChatCore({
             padding: isMobile ? "0 8px" : "0 8px 0 0",
           }}
         >
-          {/* Always at the top, independent of showWelcome below - the
-            component itself renders a placeholder when there's nothing to
-            show, so no outer conditional is needed here. */}
-          <PinnedProjectResults
-            results={pinnedProjectResults || []}
-            description={pinnedProjectsDescription}
-            hasChatStarted={!!chatHistory.length}
-            isLoading={pinnedProjectsLoading}
-            onLocateProject={handleLocateProject}
-            onSelectProject={handleSelectProject}
-            selectedProjectId={selectedProject?.projectId}
-            collapseOnSelect={true}
-          />
+          {/* At the top for logged-in users, independent of showWelcome below -
+            the component itself renders a placeholder when there's nothing to
+            show. */}
+          {user?._id && (
+            <PinnedProjectResults
+              results={pinnedProjectResults || []}
+              description={pinnedProjectsDescription}
+              hasChatStarted={!!chatHistory.length}
+              isLoading={pinnedProjectsLoading}
+              onLocateProject={handleLocateProject}
+              onSelectProject={handleSelectProject}
+              selectedProjectId={selectedProject?.projectId}
+              collapseOnSelect={true}
+            />
+          )}
           {showWelcome ? (
             <Flex vertical style={{marginTop:32}}>
               <Flex vertical align="center">
@@ -2381,14 +2398,14 @@ export default function BrickChatClient(props: { projectRef?: string } = {}) {
 }
 
 function BrickChatClientContent({ projectRef }: { projectRef?: string }) {
-  // ?q= is set by the landing page search input - auto-submit it as the
-  // first question of a fresh chat.
+  // ?q= is set by the landing page search input - it fills the search box of
+  // a fresh chat, ready to send.
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q")?.trim() || undefined;
 
   return (
     <BrickChatCore
-      autoStartQuestion={initialQuery}
+      initialQuestion={initialQuery}
       threadPathBase={BRICKCHAT_THREAD_PATH_BASE}
       projectRef={projectRef}
     />

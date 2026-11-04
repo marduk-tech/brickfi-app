@@ -70,53 +70,80 @@ const SAMPLE_QUERIES: {
   icons: { iconName: string; iconSet: IconSetKey }[];
 }[] = [
   {
-    text: "I work in Bellandur, have a ₹1.5 Cr budget, and want the best schools nearby",
+    text: "Find a 3 BHK apartment under ₹1.5 Cr with good connectivity to Whitefield and my workplace in Bellandur.",
     icons: [
-      { iconName: "MdWork", iconSet: "md" },
+      { iconName: "MdApartment", iconSet: "md" },
       { iconName: "PiCurrencyInr", iconSet: "pi" },
-      { iconName: "MdSchool", iconSet: "md" },
+      { iconName: "MdCommute", iconSet: "md" },
     ],
   },
   {
-    text: "I am confused between Prestige Glenpark and Sattva Ecocity",
+    text: "I work in ORR and have a budget of ₹1.2 Cr. Which areas in Bangalore offer the best combination of connectivity, liveability and value?",
+    icons: [
+      { iconName: "MdWork", iconSet: "md" },
+      { iconName: "PiCurrencyInr", iconSet: "pi" },
+      { iconName: "MdLocationOn", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Suggest residential projects under ₹1 Cr in Bangalore with good long-term appreciation potential.",
+    icons: [
+      { iconName: "PiCurrencyInr", iconSet: "pi" },
+      { iconName: "MdTrendingUp", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Find apartments near major IT hubs in Bangalore with strong rental demand and attractive rental yields.",
+    icons: [
+      { iconName: "PiLaptop", iconSet: "pi" },
+      { iconName: "PiKey", iconSet: "pi" },
+      { iconName: "PiHandCoins", iconSet: "pi" },
+    ],
+  },
+  {
+    text: "Find a 3 BHK resale apartment in Sarjapur Road or HSR Layout under ₹1.5 Cr, preferably in a well-maintained gated community.",
+    icons: [
+      { iconName: "MdHome", iconSet: "md" },
+      { iconName: "MdSell", iconSet: "md" },
+      { iconName: "PiShieldCheck", iconSet: "pi" },
+    ],
+  },
+  {
+    text: "I'm considering a resale flat in Whitefield. How do I evaluate whether its asking price is fair and whether the property has any red flags?",
+    icons: [
+      { iconName: "PiScales", iconSet: "pi" },
+      { iconName: "PiFlag", iconSet: "pi" },
+    ],
+  },
+  {
+    text: "Evaluate Prestige Raintree Park. Is the pricing justified, how credible is the builder and what are the potential concerns?",
+    icons: [
+      { iconName: "PiBuildings", iconSet: "pi" },
+      { iconName: "MdVerified", iconSet: "md" },
+      { iconName: "MdWarning", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Should I buy an under-construction apartment or a ready-to-move property in Bangalore? What are the risks and trade-offs?",
+    icons: [
+      { iconName: "MdConstruction", iconSet: "md" },
+      { iconName: "PiKey", iconSet: "pi" },
+      { iconName: "MdWarning", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Compare Assetz Marq and Godrej Parkshire on location, builder credibility, pricing, amenities and investment potential.",
     icons: [
       { iconName: "MdCompareArrows", iconSet: "md" },
       { iconName: "PiBuildings", iconSet: "pi" },
     ],
   },
   {
-    text: "Where can I get the best rental in East Bangalore for 1.5 crore ?",
+    text: "How do I check a builder's track record, past complaints, project approvals and delivery history before paying a booking amount?",
     icons: [
-      { iconName: "PiKey", iconSet: "pi" },
-      { iconName: "PiCurrencyInr", iconSet: "pi" },
-    ],
-  },
-  {
-    text: "I need apartment community for kids outdoor activities in less than 2 crore",
-    icons: [
-      { iconName: "MdChildCare", iconSet: "md" },
-      { iconName: "PiTree", iconSet: "pi" },
-    ],
-  },
-  {
-    text: "How is Jakkur as an area from an investment perspective ?",
-    icons: [
-      { iconName: "MdLocationOn", iconSet: "md" },
-      { iconName: "MdTrendingUp", iconSet: "md" },
-    ],
-  },
-  {
-    text: "Are there any red flags for Shanti Lakeview ?",
-    icons: [
-      { iconName: "PiFlag", iconSet: "pi" },
-      { iconName: "MdWarning", iconSet: "md" },
-    ],
-  },
-  {
-    text: "Show me properties under 3 crore within 10 mins of Prestige Tech Park",
-    icons: [
-      { iconName: "MdHome", iconSet: "md" },
-      { iconName: "MdOutlineTimer", iconSet: "md" },
+      { iconName: "MdHistory", iconSet: "md" },
+      { iconName: "MdGavel", iconSet: "md" },
+      { iconName: "MdFactCheck", iconSet: "md" },
     ],
   },
 ];
@@ -482,9 +509,9 @@ export default function BrickChatv2({
             className={styles.queryMarqueeRow}
             style={{
               // keep both rows moving at the same speed despite different
-              // widths (chips are two lines, so about half the text wide)
+              // widths (chips are about a third of the text wide)
               animationDuration: `${
-                row.reduce((n, q) => n + q.text.length, 0) * 0.1
+                row.reduce((n, q) => n + q.text.length, 0) * 0.07
               }s`,
             }}
           >
@@ -501,9 +528,13 @@ export default function BrickChatv2({
                 }}
                 style={{
                   flexShrink: 0,
+                  maxWidth: 350,
                   display: "inline-flex",
                   // icons stacked below the text
                   flexDirection: "column-reverse",
+                  // text at the top, icons at the bottom, on chips stretched
+                  // to the row's height
+                  justifyContent: "space-between",
                   alignItems: "flex-start",
                   gap: 6,
                   padding: "8px 12px",
@@ -554,9 +585,10 @@ export default function BrickChatv2({
                 </Flex>
                 <span
                   style={{
-                    // sized to about half the text so it wraps to two lines
-                    // without cutting anything off
-                    width: `${Math.ceil(q.text.length / 2) + 2}ch`,
+                    // sized to about a third of the text, so it wraps to around
+                    // three lines; longer queries stop at the chip's max width
+                    width: `${Math.ceil(q.text.length / 3) + 2}ch`,
+                    maxWidth: "100%",
                   }}
                 >
                   {q.text}
@@ -1112,7 +1144,7 @@ export default function BrickChatv2({
               }}
             >
               <span style={{ color: COLORS.LANDING.PINK, fontWeight: 200 }}>
-                How does Brickfi{" "}
+                How Brickfi{" "}
                 <span
                   style={{
                     color: "white",
@@ -1162,10 +1194,7 @@ export default function BrickChatv2({
                   maxWidth: 800,
                 }}
               >
-                The Heart of Brickfi is the Brick360 Data Framework, a 4-pillar
-                based assessment platform. It collects data from verified
-                government, public data and open source platforms and builds a
-                standardizing rating framework for every property out there.
+                At the heart of Brickfi is the <b>Brick360 Data Framework</b>- a four-pillar assessment framework that brings together data from verified government records, public databases and credible open sources. It standardises this information into a consistent evaluation and rating system, enabling buyers to assess properties across the same set of parameters.
               </Typography.Text>
             </Flex>
           </Flex>

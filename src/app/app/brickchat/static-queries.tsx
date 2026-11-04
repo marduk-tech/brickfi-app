@@ -19,28 +19,28 @@ const SAMPLE_PROMPTS: {
   icons: { iconName: string; iconSet: IconSetKey }[];
 }[] = [
   {
-    text: "Looking for a 3BHK near Electronic City under 2 crore",
-    icons: [
-      { iconName: "MdHome", iconSet: "md" },
-      { iconName: "PiCurrencyInr", iconSet: "pi" },
-    ],
-  },
-  {
-    text: "Gated plot at less than 6000 per sq.ft in North Bangalore",
-    icons: [
-      { iconName: "MdLandscape", iconSet: "md" },
-      { iconName: "MdLocationOn", iconSet: "md" },
-    ],
-  },
-  {
-    text: "4BHK under 3 crore with lake or forest facing views in East Bangalore",
+    text: "3BHK near a forest in Electronic City under 2.5 crore",
     icons: [
       { iconName: "MdHome", iconSet: "md" },
       { iconName: "PiTree", iconSet: "pi" },
     ],
   },
   {
-    text: "Where can I get the best rental in East Bangalore for 1.5 crore ?",
+    text: "4BHK under 3 crore with lake facing views in East Bangalore",
+    icons: [
+      { iconName: "MdLandscape", iconSet: "md" },
+      { iconName: "MdLocationOn", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Where in Bangalore I can find best rental yield?",
+    icons: [
+      { iconName: "MdHome", iconSet: "md" },
+      { iconName: "PiCurrencyInr", iconSet: "pi" },
+    ],
+  },
+  {
+    text: "Show me detailed report for Prestige Lakeside Habitat",
     icons: [
       { iconName: "PiKey", iconSet: "pi" },
       { iconName: "PiCurrencyInr", iconSet: "pi" },

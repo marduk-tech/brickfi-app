@@ -68,19 +68,19 @@ export const FeedbackForm = () => {
     },
     {
       question:
-        "On a scale of 1 to 10, how would helpful would you rate the Brick360 report ?",
+        "On a scale of 1 to 10, how would helpful would you rate the Brickfi Product ?",
       answer: "",
       key: "rating",
       required: true,
     },
     {
-      question: "What did you find helpful in the report?",
+      question: "What did you find helpful when using the product?",
       answer: "",
       key: "helpful",
       required: false,
     },
     {
-      question: "What did you find missing/lacking in the report?",
+      question: "What did you find missing/lacking in the product?",
       answer: "",
       key: "helpful",
       required: false,

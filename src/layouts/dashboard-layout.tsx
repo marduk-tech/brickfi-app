@@ -322,7 +322,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                 </Flex>
               </Flex>
               <Flex style={{ marginLeft: "auto" }} align="center">
-                <Link href="/feedback" target="_blank">
+                {/* <Link href="/feedback" target="_blank">
                 <Flex
                   style={{
                     border: `1px solid ${COLORS.textColorDark}`,
@@ -347,9 +347,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   </Typography.Text>
 
                 </Flex>
-                </Link>
+                </Link> */}
 
-                <Flex style={{ cursor: "pointer" }}>
+                {/* <Flex style={{ cursor: "pointer" }}>
                   <img
                     src="/images/brickfi-assist.png"
                     onClick={() => {
@@ -363,7 +363,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                     }}
                     style={{ height: 32, width: "auto" }}
                   ></img>
-                </Flex>
+                </Flex> */}
               </Flex>
             </Flex>
           </Header>
