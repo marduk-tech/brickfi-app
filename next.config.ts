@@ -24,8 +24,9 @@ const nextConfig: NextConfig = {
     return [
       // TEMP: maintenance - every page goes to the home page, which shows
       // src/app/maintenance.tsx. Skips Next internals, static files (anything
-      // with an extension) and the service worker's /offline page.
-      // "/:path((?!_next/|offline$|.*\\.).+)",
+      // with an extension), the service worker's /offline page and
+      // /app/brickchat (that exact path, not its threads).
+      // "/:path((?!_next/|offline$|app/brickchat$|.*\\.).+)",
       "/brickassist",
       "/brkassistv2",
       "/buy-with-brickfi",
