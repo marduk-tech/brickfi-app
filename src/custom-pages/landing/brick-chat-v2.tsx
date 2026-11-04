@@ -309,12 +309,7 @@ const REPORT_FEATURES: {
     title: "Financials Assessment including Price Point, Rental Yield.",
     subHeading: (
       <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
-        Making the right financial decisions becomes all the more necessary.
-        Assess the{" "}
-        <span style={{ fontWeight: 600 }}>
-          price point, rental yield and growth potential
-        </span>{" "}
-        with upto date pricing information.
+        Make informed property decisions by understanding whether the price is fair, the potential rental returns and long-term growth prospects, backed by up-to-date pricing data and market insights.
       </Typography.Text>
     ),
     mainImgUrl: "/images/landing/report-feature-financials.png",
