@@ -284,8 +284,8 @@ export function FlowFooter({
 
 // The terms every request is sent on - shown ticked and disabled, so it reads
 // as what submitting means rather than a choice; each flow's data records it
-// as consentToContact: true
-export function ContactConsent() {
+// as consentToContact: true. `msg` replaces the default terms.
+export function ContactConsent({ msg }: { msg?: React.ReactNode }) {
   return (
     <Flex vertical style={{ margin: "16px 0" }}>
       {/* <DynamicReactIcon size={14} iconName="FaCheckSquare" iconSet="fa" color={COLORS.textColorMedium}></DynamicReactIcon> */}
@@ -293,11 +293,9 @@ export function ContactConsent() {
       <Typography.Text
         style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorLight }}
       >
-        <span style={{ fontSize: FONT_SIZE.HEADING_3 }}>☑</span>The Brickfi Team
-        never intends to reach out unless necessary. Only when additional
-        information or a detailed discussion is required, we will
-        initiate a call. By creating this request, you agree to be contacted by a
-        Brickfi Expert only with respect to your query.
+        <span style={{ fontSize: FONT_SIZE.HEADING_3, paddingTop: 1 }}>☑</span>
+        {msg ??
+          "The Brickfi Team never intends to reach out unless necessary. Only when additional information or a detailed discussion is required, we will initiate a call. By creating this request, you agree to be contacted by a Brickfi Expert only with respect to your query."}
       </Typography.Text>
     </Flex>
   );

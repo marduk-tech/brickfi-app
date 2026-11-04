@@ -1,10 +1,12 @@
-import { Button, Flex, Form, Input, Typography } from "antd";
+import { Button, Flex, Form, Input, Tag, Typography } from "antd";
 import PhoneInput from "antd-phone-input";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/use-auth";
 import { useUser } from "../hooks/use-user";
 import { safeWindow } from "../libs/browser-utils";
 import { COLORS, FONT_SIZE } from "../theme/style-constants";
+import { ContactConsent } from "@/app/app/brickchat/offerings/flow-shared";
+import DynamicReactIcon from "./common/dynamic-react-icon";
 
 export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
   // auth
@@ -277,6 +279,50 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
                 );
               }}
             </Form.Item>
+            <Flex wrap gap={8} style={{ marginTop: 16 }}>
+                {(
+                  [
+                    {
+                      label: "No Spam Promise",
+                      iconName: "PiHandPeace",
+                      iconSet: "pi",
+                    },
+                    {
+                      label: "2000+ Properties",
+                      iconName: "PiMagicWand",
+                      iconSet: "pi",
+                    },
+                    {
+                      label: "Verified Data",
+                      iconName: "MdVerifiedUser",
+                      iconSet: "md",
+                    },
+                    
+                  ] as const
+                ).map((t) => (
+                  <Tag
+                    key={t.label}
+                    style={{
+                      margin: 0,
+                      color: COLORS.LANDING.LIGHT_PINK,
+                      backgroundColor: COLORS.primaryColor,
+                      border: 0,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Flex align="center" gap={4}>
+                      <DynamicReactIcon
+                        iconName={t.iconName}
+                        iconSet={t.iconSet}
+                        size={14}
+                        color={COLORS.LANDING.LIGHT_PINK}
+                      />
+                      {t.label}
+                    </Flex>
+                  </Tag>
+                ))}
+              </Flex>
+            <ContactConsent msg={"By signing up you agree to the terms and conditions as well as privacy policy of Brickfi."}></ContactConsent>
             <Form.Item style={{ marginTop: 16 }}>
               <Button
                 type="primary"

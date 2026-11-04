@@ -2347,18 +2347,18 @@ export function BrickChatCore({
       >
         <Flex vertical>
           <Typography.Text
-            style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: 500 }}
+            style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
           >
-            Sign in to continue
+            Sign in to Continue
           </Typography.Text>
           <Typography.Text
             style={{
-              fontSize: FONT_SIZE.HEADING_3,
+              fontSize: FONT_SIZE.HEADING_4,
               marginBottom: 24,
               color: COLORS.textColorMedium,
             }}
           >
-            Login/Signup with your mobile number to keep this conversation going
+            Login or Signup with your mobile to keep this conversation going.
           </Typography.Text>
           {/* useAuth invalidates a different query client than the app's,
             so refetch the user here to pick up the new sign in */}
