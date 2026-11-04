@@ -90,9 +90,9 @@ export const metadata: Metadata = {
 };
 
 export default async function BrickAssistPage() {
-  // const headersList = await headers();
-  // const ua = headersList.get("user-agent") ?? "";
-  // const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
-  // return <BrickChatv2 initialIsMobile={isMobileSSR} />;
-  return <Maintenance />;
+  const headersList = await headers();
+  const ua = headersList.get("user-agent") ?? "";
+  const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
+  return <BrickChatv2 initialIsMobile={isMobileSSR} />;
+  // return <Maintenance />;
 }
