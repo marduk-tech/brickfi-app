@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
       // src/app/maintenance.tsx. Skips Next internals, static files (anything
       // with an extension), the service worker's /offline page and
       // /app/brickchat (that exact path, not its threads).
-      // "/:path((?!_next/|offline$|app/brickchat$|.*\\.).+)",
+      "/:path((?!_next/|offline$|app/brickchat$|.*\\.).+)",
       "/brickassist",
       "/brkassistv2",
       "/buy-with-brickfi",
