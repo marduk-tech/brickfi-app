@@ -2,7 +2,12 @@
 // CTA opens (one file per flow, registered in flows.ts) and the requests
 // (tickets) they raise
 export * from "./types";
-export { threadTicketsQueryKey, useActiveOfferings, useThreadTickets } from "./api";
+export {
+  threadTicketsQueryKey,
+  useActiveOfferings,
+  useOfferingCtaForFlow,
+  useThreadTickets,
+} from "./api";
 export { default as OfferingCtaButtons } from "./offering-cta-buttons";
 export {
   default as OfferingFlowDialog,

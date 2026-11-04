@@ -2,6 +2,7 @@ import { apiKey, baseApiUrl } from "@/libs/constants";
 import { useQuery } from "@tanstack/react-query";
 import type {
   BrickfiOffering,
+  OfferingCta,
   OfferingTicket,
   OfferingTicketOwner,
 } from "./types";
@@ -21,14 +22,30 @@ const getActiveOfferings = async (): Promise<BrickfiOffering[]> => {
 // Every active offering, by key - one request shared by every answer's
 // buttons and ticket cards. An offering archived since an answer was given
 // just isn't found, so its buttons disappear.
+const activeOfferingsQuery = {
+  queryKey: ["brickfi-active-offerings"],
+  queryFn: getActiveOfferings,
+  staleTime: 5 * 60 * 1000,
+  refetchOnWindowFocus: false,
+};
+
 export function useActiveOfferings() {
-  const { data } = useQuery({
-    queryKey: ["brickfi-active-offerings"],
-    queryFn: getActiveOfferings,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  const { data } = useQuery(activeOfferingsQuery);
   return (key?: string) => data?.find((o) => o.key === key);
+}
+
+// The active offering and CTA that open `flowKey` (see OFFERING_FLOWS), for
+// opening a flow from outside an answer - null while loading, or when no
+// active offering has a CTA for it
+export function useOfferingCtaForFlow(
+  flowKey: string,
+): { offering: BrickfiOffering; cta: OfferingCta } | null {
+  const { data } = useQuery(activeOfferingsQuery);
+  for (const offering of data || []) {
+    const cta = offering.ctas.find((c) => c.flowKey === flowKey);
+    if (cta) return { offering, cta };
+  }
+  return null;
 }
 
 // ---------------------------------------------------------------------------

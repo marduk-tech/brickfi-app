@@ -5,10 +5,11 @@ import { Flex, Form, Input } from "antd";
 import {
   ContactConsent,
   contactFrom,
-  ExpertCallField,
   FlowFooter,
   MobileField,
-  queryLabel,
+  REQUEST_OPTION_DEFAULTS,
+  RequestOptions,
+  useRequestOptions,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
 
@@ -24,10 +25,9 @@ export default function ExpertHelpFlow({
   onCancel,
 }: OfferingFlowProps) {
   const [form] = Form.useForm();
-  const query: string = Form.useWatch("query", form) || "";
-  const askExpert: boolean = Form.useWatch("askExpertToContact", form) || false;
-  // something to act on: a request, or a request for an expert to call
-  const canSubmit = !!query.trim() || askExpert;
+  const { anySelected, taskMissingQuery } = useRequestOptions(form);
+  // something to act on: a task, or a call with an expert
+  const canSubmit = anySelected && !taskMissingQuery;
 
   return (
     <Form
@@ -39,13 +39,14 @@ export default function ExpertHelpFlow({
         // the next step the answer offered, e.g. which project to onboard -
         // editable, so the user can add to it
         query: offeringContext || "",
-        askExpertToContact: false,
+        ...REQUEST_OPTION_DEFAULTS,
       }}
       onFinish={(values) =>
         onSubmit({
           ...(values.query?.trim() ? { query: values.query.trim() } : {}),
           // what was prefilled, kept even if the user edits the request
           ...(offeringContext ? { offeringContext } : {}),
+          createTask: !!values.createTask,
           askExpertToContact: !!values.askExpertToContact,
           consentToContact: true,
           contact: contactFrom(context, values),
@@ -62,17 +63,17 @@ export default function ExpertHelpFlow({
       >
         <Form.Item
           name="query"
-          label={queryLabel("What would you like us to do?")}
+          validateStatus={taskMissingQuery ? "error" : undefined}
           style={{ marginBottom: 12 }}
         >
           <Input.TextArea
             autoSize={{ minRows: 3, maxRows: 6 }}
             maxLength={1000}
-            placeholder="Enter your query"
+            placeholder="Type in your query"
           />
         </Form.Item>
 
-        <ExpertCallField />
+        <RequestOptions />
 
         <MobileField context={context} />
       </Flex>

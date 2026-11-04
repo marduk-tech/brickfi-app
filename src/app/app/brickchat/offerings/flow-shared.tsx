@@ -1,7 +1,16 @@
 "use client";
 
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Button, Checkbox, Flex, Form, Input, Typography } from "antd";
+import {
+  Button,
+  Col,
+  Flex,
+  Form,
+  Input,
+  Row,
+  Typography,
+  type FormInstance,
+} from "antd";
 import type { OfferingFlowContext } from "./types";
 
 // Form pieces shared by the offering flows
@@ -13,7 +22,7 @@ export const fieldLabel = (text: string) => (
 );
 
 // What a section does, right under its heading - the same small grey text
-// for the visit switch, the query box and the expert-call checkbox
+// for the visit switch and the request options
 export function FieldNote({ children }: { children: React.ReactNode }) {
   return (
     <Typography.Text
@@ -24,7 +33,7 @@ export function FieldNote({ children }: { children: React.ReactNode }) {
   );
 }
 
-// A bordered, switch-expanded block (the visit request, home loan offers):
+// A shaded, switch-expanded block (the visit request, home loan offers):
 // heading + note with the switch on the right, its fields below while on.
 // `keepMounted` hides rather than unmounts the fields when off, for a block
 // whose entered state should survive toggling (it mustn't hold fields the
@@ -49,7 +58,7 @@ export function ToggleSection({
     <Flex
       vertical
       style={{
-        border: `1px solid ${COLORS.borderColor}`,
+        backgroundColor: COLORS.bgColorBlue,
         borderRadius: 8,
         padding: 12,
         marginBottom: 16,
@@ -79,42 +88,117 @@ export function ToggleSection({
   );
 }
 
-// Every flow's query-box label - larger than the other fields' labels, with
-// what happens to a typed-in query right under it (above the box)
-export const queryLabel = (text: string) => (
-  <Flex vertical gap={2}>
-    <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}>
-      {text}
-    </Typography.Text>
-    <FieldNote>
-      Just type in your query. I will work on it and reply to your query
-      directly through a message within 24-48 hrs. No additional calls.
-    </FieldNote>
-  </Flex>
-);
+// What the user wants done with their request, below the query box - one
+// of: a task worked on over messages (createTask), or a call with an expert
+// (askExpertToContact). Each is its own boolean in the ticket data, and
+// RequestOptions keeps at most one of them true.
+export const REQUEST_OPTION_DEFAULTS = {
+  createTask: false,
+  askExpertToContact: false,
+};
 
-// The askExpertToContact checkbox every flow ends with - the box on its own
-// line, its label (clickable, via htmlFor) and what ticking it means below
-const EXPERT_CALL_ID = "askExpertToContact";
+export const useRequestOptions = (form: FormInstance) => {
+  const createTask: boolean = Form.useWatch("createTask", form) || false;
+  const askExpert: boolean = Form.useWatch("askExpertToContact", form) || false;
+  const query: string = Form.useWatch("query", form) || "";
+  return {
+    createTask,
+    askExpert,
+    anySelected: createTask || askExpert,
+    // a task with nothing typed in yet (a task is worked on from what was
+    // typed in) - the flow keeps Raise Request disabled and gives the query
+    // box a red border, no message, until there is
+    taskMissingQuery: createTask && !query.trim(),
+  };
+};
 
-export function ExpertCallField() {
+// One selectable card - the whole card is the toggle: a Button (so the
+// form's disabled state applies) laid out as title + note, filled with the
+// primary colour and white text while selected. Takes checked / onChange
+// from its Form.Item; onSelect runs when it's selected.
+function RequestOption({
+  checked = false,
+  onChange,
+  onSelect,
+  title,
+  note,
+}: {
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+  onSelect: () => void;
+  title: string;
+  note: string;
+}) {
+  const textColor = checked ? "white" : undefined;
   return (
-    <Flex vertical gap={2} style={{ marginTop: 16, marginBottom: 24 }}>
-      <Form.Item name="askExpertToContact" valuePropName="checked" noStyle>
-        <Checkbox id={EXPERT_CALL_ID} />
-      </Form.Item>
-      <label htmlFor={EXPERT_CALL_ID} style={{ cursor: "pointer" }}>
+    <Button
+      block
+      aria-pressed={checked}
+      onClick={() => {
+        onChange?.(!checked);
+        if (!checked) onSelect();
+      }}
+      style={{
+        height: "100%",
+        padding: 12,
+        borderRadius: 8,
+        whiteSpace: "normal",
+        textAlign: "left",
+        justifyContent: "flex-start",
+        alignItems: "flex-start",
+        border: `1px solid ${checked ? COLORS.primaryColor : COLORS.borderColor}`,
+        backgroundColor: checked ? COLORS.primaryColor : "white",
+      }}
+    >
+      <Flex vertical gap={2}>
         <Typography.Text
-          style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}
+          style={{
+            fontSize: FONT_SIZE.HEADING_4,
+            fontWeight: 500,
+            color: textColor,
+          }}
         >
-          Free 15 min Consultation with Brickfi Expert
+          {title}
         </Typography.Text>
-      </label>
-      <FieldNote>
-        A free 15 min call with a Brickfi Expert will be scheduled at your
-        convenience.
-      </FieldNote>
-    </Flex>
+        <Typography.Text
+          style={{
+            fontSize: FONT_SIZE.SUB_TEXT,
+            color: textColor ?? COLORS.textColorLight,
+          }}
+        >
+          {note}
+        </Typography.Text>
+      </Flex>
+    </Button>
+  );
+}
+
+// Selecting one card clears the other - a request is either a task or a
+// call. The selected one can still be clicked off, for flows where something
+// above (a visit, offers) is the request on its own.
+export function RequestOptions() {
+  const form = Form.useFormInstance();
+  return (
+    <Row gutter={[12, 12]} style={{ marginBottom: 24 }}>
+      <Col xs={24} sm={12}>
+        <Form.Item name="createTask" valuePropName="checked" noStyle>
+          <RequestOption
+            onSelect={() => form.setFieldValue("askExpertToContact", false)}
+            title="Create a Task for Me"
+            note="I will work on your query and reply directly through a message within 24-48 hrs. No additional calls."
+          />
+        </Form.Item>
+      </Col>
+      <Col xs={24} sm={12}>
+        <Form.Item name="askExpertToContact" valuePropName="checked" noStyle>
+          <RequestOption
+            onSelect={() => form.setFieldValue("createTask", false)}
+            title="15 min Free Consultation with Brickfi Expert"
+            note="A free 15 min call with a Brickfi Expert will be scheduled at your convenience."
+          />
+        </Form.Item>
+      </Col>
+    </Row>
   );
 }
 
@@ -195,7 +279,7 @@ export function ContactConsent() {
       >
         <span style={{ fontSize: FONT_SIZE.HEADING_3 }}>☑</span>The Brickfi Team
         never intends to reach out unless necessary. Only when additional
-        information is required or a detailed discussion is required, we will
+        information or a detailed discussion is required, we will
         initiate a call. By creating this request, you agree to be contacted by a
         Brickfi Expert only with respect to your query.
       </Typography.Text>

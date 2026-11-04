@@ -4,12 +4,13 @@ import { DatePicker, Flex, Form, Input, Select, Switch } from "antd";
 import {
   ContactConsent,
   contactFrom,
-  ExpertCallField,
   fieldLabel,
   FlowFooter,
   MobileField,
-  queryLabel,
+  REQUEST_OPTION_DEFAULTS,
+  RequestOptions,
   ToggleSection,
+  useRequestOptions,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
 
@@ -42,12 +43,11 @@ export default function ScheduleVisitCallbackFlow({
 }: OfferingFlowProps) {
   const [form] = Form.useForm();
   const scheduleVisit: boolean = Form.useWatch("scheduleVisit", form) || false;
-  const askExpert: boolean = Form.useWatch("askExpertToContact", form) || false;
-  const query: string = Form.useWatch("query", form) || "";
+  const { anySelected, taskMissingQuery } = useRequestOptions(form);
   const projectIds: string[] = Form.useWatch("projectIds", form) || [];
   const otherProject = scheduleVisit && projectIds.includes(OTHER_PROJECT);
-  // something to act on: a visit, a callback, or a question
-  const canSubmit = scheduleVisit || askExpert || !!query.trim();
+  // something to act on: a visit, a task, a call with an expert
+  const canSubmit = (scheduleVisit || anySelected) && !taskMissingQuery;
 
   return (
     <Form
@@ -57,7 +57,7 @@ export default function ScheduleVisitCallbackFlow({
       disabled={submitting}
       initialValues={{
         scheduleVisit: false,
-        askExpertToContact: false,
+        ...REQUEST_OPTION_DEFAULTS,
         // preselect the project being discussed, when there's exactly one
         projectIds:
           context.projects.length === 1 ? [context.projects[0].projectId] : [],
@@ -65,6 +65,7 @@ export default function ScheduleVisitCallbackFlow({
       onFinish={(values) =>
         onSubmit({
           scheduleVisit: !!values.scheduleVisit,
+          createTask: !!values.createTask,
           askExpertToContact: !!values.askExpertToContact,
           ...(values.scheduleVisit
             ? {
@@ -147,11 +148,6 @@ export default function ScheduleVisitCallbackFlow({
 
         <Form.Item
           name="query"
-          label={queryLabel(
-            otherProject
-              ? "Create a Task for Me (mention the project)"
-              : "Create a Task for Me",
-          )}
           rules={[
             {
               required: otherProject,
@@ -159,15 +155,21 @@ export default function ScheduleVisitCallbackFlow({
               message: "Please mention the project you'd like to visit",
             },
           ]}
+          // otherwise the rule above sets it
+          validateStatus={taskMissingQuery ? "error" : undefined}
         >
           <Input.TextArea
             autoSize={{ minRows: 2, maxRows: 6 }}
             maxLength={1000}
-            placeholder="Enter your query"
+            placeholder={
+              otherProject
+                ? "Type in your query - mention the project you'd like to visit"
+                : "Type in your query"
+            }
           />
         </Form.Item>
 
-        <ExpertCallField />
+        <RequestOptions />
 
         <MobileField context={context} />
       </Flex>

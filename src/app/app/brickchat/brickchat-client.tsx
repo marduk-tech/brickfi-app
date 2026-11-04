@@ -75,6 +75,7 @@ import {
   OfferingTicketCard,
   OfferingTicketUpdate,
   threadTicketsQueryKey,
+  useOfferingCtaForFlow,
   useThreadTickets,
 } from "./offerings";
 
@@ -354,8 +355,6 @@ const hasStoredUser = () => {
   }
 };
 
-const INTERNAL_ROLES = ["admin", "member"];
-
 const GUEST_LOGIN_PROMPT_DELAY_MS = 10000;
 
 // Streamed step ids that only occur when the answer will be a project list
@@ -427,7 +426,8 @@ export function BrickChatCore({
   );
 
   const isGuest = !user?._id && !hasStoredUser();
-  const isInternalUser = !!user?.role && INTERNAL_ROLES.includes(user.role);
+  // admin-only tools: the thread links button and per-answer feedback
+  const isAdmin = user?.role === "admin";
 
   const loginPromptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -1319,6 +1319,9 @@ export function BrickChatCore({
   // the CTA flow open in its dialog, if any
   const [activeOfferingFlow, setActiveOfferingFlow] =
     useState<ActiveOfferingFlow | null>(null);
+  // Expert Help, opened from the header rather than an answer's CTA - no
+  // turnId or offeringContext, it isn't tied to an answer
+  const expertHelpCta = useOfferingCtaForFlow("brkfi-expert");
 
   // what a flow can prefill from: projects in this conversation (the open
   // one, then the latest answers' cards first, then saved ones) and the
@@ -1542,6 +1545,33 @@ export function BrickChatCore({
                   {showWelcome ? "Sign In": "Sign In To Continue"}
                 </Button>
               )}
+              {/* signed-in users only (so never alongside Sign In above),
+                and once there's a thread - a request is raised against one
+                (see OfferingFlowDialog's submit) */}
+              {expertHelpCta && user?._id && (activeThreadId || selectedThreadId) && (
+                <Tooltip title={expertHelpCta.offering.title}>
+                  <Button
+                    type="text"
+                    style={{
+                      padding: "8px 0",
+                      height: "auto",
+                      width: 32,
+                      lineHeight: 1,
+                      // pushes it to the left edge, the rest stay right-aligned
+                      marginRight: "auto",
+                    }}
+                    icon={
+                      <DynamicReactIcon
+                        iconName="GiAstronautHelmet"
+                        iconSet="gi"
+                        color={COLORS.textColorMedium}
+                        size={16}
+                      />
+                    }
+                    onClick={() => setActiveOfferingFlow(expertHelpCta)}
+                  />
+                </Tooltip>
+              )}
               <BrickchatFeedback
                 threadId={activeThreadId || selectedThreadId}
                 userId={user?._id}
@@ -1552,7 +1582,7 @@ export function BrickChatCore({
                   userId={user._id}
                 />
               )}
-              {isInternalUser && (activeThreadId || selectedThreadId) && (
+              {isAdmin && (activeThreadId || selectedThreadId) && (
                 <ThreadLinksButton
                   threadId={(activeThreadId || selectedThreadId) as string}
                 />
@@ -2055,9 +2085,9 @@ export function BrickChatCore({
                       );
                     })() : null}
 
-                    {/* feedback on just this answer - only once it carries
-                      a turnId, so it can be tied to the turn's log */}
-                    {messageItem.answer.turnId ? (
+                    {/* feedback on just this answer, admins only - only once
+                      it carries a turnId, so it can be tied to the turn's log */}
+                    {isAdmin && messageItem.answer.turnId ? (
                       <Flex justify="flex-end">
                         <BrickchatFeedback
                           threadId={activeThreadId || selectedThreadId}

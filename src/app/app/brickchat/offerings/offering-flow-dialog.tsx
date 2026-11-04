@@ -1,8 +1,8 @@
 "use client";
 
 import { useDevice } from "@/hooks/use-device";
-import { COLORS, FONT_SIZE } from "@/theme/style-constants";
-import { Flex, message, Modal, Typography } from "antd";
+import { FONT_SIZE } from "@/theme/style-constants";
+import { message, Modal, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { createOfferingTicket } from "./api";
 import { OFFERING_FLOWS } from "./flows";
@@ -81,22 +81,11 @@ export default function OfferingFlowDialog({
       open={!!flow && !!Flow}
       title={
         flow ? (
-          <Flex vertical gap={2}>
-            <Typography.Text
-              style={{
-                fontSize: FONT_SIZE.SUB_TEXT,
-                color: COLORS.primaryColor,
-                textTransform: "uppercase",
-              }}
-            >
-              {flow.offering.title}
-            </Typography.Text>
-            <Typography.Text
-              style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 600 }}
-            >
-              {flow.cta.label}
-            </Typography.Text>
-          </Flex>
+          <Typography.Text
+            style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 600 }}
+          >
+            {flow.offering.title}
+          </Typography.Text>
         ) : null
       }
       onCancel={() => !submitting && onClose()}

@@ -30,12 +30,13 @@ import { postJson } from "./api";
 import {
   ContactConsent,
   contactFrom,
-  ExpertCallField,
   fieldLabel,
   FlowFooter,
   MobileField,
-  queryLabel,
+  REQUEST_OPTION_DEFAULTS,
+  RequestOptions,
   ToggleSection,
+  useRequestOptions,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
@@ -519,15 +520,13 @@ export default function HomeLoanFlow({
     | YesNo
     | undefined;
 
-  const query: string = Form.useWatch("query", contactForm) || "";
-  const askExpert: boolean =
-    Form.useWatch("askExpertToContact", contactForm) || false;
+  const { anySelected, taskMissingQuery } = useRequestOptions(contactForm);
   // offers fetched for the details last checked - they go on the request
   const seenOffers = offersMutation.isSuccess && !!lastPayload;
-  // something to act on: a question, a request for an expert to call, or
-  // the offers the user checked (while the offers switch is still on)
+  // something to act on: a task, a call with an expert, or the offers the
+  // user checked (while the offers switch is still on)
   const canSubmit =
-    !!query.trim() || askExpert || (showOffers && seenOffers);
+    (anySelected || (showOffers && seenOffers)) && !taskMissingQuery;
 
   const loanTypeOptions = masterOptions(masterdata?.loan_type);
   const professionOptions = masterOptions(masterdata?.profession);
@@ -1004,14 +1003,14 @@ export default function HomeLoanFlow({
         title={
           <Flex gap={8} align="center">
             <Typography.Text
-              style={{ fontSize: FONT_SIZE.HEADING_3, fontWeight: 500 }}
+              style={{ fontSize: FONT_SIZE.HEADING_4, fontWeight: 500 }}
             >
               Provide Details to See Offers
             </Typography.Text>
             <DynamicReactIcon
               iconName="BiSolidOffer"
               iconSet="bi"
-              size={24}
+              size={20}
               color={COLORS.textColorDark}
             ></DynamicReactIcon>
           </Flex>
@@ -1038,7 +1037,7 @@ export default function HomeLoanFlow({
         layout="vertical"
         requiredMark={false}
         disabled={submitting}
-        initialValues={{ askExpertToContact: false }}
+        initialValues={REQUEST_OPTION_DEFAULTS}
         onFinish={(values) => {
           const userQuery = values.query?.trim();
           // switching "Provide Details to See Offers" off leaves its details
@@ -1073,6 +1072,7 @@ export default function HomeLoanFlow({
                 tenure: o.finalMaxTenure ?? o.maxTenure,
               })),
             }),
+            createTask: !!values.createTask,
             askExpertToContact: !!values.askExpertToContact,
             consentToContact: true,
             contact: contactFrom(context, values),
@@ -1088,17 +1088,17 @@ export default function HomeLoanFlow({
         >
           <Form.Item
             name="query"
-            label={queryLabel("Create a Task for Me")}
+            validateStatus={taskMissingQuery ? "error" : undefined}
             style={{ marginBottom: 12 }}
           >
             <Input.TextArea
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={1000}
-              placeholder="Enter your query"
+              placeholder="Type in your query"
             />
           </Form.Item>
 
-          <ExpertCallField />
+          <RequestOptions />
 
           <MobileField context={context} />
         </Flex>
