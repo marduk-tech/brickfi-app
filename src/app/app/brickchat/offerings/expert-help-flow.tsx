@@ -25,7 +25,8 @@ export default function ExpertHelpFlow({
   onCancel,
 }: OfferingFlowProps) {
   const [form] = Form.useForm();
-  const { anySelected, taskMissingQuery } = useRequestOptions(form);
+  const { anySelected, taskMissingQuery, queryPlaceholder } =
+    useRequestOptions(form);
   // something to act on: a task, or a call with an expert
   const canSubmit = anySelected && !taskMissingQuery;
 
@@ -69,7 +70,7 @@ export default function ExpertHelpFlow({
           <Input.TextArea
             autoSize={{ minRows: 3, maxRows: 6 }}
             maxLength={1000}
-            placeholder="Type in your query"
+            placeholder={queryPlaceholder}
           />
         </Form.Item>
 

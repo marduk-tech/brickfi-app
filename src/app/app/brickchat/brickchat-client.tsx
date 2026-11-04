@@ -1829,7 +1829,7 @@ export function BrickChatCore({
                         {!chatLoading &&
                           (messageItem.answer.nextSetCount ?? 0) > 0 &&
                           index === chatHistory.length - 1 && (
-                            <Flex justify="flex-start">
+                            <Flex justify="flex-start" style={{marginBottom: 8}}>
                               <Button
                                 size="small"
                                 style={{
@@ -1843,7 +1843,7 @@ export function BrickChatCore({
                                   form.submit();
                                 }}
                               >
-                                Show me more
+                                Show more
                               </Button>
                             </Flex>
                           )}

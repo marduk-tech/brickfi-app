@@ -1,6 +1,15 @@
 "use client";
 
-import { DatePicker, Flex, Form, Input, Select, Switch } from "antd";
+import {
+  DatePicker,
+  Divider,
+  Flex,
+  Form,
+  Input,
+  Select,
+  Switch,
+  Typography,
+} from "antd";
 import {
   ContactConsent,
   contactFrom,
@@ -13,6 +22,7 @@ import {
   useRequestOptions,
 } from "./flow-shared";
 import type { OfferingFlowProps } from "./types";
+import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 
 // ---------------------------------------------------------------------------
 // schedule-visit-callback (Brickfi Builder Buy)
@@ -43,7 +53,8 @@ export default function ScheduleVisitCallbackFlow({
 }: OfferingFlowProps) {
   const [form] = Form.useForm();
   const scheduleVisit: boolean = Form.useWatch("scheduleVisit", form) || false;
-  const { anySelected, taskMissingQuery } = useRequestOptions(form);
+  const { anySelected, taskMissingQuery, queryPlaceholder } =
+    useRequestOptions(form);
   const projectIds: string[] = Form.useWatch("projectIds", form) || [];
   const otherProject = scheduleVisit && projectIds.includes(OTHER_PROJECT);
   // something to act on: a visit, a task, a call with an expert
@@ -146,6 +157,18 @@ export default function ScheduleVisitCallbackFlow({
           </Form.Item>
         </ToggleSection>
 
+        <Divider style={{marginBottom: 24}} orientation="left" orientationMargin={0}>
+          <Typography.Text
+            style={{
+              fontSize: FONT_SIZE.SUB_TEXT,
+              textTransform: "uppercase",
+              color: COLORS.textColorLight,
+            }}
+          >
+            Additionally You Can
+          </Typography.Text>
+        </Divider>
+
         <Form.Item
           name="query"
           rules={[
@@ -164,7 +187,7 @@ export default function ScheduleVisitCallbackFlow({
             placeholder={
               otherProject
                 ? "Type in your query - mention the project you'd like to visit"
-                : "Type in your query"
+                : queryPlaceholder
             }
           />
         </Form.Item>

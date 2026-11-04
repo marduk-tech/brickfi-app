@@ -109,6 +109,12 @@ export const useRequestOptions = (form: FormInstance) => {
     // typed in) - the flow keeps Raise Request disabled and gives the query
     // box a red border, no message, until there is
     taskMissingQuery: createTask && !query.trim(),
+    // the query box's prompt, for the card selected below it
+    queryPlaceholder: createTask
+      ? "Type in your query or what you need"
+      : askExpert
+      ? "Any additional information you want to provide for the call"
+      : "Type in your query",
   };
 };
 

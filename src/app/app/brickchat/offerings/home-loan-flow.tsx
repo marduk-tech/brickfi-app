@@ -10,6 +10,7 @@ import {
   Col,
   Collapse,
   DatePicker,
+  Divider,
   Empty,
   Flex,
   Form,
@@ -486,9 +487,9 @@ export default function HomeLoanFlow({
   const [contactForm] = Form.useForm();
   const [step, setStep] = useState<"requirements" | "offers">("requirements");
   const [section, setSection] = useState("lead");
-  // the "Provide Details to See Offers" switch - off by default, the
-  // question alone is enough to raise a request
-  const [showOffers, setShowOffers] = useState(false);
+  // the "Provide Details to See Offers" switch - on by default, but it can be
+  // turned off since the question alone is enough to raise a request
+  const [showOffers, setShowOffers] = useState(true);
   // what the shown offers were fetched for - goes on the ticket with them
   const [lastPayload, setLastPayload] = useState<AmbakOffersRequest | null>(
     null,
@@ -520,7 +521,8 @@ export default function HomeLoanFlow({
     | YesNo
     | undefined;
 
-  const { anySelected, taskMissingQuery } = useRequestOptions(contactForm);
+  const { anySelected, taskMissingQuery, queryPlaceholder } =
+    useRequestOptions(contactForm);
   // offers fetched for the details last checked - they go on the request
   const seenOffers = offersMutation.isSuccess && !!lastPayload;
   // something to act on: a task, a call with an expert, or the offers the
@@ -1050,8 +1052,7 @@ export default function HomeLoanFlow({
             .filter(Boolean)
             .join("\n\n");
           // whatever was entered under "Provide Details to See Offers", even
-          // if the check was never run (its fields only mount once the
-          // switch is first turned on, so untouched means nothing entered)
+          // if the check was never run (untouched means nothing entered)
           const loanDetails =
             showOffers && form.isFieldsTouched()
               ? enteredLoanDetails(form.getFieldsValue())
@@ -1086,6 +1087,17 @@ export default function HomeLoanFlow({
             borderRadius: 8,
           }}
         >
+           <Divider style={{marginBottom: 24}} orientation="left" orientationMargin={0}>
+                    <Typography.Text
+                      style={{
+                        fontSize: FONT_SIZE.SUB_TEXT,
+                        textTransform: "uppercase",
+                        color: COLORS.textColorLight,
+                      }}
+                    >
+                      Additionally You Can
+                    </Typography.Text>
+                  </Divider>
           <Form.Item
             name="query"
             validateStatus={taskMissingQuery ? "error" : undefined}
@@ -1094,7 +1106,7 @@ export default function HomeLoanFlow({
             <Input.TextArea
               autoSize={{ minRows: 3, maxRows: 6 }}
               maxLength={1000}
-              placeholder="Type in your query"
+              placeholder={queryPlaceholder}
             />
           </Form.Item>
 
