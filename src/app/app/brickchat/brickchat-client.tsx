@@ -163,6 +163,12 @@ interface ChatMessage {
   durationMs?: number;
 }
 
+// A single project with images is already shown by those images, so the answer
+// doesn't list it as well
+const skipsProjectResults = (answer: ExploreAnswer) =>
+  answer.projectsList?.length === 1 &&
+  !!answer.images?.some((group) => group.images.length);
+
 // Combines a chat answer's brickfiDriverIds (raw LivIndexPlace ids, no label
 // of their own - resolved via useFetchAllLivindexPlaces inside
 // ReferredLocationChips) with its resolvedLocations (driver/locality/
@@ -1378,7 +1384,7 @@ export function BrickChatCore({
     const items = (imagesGroups || []).flatMap((group) =>
       group.images.map((image) => ({
         ...image,
-        caption: `${group.projectName}: ${image.caption}`,
+        caption: `${image.caption ? image.caption+", ": ""}${group.projectName}`,
       })),
     );
 
@@ -1418,7 +1424,7 @@ export function BrickChatCore({
                 <Typography.Text
                   ellipsis
                   style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontSize: FONT_SIZE.NOTE,
                     color: COLORS.textColorLight,
                   }}
                 >
@@ -1819,19 +1825,22 @@ export function BrickChatCore({
                     {renderImages(messageItem.answer.images)}
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
-                        <BrickChatResults
-                          results={messageItem.answer.projectsList}
-                          onLocateProject={(projectId) =>
-                            handleLocateProject(projectId, index)
-                          }
-                          onSelectProject={handleSelectProject}
-                          selectedProjectId={selectedProject?.projectId}
-                        />
+                        {!skipsProjectResults(messageItem.answer) ? (
+                          <BrickChatResults
+                            results={messageItem.answer.projectsList}
+                            onLocateProject={(projectId) =>
+                              handleLocateProject(projectId, index)
+                            }
+                            onSelectProject={handleSelectProject}
+                            selectedProjectId={selectedProject?.projectId}
+                          />
+                        ) : null}
                         {/* out of the whole result set (shown + still to
                           page through), not totalCount - relaxed matches
                           can push the shown count past it */}
                         {messageItem.answer.shownCount != null &&
-                        !!messageItem.answer.projectsList?.length ? (
+                        !!messageItem.answer.projectsList?.length &&
+                        !skipsProjectResults(messageItem.answer) ? (
                           <Typography.Text
                             style={{
                               fontSize: FONT_SIZE.SUB_TEXT,
@@ -1866,7 +1875,8 @@ export function BrickChatCore({
                             </Flex>
                           )}
                       </Flex>
-                    ) : !!messageItem.answer.projectsList?.length ? (
+                    ) : !!messageItem.answer.projectsList?.length &&
+                      !skipsProjectResults(messageItem.answer) ? (
                       <Flex vertical gap={8}>
                         <BrickChatResults
                           results={messageItem.answer.projectsList}
