@@ -1,6 +1,10 @@
-import BrickChatv2 from "@/custom-pages/landing/brick-chat-v2";
+// TEMP: maintenance - restore BrickChatv2 below when it's over
+// import BrickChatv2 from "@/custom-pages/landing/brick-chat-v2";
 import { SEO_CONTENT } from "@/libs/constants";
 import { Metadata } from "next";
+// import { headers } from "next/headers";
+import Maintenance from "./maintenance";
+import BrickChatv2 from "@/custom-pages/landing/brick-chat-v2";
 import { headers } from "next/headers";
 
 const META_DESCR =
@@ -90,4 +94,5 @@ export default async function BrickAssistPage() {
   const ua = headersList.get("user-agent") ?? "";
   const isMobileSSR = /Mobi|Android|iPhone|iPad|iPod/i.test(ua);
   return <BrickChatv2 initialIsMobile={isMobileSSR} />;
+  // return <Maintenance />;
 }

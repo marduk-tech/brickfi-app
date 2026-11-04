@@ -22,10 +22,13 @@ const nextConfig: NextConfig = {
   // filesystem routes, so their page.tsx files are never reached)
   async redirects() {
     return [
+      // TEMP: maintenance - every page goes to the home page, which shows
+      // src/app/maintenance.tsx. Skips Next internals, static files (anything
+      // with an extension) and the service worker's /offline page.
+      // "/:path((?!_next/|offline$|.*\\.).+)",
       "/brickassist",
       "/brkassistv2",
       "/buy-with-brickfi",
-      "/requestreport",
       "/callback-request",
     ].map(
       (source) => ({ source, destination: "/", permanent: false }),
