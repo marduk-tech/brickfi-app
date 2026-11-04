@@ -66,7 +66,7 @@ export default function LegalConsultationFlow({
           />
         </Form.Item>
 
-        <RequestOptions />
+        <RequestOptions callFirst={true}/>
 
         <MobileField context={context} />
       </Flex>

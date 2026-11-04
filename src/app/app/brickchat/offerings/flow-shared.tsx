@@ -182,28 +182,38 @@ function RequestOption({
 // Selecting one card clears the other - a request is either a task or a
 // call. The selected one can still be clicked off, for flows where something
 // above (a visit, offers) is the request on its own.
-export function RequestOptions() {
+export function RequestOptions({
+  callFirst = false,
+}: {
+  /** show the expert call before the task, instead of after it */
+  callFirst?: boolean;
+}) {
   const form = Form.useFormInstance();
+  const taskOption = (
+    <Col key="createTask" xs={24} sm={12}>
+      <Form.Item name="createTask" valuePropName="checked" noStyle>
+        <RequestOption
+          onSelect={() => form.setFieldValue("askExpertToContact", false)}
+          title="Create a Task for Me"
+          note="I will work on your query and reply directly through a message within 24-48 hrs. No additional calls."
+        />
+      </Form.Item>
+    </Col>
+  );
+  const callOption = (
+    <Col key="askExpertToContact" xs={24} sm={12}>
+      <Form.Item name="askExpertToContact" valuePropName="checked" noStyle>
+        <RequestOption
+          onSelect={() => form.setFieldValue("createTask", false)}
+          title="15 min Free Consultation with Brickfi Expert"
+          note="A free 15 min call with a Brickfi Expert will be scheduled at your convenience."
+        />
+      </Form.Item>
+    </Col>
+  );
   return (
     <Row gutter={[12, 12]} style={{ marginBottom: 24 }}>
-      <Col xs={24} sm={12}>
-        <Form.Item name="createTask" valuePropName="checked" noStyle>
-          <RequestOption
-            onSelect={() => form.setFieldValue("askExpertToContact", false)}
-            title="Create a Task for Me"
-            note="I will work on your query and reply directly through a message within 24-48 hrs. No additional calls."
-          />
-        </Form.Item>
-      </Col>
-      <Col xs={24} sm={12}>
-        <Form.Item name="askExpertToContact" valuePropName="checked" noStyle>
-          <RequestOption
-            onSelect={() => form.setFieldValue("createTask", false)}
-            title="15 min Free Consultation with Brickfi Expert"
-            note="A free 15 min call with a Brickfi Expert will be scheduled at your convenience."
-          />
-        </Form.Item>
-      </Col>
+      {callFirst ? [callOption, taskOption] : [taskOption, callOption]}
     </Row>
   );
 }
