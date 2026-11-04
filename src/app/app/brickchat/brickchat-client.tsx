@@ -1548,23 +1548,24 @@ export function BrickChatCore({
               {/* signed-in users only (so never alongside Sign In above),
                 and once there's a thread - a request is raised against one
                 (see OfferingFlowDialog's submit) */}
-              {expertHelpCta && user?._id && (activeThreadId || selectedThreadId) && (
+              {expertHelpCta && user?._id && (
                 <Tooltip title={expertHelpCta.offering.title}>
                   <Button
                     type="text"
                     style={{
-                      padding: "8px 0",
-                      height: "auto",
-                      width: 32,
+                      height: 24,
+                      width: 24,
                       lineHeight: 1,
                       // pushes it to the left edge, the rest stay right-aligned
                       marginRight: "auto",
-                    }}
+                      backgroundColor: COLORS.textColorDark,
+                      marginTop: 4
+                      }}
                     icon={
                       <DynamicReactIcon
                         iconName="GiAstronautHelmet"
                         iconSet="gi"
-                        color={COLORS.textColorMedium}
+                        color={"white"}
                         size={16}
                       />
                     }
