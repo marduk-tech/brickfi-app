@@ -10,7 +10,13 @@ import { capitalize } from "@/libs/lvnzy-helper";
 import { useBrick360FontSize } from "./brick360/use-font-size";
 import { ISurroundingElement } from "@/types/Project";
 export type ReferredLocationType =
-  "driver" | "locality" | "corridor" | "micropocket" | "surroundings" | "";
+  | "driver"
+  | "locality"
+  | "corridor"
+  | "micropocket"
+  | "surroundings"
+  | "project"
+  | "";
 
 export interface ReferredLocationChipItem {
   /** Unique per-item key for React/selection - distinct from `id` since a landmark has no id of its own (see brickchat-client's getReferredLocationItems). */
@@ -20,7 +26,7 @@ export interface ReferredLocationChipItem {
   type: ReferredLocationType;
   /** Already-known label (from resolvedLocations) - a bare brickfiDriverIds entry has none and gets one via useFetchAllLivindexPlaces below instead. */
   name?: string;
-  /** Chip icon - defaults to the map icon (DEFAULT_CHIP_ICON). */
+  /** Chip icon - defaults to its type's icon (CHIP_ICON_BY_TYPE), or the map icon (DEFAULT_CHIP_ICON) for a type with none. */
   icon?: { name: string; set: IconSetKey };
   /** Show the label as-is instead of title-casing it (e.g. "See on Map", or place names with acronyms). */
   keepLabelCase?: boolean;
@@ -37,6 +43,17 @@ const CHIP_MAX_WIDTH = 200;
 const DEFAULT_CHIP_ICON: { name: string; set: IconSetKey } = {
   name: "FaMapMarkedAlt",
   set: "fa",
+};
+
+const CHIP_ICON_BY_TYPE: Partial<
+  Record<ReferredLocationType, { name: string; set: IconSetKey }>
+> = {
+  micropocket: { name: "TbPolygon", set: "tb" },
+  corridor: { name: "TbPolygon", set: "tb" },
+  locality: { name: "PiMapPinAreaBold", set: "pi" },
+  driver: { name: "TbMapPinStar", set: "tb" },
+  surroundings: { name: "RiTreasureMapLine", set: "ri" },
+  project: { name: "BiHomeCircle", set: "bi" },
 };
 
 interface ReferredLocationChipsProps {
@@ -123,7 +140,8 @@ export default function ReferredLocationChips({
           // a landmark (no id) has no map layer to populate - show it for
           // context but don't make it look/act clickable
           const clickable = !!item.id;
-          const icon = item.icon || DEFAULT_CHIP_ICON;
+          const icon =
+            item.icon || CHIP_ICON_BY_TYPE[item.type] || DEFAULT_CHIP_ICON;
           const displayLabel = item.keepLabelCase
             ? label || ""
             : capitalize(label || "");

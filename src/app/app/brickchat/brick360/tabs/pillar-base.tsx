@@ -717,7 +717,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                         type: "",
                                         name: isActive
                                           ? "Showing on Map"
-                                          : "See on Map",
+                                          : "See All on Map",
                                         keepLabelCase: true,
                                       },
                                     ]}

@@ -1958,16 +1958,21 @@ export function BrickChatCore({
                       const referredLocationItems = getReferredLocationItems(
                         messageItem.answer,
                       );
-                      // "See All Projects" leads the row - plots this
-                      // answer's project list (not a referred location, so
-                      // handled here rather than in getReferredLocationItems)
+                      // "See All Projects" (or the project's name, when
+                      // there's only one) leads the row - plots this answer's
+                      // project list (not a referred location, so handled here
+                      // rather than in getReferredLocationItems)
+                      const projectsList = messageItem.answer.projectsList;
                       const projectsItem: ReferredLocationChipItem | null =
-                        messageItem.answer.projectsList?.length
+                        projectsList?.length
                           ? {
                               key: ALL_PROJECTS_CHIP_KEY,
                               id: ALL_PROJECTS_CHIP_KEY,
-                              type: "",
-                              name: "See All Projects",
+                              type: "project",
+                              name:
+                                (projectsList.length === 1 &&
+                                  projectsList[0].projectName) ||
+                                "See All Projects",
                               keepLabelCase: true,
                             }
                           : null;
@@ -1998,6 +2003,8 @@ export function BrickChatCore({
                       return (
                         <Flex vertical gap={4} style={{ marginBottom: 2 }}>
                           <Flex align="center" gap={6}>
+                            <Flex gap={4} align="center">
+                              <DynamicReactIcon color={COLORS.textColorMedium} size={12} iconName="FaMapMarkedAlt" iconSet="fa"></DynamicReactIcon>
                             <Typography.Text
                               style={{
                                 fontSize: FONT_SIZE.SUB_TEXT,
@@ -2007,6 +2014,7 @@ export function BrickChatCore({
                             >
                               See on map
                             </Typography.Text>
+                            </Flex>
                             {hasFocusable ? (
                               <Tooltip title="Reset">
                                 <Button
