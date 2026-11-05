@@ -22,6 +22,9 @@ function isAppRequest(req: NextRequest) {
 }
 
 function isAllowed(pathname: string) {
+  // TEMP: maintenance - next.config.ts sends /app to "/", so sending "/" back
+  // to /app here would loop
+  // if (pathname === "/") return true;
   return ALLOWED_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );

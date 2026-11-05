@@ -18,12 +18,10 @@ export default function OfflineClient() {
       }}
     >
       <div style={{ maxWidth: "500px" }}>
-        <Image
+        <img
           src="/images/brickfi-logo.png"
           alt="Brickfi Logo"
           width={200}
-          height={60}
-          priority
           style={{ marginBottom: "2rem" }}
         />
 
@@ -100,30 +98,7 @@ export default function OfflineClient() {
           </Link>
         </div>
 
-        <div
-          style={{
-            marginTop: "3rem",
-            padding: "1.5rem",
-            backgroundColor: "#fff",
-            borderRadius: "8px",
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <h2
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: "600",
-              marginBottom: "1rem",
-              color: "#2E3E4E",
-            }}
-          >
-            While you&apos;re offline
-          </h2>
-          <p style={{ fontSize: "0.9rem", color: "#666", margin: 0 }}>
-            Some features may be limited, but you can still browse cached pages
-            and content you&apos;ve previously viewed.
-          </p>
-        </div>
+        
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ import {
   ProjectsNearbyMarkers,
 } from "./map-markers/project-markers";
 import { SurroundingMarkers } from "./map-markers/surrounding-markers";
-import { MapModalBody } from "./map-modal";
+import { getMapPopupWidth, MapModalBody } from "./map-modal";
 import { MapStyleControls } from "./map-style-switcher/map-style-controls";
 import { MapStyleType } from "./map-style-switcher/map-style-dialog";
 import { BoundsAwareDrivers } from "./map-utils/bounds-aware-drivers";
@@ -69,6 +69,21 @@ import { RentalLocalityMarkers } from "./map-markers/rental-locality-markers";
 import { RentalLegend } from "./map-utils/rental-legend";
 
 export type { ProjectMarkerInput } from "./types";
+
+// The map modal's Leaflet popup. Leaflet sizes a popup to its content
+// (clamped to min/maxWidth), so text popups pin both to getMapPopupWidth -
+// the same width map-view-google's InfoWindow gets. Card popups size to the
+// card (see .map-card-popup in globals.scss).
+const MapModalPopup = ({
+  isCard,
+  ...props
+}: React.ComponentProps<typeof Popup> & { isCard: boolean }) => {
+  const map = useMap();
+  const width = isCard ? undefined : getMapPopupWidth(map.getSize().x);
+  return (
+    <Popup {...props} maxWidth={width ?? 320} minWidth={width} />
+  );
+};
 
 // Utility function to get tile URL based on map style
 const getTileUrl = (style: MapStyleType): string => {
@@ -456,12 +471,12 @@ const MapViewV2Inner = ({
           })()}
 
           {infoModalOpen && modalPosition && (
-            <Popup
+            <MapModalPopup
               // className is a creation-time option - remount when switching
               // between card and text popups
               key={modalContent?.customBody ? "card" : "text"}
+              isCard={!!modalContent?.customBody}
               position={[modalPosition.lat, modalPosition.lng]}
-              maxWidth={320}
               // no close icon - clicking outside closes it (MapModalBody), same as map-view-google
               closeButton={false}
               // card popups size to the card (see .map-card-popup in globals.css)
@@ -469,7 +484,7 @@ const MapViewV2Inner = ({
               eventHandlers={{ remove: closeModal }}
             >
               <MapModalBody content={modalContent} onClose={closeModal} />
-            </Popup>
+            </MapModalPopup>
           )}
         </MapContainer>
         {showRentals && <RentalLegend anchors={rentalLocalities!} />}

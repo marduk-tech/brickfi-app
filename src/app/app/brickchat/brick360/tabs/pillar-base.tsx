@@ -669,8 +669,9 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                   item[1].rating > 0
                                     ? COLORS.textColorDark
                                     : COLORS.textColorLight,
-                                fontWeight: 500,
+                                fontWeight: 600,
                                 marginLeft: 4,
+                                textTransform: "uppercase"
                               }}
                             >
                               {capitalize(
@@ -679,46 +680,52 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                                 ],
                               )}
                             </Typography.Text>
-                            <RatingBar value={item[1].rating}></RatingBar>
-                            {hasMap ? (
-                              <Flex style={{ marginLeft: "auto" }}>
-                                <ReferredLocationChips
-                                  items={[
-                                    {
-                                      key,
-                                      id: key,
-                                      type: "",
-                                      name: isActive
-                                        ? "Showing on Map"
-                                        : "See on Map",
-                                      keepLabelCase: true,
-                                    },
-                                  ]}
-                                  selectedKey={isActive ? key : null}
-                                  onToggle={() => handleSeeOnMap(key)}
-                                />
-                              </Flex>
-                            ) : null}
+                            {/* pushed to the right end of the criteria row */}
+                            <Flex style={{ marginLeft: "auto", flexShrink: 0 }}>
+                              <RatingBar value={item[1].rating}></RatingBar>
+                            </Flex>
                           </Flex>
                         </div>
+                        {/* See on Map, then the data point's own chips (e.g.
+                            locations), in one scrollable row under the name */}
                         {(() => {
                           const actions = renderDataPointActions?.(
                             item[0],
                             mapFocus,
                           );
-                          if (!actions) return null;
+                          if (!hasMap && !actions) return null;
                           return (
                             <Flex
                               align="center"
                               gap={8}
                               style={{
                                 marginTop: 6,
+                                marginLeft: 4,
                                 overflowX: "auto",
                                 flexWrap: "nowrap",
                                 paddingBottom: 2,
                                 scrollbarWidth: "none",
                               }}
                             >
+                              {hasMap ? (
+                                <Flex style={{ flexShrink: 0 }}>
+                                  <ReferredLocationChips
+                                    items={[
+                                      {
+                                        key,
+                                        id: key,
+                                        type: "",
+                                        name: isActive
+                                          ? "Showing on Map"
+                                          : "See All on Map",
+                                        keepLabelCase: true,
+                                      },
+                                    ]}
+                                    selectedKey={isActive ? key : null}
+                                    onToggle={() => handleSeeOnMap(key)}
+                                  />
+                                </Flex>
+                              ) : null}
                               {actions}
                             </Flex>
                           );
@@ -751,7 +758,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                     border:`1px dashed ${COLORS.borderColorDark}`
                   }}
                 >
-                  {categoryKey == BRICK360_CATEGORY.developer ? (
+                  {categoryKey == BRICK360_CATEGORY.developer && !!lvnzyProject?.originalProjectId?.info?.developerId? (
                     <Typography.Text
                       style={{
                         textTransform: "uppercase",
@@ -762,7 +769,7 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                       {lvnzyProject?.originalProjectId?.info?.developerId?.name}
                     </Typography.Text>
                   ) : null}
-                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorMedium }}>
                     {noDataPlaceholder ??
                       (Brick360DataPoints as any)[sc.key]?.noDataPlaceholder}
                   </Typography.Text>

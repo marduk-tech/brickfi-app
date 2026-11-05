@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import BrickChatClient from "./brickchat/brickchat-client";
 
 const META_DESCR =
-  "BrickChat. Find the perfect home.";
-const META_TITLE = "BrickChat";
+  "Find the Perfect Home You Need Without Brokers or Spam.";
+const META_TITLE = "Brickfi AI";
 export const metadata: Metadata = {
   title: META_TITLE,
   description: META_DESCR,
@@ -34,10 +34,10 @@ export const metadata: Metadata = {
     siteName: "Brickfi",
     images: [
       {
-        url: "/images/brick360-preview.png",
+        url: "/images/brickfiai-preview.png",
         width: 1200,
         height: 630,
-        alt: "Brickfi | Get a 360 Report Card across any property in Bangalore",
+        alt: "Brickfi AI | Tell Brickfi what you're looking for. Discover matching properties across Bangalore.",
       },
     ],
     locale: "en_IN",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: META_TITLE,
     description: META_DESCR,
-    images: ["/images/brick360-preview.png"],
+    images: ["/images/brickfiai-preview.png"],
   },
   robots: {
     index: true,

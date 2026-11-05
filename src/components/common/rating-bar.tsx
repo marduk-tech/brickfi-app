@@ -1,6 +1,6 @@
-import { Flex } from "antd";
+import { Flex, Typography } from "antd";
 import React from "react";
-import { COLORS } from "../../theme/style-constants";
+import { COLORS, FONT_SIZE } from "../../theme/style-constants";
 
 const hexToRgb = (hex: string): number[] =>
   [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
@@ -12,10 +12,12 @@ interface RatingBarProps {
   value: number;
 }
 
+// Same overall width the old five 16px blocks took, so layouts don't shift
+const BAR_WIDTH = 125;
+const BAR_HEIGHT = 8;
+
 const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
-  const totalBars = 5;
-  const filledBars = Math.floor((value / 100) * totalBars);
-  const partialFill = ((value / 100) * totalBars) % 1;
+  const clampedValue = Math.max(0, Math.min(100, Number(value) || 0));
 
   const interpolate = (start: number, end: number, factor: number): number => {
     return Math.round(start + (end - start) * factor);
@@ -28,8 +30,8 @@ const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
     const colors = [
       { stop: 0, color: "#f98518" }, // Red-Orange
       { stop: 30, color: "#f4c119" }, // Orange-Yellow
-      { stop: 50, color: "#eee732" }, // Yellow Greenish
-      { stop: 70, color: "#bdf163" }, // Greenish
+      { stop: 60, color: "#f5ef35" }, // Yellow Greenish
+      { stop: 80, color: "#bdf163" }, // Greenish
       { stop: 100, color: "#0cd68f" }, // Dark Green
     ].map(({ stop, color }) => ({ stop, color: hexToRgb(color) }));
 
@@ -52,43 +54,48 @@ const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
     // Default fallback (should never hit)
     return "#FF6961";
   };
+  // the rating out of 5, rounded up to one decimal - e.g. 76 -> "3.8",
+  // 77 -> "3.9". value / 2 is the out-of-5 rating in tenths, so ceil it
+  // there to avoid floating point error from scaling first.
+  const outOfFive = (Math.ceil(clampedValue / 2) / 10).toFixed(1);
+
   return (
-    <Flex gap={0.8} style={{ display: "flex" }}>
-      {[...Array(totalBars)].map((_, index) => {
-        let fillPercentage = 0;
-        if (index < filledBars) {
-          fillPercentage = 100;
-        } else if (index === filledBars) {
-          fillPercentage = partialFill * 100;
-        }
-        return (
-          <div
-            key={index}
-            style={{
-              position: "relative",
-              width: "16px",
-              height: "16px",
-              backgroundColor: COLORS.bgColorMedium,
-              border: "1px solid",
-              borderColor: COLORS.borderColorMedium,
-              borderRadius: 4,
-              overflow: "hidden",
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                height: "100%",
-                width: `${fillPercentage}%`,
-                backgroundColor: getGradientColor(value),
-                transition: "height 0.3s ease",
-              }}
-            ></div>
-          </div>
-        );
-      })}
+    <Flex vertical gap={2} style={{ width: BAR_WIDTH, marginTop: -2 }}>
+      <Typography.Text
+        style={{
+          alignSelf: "flex-end",
+          lineHeight: "12px",
+          fontWeight: 500,
+          color: COLORS.textColorDark,
+          fontSize: FONT_SIZE.SUB_TEXT
+        }}
+      >
+        {outOfFive}
+      </Typography.Text>
+      <div
+        style={{
+          position: "relative",
+          width: "100%",
+          height: BAR_HEIGHT,
+          backgroundColor: COLORS.bgColorMedium,
+          borderColor: COLORS.borderColorMedium,
+          borderRadius: BAR_HEIGHT,
+          overflow: "hidden",
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            height: "100%",
+            width: `${clampedValue}%`,
+            backgroundColor: getGradientColor(clampedValue),
+            borderRadius: BAR_HEIGHT,
+            transition: "width 0.3s ease",
+          }}
+        />
+      </div>
     </Flex>
   );
 };

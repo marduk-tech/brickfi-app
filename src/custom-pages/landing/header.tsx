@@ -13,19 +13,13 @@ const LandingHeader: React.FC<{
   color?: string;
   logo?: string;
   isMobile?: boolean;
-}> = ({ bgColor, color, logo, isMobile: isMobileProp }) => {
+  /** Fits the nearest positioned parent instead of being fixed to the viewport - that parent needs `position: relative`. */
+  contained?: boolean;
+}> = ({ bgColor, color, logo, isMobile: isMobileProp, contained }) => {
   const router = useRouter();
   const { isMobile: isMobileDetected } = useDevice();
   const isMobile = isMobileProp ?? isMobileDetected;
   const navItems = [
-    {
-      link: "/",
-      label: "Brick360 Report",
-    },
-    {
-      link: LandingConstants.brickAssistLink,
-      label: "Brickfi Assist",
-    },
     {
       link: LandingConstants.blogLink,
       label: "Blog",
@@ -39,8 +33,10 @@ const LandingHeader: React.FC<{
   return (
     <Flex
       style={{
-        position: "fixed",
+        position: contained ? "absolute" : "fixed",
         top: 0,
+        left: contained ? 0 : undefined,
+        boxSizing: contained ? "border-box" : undefined,
         width: "100%",
         padding: 16,
         backgroundColor: bgColor || "#32495e",

@@ -7,7 +7,7 @@ export const PROJECT_STATUS = {
   PARTIALLY_READY: "Partially Ready",
   NEW_LAUNCH: "New Launch",
   PRE_LAUNCH: "Launching Soon",
-  UNDER_CONSTRUCTION: "Under Construction",
+  UNDER_CONSTRUCTION: "Construction",
   NEAR_COMPLETION: "Near Completion",
 } as const;
 
@@ -163,4 +163,63 @@ export const computeProjectStatus = (lvnzyProject: any): string | null => {
     extensions.length > 1,
     expectedLaunchDate,
   );
+};
+
+type MonthYear = { month: number; year: number } | null | undefined;
+
+// one RERA phase's latest timeline, as sent on project display cards
+// (projectTimelines in the services' project-display-cache)
+export type ProjectPhaseTimeline = {
+  reraNumber?: string | null;
+  reraProjectName?: string | null;
+  latestTimeline?: { startDate?: MonthYear; completionDate?: MonthYear } | null;
+};
+
+const monthYearToMoment = (value: MonthYear) =>
+  value?.month && value?.year
+    ? moment({ year: value.year, month: value.month - 1, day: 1 })
+    : null;
+
+/** PROJECT_STATUS for a project display card, from its per-phase
+ * projectTimelines - checked in this order:
+ * - every phase completed over a year ago -> Ready to Move
+ * - some phase completed over a year ago -> Partially Ready
+ * - some phase completing within the next 6 months -> Near Completion
+ * - some phase started within the last 6 months -> New Launch
+ * - some phase starting in the future -> Launching Soon
+ * - otherwise -> Under Construction (null with no dates at all) */
+export const computeProjectStatusFromTimelines = (
+  timelines: ProjectPhaseTimeline[] = [],
+): string | null => {
+  const now = moment();
+  const yearAgo = now.clone().subtract(1, "year");
+  const completions = timelines
+    .map((t) => monthYearToMoment(t.latestTimeline?.completionDate))
+    .filter((d): d is moment.Moment => !!d);
+  const starts = timelines
+    .map((t) => monthYearToMoment(t.latestTimeline?.startDate))
+    .filter((d): d is moment.Moment => !!d);
+  if (!completions.length && !starts.length) return null;
+
+  if (completions.length && completions.every((d) => d.isBefore(yearAgo))) {
+    return PROJECT_STATUS.READY_TO_MOVE;
+  }
+  if (completions.some((d) => d.isBefore(yearAgo))) {
+    return PROJECT_STATUS.PARTIALLY_READY;
+  }
+  // includes phases completed within the last year, not yet "ready to move"
+  if (completions.some((d) => d.isSameOrBefore(now.clone().add(6, "months")))) {
+    return PROJECT_STATUS.NEAR_COMPLETION;
+  }
+  if (
+    starts.some((d) =>
+      d.isBetween(now.clone().subtract(6, "months"), now, undefined, "[]"),
+    )
+  ) {
+    return PROJECT_STATUS.NEW_LAUNCH;
+  }
+  if (starts.some((d) => d.isAfter(now))) {
+    return PROJECT_STATUS.PRE_LAUNCH;
+  }
+  return PROJECT_STATUS.UNDER_CONSTRUCTION;
 };

@@ -1,74 +1,63 @@
-import { NewReportRequestForm } from "@/components/request-report/new-report-request-form";
-import { Metadata } from "next";
-import { Suspense } from "react";
+"use client";
 
-const META_DESCR = "Get a comprehensive Brick360 Report around property layout, financial assessment, builder credibility and more for any property in Bangalore.";
-const META_TITLE = "Brickfi | Get a 360 Report Card for any property in Bangalore";
-export const metadata: Metadata = {
-  title: META_TITLE,
-  description:
-    META_DESCR,
-  keywords: [
-    "real estate",
-    "property",
-    "bangalore",
-    "investment",
-    "brick360",
-    "brickfi",
-    "home buying",
-    "property analysis",
-  ],
-  authors: [{ name: "Brickfi" }],
-  creator: "Brickfi",
-  publisher: "Brickfi",
-  formatDetection: {
-    telephone: false,
-  },
-  metadataBase: new URL("https://www.brickfi.in"),
-  alternates: {
-    canonical: "/",
-  },
-  openGraph: {
-    title: META_TITLE,
-    description:
-      META_DESCR,
-    url: "https://www.brickfi.in",
-    siteName: "Brickfi",
-    images: [
-      {
-        url: "/images/brick360-preview.png",
-        width: 1200,
-        height: 630,
-        alt: "Brickfi | Get a 360 Report Card across any property in Bangalore",
-      },
-    ],
-    locale: "en_IN",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: META_TITLE,
-    description:
-      META_DESCR,
-    images: ["/images/brick360-preview.png"],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-};
+import LandingHeader from "@/custom-pages/landing/header";
+import { useDevice } from "@/hooks/use-device";
+import { COLORS } from "@/theme/style-constants";
+import { Flex, Typography } from "antd";
+import { Metadata } from "next";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+const REDIRECT_SECONDS = 3;
 
 export default function RequestReportPage() {
+    const { isMobile } = useDevice();
+    const router = useRouter();
+    const [secondsLeft, setSecondsLeft] = useState(REDIRECT_SECONDS);
+
+    // replace, so the back button doesn't land here and restart the countdown
+    useEffect(() => {
+      if (secondsLeft === 0) {
+        router.replace("/app");
+        return;
+      }
+      const id = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+      return () => clearTimeout(id);
+    }, [secondsLeft, router]);
+
+    const redirectText = (
+      <div style={{fontSize: 24}}>Redirecting you in {secondsLeft}..</div>
+    );
+
   return (
-    <Suspense fallback={null}>
-      <NewReportRequestForm />
-    </Suspense>
+    <Flex
+      justify="center"
+      align="center"
+      style={{ position: "relative", width: "100%", margin: "auto" }}
+      gap={32}
+      
+    > <LandingHeader
+        contained
+        bgColor="white"
+        logo={"/images/brickfi-logo.png"}
+        color={COLORS.textColorDark}
+      />
+      <Flex gap={16} vertical={isMobile} align="center" style={{marginTop: isMobile ? 150: 125}}>
+            {isMobile ? redirectText : null}
+
+      <img
+        src="images/landing/brick-chat/request-report-redirect.png"
+        width="600px"
+        style={{  maxWidth: "95%" }}
+      ></img>
+      {!isMobile ? redirectText : null}
+      </Flex>
+     
+    </Flex>
   );
+  // return (
+  //   <Suspense fallback={null}>
+  //     <NewReportRequestForm />
+  //   </Suspense>
+  // );
 }

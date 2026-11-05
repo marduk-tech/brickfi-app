@@ -24,6 +24,7 @@ import {
   queryKeys,
 } from "@/libs/constants";
 import { addProjectToDefaultCollection } from "@/libs/lvnzy-helper";
+import { ProjectPhaseTimeline } from "@/libs/project-status";
 import { getLvnzyProjectDisplayCard } from "@/queries/lvnzy-projects";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { useQueryClient } from "@tanstack/react-query";
@@ -63,6 +64,7 @@ import ReferredLocationChips, {
 } from "./referred-location-chips";
 import ThreadLinksButton from "./thread-links-button";
 import StaticQueries from "./static-queries";
+import { ISurroundingElement } from "@/types/Project";
 import {
   ActiveOfferingFlow,
   FollowupOffering,
@@ -70,9 +72,12 @@ import {
   OfferingFlowContext,
   OfferingFlowDialog,
   OfferingTicket,
+  OfferingTicketCard,
+  OfferingTicketUpdate,
   threadTicketsQueryKey,
+  useOfferingCtaForFlow,
   useThreadTickets,
-} from "./offering-flows";
+} from "./offerings";
 
 export interface ProjectResult {
   projectId: string;
@@ -86,6 +91,8 @@ export interface ProjectResult {
   projectUnitTypes?: Array<number>;
   projectAvgSquareFootPrice?: number;
   projectCorridor?: string;
+  projectMicroPocket?: string;
+  projectTimelines?: ProjectPhaseTimeline[];
   projectHomeTypes?: Array<string>;
   sizeBuiltupMin?: number;
   rankScore: number;
@@ -115,7 +122,9 @@ interface ResolvedLocation {
   lat: number;
   lng: number;
   /** empty for a direct-maps-geocoded landmark - see summarizeResolvedLocation in shared.js. */
-  type: "driver" | "locality" | "corridor" | "micropocket" | "";
+  type: "driver" | "locality" | "corridor" | "micropocket" | "surroundings" | "";
+  /** "surroundings" only - the project's surrounding elements (id is then the project's id) - see project-surroundings.js. */
+  data?: ISurroundingElement[];
 }
 
 interface ExploreAnswer {
@@ -125,6 +134,8 @@ interface ExploreAnswer {
   nextSetCount?: number;
   /** Project-list answers: how many projects match the search's criteria outright - can be more than the list shows, or fewer when relaxed criteria filled it out. Null when unknown. See searchMeta in brick-explore-agent.js. */
   totalCount?: number | null;
+  /** Project-list answers: how many of the search's projects have been shown so far across "show me more" pages, this turn's included. Null when unknown (older answers). See synthesize.js. */
+  shownCount?: number | null;
   images?: ExploreImagesGroup[];
   /** brickfiId(s) of driver/infra records (schools, transit, tech parks etc) the answer discussed - see synthesize.js. */
   brickfiDriverIds?: string[];
@@ -138,14 +149,25 @@ interface ExploreAnswer {
   resolvedLocations?: ResolvedLocation[];
   /** This turn's id in the backend's turn log - sent with feedback on this answer (see tagAnswerWithTurnId). Absent on answers saved before turns were tagged. */
   turnId?: string;
+  /** Requests raised from this answer's offering CTA - noted on it by the backend (see noteTicketOnAnswer). When set, the answer shows the request's card instead of the CTA buttons. */
+  offeringTickets?: { ticketId: string; offeringKey: string }[];
+  /** Set on a message the backend posts when ops updates a request (see postTicketUpdates) - shown as request cards above the message, whose text is ops' reply (empty for a status-only change). */
+  ticketUpdates?: OfferingTicketUpdate[];
 }
 
 interface ChatMessage {
-  question: string;
+  /** null on a message posted outside a turn (ticket status updates) */
+  question: string | null;
   answer: ExploreAnswer;
   steps?: TimelineStep[];
   durationMs?: number;
 }
+
+// A single project with images is already shown by those images, so the answer
+// doesn't list it as well
+const skipsProjectResults = (answer: ExploreAnswer) =>
+  answer.projectsList?.length === 1 &&
+  !!answer.images?.some((group) => group.images.length);
 
 // Combines a chat answer's brickfiDriverIds (raw LivIndexPlace ids, no label
 // of their own - resolved via useFetchAllLivindexPlaces inside
@@ -155,6 +177,10 @@ interface ChatMessage {
 // resolvedLocations takes priority on a shared id (e.g. "distance to Sampige
 // Line" both names the driver in the answer AND resolves it as a
 // targetPlace) since it already carries a name for free, no fetch needed.
+// key (and stand-in id, so the chip is clickable) of the "See All Projects"
+// chip at the head of the "See on map" row
+const ALL_PROJECTS_CHIP_KEY = "all-projects";
+
 const getReferredLocationItems = (
   answer: ExploreAnswer,
 ): ReferredLocationChipItem[] => {
@@ -167,7 +193,13 @@ const getReferredLocationItems = (
       : `landmark:${loc.name}:${loc.lat}:${loc.lng}`;
     if (seenKeys.has(key)) return;
     seenKeys.add(key);
-    items.push({ key, id: loc.id, type: loc.type, name: loc.name });
+    items.push({
+      key,
+      id: loc.id,
+      type: loc.type,
+      name: loc.name,
+      data: loc.data,
+    });
   });
 
   (answer.brickfiDriverIds || []).forEach((id) => {
@@ -329,8 +361,6 @@ const hasStoredUser = () => {
   }
 };
 
-const INTERNAL_ROLES = ["admin", "member"];
-
 const GUEST_LOGIN_PROMPT_DELAY_MS = 10000;
 
 // Streamed step ids that only occur when the answer will be a project list
@@ -350,10 +380,10 @@ interface BrickChatCoreProps {
   threadPathBase?: string;
   /**
    * When set and there's no thread already open (no thread id, no history),
-   * automatically submits this question on mount instead of waiting for the
-   * user to type - e.g. the landing page's ?q= search.
+   * fills the search box with this question on mount, for the user to edit or
+   * send - e.g. the landing page's ?q= search.
    */
-  autoStartQuestion?: string;
+  initialQuestion?: string;
   /**
    * A project to open in the inline 360 view on load (the /app/<projectRef>
    * route) - an lvnzyProjectId, slug or originalProjectId. Opened straight
@@ -365,12 +395,13 @@ interface BrickChatCoreProps {
 
 export function BrickChatCore({
   threadPathBase,
-  autoStartQuestion,
+  initialQuestion,
   projectRef,
 }: BrickChatCoreProps) {
   const fs = useBrick360FontSize();
 
   const [form] = Form.useForm();
+  const questionValue: string | undefined = Form.useWatch("question", form);
   const { user, isLoading: userLoading, refetch: refetchUser } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const pathname = usePathname();
@@ -402,7 +433,8 @@ export function BrickChatCore({
   );
 
   const isGuest = !user?._id && !hasStoredUser();
-  const isInternalUser = !!user?.role && INTERNAL_ROLES.includes(user.role);
+  // admin-only tools: the thread links button and per-answer feedback
+  const isAdmin = user?.role === "admin";
 
   const loginPromptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
@@ -520,6 +552,11 @@ export function BrickChatCore({
   const focusedLocalityIds = focusedIdsOfType("locality");
   const focusedCorridorIds = focusedIdsOfType("corridor");
   const focusedMicroPocketIds = focusedIdsOfType("micropocket");
+  // surroundings chips carry their elements inline (item.data) rather than
+  // an id to fetch - every selected one's elements are plotted together
+  const focusedSurroundingElements = focusedReferredLocations
+    .filter((i) => i.type === "surroundings")
+    .flatMap((i) => i.data || []);
 
   // Default to the drivers relevant to the current results list; once any
   // chip is selected the map shows only the selected drivers (none if only
@@ -556,6 +593,14 @@ export function BrickChatCore({
   // it by id/slug, open it, and save it to the user's default collection
   // (refetching the user re-derives the pinned list with it included).
   const handledProjectRefRef = useRef<string | undefined>(undefined);
+  // Set once projectRef's project is opened (or found missing) - until then
+  // the welcome message is held back so it doesn't flash before the
+  // project opens. Guests never get projectRef handled, so they don't wait.
+  const [resolvedProjectRef, setResolvedProjectRef] = useState<string>();
+  const projectRefPending =
+    !!projectRef &&
+    resolvedProjectRef !== projectRef &&
+    (userLoading || !!user?._id);
   useEffect(() => {
     if (!projectRef || !user?._id || pinnedProjectsLoading) return;
     if (handledProjectRefRef.current === projectRef) return;
@@ -569,11 +614,15 @@ export function BrickChatCore({
     );
     if (pinned) {
       handleSelectProject(pinned);
+      setResolvedProjectRef(projectRef);
       return;
     }
 
     const openAndSaveProject = async () => {
-      const project = await getLvnzyProjectDisplayCard(projectRef);
+      const project = await getLvnzyProjectDisplayCard(projectRef).catch(
+        () => undefined,
+      );
+      setResolvedProjectRef(projectRef);
       if (!project) {
         message.error("Project not found.");
         return;
@@ -673,7 +722,7 @@ export function BrickChatCore({
   const [shareLink, setShareLink] = useState<string>();
   const [sharePreparing, setSharePreparing] = useState(false);
 
-  const autoStartFiredRef = useRef(false);
+  const initialQuestionFilledRef = useRef(false);
 
   // With threadPathBase, the open thread lives in the path
   // (/app/brickchat/<threadId>) - read from usePathname rather than the
@@ -700,13 +749,14 @@ export function BrickChatCore({
     !chatHistory.length &&
     !threadyHistoryLoading &&
     !chatLoading &&
-    !selectedProject;
+    !selectedProject &&
+    !projectRefPending;
 
-  // Auto-submit autoStartQuestion once, only when landing fresh (no thread
-  // selected/active/loading and no history yet).
+  // Fill the search box with initialQuestion once, only when landing fresh (no
+  // thread selected/active/loading and no history yet).
   useEffect(() => {
-    if (autoStartFiredRef.current) return;
-    if (!autoStartQuestion || (!user?._id && !isGuest)) return;
+    if (initialQuestionFilledRef.current) return;
+    if (!initialQuestion || (!user?._id && !isGuest)) return;
     if (
       selectedThreadId ||
       activeThreadId ||
@@ -716,11 +766,10 @@ export function BrickChatCore({
       return;
     }
 
-    autoStartFiredRef.current = true;
-    form.setFieldsValue({ question: autoStartQuestion });
-    form.submit();
+    initialQuestionFilledRef.current = true;
+    form.setFieldsValue({ question: initialQuestion });
   }, [
-    autoStartQuestion,
+    initialQuestion,
     user?._id,
     isGuest,
     selectedThreadId,
@@ -742,7 +791,7 @@ export function BrickChatCore({
   ) => {
     if (!threadPathBase) return;
     const params = new URLSearchParams(searchParams.toString());
-    // ?q= has already been consumed as autoStartQuestion - drop it so it
+    // ?q= has already been consumed as initialQuestion - drop it so it
     // doesn't linger in (or get shared via) the thread URL.
     params.delete("q");
     dropParams.forEach((p) => params.delete(p));
@@ -1271,11 +1320,14 @@ export function BrickChatCore({
     }
   };
 
-  // --- Brickfi offerings (see offering-flows.tsx) ---
+  // --- Brickfi offerings (see offerings/) ---
 
   // the CTA flow open in its dialog, if any
   const [activeOfferingFlow, setActiveOfferingFlow] =
     useState<ActiveOfferingFlow | null>(null);
+  // Expert Help, opened from the header rather than an answer's CTA - no
+  // turnId or offeringContext, it isn't tied to an answer
+  const expertHelpCta = useOfferingCtaForFlow("brkfi-expert");
 
   // what a flow can prefill from: projects in this conversation (the open
   // one, then the latest answers' cards first, then saved ones) and the
@@ -1332,7 +1384,7 @@ export function BrickChatCore({
     const items = (imagesGroups || []).flatMap((group) =>
       group.images.map((image) => ({
         ...image,
-        caption: `${group.projectName}: ${image.caption}`,
+        caption: `${image.caption ? image.caption+", ": ""}${group.projectName}`,
       })),
     );
 
@@ -1372,7 +1424,7 @@ export function BrickChatCore({
                 <Typography.Text
                   ellipsis
                   style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontSize: FONT_SIZE.NOTE,
                     color: COLORS.textColorLight,
                   }}
                 >
@@ -1411,7 +1463,8 @@ export function BrickChatCore({
       style={{
         width: "100%",
         maxWidth: 2000,
-        height: isMobile ? "calc(100vh - 100px)" : "calc(100vh - 60px)",
+        // fill the dashboard layout's content area (already sized below the header)
+        height: "100%",
         // mobile: no side padding here - the search form and chat panel
         // below carry their own 8px gutter instead, so everything (including
         // the inline Brick360 view) gets an even 8px on both sides
@@ -1425,7 +1478,7 @@ export function BrickChatCore({
           margin: "0 auto",
           position: "relative",
           paddingBottom: 100,
-          width: isMobile ? "100%" : "57%",
+          width: isMobile ? "100%" : "50%",
           height: "100%",
         }}
       >
@@ -1496,8 +1549,36 @@ export function BrickChatCore({
                   }
                   onClick={openLoginPrompt}
                 >
-                  Sign Up To Continue
+                  {showWelcome ? "Sign In": "Sign In To Continue"}
                 </Button>
+              )}
+              {/* signed-in users only (so never alongside Sign In above),
+                and once there's a thread - a request is raised against one
+                (see OfferingFlowDialog's submit) */}
+              {expertHelpCta && user?._id && (
+                <Tooltip title={expertHelpCta.offering.title}>
+                  <Button
+                    type="text"
+                    style={{
+                      height: 24,
+                      width: 24,
+                      lineHeight: 1,
+                      // pushes it to the left edge, the rest stay right-aligned
+                      marginRight: "auto",
+                      backgroundColor: COLORS.textColorDark,
+                      marginTop: 4
+                      }}
+                    icon={
+                      <DynamicReactIcon
+                        iconName="GiAstronautHelmet"
+                        iconSet="gi"
+                        color={"white"}
+                        size={16}
+                      />
+                    }
+                    onClick={() => setActiveOfferingFlow(expertHelpCta)}
+                  />
+                </Tooltip>
               )}
               <BrickchatFeedback
                 threadId={activeThreadId || selectedThreadId}
@@ -1509,7 +1590,7 @@ export function BrickChatCore({
                   userId={user._id}
                 />
               )}
-              {isInternalUser && (activeThreadId || selectedThreadId) && (
+              {isAdmin && (activeThreadId || selectedThreadId) && (
                 <ThreadLinksButton
                   threadId={(activeThreadId || selectedThreadId) as string}
                 />
@@ -1555,46 +1636,61 @@ export function BrickChatCore({
                 </Button>
               </Flex>
             )}
-            <Form.Item name="question" style={{ marginBottom: 0 }}>
-              <Input
-                placeholder={
-                  isArchivedThread
-                    ? "Start a new chat to ask more"
-                    : "Search for projects... (e.g., 'apartments near Whitefield')"
-                }
-                size="large"
+            <div style={{ position: "relative" }}>
+              <Form.Item name="question" style={{ marginBottom: 0 }}>
+                <Input.TextArea
+                  placeholder={
+                    isArchivedThread
+                      ? "Start a new chat to ask more"
+                      : "Enter what you are looking for"
+                  }
+                  autoSize={{ minRows: 1, maxRows: 2 }}
+                  disabled={
+                    chatLoading ||
+                    threadyHistoryLoading ||
+                    claimingGuestThread ||
+                    isArchivedThread
+                  }
+                  style={{
+                    boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
+                    // 50px tall on one row, with room for the send button
+                    padding: "12px 48px 12px 16px",
+                    lineHeight: "24px",
+                    resize: "none",
+                    backgroundColor: "white",
+                    border: "1px solid",
+                    borderColor: COLORS.borderColorMedium,
+                    borderRadius: 16,
+                    fontSize: FONT_SIZE.HEADING_4,
+                  }}
+                  // Enter sends, Shift+Enter starts a new line
+                  onPressEnter={(e) => {
+                    if (e.shiftKey) return;
+                    e.preventDefault();
+                    form.submit();
+                  }}
+                />
+              </Form.Item>
+              <Button
+                type="text"
+                htmlType="submit"
+                icon={<BiSend size={20} />}
                 disabled={
                   chatLoading ||
                   threadyHistoryLoading ||
                   claimingGuestThread ||
-                  isArchivedThread
-                }
-                suffix={
-                  <Button
-                    type="text"
-                    htmlType="submit"
-                    icon={<BiSend size={20} />}
-                    disabled={
-                      chatLoading ||
-                      threadyHistoryLoading ||
-                      claimingGuestThread ||
-                      isArchivedThread
-                    }
-                    style={{ color: COLORS.primaryColor }}
-                  />
+                  isArchivedThread ||
+                  (!!questionValue?.trim().length) 
                 }
                 style={{
-                  boxShadow: "0 0 8px rgba(41, 181, 232, 0.3)",
-                  height: 50,
-                  backgroundColor: "white",
-                  border: "1px solid",
-                  borderColor: COLORS.borderColorMedium,
-                  borderRadius: 16,
-                  fontSize: FONT_SIZE.HEADING_4,
+                  position: "absolute",
+                  right: 0,
+                  top: "50%",
+                  transform: "translateY(-50%)",
+                  color: COLORS.primaryColor,
                 }}
-                onPressEnter={() => form.submit()}
               />
-            </Form.Item>
+            </div>
           </Form>
         ) : null}
         <Flex
@@ -1607,19 +1703,21 @@ export function BrickChatCore({
             padding: isMobile ? "0 8px" : "0 8px 0 0",
           }}
         >
-          {/* Always at the top, independent of showWelcome below - the
-            component itself renders a placeholder when there's nothing to
-            show, so no outer conditional is needed here. */}
-          <PinnedProjectResults
-            results={pinnedProjectResults || []}
-            description={pinnedProjectsDescription}
-            hasChatStarted={!!chatHistory.length}
-            isLoading={pinnedProjectsLoading}
-            onLocateProject={handleLocateProject}
-            onSelectProject={handleSelectProject}
-            selectedProjectId={selectedProject?.projectId}
-            collapseOnSelect={true}
-          />
+          {/* At the top for logged-in users, independent of showWelcome below -
+            the component itself renders a placeholder when there's nothing to
+            show. */}
+          {user?._id && (
+            <PinnedProjectResults
+              results={pinnedProjectResults || []}
+              description={pinnedProjectsDescription}
+              hasChatStarted={!!chatHistory.length}
+              isLoading={pinnedProjectsLoading}
+              onLocateProject={handleLocateProject}
+              onSelectProject={handleSelectProject}
+              selectedProjectId={selectedProject?.projectId}
+              collapseOnSelect={true}
+            />
+          )}
           {showWelcome ? (
             <Flex vertical style={{marginTop:32}}>
               <Flex vertical align="center">
@@ -1663,6 +1761,9 @@ export function BrickChatCore({
                 </Flex>
               </Flex>
             </Flex>
+          ) : projectRefPending && !selectedProject ? (
+            // 40% smaller than the default Loader
+            <Loader height={75} style={{ transform: "scale(0.6)" }} />
           ) : null}
 
           {threadyHistoryLoading && !chatHistory.length ? (
@@ -1683,7 +1784,11 @@ export function BrickChatCore({
                 null
               ) : (
               <Flex key={`${messageItem.question}-${index}`} vertical gap={12}>
-                {renderQuestion(messageItem.question)}
+                {/* no question on a message posted outside a turn (ticket
+                  status updates) */}
+                {messageItem.question
+                  ? renderQuestion(messageItem.question)
+                  : null}
 
                 <Flex
                   vertical
@@ -1719,116 +1824,40 @@ export function BrickChatCore({
                     ) : null} */}
 
                     {renderImages(messageItem.answer.images)}
-                    {/* Map Chips */}
-                    <Flex
-                      align="center"
-                      gap={8}
-                      style={{
-                        marginBottom: 8,
-                        width: "100%",
-                        overflowX: "scroll",
-                        flexWrap: "nowrap",
-                        scrollbarWidth: "none",
-                      }}
-                    >
-                      {messageItem.answer.projectsList &&
-                      !!messageItem.answer.projectsList.length ? (
-                        <Flex justify="flex-end" style={{ flexShrink: 0 }}>
-                          <Button
-                            size="small"
-                            icon={
-                              <DynamicReactIcon
-                                iconName="FaMapMarkedAlt"
-                                iconSet="fa"
-                                size={16}
-                                color={
-                                  !hasFocusedReferredLocations &&
-                                  mapResultsIndex === index
-                                    ? "white"
-                                    : COLORS.textColorDark
-                                }
-                              ></DynamicReactIcon>
-                            }
-                            type={
-                              mapResultsIndex === index ? "primary" : "default"
-                            }
-                            onClick={() => {
-                              setFocusedReferredLocations([]);
-                              if (isMobile) setShowMobileMap(true);
-                              setMapResultsIndex(index);
-                              // a fresh array reference even when re-selecting
-                              // the same list (e.g. after wandering off to a
-                              // driver/locality focus) - MapCenterer's
-                              // re-centering effect only re-fires when its
-                              // `projects` dependency actually changes
-                              // reference, and setProjectResults with the
-                              // exact same array object React already holds
-                              // is a no-op (React bails out of re-rendering
-                              // for an Object.is-identical value), so
-                              // re-clicking this button on an
-                              // already-selected list would otherwise never
-                              // reset the camera back to it.
-                              setProjectResults([
-                                ...messageItem.answer.projectsList,
-                              ]);
-                            }}
-                            style={{
-                              fontSize: FONT_SIZE.PARA,
-                              height: 24,
-                              borderRadius: 16,
-                              border: `1px solid ${
-                                !hasFocusedReferredLocations &&
-                                mapResultsIndex === index
-                                  ? COLORS.primaryColor
-                                  : COLORS.borderColorMedium
-                              }`,
-                              backgroundColor:
-                                !hasFocusedReferredLocations &&
-                                mapResultsIndex === index
-                                  ? COLORS.primaryColor
-                                  : COLORS.bgColorLightBlue,
-                              color:
-                                !hasFocusedReferredLocations &&
-                                mapResultsIndex === index
-                                  ? "white"
-                                  : COLORS.textColorDark,
-                            }}
-                          >
-                            {messageItem.answer.projectsList.length} Projects
-                          </Button>
-                        </Flex>
-                      ) : null}
-                      {messageItem.answer.totalCount != null &&
-                      !!messageItem.answer.projectsList?.length ? (
-                        <Typography.Text
-                          style={{
-                            flexShrink: 0,
-                            fontSize: FONT_SIZE.SUB_TEXT,
-                            color: COLORS.textColorMedium,
-                          }}
-                        >
-                          {messageItem.answer.totalCount}{" "}
-                          {messageItem.answer.totalCount === 1
-                            ? "project matches"
-                            : "projects match"}{" "}
-                          your criteria
-                        </Typography.Text>
-                      ) : null}
-                    </Flex>
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
-                        <BrickChatResults
-                          results={messageItem.answer.projectsList}
-                          onLocateProject={(projectId) =>
-                            handleLocateProject(projectId, index)
-                          }
-                          onSelectProject={handleSelectProject}
-                          selectedProjectId={selectedProject?.projectId}
-                        />
+                        {!skipsProjectResults(messageItem.answer) ? (
+                          <BrickChatResults
+                            results={messageItem.answer.projectsList}
+                            onLocateProject={(projectId) =>
+                              handleLocateProject(projectId, index)
+                            }
+                            onSelectProject={handleSelectProject}
+                            selectedProjectId={selectedProject?.projectId}
+                          />
+                        ) : null}
+                        {/* out of the whole result set (shown + still to
+                          page through), not totalCount - relaxed matches
+                          can push the shown count past it */}
+                        {messageItem.answer.shownCount != null &&
+                        !!messageItem.answer.projectsList?.length &&
+                        !skipsProjectResults(messageItem.answer) ? (
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.SUB_TEXT,
+                              color: COLORS.textColorMedium,
+                            }}
+                          >
+                            Showing {messageItem.answer.shownCount} out of{" "}
+                            {messageItem.answer.shownCount +
+                              (messageItem.answer.nextSetCount ?? 0)}{" "}
+                            projects
+                          </Typography.Text>
+                        ) : null}
                         {!chatLoading &&
                           (messageItem.answer.nextSetCount ?? 0) > 0 &&
                           index === chatHistory.length - 1 && (
-                            <Flex justify="flex-start">
+                            <Flex justify="flex-start" style={{marginBottom: 8}}>
                               <Button
                                 size="small"
                                 style={{
@@ -1842,12 +1871,13 @@ export function BrickChatCore({
                                   form.submit();
                                 }}
                               >
-                                Show me more
+                                Show more
                               </Button>
                             </Flex>
                           )}
                       </Flex>
-                    ) : !!messageItem.answer.projectsList?.length ? (
+                    ) : !!messageItem.answer.projectsList?.length &&
+                      !skipsProjectResults(messageItem.answer) ? (
                       <Flex vertical gap={8}>
                         <BrickChatResults
                           results={messageItem.answer.projectsList}
@@ -1859,6 +1889,23 @@ export function BrickChatCore({
                           skipOneLiner
                           skipSort
                         />
+                      </Flex>
+                    ) : null}
+
+                    {/* a ticket status update posted to the thread (see
+                      postTicketUpdates) - its request card(s) above the
+                      message */}
+                    {messageItem.answer.ticketUpdates?.length ? (
+                      <Flex vertical gap={8} style={{ marginBottom: 12 }}>
+                        {messageItem.answer.ticketUpdates.map((update) => (
+                          <OfferingTicketCard
+                            key={`${update.ticketId}-${update.status}`}
+                            ticket={update}
+                            details={threadTickets?.find(
+                              (t) => t.ticketId === update.ticketId,
+                            )}
+                          />
+                        ))}
                       </Flex>
                     ) : null}
 
@@ -1875,8 +1922,8 @@ export function BrickChatCore({
                           p: ({ children }) => (
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_4,
-                                fontWeight: 500,
+                                fontSize: FONT_SIZE.HEADING_4 * .9,
+                                fontWeight: 400,
                                 marginBottom: 16,
                                 display: "block",
                                 maxWidth: 850,
@@ -1923,13 +1970,53 @@ export function BrickChatCore({
                       const referredLocationItems = getReferredLocationItems(
                         messageItem.answer,
                       );
-                      if (!referredLocationItems.length) return null;
+                      // "See All Projects" (or the project's name, when
+                      // there's only one) leads the row - plots this answer's
+                      // project list (not a referred location, so handled here
+                      // rather than in getReferredLocationItems)
+                      const projectsList = messageItem.answer.projectsList;
+                      const projectsItem: ReferredLocationChipItem | null =
+                        projectsList?.length
+                          ? {
+                              key: ALL_PROJECTS_CHIP_KEY,
+                              id: ALL_PROJECTS_CHIP_KEY,
+                              type: "project",
+                              name:
+                                (projectsList.length === 1 &&
+                                  projectsList[0].projectName) ||
+                                "See All Projects",
+                              keepLabelCase: true,
+                            }
+                          : null;
+                      const chipItems = projectsItem
+                        ? [projectsItem, ...referredLocationItems]
+                        : referredLocationItems;
+                      if (!chipItems.length) return null;
                       const hasFocusable = referredLocationItems.some(
                         (i) => !!i.id,
                       );
+                      // the map always plots the active list's projects, so
+                      // this stays selected alongside any location chips
+                      // focused on top of it
+                      const projectsSelected = mapResultsIndex === index;
+                      const handleShowAllProjects = () => {
+                        if (isMobile) setShowMobileMap(true);
+                        setMapResultsIndex(index);
+                        // a fresh array reference even when re-selecting the
+                        // same list (e.g. after wandering off to a
+                        // driver/locality focus) - MapCenterer's re-centering
+                        // effect only re-fires when its `projects` dependency
+                        // changes reference, and setting the exact array
+                        // React already holds is a no-op, so re-clicking on
+                        // an already-selected list would otherwise never
+                        // reset the camera back to it.
+                        setProjectResults([...messageItem.answer.projectsList]);
+                      };
                       return (
                         <Flex vertical gap={4} style={{ marginBottom: 2 }}>
                           <Flex align="center" gap={6}>
+                            <Flex gap={4} align="center">
+                              <DynamicReactIcon color={COLORS.textColorMedium} size={12} iconName="FaMapMarkedAlt" iconSet="fa"></DynamicReactIcon>
                             <Typography.Text
                               style={{
                                 fontSize: FONT_SIZE.SUB_TEXT,
@@ -1939,6 +2026,7 @@ export function BrickChatCore({
                             >
                               See on map
                             </Typography.Text>
+                            </Flex>
                             {hasFocusable ? (
                               <Tooltip title="Reset">
                                 <Button
@@ -1971,9 +2059,20 @@ export function BrickChatCore({
                             }}
                           >
                             <ReferredLocationChips
-                              items={referredLocationItems}
-                              selectedKeys={focusedReferredLocationKeys}
-                              onToggle={handleToggleReferredLocation}
+                              items={chipItems}
+                              selectedKeys={
+                                projectsSelected
+                                  ? [
+                                      ALL_PROJECTS_CHIP_KEY,
+                                      ...focusedReferredLocationKeys,
+                                    ]
+                                  : focusedReferredLocationKeys
+                              }
+                              onToggle={(item) =>
+                                item.key === ALL_PROJECTS_CHIP_KEY
+                                  ? handleShowAllProjects()
+                                  : handleToggleReferredLocation(item)
+                              }
                             />
                           </Flex>
                         </Flex>
@@ -1993,27 +2092,39 @@ export function BrickChatCore({
                       </Typography.Text>
                     ) : null}
 
-                    {messageItem.answer.followupOffering ? (
+                    {messageItem.answer.followupOffering ? (() => {
+                      const offeringKey = messageItem.answer.followupOffering.key;
+                      // the request raised from this very answer, if any
+                      const notedTicket = messageItem.answer.offeringTickets?.find(
+                        (t) => t.offeringKey === offeringKey,
+                      );
+                      return (
                       <OfferingCtaButtons
-                        offeringKey={messageItem.answer.followupOffering.key}
+                        offeringKey={offeringKey}
+                        ticketNoted={!!notedTicket}
                         existingTicket={
-                          offeringTicketsByKey[
-                            messageItem.answer.followupOffering.key
-                          ]
+                          (notedTicket &&
+                            threadTickets?.find(
+                              (t) => t.ticketId === notedTicket.ticketId,
+                            )) ||
+                          offeringTicketsByKey[offeringKey]
                         }
                         onStart={(offering, cta) =>
                           setActiveOfferingFlow({
                             offering,
                             cta,
                             turnId: messageItem.answer.turnId,
+                            offeringContext:
+                              messageItem.answer.followupOffering?.context,
                           })
                         }
                       />
-                    ) : null}
+                      );
+                    })() : null}
 
-                    {/* feedback on just this answer - only once it carries
-                      a turnId, so it can be tied to the turn's log */}
-                    {messageItem.answer.turnId ? (
+                    {/* feedback on just this answer, admins only - only once
+                      it carries a turnId, so it can be tied to the turn's log */}
+                    {isAdmin && messageItem.answer.turnId ? (
                       <Flex justify="flex-end">
                         <BrickchatFeedback
                           threadId={activeThreadId || selectedThreadId}
@@ -2091,8 +2202,8 @@ export function BrickChatCore({
       {!isMobile && (
         <Flex
           style={{
-            width: "40%",
-            minWidth: "37%",
+            width: "47%",
+            minWidth: "44%",
             padding: "0 1.5%",
             flexShrink: 0,
             isolation: "isolate",
@@ -2114,6 +2225,9 @@ export function BrickChatCore({
             }
             focusedMicroPocketIds={
               selectedProject ? undefined : focusedMicroPocketIds
+            }
+            focusedSurroundingElements={
+              selectedProject ? undefined : focusedSurroundingElements
             }
           />
         </Flex>
@@ -2215,6 +2329,9 @@ export function BrickChatCore({
                 focusedMicroPocketIds={
                   selectedProject ? undefined : focusedMicroPocketIds
                 }
+                focusedSurroundingElements={
+                  selectedProject ? undefined : focusedSurroundingElements
+                }
               />
             </Flex>
           </Drawer>
@@ -2241,18 +2358,18 @@ export function BrickChatCore({
       >
         <Flex vertical>
           <Typography.Text
-            style={{ fontSize: FONT_SIZE.HEADING_1, fontWeight: 500 }}
+            style={{ fontSize: FONT_SIZE.HEADING_2, fontWeight: 500 }}
           >
-            Sign in to continue
+            Sign in to Continue
           </Typography.Text>
           <Typography.Text
             style={{
-              fontSize: FONT_SIZE.HEADING_3,
+              fontSize: FONT_SIZE.HEADING_4,
               marginBottom: 24,
               color: COLORS.textColorMedium,
             }}
           >
-            Login/Signup with your mobile number to keep this conversation going
+            Login or Signup with your mobile to keep this conversation going.
           </Typography.Text>
           {/* useAuth invalidates a different query client than the app's,
             so refetch the user here to pick up the new sign in */}
@@ -2301,14 +2418,14 @@ export default function BrickChatClient(props: { projectRef?: string } = {}) {
 }
 
 function BrickChatClientContent({ projectRef }: { projectRef?: string }) {
-  // ?q= is set by the landing page search input - auto-submit it as the
-  // first question of a fresh chat.
+  // ?q= is set by the landing page search input - it fills the search box of
+  // a fresh chat, ready to send.
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("q")?.trim() || undefined;
 
   return (
     <BrickChatCore
-      autoStartQuestion={initialQuery}
+      initialQuestion={initialQuery}
       threadPathBase={BRICKCHAT_THREAD_PATH_BASE}
       projectRef={projectRef}
     />

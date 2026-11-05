@@ -4,6 +4,11 @@ import { useEffect, useRef } from "react";
 import { useMap } from "@vis.gl/react-google-maps";
 import { ProjectMarkerInput } from "../types";
 import { MapModalContent, MapModalGeoPosition } from "../map-modal";
+import { ISurroundingElement } from "../../../types/Project";
+import {
+  isValidSurroundingElementGeometry,
+  processSurroundingElementGeometry,
+} from "../map-utils";
 
 // Google Maps JS API has no built-in smooth zoom - setZoom/fitBounds always
 // jump straight to the target level. The common workaround (used throughout
@@ -228,6 +233,22 @@ const boundsFromFeatures = (features: any): google.maps.LatLngBounds | null => {
   return bounds.isEmpty() ? null : bounds;
 };
 
+// Surrounding elements' geometry is [{lat, lon}] points (or arrays of them
+// for a multi-line) - processSurroundingElementGeometry's polygonCoordinates
+// already reshapes that into GeoJSON-style [lng, lat] for
+// extendBoundsFromCoordinates.
+const boundsFromSurroundingElements = (
+  elements: ISurroundingElement[],
+): google.maps.LatLngBounds | null => {
+  const bounds = new google.maps.LatLngBounds();
+  elements.forEach((el) => {
+    if (!isValidSurroundingElementGeometry(el)) return;
+    const geo = processSurroundingElementGeometry(el);
+    if (geo) extendBoundsFromCoordinates(bounds, geo.polygonCoordinates);
+  });
+  return bounds.isEmpty() ? null : bounds;
+};
+
 const focusOnPoint = (
   map: google.maps.Map,
   location: { lat?: number; lng?: number } | undefined,
@@ -271,12 +292,15 @@ const DRIVER_FOCUS_ZOOM = 15;
 // (13) / MICROPOCKET_MAX_ZOOM (13.5).
 const CORRIDOR_FOCUS_MAX_ZOOM = 12.5;
 const MICROPOCKET_FOCUS_MAX_ZOOM = 13;
+const SURROUNDINGS_FOCUS_MAX_ZOOM = 16;
 
 interface ActiveFocusCentererProps {
   localities?: any[];
   corridors?: any[];
   microPockets?: any[];
   drivers?: any[];
+  /** Framed as a whole (every element in view) whenever non-empty - only passed by callers that opt in (see MapViewGoogle's focusSurroundingElements). */
+  surroundingElements?: ISurroundingElement[];
 }
 
 // Centers/zooms the camera onto whichever of localities/corridors/
@@ -294,6 +318,7 @@ export function ActiveFocusCenterer({
   corridors,
   microPockets,
   drivers,
+  surroundingElements,
 }: ActiveFocusCentererProps) {
   const map = useMap();
 
@@ -316,7 +341,12 @@ export function ActiveFocusCenterer({
       focusOnDriver(map, drivers[0]);
       return;
     }
-  }, [map, localities, corridors, microPockets, drivers]);
+    if (surroundingElements?.length) {
+      const bounds = boundsFromSurroundingElements(surroundingElements);
+      if (bounds) flyToBounds(map, bounds, SURROUNDINGS_FOCUS_MAX_ZOOM);
+      return;
+    }
+  }, [map, localities, corridors, microPockets, drivers, surroundingElements]);
 
   return null;
 }

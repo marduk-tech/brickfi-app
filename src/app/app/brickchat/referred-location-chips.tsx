@@ -8,8 +8,15 @@ import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Tag, Tooltip, Typography } from "antd";
 import { capitalize } from "@/libs/lvnzy-helper";
 import { useBrick360FontSize } from "./brick360/use-font-size";
+import { ISurroundingElement } from "@/types/Project";
 export type ReferredLocationType =
-  "driver" | "locality" | "corridor" | "micropocket" | "";
+  | "driver"
+  | "locality"
+  | "corridor"
+  | "micropocket"
+  | "surroundings"
+  | "project"
+  | "";
 
 export interface ReferredLocationChipItem {
   /** Unique per-item key for React/selection - distinct from `id` since a landmark has no id of its own (see brickchat-client's getReferredLocationItems). */
@@ -19,21 +26,34 @@ export interface ReferredLocationChipItem {
   type: ReferredLocationType;
   /** Already-known label (from resolvedLocations) - a bare brickfiDriverIds entry has none and gets one via useFetchAllLivindexPlaces below instead. */
   name?: string;
-  /** Chip icon - defaults to the map icon (DEFAULT_CHIP_ICON). */
+  /** Chip icon - defaults to its type's icon (CHIP_ICON_BY_TYPE), or the map icon (DEFAULT_CHIP_ICON) for a type with none. */
   icon?: { name: string; set: IconSetKey };
   /** Show the label as-is instead of title-casing it (e.g. "See on Map", or place names with acronyms). */
   keepLabelCase?: boolean;
   /** Text after the label that's never truncated (e.g. "6 mins") - only the label gets the ellipsis. */
   suffix?: string;
+  /** What the chip plots when there's no catalog record to fetch by id - a "surroundings" chip's project surroundings (see project-surroundings.js), passed to the map as surroundingElements. */
+  data?: ISurroundingElement[];
 }
 
 // chips never grow past this - the label is cut with an ellipsis instead
 // (full label in a tooltip); icon and suffix always stay whole
-const CHIP_MAX_WIDTH = 250;
+const CHIP_MAX_WIDTH = 200;
 
 const DEFAULT_CHIP_ICON: { name: string; set: IconSetKey } = {
   name: "FaMapMarkedAlt",
   set: "fa",
+};
+
+const CHIP_ICON_BY_TYPE: Partial<
+  Record<ReferredLocationType, { name: string; set: IconSetKey }>
+> = {
+  micropocket: { name: "TbPolygon", set: "tb" },
+  corridor: { name: "TbPolygon", set: "tb" },
+  locality: { name: "PiMapPinAreaBold", set: "pi" },
+  driver: { name: "TbMapPinStar", set: "tb" },
+  surroundings: { name: "RiTreasureMapLine", set: "ri" },
+  project: { name: "BiHomeCircle", set: "bi" },
 };
 
 interface ReferredLocationChipsProps {
@@ -120,7 +140,8 @@ export default function ReferredLocationChips({
           // a landmark (no id) has no map layer to populate - show it for
           // context but don't make it look/act clickable
           const clickable = !!item.id;
-          const icon = item.icon || DEFAULT_CHIP_ICON;
+          const icon =
+            item.icon || CHIP_ICON_BY_TYPE[item.type] || DEFAULT_CHIP_ICON;
           const displayLabel = item.keepLabelCase
             ? label || ""
             : capitalize(label || "");
@@ -140,7 +161,7 @@ export default function ReferredLocationChips({
                 cursor: clickable ? "pointer" : "default",
                 opacity: clickable ? 1 : 0.7,
                 backgroundColor: isSelected ? COLORS.primaryColor : "white",
-                boxShadow: "0 0 1px rgba(0,0,0,0.4)",
+                border: `1px solid ${isSelected ?COLORS.primaryColor : COLORS.borderColorMedium}`,
                 color: isSelected ? "white" : COLORS.textColorDark,
               }}
             >
@@ -158,18 +179,21 @@ export default function ReferredLocationChips({
                     ellipsis={{ tooltip: displayLabel }}
                     style={{
                       minWidth: 0,
-                      fontSize: fs.SUB_TEXT,
+                      fontSize: FONT_SIZE.NOTE,
+                      fontWeight: 500,
                       color: isSelected ? "white" : COLORS.textColorMedium,
                     }}
                   >
-                    {displayLabel}
+                    {capitalize(displayLabel)}
                   </Typography.Text>
                   {item.suffix ? (
                     <Typography.Text
                       style={{
                         flexShrink: 0,
-                        fontSize: fs.HEADING_4,
-                        color: isSelected ? "white" : COLORS.textColorDark,
+                        fontSize: FONT_SIZE.NOTE,
+                        fontWeight: 500,
+                        marginLeft: 2,
+                        color: isSelected ? "white" : COLORS.textColorMedium,
                       }}
                     >
                       {item.suffix}

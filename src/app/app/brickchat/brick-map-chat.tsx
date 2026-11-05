@@ -4,7 +4,7 @@ import { Flex } from "antd";
 import { useMemo, useRef } from "react";
 import BrickChatResults from "./brick-chat-results";
 import { DRIVER_CATEGORIES } from "../../../libs/constants";
-import { IDriverPlace } from "../../../types/Project";
+import { IDriverPlace, ISurroundingElement } from "../../../types/Project";
 import dynamic from "next/dynamic";
 import type { ProjectMarkerInput } from "../../../components/map-view-v2/map-view-v2";
 import type { LvnzyProject } from "../../../types/LvnzyProject";
@@ -60,6 +60,13 @@ interface BrickMapChatProps {
   focusedLocalityIds?: string[];
   focusedCorridorIds?: string[];
   focusedMicroPocketIds?: string[];
+  /**
+   * A chat answer's "surroundings" referred-location chip(s), clicked in
+   * brickchat-client - the selected projects' surroundings (the chip's own
+   * `data`), plotted as surroundingElements and framed into view. Only
+   * meaningful in the non-detailedProject view.
+   */
+  focusedSurroundingElements?: ISurroundingElement[];
   /** "360 Details" on the project card shown when a project marker is clicked - same as BrickChatResults'. */
   onSelectProject?: (project: ProjectResult) => void;
 }
@@ -74,6 +81,7 @@ export function BrickMapChat({
   focusedLocalityIds,
   focusedCorridorIds,
   focusedMicroPocketIds,
+  focusedSurroundingElements,
   onSelectProject,
 }: BrickMapChatProps) {
   // No default "every driver in Bangalore" fetch - the base search-results
@@ -186,6 +194,8 @@ export function BrickMapChat({
           showLocalities={focusedLocalityIds ?? []}
           showCorridors={focusedCorridorIds ?? []}
           showMicroPockets={focusedMicroPocketIds ?? []}
+          surroundingElements={focusedSurroundingElements ?? []}
+          focusSurroundingElements
           hideAllFilters={hideAllFilters}
           minMapZoom={10}
           categories={Object.keys(DRIVER_CATEGORIES).filter(

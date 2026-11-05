@@ -45,6 +45,18 @@ interface MapModalProps {
 const PANEL_WIDTH = 320;
 const CLICK_OFFSET = 14;
 const EDGE_PADDING = 8;
+
+// room left around a map popup's content - its own padding plus a gap to
+// the map's edges
+const POPUP_MAP_MARGIN = 80;
+
+/**
+ * Content width for MapModalBody's text popups on the Leaflet (map-view-v2)
+ * and Google (map-view-google) maps, so both are the same: PANEL_WIDTH, or
+ * narrower when the map itself is too narrow to fit that (mobile).
+ */
+export const getMapPopupWidth = (mapWidth: number) =>
+  Math.max(160, Math.min(PANEL_WIDTH, mapWidth - POPUP_MAP_MARGIN));
 const CONTENT_WORD_LIMIT = 40;
 
 /** Breaks long plain-text content into paragraphs of ~CONTENT_WORD_LIMIT words each, splitting at the nearest sentence-ending full stop so line breaks never land mid-sentence. */
@@ -130,6 +142,8 @@ export const MapModalBody = ({ content, onClose }: MapModalBodyProps) => {
   return (
     <div
       ref={containerRef}
+      // wraps content to the popup's width (see globals.scss)
+      className="map-modal-body"
       onMouseDown={() => (mouseDownInsideRef.current = true)}
     >
       {/* <div
@@ -176,11 +190,13 @@ export const MapModalBody = ({ content, onClose }: MapModalBodyProps) => {
           </Flex>
         ) : null}
 
-        <Flex align="center" gap={4} style={{ paddingRight: 20 }}>
+        <Flex align="center" gap={4} style={{ paddingRight: 20, minWidth: 0 }}>
           {content?.titleIcon && content.titleIcon}
           {typeof content?.title == "string" ? (
             <Paragraph
               style={{
+                // lets the title shrink and wrap/ellipsize next to the icon
+                minWidth: 0,
                 fontSize: FONT_SIZE.HEADING_3,
                 fontWeight: 500,
                 marginBottom: 8,

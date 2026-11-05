@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusOutlined, SendOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, PlusOutlined } from "@ant-design/icons";
 import {
   Button,
   Carousel,
@@ -13,6 +13,8 @@ import {
   Typography,
 } from "antd";
 import { ReactNode, useEffect, useRef, useState } from "react";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import type { CarouselRef } from "antd/es/carousel";
 import type { TextAreaRef } from "antd/es/input/TextArea";
 import { BrickAssistCallback } from "../../components/common/brickassist-callback";
@@ -28,65 +30,127 @@ import DynamicReactIcon, {
 import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import styles from "./brick-chat.module.css";
 
+const FAQs = [
+  {
+    question:
+      "How is Brickfi different from other brokers and channel partners?",
+    answer:
+      "\nTraditional brokers and channel partners typically work with a limited set of builders and projects, and their recommendations are often influenced by the inventory they represent and associated commissions or incentives. Property listing portals offer wider catalogues, but their visibility is often driven by paid promotions and advertising rather than buyer requirements.\n\nBrickfi takes a different approach by starting with your budget, preferred locations, lifestyle, and investment objectives, using custom-trained AI to scan all RERA registered projects. Shortlisted projects are then evaluated through our Brick360 intelligence engine, covering:\n* Builder credibility\n* Neighbourhood potential\n* Pricing\n* Project specifications\n* Potential risks\n\nInstead of restricting you to an agent's inventory or marketing budgets, Brickfi gives you a comprehensive, buyer-first view of the market to help you find and evaluate properties that make sense for you.\n",
+  },
+  {
+    question:
+      "Is Brickfi free for customers? What is included in the services?",
+    answer:
+      "\nYes, customers can use Brickfi to discover properties, explore recommendations, and access property insights without paying for the discovery experience.\n\nOur services include:\n* **Personalised property discovery:** Find properties based on your budget, preferred locations, configuration, workplace, and other requirements.\n* **Property shortlisting:** Get recommendations with clear explanations of how each property matches your requirements.\n* **Brick360 Property Reports:** Understand a project's strengths, limitations, and important considerations through detailed research on the builder, location, pricing, and project.\n* **Expert consultation:** Speak to our team to clarify doubts, discuss shortlisted properties, and plan site visits.\n* **End-to-end buying assistance:** Get support throughout the buying journey from shortlisting to site visits, legal checks, home loan assistance, cost assessment, and more.\n\nAny charges applicable to specific services or third-party engagements (like legal checks in specific cases) will be communicated upfront.\n",
+  },
+  {
+    question: "How do you evaluate a neighbourhood?",
+    answer:
+      "\nEvaluating a neighbourhood requires looking at multiple parameters to understand how suitable an area is for your lifestyle and daily needs:\n\n* **Connectivity:** Access to major roads, metro stations, public transport, and important employment hubs.\n* **Social infrastructure:** Proximity to schools, hospitals, supermarkets, shopping areas, and other essential facilities.\n* **Liveability:** Traffic conditions, road access, water availability, surrounding development, noise, and other factors that influence everyday living.\n* **Infrastructure and development:** Existing infrastructure as well as planned roads, metro connectivity, and other developments that could influence the area.\n* **Surrounding environment:** Land use, nearby commercial or industrial activity, open spaces, and potential environmental concerns.\n\nWe bring these insights together to help you understand the advantages and disadvantages of a neighbourhood, rather than judging it on its popularity or marketing claims alone.\n",
+  },
+  {
+    question: "How do you know if an area has good growth potential?",
+    answer:
+      "\nAn area's growth potential depends on factors that influence its future demand, connectivity, and liveability, rather than just past price increases. Our assessment considers:\n\n* **Upcoming infrastructure:** Planned metro lines, road expansions, expressways, and other connectivity improvements.\n* **Employment cluster:** Existing and emerging IT parks, business districts, and employment hubs that drive housing demand.\n* **Social infrastructure:** Development of schools, hospitals, retail, and other facilities making an area more attractive to residents.\n* **Residential development:** New projects, developer activity, supply pipeline, and overall pace of development.\n* **Price trends:** Historical price movement and comparison with neighbouring micro-markets to understand if current prices already reflect expected growth.\n* **Rental demand:** Tenant demand, proximity to employment hubs, and potential rental yields.\n\nGrowth potential is an assessment, not a guarantee of future price appreciation. Planned infrastructure and proposed developments are also distinguished from projects already operational.\n",
+  },
+  {
+    question: "How do you check the credibility of a builder?",
+    answer:
+      "\nA builder's reputation is critical before purchasing a property. We evaluate developers by examining:\n\n* **Delivery track record:** Whether earlier projects were delivered on time or experienced significant delays, and the ratio of on-time vs. delayed projects.\n* **Customer complaints:** Available complaints, disputes, and litigation involving the builder or its projects.\n* **Regulatory compliance:** Relevant RERA registrations, project approvals, and regulatory records.\n* **Construction and project quality:** The quality of completed developments, maintenance standards, and overall execution.\n* **Financial and business background:** Available information about the promoter, associated entities, and business track record.\n\nWe pull information from legitimate sources like RERA, public documents, and project disclosures to help you understand a builder's track record and identify potential red or green flags.\n",
+  },
+  {
+    question: "How do I know if the price quoted for a flat is fair?",
+    answer:
+      "\nA property's quoted price should be evaluated against comparable properties and the value it offers, rather than just the price per square foot. What we analyse includes:\n\n* **Comparable properties:** Prices of similar projects in the same micro-market, considering configuration, size, development stage, and positioning.\n* **Location premium:** Whether the property commands a reasonable premium based on connectivity, infrastructure, and neighbourhood quality.\n* **Builder premium:** Whether the developer's reputation, construction quality, and delivery track record justify the price.\n* **Project specifications:** Amenities, open spaces, density, construction quality, and other features influencing property value.\n* **Price trends:** How the quoted price compares with historical trends and competing projects in the area.\n* **All-inclusive cost:** Base price, floor rise, preferential location charges, parking, taxes, registration, and other applicable costs.\n\nThe goal is to help you understand what you are paying for, whether any premium is justified, and where there is room to negotiate.\n",
+  },
+];
+
 const SAMPLE_QUERIES: {
   text: string;
   icons: { iconName: string; iconSet: IconSetKey }[];
 }[] = [
   {
-    text: "I work in Bellandur, have a ₹1.5 Cr budget, and want the best schools nearby",
+    text: "Find a 3 BHK apartment under ₹1.5 Cr with good connectivity to Whitefield and my workplace in Bellandur.",
     icons: [
-      { iconName: "MdWork", iconSet: "md" },
+      { iconName: "MdApartment", iconSet: "md" },
       { iconName: "PiCurrencyInr", iconSet: "pi" },
-      { iconName: "MdSchool", iconSet: "md" },
+      { iconName: "MdCommute", iconSet: "md" },
     ],
   },
   {
-    text: "I am confused between Prestige Glenpark and Sattva Ecocity",
+    text: "I work in ORR and have a budget of ₹1.2 Cr. Which areas in Bangalore offer the best combination of connectivity, liveability and value?",
+    icons: [
+      { iconName: "MdWork", iconSet: "md" },
+      { iconName: "PiCurrencyInr", iconSet: "pi" },
+      { iconName: "MdLocationOn", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Suggest residential projects under ₹1 Cr in Bangalore with good long-term appreciation potential.",
+    icons: [
+      { iconName: "PiCurrencyInr", iconSet: "pi" },
+      { iconName: "MdTrendingUp", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Find apartments near major IT hubs in Bangalore with strong rental demand and attractive rental yields.",
+    icons: [
+      { iconName: "PiLaptop", iconSet: "pi" },
+      { iconName: "PiKey", iconSet: "pi" },
+      { iconName: "PiHandCoins", iconSet: "pi" },
+    ],
+  },
+  {
+    text: "Find a 3 BHK resale apartment in Sarjapur Road or HSR Layout under ₹1.5 Cr, preferably in a well-maintained gated community.",
+    icons: [
+      { iconName: "MdHome", iconSet: "md" },
+      { iconName: "MdSell", iconSet: "md" },
+      { iconName: "PiShieldCheck", iconSet: "pi" },
+    ],
+  },
+  {
+    text: "I'm considering a resale flat in Whitefield. How do I evaluate whether its asking price is fair and whether the property has any red flags?",
+    icons: [
+      { iconName: "PiScales", iconSet: "pi" },
+      { iconName: "PiFlag", iconSet: "pi" },
+    ],
+  },
+  {
+    text: "Evaluate Prestige Raintree Park. Is the pricing justified, how credible is the builder and what are the potential concerns?",
+    icons: [
+      { iconName: "PiBuildings", iconSet: "pi" },
+      { iconName: "MdVerified", iconSet: "md" },
+      { iconName: "MdWarning", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Should I buy an under-construction apartment or a ready-to-move property in Bangalore? What are the risks and trade-offs?",
+    icons: [
+      { iconName: "MdConstruction", iconSet: "md" },
+      { iconName: "PiKey", iconSet: "pi" },
+      { iconName: "MdWarning", iconSet: "md" },
+    ],
+  },
+  {
+    text: "Compare Assetz Marq and Godrej Parkshire on location, builder credibility, pricing, amenities and investment potential.",
     icons: [
       { iconName: "MdCompareArrows", iconSet: "md" },
       { iconName: "PiBuildings", iconSet: "pi" },
     ],
   },
   {
-    text: "Where can I get the best rental in East Bangalore for 1.5 crore ?",
+    text: "How do I check a builder's track record, past complaints, project approvals and delivery history before paying a booking amount?",
     icons: [
-      { iconName: "PiKey", iconSet: "pi" },
-      { iconName: "PiCurrencyInr", iconSet: "pi" },
-    ],
-  },
-  {
-    text: "I need a community for kids outdoor activities in less than 2 crore",
-    icons: [
-      { iconName: "MdChildCare", iconSet: "md" },
-      { iconName: "PiTree", iconSet: "pi" },
-    ],
-  },
-  {
-    text: "How is Jakkur as an area from an investment perspective ?",
-    icons: [
-      { iconName: "MdLocationOn", iconSet: "md" },
-      { iconName: "MdTrendingUp", iconSet: "md" },
-    ],
-  },
-  {
-    text: "Are there any red flags for Shanti Lakeview ?",
-    icons: [
-      { iconName: "PiFlag", iconSet: "pi" },
-      { iconName: "MdWarning", iconSet: "md" },
-    ],
-  },
-  {
-    text: "Show me properties under 3 crore within 10 mins of Prestige Tech Park",
-    icons: [
-      { iconName: "MdHome", iconSet: "md" },
-      { iconName: "MdOutlineTimer", iconSet: "md" },
+      { iconName: "MdHistory", iconSet: "md" },
+      { iconName: "MdGavel", iconSet: "md" },
+      { iconName: "MdFactCheck", iconSet: "md" },
     ],
   },
 ];
 
 // SAMPLE_QUERIES split across the two scrolling rows under the search input.
 const QUERY_ROWS = [0, 1].map((r) =>
-  SAMPLE_QUERIES.filter((_, i) => i % 2 === r)
+  SAMPLE_QUERIES.filter((_, i) => i % 2 === r),
 );
 
 // Unique icons from SAMPLE_QUERIES, in order of first appearance.
@@ -184,7 +248,7 @@ const REPORT_FEATURES: {
   iconSet: IconSetKey;
   title: string;
   headingMarginBottom?: number;
-  subHeading: string;
+  subHeading: ReactNode;
   mainImgUrl: string;
 }[] = [
   {
@@ -192,8 +256,16 @@ const REPORT_FEATURES: {
     iconName: "SiHomebridge",
     iconSet: "si",
     title: "Property Layout & Design",
-    subHeading:
-      "Don't judge a property by its brochure (said someone); Brick360 looks at numbers like open space, unit density, unit distribution, amenities mix and more to give a deeper insights into property layout.",
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Don't judge a property by its brochure (said someone); Brick360 looks at
+        numbers like{" "}
+        <span style={{ fontWeight: 600 }}>
+          open space, unit density, unit distribution, amenities mix
+        </span>{" "}
+        and more to give a deeper insights into property layout.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-layout.png",
   },
   {
@@ -201,8 +273,16 @@ const REPORT_FEATURES: {
     iconName: "FaMapLocation",
     iconSet: "fa6",
     title: "Location Dissection to Assess Livability & Future Growth.",
-    subHeading:
-      "Analysing livability is more than just checking the nearest mall. We go deeper to understand road connectivity, workplace distribution, type of schools nearby and more.",
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Analysing livability is more than just checking the nearest mall. We go
+        deeper to understand{" "}
+        <span style={{ fontWeight: 600 }}>
+          road connectivity, workplace distribution, type of schools
+        </span>{" "}
+        nearby and more.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-location.png",
   },
   {
@@ -211,8 +291,15 @@ const REPORT_FEATURES: {
     iconSet: "tb",
     title: "Builder Track Records, Complaints & Delays",
     headingMarginBottom: 16,
-    subHeading:
-      "Trust more than builder's words; look at their past projects, customer complaint, timely delivery, scale, diversity to get a sense of execution risks and credibility.",
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Trust more than builder's words; look at their{" "}
+        <span style={{ fontWeight: 600 }}>
+          past projects, customer complaints, timely delivery, scale, diversity
+        </span>{" "}
+        to get a sense of execution risks and credibility.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-builder.png",
   },
   {
@@ -220,8 +307,11 @@ const REPORT_FEATURES: {
     iconName: "FaMoneyBills",
     iconSet: "fa6",
     title: "Financials Assessment including Price Point, Rental Yield.",
-    subHeading:
-      "Making the right financial decisions becomes all the more necessary. Assess the price point, rental yield and growth potential with upto date pricing information. ",
+    subHeading: (
+      <Typography.Text style={{ fontSize: FONT_SIZE.HEADING_3 }}>
+        Make informed property decisions by understanding whether the price is fair, the potential rental returns and long-term growth prospects, backed by up-to-date pricing data and market insights.
+      </Typography.Text>
+    ),
     mainImgUrl: "/images/landing/report-feature-financials.png",
   },
 ];
@@ -312,7 +402,11 @@ export default function BrickChatv2({
   const isSearchQueryValid = /\S+\s+\S+/.test(searchQuery);
 
   const submitSearch = () => {
-    if (!isSearchQueryValid) return;
+    // the button is always enabled - send the user back to the input instead
+    if (!isSearchQueryValid) {
+      searchInputRef.current?.focus();
+      return;
+    }
     const query = searchQuery.trim();
     captureAnalyticsEvent("brickchat-landing-search", { query });
     safeWindow.location.href = `/app/brickchat?q=${encodeURIComponent(query)}`;
@@ -320,18 +414,21 @@ export default function BrickChatv2({
 
   const getSearchInput = () => {
     return (
-      <div
+      // desktop: button beside the input; mobile: on its own line below it
+      <Flex
+        vertical={isMobile}
+        gap={16}
+        align={isMobile ? "stretch" : "flex-end"}
         style={{
-          position: "relative",
           marginTop: 32,
           width: "100%",
-          maxWidth: 800,
+          maxWidth: 900,
         }}
       >
         <Input.TextArea
           ref={searchInputRef}
           className={styles.searchInput}
-          rows={2}
+          rows={3}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           onPressEnter={(e) => {
@@ -340,36 +437,45 @@ export default function BrickChatv2({
             e.preventDefault();
             submitSearch();
           }}
-          placeholder="Describe your Dream Home Today.."
+          placeholder="What kind of home are you looking for?"
           aria-label="Search properties"
           variant="borderless"
           style={{
             borderRadius: 24,
             backgroundColor: "white",
             boxShadow: "0 8px 24px rgba(0, 0, 0, 0.08)",
-            // right padding leaves room for the send button
-            padding: "16px 64px 16px 24px",
+            padding: "16px 24px",
             width: "100%",
             resize: "none",
-            fontSize: isMobile ? FONT_SIZE.HEADING_4: FONT_SIZE.HEADING_3,
+            fontSize: isMobile ? FONT_SIZE.HEADING_4 : FONT_SIZE.HEADING_3,
             lineHeight: "140%",
             color: COLORS.textColorDark,
             textAlign: "left",
             fontWeight: 500,
           }}
         />
-        {searchQuery ? (
-          <Button
-            type="primary"
-            shape="round"
-            icon={<SendOutlined />}
-            disabled={!isSearchQueryValid}
-            onClick={submitSearch}
-            aria-label="Send"
-            style={{ position: "absolute", right: 12, bottom: 12, marginLeft: 4 }}
-          />
-        ) : null}
-      </div>
+        <Button
+          type="primary"
+          shape="round"
+          icon={<ArrowRightOutlined />}
+          iconPosition="end"
+          onClick={() => {
+            // nothing typed - the button is then just the way into the app,
+            // same as the bottom "Explore Brickfi" button
+            if (!searchQuery.trim()) {
+              safeWindow.location.href = "/app";
+              return;
+            }
+            submitSearch();
+          }}
+          style={{ flexShrink: 0 }}
+        >
+          <Flex align="center" gap={8} style={{ padding: "12px 4px" }}>
+            <FlippingIcons count={2} size={14} color={COLORS.primaryColor} />
+            Ask Brickfi
+          </Flex>
+        </Button>
+      </Flex>
     );
   };
 
@@ -382,12 +488,14 @@ export default function BrickChatv2({
         className={styles.queryMarquee}
         style={{
           // pull up into the section's bottom padding: 16px below the input
-          marginTop: -8,
-          marginBottom: isMobile ? 32 : 0,
+          marginTop: 16,
+          marginBottom: 0,
           display: "flex",
           flexDirection: "column",
-          gap: 16,
-          padding: "4px 0 8px",
+          gap: 24,
+          // continues the hero section's light pink behind the chips
+          padding: "24px 0",
+          backgroundColor: COLORS.LANDING.LIGHT_PINK,
         }}
       >
         {QUERY_ROWS.map((row, rowIndex) => (
@@ -396,10 +504,9 @@ export default function BrickChatv2({
             className={styles.queryMarqueeRow}
             style={{
               // keep both rows moving at the same speed despite different
-              // widths (mobile chips are two lines, so about half as wide)
+              // widths (chips are about a third of the text wide)
               animationDuration: `${
-                row.reduce((n, q) => n + q.text.length, 0) *
-                (isMobile ? 0.1 : 0.15)
+                row.reduce((n, q) => n + q.text.length, 0) * 0.07
               }s`,
             }}
           >
@@ -416,52 +523,68 @@ export default function BrickChatv2({
                 }}
                 style={{
                   flexShrink: 0,
+                  maxWidth: 350,
                   display: "inline-flex",
-                  // mobile: icons stacked below the text
-                  flexDirection: isMobile ? "column-reverse" : "row",
-                  alignItems: isMobile ? "flex-start" : "center",
-                  gap: isMobile ? 6 : 8,
-                  padding: isMobile ? "8px 12px" : "6px 12px 6px 6px",
-                  borderRadius: isMobile ? 20 : 999,
-                  border: "none",
+                  // icons stacked below the text
+                  flexDirection: "column-reverse",
+                  // text at the top, icons at the bottom, on chips stretched
+                  // to the row's height
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                  gap: 6,
+                  padding: "8px 12px",
+                  borderRadius: 20,
+                  // white on the near-white band - the border keeps the chip's
+                  // edge visible
+                  border: `1px solid ${COLORS.textColorVeryLight}`,
                   backgroundColor: "white",
-                  boxShadow: "0 2px 8px rgba(0, 0, 0, 0.06)",
+                  // PINK at ~25% opacity (hex alpha "40")
+                  boxShadow: `0 2px 8px ${COLORS.LANDING.PINK}40`,
                   color: COLORS.textColorDark,
                   fontSize: FONT_SIZE.PARA,
                   fontWeight: 500,
                   lineHeight: "130%",
                   textAlign: "left",
-                  whiteSpace: isMobile ? "normal" : "nowrap",
+                  whiteSpace: "normal",
                   cursor: "pointer",
                 }}
               >
-                <Flex gap={4} style={{ flexShrink: 0 }}>
-                  {q.icons.map((icon) => (
-                    <Flex
-                      key={`${icon.iconSet}-${icon.iconName}`}
-                      style={{
-                        backgroundColor: COLORS.LANDING.PINK,
-                        borderRadius: "50%",
-                        padding: 3,
-                      }}
-                    >
-                      <DynamicReactIcon
-                        iconName={icon.iconName}
-                        iconSet={icon.iconSet}
-                        size={12}
-                        color="white"
-                      />
-                    </Flex>
-                  ))}
+                {/* icons on the left, arrow on the bottom right */}
+                <Flex
+                  align="center"
+                  justify="space-between"
+                  style={{ flexShrink: 0, alignSelf: "stretch" }}
+                >
+                  <Flex gap={4}>
+                    {q.icons.map((icon) => (
+                      <Flex
+                        key={`${icon.iconSet}-${icon.iconName}`}
+                        style={{
+                          backgroundColor: COLORS.LANDING.PINK,
+                          borderRadius: "50%",
+                          padding: 3,
+                        }}
+                      >
+                        <DynamicReactIcon
+                          iconName={icon.iconName}
+                          iconSet={icon.iconSet}
+                          size={12}
+                          color="white"
+                        />
+                      </Flex>
+                    ))}
+                  </Flex>
+                  <ArrowRightOutlined
+                    style={{ fontSize: 12, color: COLORS.textColorDark }}
+                  />
                 </Flex>
                 <span
-                  style={
-                    // mobile: sized to about half the text so it wraps to
-                    // two lines without cutting anything off
-                    isMobile
-                      ? { width: `${Math.ceil(q.text.length / 2) + 2}ch` }
-                      : undefined
-                  }
+                  style={{
+                    // sized to about a third of the text, so it wraps to around
+                    // three lines; longer queries stop at the chip's max width
+                    width: `${Math.ceil(q.text.length / 3) + 2}ch`,
+                    maxWidth: "100%",
+                  }}
                 >
                   {q.text}
                 </span>
@@ -568,11 +691,16 @@ export default function BrickChatv2({
     );
   };
 
-  const getFaqText = (text: string | ReactNode) => {
+  // FAQ answers are markdown (paragraphs, bullet lists, bold) - a div, not a
+  // p, since the rendered markdown brings its own p/ul elements
+  const getFaqText = (markdown: string) => {
     return (
-      <p style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_4 }}>
-        {typeof text == "string" ? text : <>{text}</>}
-      </p>
+      <div
+        className={styles.faqAnswer}
+        style={{ textAlign: "left", fontSize: FONT_SIZE.HEADING_4 }}
+      >
+        <Markdown remarkPlugins={[remarkGfm]}>{markdown}</Markdown>
+      </div>
     );
   };
   const faqPanelStyle = {
@@ -582,78 +710,12 @@ export default function BrickChatv2({
     border: "none",
     borderBottom: `1px solid ${COLORS.textColorVeryLight}`,
   };
-  const faqs: CollapseProps["items"] = [
-    {
-      key: "1",
-      label: getFaqHeading("How do I search for a home on Brickfi?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Describe what you're looking for in plain English — budget, location, priorities, anything that matters to you and your family. No filters, no forms.",
-      ),
-    },
-    {
-      key: "2",
-      label: getFaqHeading("How does the AI decide what to recommend?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "It matches your stated priorities against live projects across Bangalore and shortlists what genuinely fits — not what's being pushed the hardest.",
-      ),
-    },
-    {
-      // TODO: confirm this claim is fully accurate before shipping.
-      key: "3",
-      label: getFaqHeading(
-        "Do you have any tie-up with builders or brokers that affects recommendations?",
-      ),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "No — recommendations are matched to your criteria, not to any builder or broker arrangement.",
-      ),
-    },
-    {
-      key: "4",
-      label: getFaqHeading("Is the Discovery tool free to use?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Yes, searching and getting shortlisted recommendations is free.",
-      ),
-    },
-    {
-      key: "5",
-      label: getFaqHeading(
-        "What is the Brick360 Report, and where does the data come from?",
-      ),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "An independent report for any RERA-registered property in Bangalore, covering legal standing, pricing, builder history, layout, and location — sourced from verified government and public records like RERA, BBMP, Open City, and Open Street, not brochures.",
-      ),
-    },
-    {
-      // TODO: add the current free-report limit and turnaround time before shipping.
-      key: "6",
-      label: getFaqHeading("Is the report free, and how long does it take?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "You can generate free reports for RERA-registered properties in Bangalore.",
-      ),
-    },
-    {
-      key: "7",
-      label: getFaqHeading("What kind of red flags can the report reveal?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Legal issues like disputed land or unclear title, past builder delays and complaints, pricing out of line with the market, and location concerns no listing would mention — like nearby drains, high-tension lines, or transit noise.",
-      ),
-    },
-    {
-      key: "8",
-      label: getFaqHeading("Can I compare multiple properties side by side?"),
-      style: faqPanelStyle,
-      children: getFaqText(
-        "Yes — generate reports for different projects and compare them directly on price, legal standing, builder history, and location.",
-      ),
-    },
-  ];
+  const faqs: CollapseProps["items"] = FAQs.map((faq, i) => ({
+    key: String(i + 1),
+    label: getFaqHeading(faq.question),
+    style: faqPanelStyle,
+    children: getFaqText(faq.answer),
+  }));
 
   const renderProcessStep = (data: any) => {
     const padding = isMobile ? 8 : 16;
@@ -664,7 +726,9 @@ export default function BrickChatv2({
         style={{
           width: isMobile
             ? `calc(100% - ${padding * 2}px - 16px)`
-            : `calc(${sectionMaxWidth * (data.fullWidth ? 2 : 1)}px - ${padding * 2}px - 32px)`,
+            : `calc(${sectionMaxWidth * (data.fullWidth ? 2 : 1)}px - ${
+                padding * 2
+              }px - 32px)`,
           padding: `${padding}px`,
           borderRadius: 16,
           marginLeft: isMobile ? 8 : 0,
@@ -785,7 +849,7 @@ export default function BrickChatv2({
                   margin: 0,
                 }}
               >
-                The Only Broker You Need<br></br> For Your Home Search
+                Find The Home You Need<br></br> Without Brokers or Spam
               </h1>
             </Flex>
           ),
@@ -795,26 +859,28 @@ export default function BrickChatv2({
             <Flex vertical>
               <Typography.Text
                 style={{
-                  fontSize: isMobile ? FONT_SIZE.HEADING_3 : FONT_SIZE.HEADING_2,
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_3
+                    : FONT_SIZE.HEADING_2,
                   marginTop: 8,
                   marginBottom: 0,
                   lineHeight: "120%",
                 }}
               >
-                Describe your dream home in your own words. Our AI scans
-                thousands of properties and data points to deliver tailored
-                recommendations and detailed analysis.
+                Tell Brickfi what you're looking for. Discover matching
+                properties across Bangalore and get 360 assessment around
+                builder, property, location and pricing.
               </Typography.Text>
               <Flex wrap gap={8} style={{ marginTop: 16 }}>
                 {(
                   [
                     {
-                      label: "AI Matchmaking",
+                      label: "2000+ Properties",
                       iconName: "PiMagicWand",
                       iconSet: "pi",
                     },
                     {
-                      label: "Legit Data Source",
+                      label: "Verified Data",
                       iconName: "MdVerifiedUser",
                       iconSet: "md",
                     },
@@ -830,7 +896,9 @@ export default function BrickChatv2({
                     style={{
                       margin: 0,
                       color: COLORS.LANDING.LIGHT_PINK,
-                      backgroundColor: COLORS.primaryColor,
+                      backgroundColor: COLORS.LANDING.PINK,
+                      border: 0,
+                      borderRadius: 8,
                     }}
                   >
                     <Flex align="center" gap={4}>
@@ -853,85 +921,91 @@ export default function BrickChatv2({
       ></SectionCenter>
       {getSampleQueryRows()}
 
-      <Flex
-        vertical
-        align="center"
-        justify="center"
-        style={{ width: "100%", marginTop: 32 }}
-      >
-        {/* <Typography.Text>Have a Real Estate Query ? Just Brickfi it!</Typography.Text> */}
-        {isMobile ? (
-          <img
-            width="90%"
-            style={{ marginTop: 16, marginBottom: "64px" }}
-            src="/images/landing/brick-chat/landing-demo-mob.png"
-          />
-        ) : (
-          // muted + playsInline are what let browsers autoplay it, like the GIF it replaces
-          <video
-            width="80%"
-            style={{ marginTop: 16, marginBottom: "64px" }}
-            src="/images/landing/brick-chat/landing-demo.mp4"
-            poster="/images/landing/brick-chat/landing-demo.png"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="auto"
-            aria-label="Brickfi AI demo"
-          />
-        )}
-      </Flex>
-      <Flex vertical gap={isMobile ? 16 : 32} style={{marginTop: 32}}>
+      <SectionLeft
+        isMobile={isMobile}
+        sectionData={{
+          bgColor: COLORS.textColorDark,
+          sectionMaxWidth: isMobile ? "100%" : 1400,
+          heading: (
+            <Flex align="flex-start" gap={isMobile ? 0 : 32} vertical>
+              <img
+                width={isMobile ? 200 : 225}
+                style={{
+                  margin: 16,
+                  marginTop: 0,
+                }}
+                src={
+                  isMobile
+                    ? "/images/landing/brick-chat/brickchat-stats.png"
+                    : "/images/landing/brick-chat/brickchat-stats.png"
+                }
+              />
+
+              <Flex vertical style={{ width: "100%", margin: "auto" }}>
+                <h2
+                  style={{
+                    fontSize: isMobile ? 40 : 50,
+                    color: "white",
+                    lineHeight: "100%",
+                    fontWeight: 800,
+                    margin: 0,
+                  }}
+                >
+                  The Platform That Works For You,
+                </h2>
+                <h2
+                  style={{
+                    fontSize: isMobile ? 40 : 54,
+                    lineHeight: "100%",
+                    fontWeight: 800,
+                    margin: 0,
+                    color: COLORS.primaryColor,
+                  }}
+                >
+                  The Modern Indian Home Buyer
+                </h2>
+              </Flex>
+            </Flex>
+          ),
+          subHeading: "",
+          centerSectionTextAlign: "left",
+          verticalPadding: isMobile ? 100 : 100,
+          textColor: COLORS.LANDING.LIGHT_PINK,
+          mainImgUrl: isMobile
+            ? "/images/landing/brick-chat/platform-usps.png"
+            : "/images/landing/brick-chat/platform-usps.png",
+          primaryImageSize: isMobile ? "100%" : "90%",
+        }}
+      ></SectionLeft>
+      <Flex vertical gap={isMobile ? 16 : 32} style={{ marginTop: 32 }}>
         <Flex
           vertical
-          style={{
-            maxWidth: isMobile ? "90%" : "80%",
-            margin: "auto",
-            marginBottom: isMobile ? 32 : 0,
-          }}
-          
+          align="center"
+          justify="center"
+          style={{ width: "100%", marginTop: 32 }}
         >
-          <Flex align="center" gap={isMobile ? 0 : 32} vertical={isMobile}>
+          {/* <Typography.Text>Have a Real Estate Query ? Just Brickfi it!</Typography.Text> */}
+          {isMobile ? (
             <img
-              width={isMobile ? 125 : 200}
-              style={{
-                margin: isMobile ? 16 : "auto",
-                marginTop: 0,
-              }}
-              src={
-                isMobile
-                  ? "/images/landing/brick-chat/brickchat-stats.png"
-                  : "/images/landing/brick-chat/brickchat-stats.png"
-              }
+              width="90%"
+              style={{ marginTop: 16, marginBottom: "64px" }}
+              src="/images/landing/brick-chat/landing-demo-mob.png"
             />
-          <Flex vertical style={{ width: "100%", margin: "auto" }}>
-            <h2
-              style={{
-                fontSize: isMobile ? 40 : 50,
-                color: COLORS.textColorDark,
-                lineHeight: "100%",
-                fontWeight: 800,
-                margin: 0,
-              }}
-            >
-              The Platform That Exists For You,
-            </h2>
-            <h2
-              style={{
-                fontSize: isMobile ? 40 : 54,
-                lineHeight: "100%",
-                fontWeight: 800,
-                margin: 0,
-                color: COLORS.primaryColor,
-              }}
-            >
-              The Modern Indian Home Buyer
-            </h2>
-            
-          </Flex>
-          </Flex>
-          
+          ) : (
+            // muted + playsInline are what let browsers autoplay it, like the GIF it replaces
+            <video
+              width="80%"
+              style={{ marginTop: 16, marginBottom: "64px" }}
+              src="/images/landing/brick-chat/landing-demo.mp4"
+              poster="/images/landing/brick-chat/landing-demo.png"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-label="Brickfi AI demo"
+            />
+          )}
         </Flex>
         <Flex vertical align="center">
           {/* <Typography.Text
@@ -965,7 +1039,12 @@ export default function BrickChatv2({
                   <img
                     key={i}
                     aria-hidden={i === 1}
-                    style={{ height: 240, width: "auto", maxWidth: "none", display: "block" }}
+                    style={{
+                      height: 240,
+                      width: "auto",
+                      maxWidth: "none",
+                      display: "block",
+                    }}
                     src="/images/landing/brick-chat/brickchat-stats-2.png"
                   />
                 ))}
@@ -997,26 +1076,42 @@ export default function BrickChatv2({
                   marginBottom: 8,
                 }}
               >
-                What makes Brickfi <span style={{color: "white", backgroundColor: COLORS.primaryColor, padding: "0 4px"}}>Different ?</span> 
+                What makes Brickfi{" "}
+                <span
+                  style={{
+                    color: "white",
+                    backgroundColor: COLORS.primaryColor,
+                    padding: "0 4px",
+                  }}
+                >
+                  Different ?
+                </span>
               </h2>
-             <Typography.Text style={{fontSize: FONT_SIZE.HEADING_2, color: "white"}}>
-              Brickfi is not your average <span >neighborhood broker</span> or a yet another <span>good-for-nothing property website</span>. 
-              Brickfi is the best in class real estate platform that believes in <span>data, unbiased advise</span> and absolute <span >buyer side assistance</span>. 
-
-            </Typography.Text>
+              <Typography.Text
+                style={{
+                  fontSize: FONT_SIZE.HEADING_3,
+                  color: "white",
+                  lineHeight: "130%",
+                }}
+              >
+                Traditional brokers show you what earns them a fee. Listing
+                sites rank whoever pays the most. Brickfi searches the entire
+                market for what actually fits your needs—unbiased insights,
+                intelligent discovery and no spam.
+              </Typography.Text>
             </Flex>
           ),
           subHeading: "",
           centerSectionTextAlign: "left",
-          verticalPadding: isMobile ? 48: 100,
+          verticalPadding: isMobile ? 48 : 100,
           textColor: COLORS.LANDING.LIGHT_PINK,
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/brickchat-vs-broker.png"
             : "/images/landing/brick-chat/brickchat-vs-broker.png",
-          primaryImageSize: isMobile ? "90%" : "80%",
+          primaryImageSize: isMobile ? "100%" : "80%",
         }}
       ></SectionLeft>
-          <Flex
+      <Flex
         align="flex-start"
         justify="flex-start"
         style={{
@@ -1044,11 +1139,25 @@ export default function BrickChatv2({
               }}
             >
               <span style={{ color: COLORS.LANDING.PINK, fontWeight: 200 }}>
-                What makes Brickfi <span style={{color: "white", backgroundColor: COLORS.LANDING.PINK, padding: "0 4px"}}>Possible?</span>
+                How Brickfi{" "}
+                <span
+                  style={{
+                    color: "white",
+                    backgroundColor: COLORS.LANDING.PINK,
+                    padding: "0 4px",
+                  }}
+                >
+                  Evaluates 
+                </span>
+                Any Project?
               </span>{" "}
             </h2>
           </Flex>
-          <Flex justify={isMobile ? "flex-start": "center"} gap={16} align={isMobile ? "flex-start": "center"}>
+          <Flex
+            justify={isMobile ? "flex-start" : "center"}
+            gap={16}
+            align={isMobile ? "flex-start" : "center"}
+          >
             <Flex>
               <img
                 src="/images/landing/brick-chat/brick360-emblem.png"
@@ -1080,7 +1189,7 @@ export default function BrickChatv2({
                   maxWidth: 800,
                 }}
               >
-                The Heart of Brickfi is the Brick360 Data Framework, a 4-pillar based assessment platform. It collects data from verified government, public data and open source platforms and builds a standardizing rating framework for every property out there.
+                At the heart of Brickfi is the <b>Brick360 Data Framework</b>- a four-pillar assessment framework that brings together data from verified government records, public databases and credible open sources. It standardises this information into a consistent evaluation and rating system, enabling buyers to assess properties across the same set of parameters.
               </Typography.Text>
             </Flex>
           </Flex>
@@ -1134,7 +1243,7 @@ export default function BrickChatv2({
         })}
       </Flex>
 
-       <Carousel
+      <Carousel
         ref={featureCarouselRef}
         autoplay
         autoplaySpeed={4000}
@@ -1149,8 +1258,10 @@ export default function BrickChatv2({
                   isMobile ? styles.featureFrameMobile : ""
                 }`}
               >
-                <div className={styles.featureCell}>
-                  <img src={mainImgUrl} alt={title} style={{ width: "100%" }} />
+                <div
+                  className={`${styles.featureCell} ${styles.featureImageCell}`}
+                >
+                  <img src={mainImgUrl} alt={title} />
                 </div>
                 <div className={styles.featureCell}>
                   <Typography.Text
@@ -1163,15 +1274,7 @@ export default function BrickChatv2({
                   >
                     {title}
                   </Typography.Text>
-                  <Typography.Text
-                    style={{
-                      fontSize: FONT_SIZE.HEADING_3,
-                      color: COLORS.textColorMedium,
-                      fontWeight: 300,
-                    }}
-                  >
-                    {subHeading}
-                  </Typography.Text>
+                  {subHeading}
                 </div>
                 {/* dots where the frame lines meet */}
                 <span className={`${styles.frameDot} ${styles.dotTopLeft}`} />
@@ -1190,68 +1293,6 @@ export default function BrickChatv2({
         )}
       </Carousel>
 
-
-      <SectionCenter
-        isMobile={isMobile}
-        sectionData={{
-          bgColor: COLORS.textColorDark,
-          sectionMaxWidth: "100%",
-          heading: (
-            <Flex vertical align={isMobile ? "flex-start": "center"}>
-              <h2
-                style={{
-                  fontSize: isMobile ? 40 : 54,
-                  lineHeight: "100%",
-                  fontWeight: 800,
-                  margin: 0,
-                  marginBottom: 0,
-                  color: COLORS.primaryColor,
-                }}
-              >The Toolset To Help
-              </h2>
-              <h2
-                style={{
-                  fontSize: isMobile ? 40 : 54,
-                  color: "white",
-                  lineHeight: "100%",
-                  fontWeight: 800,
-                  margin: 0,
-                }}
-              >
-                You Connect the Dots
-              </h2>
-            </Flex>
-          ),
-          subHeading: "",
-          centerSectionTextAlign: "left",
-          verticalPadding: 100,
-          textColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: isMobile
-            ? "/images/landing/brick-chat/features-1-mob-v2.png"
-            : "/images/landing/brick-chat/features-1-v2.png",
-          primaryImageSize: isMobile ? "110%" : "75%",
-        }}
-      ></SectionCenter>
-      <SectionCenter
-        isMobile={isMobile}
-        sectionData={{
-          bgColor: COLORS.textColorDark,
-          sectionMaxWidth: "100%",
-          heading: null,
-          subHeading: "",
-          centerSectionTextAlign: "left",
-          verticalPadding: 1,
-          textColor: COLORS.LANDING.LIGHT_PINK,
-          mainImgUrl: isMobile
-            ? "/images/landing/brick-chat/features-2-mob.png"
-            : "/images/landing/brick-chat/features-2.png",
-          primaryImageSize: isMobile ? "110%" : "75%",
-        }}
-      ></SectionCenter>
-
-  
-     
-
       <Flex align="center" justify="center">
         <img
           src="/images/landing/brickassistv2/divider.png"
@@ -1266,10 +1307,10 @@ export default function BrickChatv2({
           bgColor: COLORS.LANDING.LIGHT_PINK,
           heading: "",
           subHeading: "",
-          primaryImageSize: isMobile ? "100%" : "80%",
+          primaryImageSize: isMobile ? "100%" : "70%",
           mainImgUrl: isMobile
-            ? "/images/landing/brickassistv2/6-mob.png"
-            : "/images/landing/brickassistv2/6.png",
+            ? "/images/landing/brick-chat/testimonial-mob.png"
+            : "/images/landing/brick-chat/testimonial.png",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
           verticalPadding: isMobile ? 32 : 100,
@@ -1288,7 +1329,7 @@ export default function BrickChatv2({
                   textTransform: "uppercase",
                   color: COLORS.primaryColor,
                   textAlign: "left",
-                  fontSize: FONT_SIZE.HEADING_2,
+                  fontSize: FONT_SIZE.HEADING_3,
                   margin: 0,
                 }}
               >
@@ -1298,8 +1339,11 @@ export default function BrickChatv2({
                 style={{
                   color: COLORS.textColorDark,
                   textAlign: "left",
-                  fontSize: FONT_SIZE.HEADING_1,
+                  fontSize: isMobile
+                    ? FONT_SIZE.HEADING_1 * 0.9
+                    : FONT_SIZE.HEADING_1,
                   margin: 0,
+                  fontWeight: 300,
                 }}
               >
                 Why are we building Brickfi ?
@@ -1391,12 +1435,13 @@ export default function BrickChatv2({
                   }}
                 >
                   <Flex align="center" gap={16}>
-                    Describe You Dream Home Today
                     <FlippingIcons
                       count={2}
                       size={16}
                       color={COLORS.primaryColor}
                     />
+                    Ask Brickfi
+                    <ArrowRightOutlined />
                   </Flex>
                 </Button>
               </Flex>
@@ -1422,7 +1467,9 @@ export default function BrickChatv2({
                 <Typography.Text
                   style={{
                     color: COLORS.textColorMedium,
-                    fontSize: FONT_SIZE.HEADING_1,
+                    fontSize: isMobile
+                      ? FONT_SIZE.HEADING_1 * 0.8
+                      : FONT_SIZE.HEADING_1,
                     fontWeight: 300,
                   }}
                 >

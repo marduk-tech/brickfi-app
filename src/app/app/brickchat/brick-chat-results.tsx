@@ -6,6 +6,10 @@ import { useUpdateUserMutation } from "@/hooks/user-hooks";
 import { safeStorage } from "@/libs/browser-utils";
 import { LocalStorageKeys } from "@/libs/constants";
 import {
+  computeProjectStatusFromTimelines,
+  PROJECT_STATUS_CONFIG,
+} from "@/libs/project-status";
+import {
   capitalize,
   getSaveCollectionIndex,
   removeDuplicatesAndPrepend,
@@ -13,6 +17,7 @@ import {
 } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import {
+  Button,
   Card,
   Flex,
   message,
@@ -24,7 +29,9 @@ import {
 } from "antd";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import DynamicReactIcon from "../../../components/common/dynamic-react-icon";
+import DynamicReactIcon, {
+  IconSetKey,
+} from "../../../components/common/dynamic-react-icon";
 import ProjectImageCarousel from "./project-image-carousel";
 import styles from "./brick-chat-results.module.css";
 
@@ -113,19 +120,55 @@ const orderResults = (
   return [...ranked.filter((p) => !isWeak(p)), ...ranked.filter(isWeak)];
 };
 
-const MatchTag = ({
-  match,
+const getMatchConfig = (project: ProjectResult) => {
+  const match = parseOneLiner(project.oneLiner).match;
+  return match ? MATCH_LEVEL_CONFIG[match] : undefined;
+};
+
+// small rounded tag on a project card - its micro-pocket/corridor and match
+// level; `color` is an antd Tag color (preset or hex), default grey if unset
+const MetaTag = ({
+  label,
+  color,
+  bgColor,
+  icon,
   style,
 }: {
-  match?: MatchLevel;
+  label?: string;
+  color?: string;
+  bgColor?: string;
+  // drawn in the tag's own text color
+  icon?: { iconSet: IconSetKey; iconName: string };
   style?: React.CSSProperties;
 }) =>
-  match ? (
+  label ? (
     <Tag
-      color={MATCH_LEVEL_CONFIG[match].color}
-      style={{ borderRadius: 8, fontSize: FONT_SIZE.NOTE, ...style }}
+      color={color}
+      style={{
+        borderRadius: 8,
+        fontSize: FONT_SIZE.NOTE,
+        // antd's Tag line-height (20px) is what sets its height, not padding
+        lineHeight: "20px",
+        padding: "0 6px",
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 2,
+        marginRight: 2,
+        border: 0,
+        fontWeight: 500,
+        backgroundColor: bgColor || COLORS.bgColorMedium,
+        ...style,
+      }}
     >
-      {MATCH_LEVEL_CONFIG[match].label}
+      {icon && (
+        <DynamicReactIcon
+          iconSet={icon.iconSet}
+          iconName={icon.iconName}
+          size={12}
+          color="currentColor"
+        />
+      )}
+      {label}
     </Tag>
   ) : null;
 
@@ -188,6 +231,18 @@ export default function BrickChatResults({
     const isSaved = savedIds.includes(lvnzyId);
 
     modal.confirm({
+      // the saved-projects heart instead of antd's default warning sign;
+      // antd only spaces its own icons, hence the margin
+      icon: (
+        <span style={{ display: "inline-flex", marginInlineEnd: 12, marginTop: 2 }}>
+          <DynamicReactIcon
+            iconName="MdFavorite"
+            iconSet="md"
+            size={22}
+            color={COLORS.primaryColor}
+          />
+        </span>
+      ),
       title: isSaved ? "Remove from saved projects?" : "Save this project?",
       content: isSaved
         ? `Remove "${project.projectName}" from your saved projects?`
@@ -251,25 +306,53 @@ export default function BrickChatResults({
     e.preventDefault();
     e.stopPropagation();
 
-    modal.info({
+    const instance = modal.info({
       title: project.projectName,
       content: (
-        <Typography.Paragraph
-          style={{
-            fontSize: FONT_SIZE.PARA,
-            color: COLORS.textColorMedium,
-            lineHeight: "140%",
-            marginBottom: 0,
-          }}
-        >
-          {parseOneLiner(project.oneLiner).text}
-        </Typography.Paragraph>
+        <Flex vertical align="flex-start" gap={8}>
+          <MetaTag
+            label={getMatchConfig(project)?.label}
+            color={getMatchConfig(project)?.color}
+            bgColor="white"
+            style={{border: `1px solid ${COLORS.borderColorMedium}`}}
+          />
+          <Typography.Paragraph
+            style={{
+              fontSize: FONT_SIZE.PARA,
+              color: COLORS.textColorMedium,
+              lineHeight: "140%",
+              marginBottom: 0,
+            }}
+          >
+            {parseOneLiner(project.oneLiner).text}
+          </Typography.Paragraph>
+        </Flex>
       ),
       icon: null,
-      okText: "Close",
       maskClosable: true,
+      closable: true,
+      // "See 360 Details" bottom-left (same action as the card's button);
+      // closing is via the cross or the mask
+      footer: onSelectProject ? (
+        <Flex align="center" style={{ marginTop: 16 }}>
+          <Button
+            type="default"
+            size="small"
+            onClick={() => {
+              instance.destroy();
+              onSelectProject(project);
+            }}
+          >
+            See 360 Details
+          </Button>
+        </Flex>
+      ) : null,
     });
   };
+
+  // reflects what a click on the heart will do
+  const saveTooltip = (lvnzyProjectId: string) =>
+    savedIds.includes(lvnzyProjectId) ? "Remove from saved" : "Save project";
 
   const handleLocateOnMap = (e: React.MouseEvent, project: ProjectResult) => {
     // cards are wrapped in a Link - don't navigate on icon click
@@ -291,7 +374,7 @@ export default function BrickChatResults({
     const orderedResults = orderResults(results, skipSort);
 
     return (
-      <Flex className={styles.scrollContainer} gap={8}>
+      <Flex className={styles.scrollContainer} gap={8} >
         {contextHolder}
         {modalContextHolder}
         {orderedResults.map((project) => (
@@ -423,31 +506,33 @@ export default function BrickChatResults({
                 )}
                   <Flex align="center" gap={4} style={{ marginLeft: "auto" }}>
                     {project.lvnzyProjectId && (
-                      <Flex
-                        align="center"
-                        justify="center"
-                        onClick={(e) => handleToggleSave(e, project)}
-                        style={{
-                          width: 24,
-                          height: 24,
-                          flexShrink: 0,
-                          borderRadius: "50%",
-                          backgroundColor: "rgba(255, 255, 255, 0.9)",
-                          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <DynamicReactIcon
-                          iconName={
-                            savedIds.includes(project.lvnzyProjectId)
-                              ? "MdOutlineBookmark"
-                              : "MdOutlineBookmarkBorder"
-                          }
-                          iconSet="md"
-                          size={16}
-                          color={COLORS.textColorDark}
-                        />
-                      </Flex>
+                      <Tooltip title={saveTooltip(project.lvnzyProjectId)}>
+                        <Flex
+                          align="center"
+                          justify="center"
+                          onClick={(e) => handleToggleSave(e, project)}
+                          style={{
+                            width: 24,
+                            height: 24,
+                            flexShrink: 0,
+                            borderRadius: "50%",
+                            backgroundColor: "rgba(255, 255, 255, 0.9)",
+                            boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                            cursor: "pointer",
+                          }}
+                        >
+                          <DynamicReactIcon
+                            iconName={
+                              savedIds.includes(project.lvnzyProjectId)
+                                ? "MdFavorite"
+                                : "MdFavoriteBorder"
+                            }
+                            iconSet="md"
+                            size={16}
+                            color={COLORS.textColorDark}
+                          />
+                        </Flex>
+                      </Tooltip>
                     )}
                   </Flex>
                 </Flex>
@@ -461,7 +546,7 @@ export default function BrickChatResults({
   }
 
   return (
-    <Flex className={styles.scrollContainer} gap={16}>
+    <Flex className={styles.scrollContainer} gap={16} style={{marginBottom: 16 }}>
       {contextHolder}
       {modalContextHolder}
       {orderResults(results, skipSort).map((project) => (
@@ -469,14 +554,25 @@ export default function BrickChatResults({
           <Card
             hoverable
             style={{
-              width: 200,
+              width: 225,
               borderRadius: 12,
-              display: "block",
+              // column so the body fills the card - the row stretches every
+              // card to the tallest one, and the action row below is pinned
+              // to the bottom however tall the one-liner is
+              display: "flex",
+              flexDirection: "column",
               overflow: "hidden",
               margin: "8px 0",
               border: `0.5px solid ${COLORS.borderColor}`,
             }}
-            styles={{ body: { padding: 0 } }}
+            styles={{
+              body: {
+                padding: 0,
+                flex: 1,
+                display: "flex",
+                flexDirection: "column",
+              },
+            }}
             cover={
               <div
                 style={{
@@ -511,27 +607,40 @@ export default function BrickChatResults({
                     <Typography.Text type="secondary">No Image</Typography.Text>
                   </Flex>
                 )}
+                <MetaTag
+                  label={getMatchConfig(project)?.label}
+                  color={getMatchConfig(project)?.color}
+                  bgColor="white"
+                  style={{
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    margin: 0,
+                    zIndex: 1,
+                  }}
+                />
               </div>
             }
           >
-            <Flex style={{ padding: 4 }} gap={0} vertical>
-              <Flex wrap>
-                <Tag
-                  style={{
-                    fontSize: FONT_SIZE.NOTE,
-                    color: COLORS.textColorDark,
-                    padding: "0 4px",
-                    marginTop: 8,
-                    backgroundColor: COLORS.bgColor,
-                    borderRadius: 8,
-                  }}
-                >
-                  {project.projectCorridor}
-                </Tag>
-                <MatchTag
-                  match={parseOneLiner(project.oneLiner).match}
-                  style={{ padding: "0 4px", marginTop: 8 }}
+            <Flex style={{ padding: 4, flex: 1 }} gap={0} vertical>
+              <Flex style={{width: "100%", overflowX: "scroll", scrollbarWidth: "none"}}>
+                <MetaTag
+                  label={project.projectMicroPocket || project.projectCorridor}
+                  icon={{ iconSet: "ri", iconName: "RiRoadMapLine" }}
+                  style={{ marginTop: 8 }}
                 />
+                {(() => {
+                  const status = computeProjectStatusFromTimelines(
+                    project.projectTimelines,
+                  );
+                  return status ? (
+                    <MetaTag
+                      label={status}
+                      icon={PROJECT_STATUS_CONFIG[status]}
+                      style={{ marginTop: 8 }}
+                    />
+                  ) : null;
+                })()}
               </Flex>
               <Typography.Text
                 style={{
@@ -543,7 +652,7 @@ export default function BrickChatResults({
               >
                 {project.projectName}
               </Typography.Text>
-              {getProjectMetadata(project) && (
+              {/* {getProjectMetadata(project) && (
                 <Typography.Text
                   style={{
                     fontSize: FONT_SIZE.SUB_TEXT,
@@ -554,24 +663,22 @@ export default function BrickChatResults({
                 >
                   {getProjectMetadata(project)}
                 </Typography.Text>
-              )}
+              )} */}
 
               {!skipOneLiner && project.oneLiner && (
                 <Typography.Paragraph
                   style={{
-                    fontSize: FONT_SIZE.NOTE,
-                    color: COLORS.textColorMedium,
-                    padding: "4px",
-                    lineHeight: "140%",
+                    fontSize: FONT_SIZE.SUB_TEXT,
+                    color: COLORS.textColorLight,
+                    lineHeight: "130%",
                     borderRadius: 4,
-                    marginTop: 4,
-                    marginBottom: 2,
+                    marginTop: 0,
+                    marginBottom: 8,
                     fontWeight: 400,
-                    backgroundColor: COLORS.bgColor,
                     cursor: "pointer",
                   }}
                   ellipsis={{
-                    rows: 2,
+                    rows: 4,
                     tooltip: parseOneLiner(project.oneLiner).text,
                   }}
                   onClick={(e) => handleShowOneLiner(e, project)}
@@ -579,43 +686,16 @@ export default function BrickChatResults({
                   {parseOneLiner(project.oneLiner).text}
                 </Typography.Paragraph>
               )}
-              <Flex style={{ width: "100%", marginTop: 8 }} gap={4}>
+              <Flex
+                style={{ width: "100%", marginTop: "auto", paddingTop: 8 }}
+                gap={4}
+              >
                 {project.lvnzyProjectId && (
-                  <Flex
-                    align="center"
-                    justify="center"
-                    onClick={(e) => handleToggleSave(e, project)}
-                    style={{
-                      width: 20,
-                      height: 20,
-                      flexShrink: 0,
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName={
-                        savedIds.includes(project.lvnzyProjectId)
-                          ? "MdOutlineBookmark"
-                          : "MdOutlineBookmarkBorder"
-                      }
-                      iconSet="md"
-                      size={16}
-                      color={COLORS.primaryColor}
-                    />
-                  </Flex>
-                )}
-
-                {/* hidden without a handler - e.g. the card in a map marker's popup (BrickMapChat), where it's already on the map */}
-                {onLocateProject &&
-                  project.projectLocation?.lat &&
-                  project.projectLocation?.lng && (
+                  <Tooltip title={saveTooltip(project.lvnzyProjectId)}>
                     <Flex
                       align="center"
                       justify="center"
-                      onClick={(e) => handleLocateOnMap(e, project)}
+                      onClick={(e) => handleToggleSave(e, project)}
                       style={{
                         width: 20,
                         height: 20,
@@ -627,34 +707,70 @@ export default function BrickChatResults({
                       }}
                     >
                       <DynamicReactIcon
-                        iconName="IoLocateOutline"
-                        iconSet="io5"
-                        size={18}
+                        iconName={
+                          savedIds.includes(project.lvnzyProjectId)
+                            ? "MdFavorite"
+                            : "MdFavoriteBorder"
+                        }
+                        iconSet="md"
+                        size={16}
                         color={COLORS.primaryColor}
                       />
                     </Flex>
+                  </Tooltip>
+                )}
+
+                {/* hidden without a handler - e.g. the card in a map marker's popup (BrickMapChat), where it's already on the map */}
+                {onLocateProject &&
+                  project.projectLocation?.lat &&
+                  project.projectLocation?.lng && (
+                    <Tooltip title="Locate on map">
+                      <Flex
+                        align="center"
+                        justify="center"
+                        onClick={(e) => handleLocateOnMap(e, project)}
+                        style={{
+                          width: 20,
+                          height: 20,
+                          flexShrink: 0,
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <DynamicReactIcon
+                          iconName="IoLocateOutline"
+                          iconSet="io5"
+                          size={18}
+                          color={COLORS.primaryColor}
+                        />
+                      </Flex>
+                    </Tooltip>
                   )}
 
                 {project.isDeveloperPartner && (
-                  <Flex
-                    align="center"
-                    justify="center"
-                    style={{
-                      width: 20,
-                      height: 20,
-                      flexShrink: 0,
-                      borderRadius: "50%",
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                    }}
-                  >
-                    <DynamicReactIcon
-                      iconName="FaPeopleArrows"
-                      iconSet="fa6"
-                      size={14}
-                      color={COLORS.primaryColor}
-                    />
-                  </Flex>
+                  <Tooltip title="Brickfi Builder Buy Available">
+                    <Flex
+                      align="center"
+                      justify="center"
+                      style={{
+                        width: 20,
+                        height: 20,
+                        flexShrink: 0,
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(255, 255, 255, 0.9)",
+                        boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                      }}
+                    >
+                      <DynamicReactIcon
+                        iconName="FaPeopleArrows"
+                        iconSet="fa6"
+                        size={14}
+                        color={COLORS.primaryColor}
+                      />
+                    </Flex>
+                  </Tooltip>
                 )}
 
                 {onSelectProject && (
@@ -674,11 +790,13 @@ export default function BrickChatResults({
                       flexShrink: 0,
                       padding: "2px 4px",
                       borderRadius: 4,
-                      backgroundColor: COLORS.primaryColor,
+                      backgroundColor: COLORS.textColorDark,
                       boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
                       cursor: "pointer",
                       color: "white",
                       fontSize: FONT_SIZE.SUB_TEXT,
+                      marginRight: 4, 
+                      marginBottom: 4
                     }}
                   >
                     {/* <DynamicReactIcon

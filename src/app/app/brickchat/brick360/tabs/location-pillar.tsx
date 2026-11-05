@@ -46,9 +46,26 @@ const driverTypeRank = (type: string) => {
   return i === -1 ? DRIVER_TYPE_RANK.length : i;
 };
 
+// Tags are stored inconsistently (e.g. "popular brand" next to "pre-school"),
+// so they're compared with case and hyphens ignored
+const SKIPPED_SCHOOL_TAGS = ["pre school", "vocational"];
+const REQUIRED_FOOD_TAG = "popular brand";
+const normalizeTag = (tag: string) =>
+  tag.toLowerCase().replace(/-/g, " ").trim();
+
+// Schools other than pre-schools/vocational ones, and only popular food brands
+const isRelevantDriverByTags = (driver: any) => {
+  const tags: string[] = (driver.tags || []).map(normalizeTag);
+  if (driver.driver === "school") {
+    return !SKIPPED_SCHOOL_TAGS.some((tag) => tags.includes(tag));
+  }
+  if (driver.driver === "food") return tags.includes(REQUIRED_FOOD_TAG);
+  return true;
+};
+
 // The RELEVANT_DRIVER_COUNT most relevant places for a data point: its
-// categories' drivers under RELEVANT_DRIVER_MAX_MINUTES away, grouped by
-// driver type (each group nearest-first),
+// categories' drivers under RELEVANT_DRIVER_MAX_MINUTES away (see also
+// isRelevantDriverByTags), grouped by driver type (each group nearest-first),
 // picked round by round - the nearest of each type in DRIVER_TYPE_RANK order,
 // then the second-nearest of each, and so on - so a high-ranked type
 // (e.g. tech parks) can't crowd out every other type in the data point.
@@ -62,7 +79,8 @@ const getRelevantDrivers = (
     .filter(
       (d: any) =>
         typeof d.duration === "number" &&
-        d.duration < RELEVANT_DRIVER_MAX_MINUTES,
+        d.duration < RELEVANT_DRIVER_MAX_MINUTES &&
+        isRelevantDriverByTags(d),
     )
     .sort((a: any, b: any) => a.duration - b.duration)
     .forEach((d: any) => {

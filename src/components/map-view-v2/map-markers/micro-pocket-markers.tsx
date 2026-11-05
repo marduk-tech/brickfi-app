@@ -70,7 +70,7 @@ export const MicroPocketMarkers = ({
                 ),
                 tags: [
                   {
-                    label: "Micro pocket",
+                    label: "Corridor",
                     color: COLORS.textColorMedium,
                   },
                 ],

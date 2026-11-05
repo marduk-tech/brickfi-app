@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 // long enough to read the notice, short enough not to feel stuck
-const REDIRECT_DELAY_MS = 2000;
+const REDIRECT_DELAY_MS = 1000;
 
 export default function Brick360Redirect({ target }: { target: string }) {
   const router = useRouter();

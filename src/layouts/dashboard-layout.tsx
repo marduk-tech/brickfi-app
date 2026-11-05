@@ -103,6 +103,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     refetch: refetchChatThreads,
   } = useFetchChatThreads(user?._id);
   const bookmarkedThreads = chatThreads?.filter((t) => t.isBookmarked) ?? [];
+  // listed under "Saved" instead, so not repeated in the recent list
+  const unbookmarkedThreads = chatThreads?.filter((t) => !t.isBookmarked) ?? [];
 
   const openThread = (threadId: string) => {
     setSidebarOpen(false);
@@ -162,18 +164,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     },
     {
       key: "consult",
-      title: "Brickfi Assist",
-      link: LandingConstants.brickAssistLink,
-      icon: { name: "RiHomeSmileFill", set: "ri" },
-    },
-    {
-      key: "about",
-      title: "Request Brick360 Report",
-      link: LandingConstants.genReportFormLink,
-      icon: { name: "HiDocumentReport", set: "hi" },
-    },
-    {
-      key: "consult",
       title: "Brickfi Blog",
       link: "/app/profile",
       icon: { name: "FaBookOpen", set: "fa6" },
@@ -186,17 +176,10 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     },
     {
       key: "chat",
-      title: "Brick Chat",
+      title: "Brickfi Ai",
       disabled: !user || user.role !== "admin" ,
-      link: "/app/brickchat",
+      link: "/app",
       icon: { name: "MdChat", set: "md" },
-    },
-    {
-      key: "chat-history",
-      title: "Chat History",
-      disabled: true,
-      link: "/user-sessions",
-      icon: { name: "RiHistoryLine", set: "ri" },
     },
   ];
 
@@ -282,12 +265,18 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
       </Modal>
       <Layout
         style={{
-          minHeight: "100vh",
+          // dvh tracks the visible viewport on mobile (excludes browser
+          // address/tool bars), unlike vh which can overflow the screen
+          height: "100dvh",
+          overflow: "hidden",
         }}
       >
         <Layout
           style={{
             backgroundColor: "#FFF",
+            display: "flex",
+            flexDirection: "column",
+            height: "100%",
           }}
         >
           <Header
@@ -295,6 +284,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
               background: "transparent",
               height: "60px",
               padding: "0 8px",
+              flexShrink: 0,
             }}
           >
             <Flex
@@ -332,7 +322,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                 </Flex>
               </Flex>
               <Flex style={{ marginLeft: "auto" }} align="center">
-                <Link href="/feedback" target="_blank">
+                {/* <Link href="/feedback" target="_blank">
                 <Flex
                   style={{
                     border: `1px solid ${COLORS.textColorDark}`,
@@ -357,9 +347,9 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   </Typography.Text>
 
                 </Flex>
-                </Link>
+                </Link> */}
 
-                <Flex style={{ cursor: "pointer" }}>
+                {/* <Flex style={{ cursor: "pointer" }}>
                   <img
                     src="/images/brickfi-assist.png"
                     onClick={() => {
@@ -373,7 +363,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                     }}
                     style={{ height: 32, width: "auto" }}
                   ></img>
-                </Flex>
+                </Flex> */}
               </Flex>
             </Flex>
           </Header>
@@ -398,27 +388,46 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                   defaultActiveKey={[]}
                   items={[
                     {
-                      key: "bookmarked",
-                      label: "Bookmarked",
-                      children: (
-                        <ThreadList
-                          threads={bookmarkedThreads}
-                          loading={chatThreadsLoading}
-                          emptyText="No bookmarked chats yet."
-                          onSelect={openThread}
-                        />
-                      ),
-                    },
-                    {
                       key: "recent-chats",
                       label: "Recent Chats",
                       children: (
-                        <ThreadList
-                          threads={chatThreads ?? []}
-                          loading={chatThreadsLoading}
-                          emptyText="No recent chats yet."
-                          onSelect={openThread}
-                        />
+                        <Flex vertical gap={16}>
+                          {/* bookmarked chats first, under their own header */}
+                          {!chatThreadsLoading && bookmarkedThreads.length > 0 && (
+                            <Flex vertical gap={4}>
+                              <Flex align="center" gap={4}>
+                                <DynamicReactIcon
+                                  iconName="MdBookmark"
+                                  iconSet="md"
+                                  size={14}
+                                  color={COLORS.textColorDark}
+                                />
+                                <Typography.Text
+                                  strong
+                                  style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                                >
+                                  Saved
+                                </Typography.Text>
+                              </Flex>
+                              <ThreadList
+                                threads={bookmarkedThreads}
+                                loading={false}
+                                emptyText=""
+                                onSelect={openThread}
+                              />
+                            </Flex>
+                          )}
+                          <ThreadList
+                            threads={unbookmarkedThreads}
+                            loading={chatThreadsLoading}
+                            emptyText={
+                              bookmarkedThreads.length
+                                ? "No other recent chats."
+                                : "No recent chats yet."
+                            }
+                            onSelect={openThread}
+                          />
+                        </Flex>
                       ),
                     },
                   ]}
@@ -440,12 +449,13 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
           {loginModalOpen || showUserDetailsForm ? null : (
             <Content
               style={{
-                margin: "auto",
                 backgroundColor: "#FFF",
                 width: "100%",
                 padding: isMobile ? 0 : `0 ${HORIZONTAL_PADDING}px`,
-                height: "calc(100vh - 300px)",
-                overflowY: "scroll",
+                // fill whatever is left below the header and scroll within it
+                flex: 1,
+                minHeight: 0,
+                overflowY: "auto",
                 scrollbarWidth: "none",
               }}
             >
