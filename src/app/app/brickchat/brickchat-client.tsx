@@ -1528,7 +1528,7 @@ export function BrickChatCore({
           >
             <Flex justify="flex-end" style={{ marginBottom: 2 }}>
               {/* guests can't share - handleShare needs a user id */}
-              {user?._id && (activeThreadId || selectedThreadId) && (
+              {/* {user?._id && (activeThreadId || selectedThreadId) && (
                   <Tooltip title="Share chat">
                     <Button
                       type="text"
@@ -1549,7 +1549,7 @@ export function BrickChatCore({
                       onClick={handleShare}
                     />
                   </Tooltip>
-                )}
+                )} */}
               {/* hidden until the user query settles, so it doesn't flash
                 for a signed-in user whose profile is still loading */}
               {isGuest && !userLoading && (
