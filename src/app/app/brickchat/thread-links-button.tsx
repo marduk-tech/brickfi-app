@@ -1,13 +1,12 @@
 "use client";
 
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
-import { adminUrl } from "@/libs/constants";
+import { adminUrl, langsmithOrgId, langsmithProjectId } from "@/libs/constants";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Button, Flex, Modal, Tooltip, Typography } from "antd";
 import { useState } from "react";
 
-const LANGSMITH_PROJECT_URL =
-  "https://smith.langchain.com/o/f789969a-14ab-5073-b68e-2822efcebf90/projects/p/4e5569cf-0f16-4779-ac99-d4297e21b54f";
+const LANGSMITH_PROJECT_URL = `https://smith.langchain.com/o/${langsmithOrgId}/projects/p/${langsmithProjectId}`;
 
 const langsmithThreadUrl = (threadId: string) =>
   `${LANGSMITH_PROJECT_URL}?runview=threads&peekedConversationId=${encodeURIComponent(threadId)}`;
@@ -15,7 +14,7 @@ const langsmithThreadUrl = (threadId: string) =>
 // matches BRICKFI_LOGGER_PATHS.thread in the admin app
 // (livinzy-homes-admin/src/components/traces/brickfi-logger-paths.ts)
 const adminThreadUrl = (threadId: string) =>
-  `https://livinzy-admin-staging.netlify.app/brickfi-logger/threads/${encodeURIComponent(threadId)}`;
+  `${adminUrl?.replace(/\/+$/, "")}/brickfi-logger/threads/${encodeURIComponent(threadId)}`;
 
 const optionStyle: React.CSSProperties = {
   display: "flex",
@@ -121,13 +120,16 @@ export default function ThreadLinksButton({ threadId }: { threadId: string }) {
             href={langsmithThreadUrl(threadId)}
             onClick={close}
           />
-          <ThreadLinkOption
-            iconName="LuScrollText"
-            title="Brickfi Logger (admin)"
-            description="Turns, plan, step logs and LLM calls"
-            href={adminThreadUrl(threadId)}
-            onClick={close}
-          />
+          {/* no admin to link to in a build without NEXT_PUBLIC_ADMIN_URL */}
+          {adminUrl && (
+            <ThreadLinkOption
+              iconName="LuScrollText"
+              title="Brickfi Logger (admin)"
+              description="Turns, plan, step logs and LLM calls"
+              href={adminThreadUrl(threadId)}
+              onClick={close}
+            />
+          )}
         </Flex>
       </Modal>
     </>
