@@ -59,6 +59,7 @@ import BrickchatFeedback from "./brickchat-feedback";
 import CollapsibleAnswer from "./collapsible-answer";
 import PinnedProjectResults from "./pinned-project-results";
 import ReferredLocationChips, {
+  ReferredPricingComp,
   ReferredLocationChipItem,
   ReferredLocationType,
 } from "./referred-location-chips";
@@ -122,9 +123,16 @@ interface ResolvedLocation {
   lat: number;
   lng: number;
   /** empty for a direct-maps-geocoded landmark - see summarizeResolvedLocation in shared.js. */
-  type: "driver" | "locality" | "corridor" | "micropocket" | "surroundings" | "";
-  /** "surroundings" only - the project's surrounding elements (id is then the project's id) - see project-surroundings.js. */
-  data?: ISurroundingElement[];
+  type:
+    | "driver"
+    | "locality"
+    | "corridor"
+    | "micropocket"
+    | "surroundings"
+    | "pricing"
+    | "";
+  /** "surroundings" - the project's surrounding elements (see project-surroundings.js); "pricing" - its pricing comps (see projects-shortlist.js). The id is then the project's id. */
+  data?: ISurroundingElement[] | ReferredPricingComp[];
 }
 
 interface ExploreAnswer {
@@ -209,16 +217,21 @@ const getReferredLocationItems = (
     items.push({ key, id, type: "driver" });
   });
 
-  return items;
+  // pricing chips go last, after every place the answer referred to
+  return [
+    ...items.filter((i) => i.type !== "pricing"),
+    ...items.filter((i) => i.type === "pricing"),
+  ];
 };
 
 // An answer's chips start out with the first few selected (and the reset
 // icon goes back to this) - landmarks have no id and can't be focused, so
-// they're skipped rather than counted.
+// they're skipped rather than counted, and pricing chips only plot when
+// clicked.
 const DEFAULT_SELECTED_CHIP_COUNT = 3;
 const getDefaultReferredLocations = (answer: ExploreAnswer) =>
   getReferredLocationItems(answer)
-    .filter((i) => !!i.id)
+    .filter((i) => !!i.id && i.type !== "pricing")
     .slice(0, DEFAULT_SELECTED_CHIP_COUNT);
 
 // The summary cites places inline as "[<24-hex id>]" or "[<id>, <id>]" -
@@ -556,7 +569,19 @@ export function BrickChatCore({
   // an id to fetch - every selected one's elements are plotted together
   const focusedSurroundingElements = focusedReferredLocations
     .filter((i) => i.type === "surroundings")
-    .flatMap((i) => i.data || []);
+    .flatMap((i) => (i.data || []) as ISurroundingElement[]);
+  // same for pricing chips - memoized since the map rebuilds its icons and
+  // re-frames whenever this array changes. Two selected projects can share
+  // comps, and the map keys its markers by project name.
+  const focusedProjectsNearby = useMemo(() => {
+    const byName = new Map<string, ReferredPricingComp>();
+    focusedReferredLocations
+      .filter((i) => i.type === "pricing")
+      .flatMap((i) => (i.data || []) as ReferredPricingComp[])
+      .filter((p) => !!p.sqftCost)
+      .forEach((p) => byName.set(p.projectName, p));
+    return Array.from(byName.values());
+  }, [focusedReferredLocations]);
 
   // Default to the drivers relevant to the current results list; once any
   // chip is selected the map shows only the selected drivers (none if only
@@ -2229,6 +2254,9 @@ export function BrickChatCore({
             focusedSurroundingElements={
               selectedProject ? undefined : focusedSurroundingElements
             }
+            focusedProjectsNearby={
+              selectedProject ? undefined : focusedProjectsNearby
+            }
           />
         </Flex>
       )}
@@ -2331,6 +2359,9 @@ export function BrickChatCore({
                 }
                 focusedSurroundingElements={
                   selectedProject ? undefined : focusedSurroundingElements
+                }
+                focusedProjectsNearby={
+                  selectedProject ? undefined : focusedProjectsNearby
                 }
               />
             </Flex>

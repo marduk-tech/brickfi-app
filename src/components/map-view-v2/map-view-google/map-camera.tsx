@@ -301,6 +301,8 @@ interface ActiveFocusCentererProps {
   drivers?: any[];
   /** Framed as a whole (every element in view) whenever non-empty - only passed by callers that opt in (see MapViewGoogle's focusSurroundingElements). */
   surroundingElements?: ISurroundingElement[];
+  /** Same, for nearby projects - framed together with surroundingElements when both are set. See MapViewGoogle's focusProjectsNearby. */
+  projectsNearby?: { projectLocation: { lat: number; lng: number } }[];
 }
 
 // Centers/zooms the camera onto whichever of localities/corridors/
@@ -319,6 +321,7 @@ export function ActiveFocusCenterer({
   microPockets,
   drivers,
   surroundingElements,
+  projectsNearby,
 }: ActiveFocusCentererProps) {
   const map = useMap();
 
@@ -341,12 +344,29 @@ export function ActiveFocusCenterer({
       focusOnDriver(map, drivers[0]);
       return;
     }
-    if (surroundingElements?.length) {
-      const bounds = boundsFromSurroundingElements(surroundingElements);
-      if (bounds) flyToBounds(map, bounds, SURROUNDINGS_FOCUS_MAX_ZOOM);
+    if (surroundingElements?.length || projectsNearby?.length) {
+      const bounds =
+        boundsFromSurroundingElements(surroundingElements || []) ??
+        new google.maps.LatLngBounds();
+      projectsNearby?.forEach((p) => {
+        if (p.projectLocation?.lat && p.projectLocation?.lng) {
+          bounds.extend(p.projectLocation);
+        }
+      });
+      if (!bounds.isEmpty()) {
+        flyToBounds(map, bounds, SURROUNDINGS_FOCUS_MAX_ZOOM);
+      }
       return;
     }
-  }, [map, localities, corridors, microPockets, drivers, surroundingElements]);
+  }, [
+    map,
+    localities,
+    corridors,
+    microPockets,
+    drivers,
+    surroundingElements,
+    projectsNearby,
+  ]);
 
   return null;
 }

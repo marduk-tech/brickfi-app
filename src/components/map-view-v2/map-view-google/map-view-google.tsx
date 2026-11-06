@@ -54,6 +54,8 @@ export interface MapViewGoogleProps {
     projectLocation: { lat: number; lng: number };
     projectType?: string;
   }[];
+  /** Frame projectsNearby into view whenever they change (e.g. a brickchat "pricing" chip) - off by default for the same reason as focusSurroundingElements. */
+  focusProjectsNearby?: boolean;
   projectSqftPricing?: number;
   /** "all" shows every locality, a list of ids shows just those, omitted shows none. */
   showLocalities?: IdsOrAll;
@@ -110,6 +112,7 @@ function MapViewGoogleInner({
   surroundingElements,
   focusSurroundingElements,
   projectsNearby,
+  focusProjectsNearby,
   projectSqftPricing,
   showLocalities,
   onMapReady,
@@ -239,6 +242,7 @@ function MapViewGoogleInner({
             surroundingElements={
               focusSurroundingElements ? surroundingElements : undefined
             }
+            projectsNearby={focusProjectsNearby ? projectsNearby : undefined}
           />
           {onMapReady && <MapReady onMapReady={onMapReady} />}
 
