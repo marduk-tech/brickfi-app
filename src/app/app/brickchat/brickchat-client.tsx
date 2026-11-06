@@ -1705,7 +1705,7 @@ export function BrickChatCore({
                   threadyHistoryLoading ||
                   claimingGuestThread ||
                   isArchivedThread ||
-                  (!!questionValue?.trim().length) 
+                  (!questionValue?.trim().length) 
                 }
                 style={{
                   position: "absolute",
