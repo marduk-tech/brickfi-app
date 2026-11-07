@@ -74,7 +74,7 @@ export default function ExpertHelpFlow({
           />
         </Form.Item>
 
-        <RequestOptions />
+        <RequestOptions defaultSelected="task"/>
 
         <MobileField context={context} />
       </Flex>

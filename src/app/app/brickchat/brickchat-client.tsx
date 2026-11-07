@@ -73,7 +73,6 @@ import {
   OfferingFlowContext,
   OfferingFlowDialog,
   OfferingTicket,
-  OfferingTicketCard,
   OfferingTicketUpdate,
   threadTicketsQueryKey,
   useOfferingCtaForFlow,
@@ -159,7 +158,7 @@ interface ExploreAnswer {
   turnId?: string;
   /** Requests raised from this answer's offering CTA - noted on it by the backend (see noteTicketOnAnswer). When set, the answer shows the request's card instead of the CTA buttons. */
   offeringTickets?: { ticketId: string; offeringKey: string }[];
-  /** Set on a message the backend posts when ops updates a request (see postTicketUpdates) - shown as request cards above the message, whose text is ops' reply (empty for a status-only change). */
+  /** Set on the message the backend posts when ops closes a request (see postTicketUpdates) - not shown; the message itself is the reply. */
   ticketUpdates?: OfferingTicketUpdate[];
 }
 
@@ -1914,23 +1913,6 @@ export function BrickChatCore({
                           skipOneLiner
                           skipSort
                         />
-                      </Flex>
-                    ) : null}
-
-                    {/* a ticket status update posted to the thread (see
-                      postTicketUpdates) - its request card(s) above the
-                      message */}
-                    {messageItem.answer.ticketUpdates?.length ? (
-                      <Flex vertical gap={8} style={{ marginBottom: 12 }}>
-                        {messageItem.answer.ticketUpdates.map((update) => (
-                          <OfferingTicketCard
-                            key={`${update.ticketId}-${update.status}`}
-                            ticket={update}
-                            details={threadTickets?.find(
-                              (t) => t.ticketId === update.ticketId,
-                            )}
-                          />
-                        ))}
                       </Flex>
                     ) : null}
 
