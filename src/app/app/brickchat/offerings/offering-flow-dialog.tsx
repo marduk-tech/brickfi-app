@@ -52,8 +52,10 @@ export default function OfferingFlowDialog({
 
   const submit = async (data: Record<string, unknown>) => {
     if (!flow) return;
-    if (!threadId || (!owner.userId && !owner.guestId)) {
-      message.error("Please start a conversation before sending a request.");
+    // no thread is fine - the request then reaches the user by WhatsApp and
+    // email instead of in a conversation
+    if (!owner.userId && !owner.guestId) {
+      message.error("Please sign in before sending a request.");
       return;
     }
     setSubmitting(true);
@@ -67,6 +69,13 @@ export default function OfferingFlowDialog({
         data,
       });
       onSubmitted(ticket);
+      // with a thread, the request's card shows where its buttons were;
+      // without one there's nothing on screen to say it went through
+      if (!threadId) {
+        message.success(
+          "Request sent. The Brickfi team will get back to you on WhatsApp and email.",
+        );
+      }
       onClose();
     } catch (error) {
       console.error("Offering request failed:", error);

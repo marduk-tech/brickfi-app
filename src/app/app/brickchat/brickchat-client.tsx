@@ -1398,6 +1398,8 @@ export function BrickChatCore({
   // show the new request straight away - its card replaces the buttons it
   // was raised from
   const handleOfferingSubmitted = (ticket: OfferingTicket) => {
+    // a request raised before there's a thread has no thread's list to join
+    if (!offeringThreadId) return;
     queryClient.setQueryData<OfferingTicket[]>(
       threadTicketsQueryKey(offeringThreadId),
       (prev) => [...(prev || []), ticket],
@@ -1576,9 +1578,9 @@ export function BrickChatCore({
                   {showWelcome ? "Sign In": "Sign In To Continue"}
                 </Button>
               )}
-              {/* signed-in users only (so never alongside Sign In above),
-                and once there's a thread - a request is raised against one
-                (see OfferingFlowDialog's submit) */}
+              {/* signed-in users only (so never alongside Sign In above).
+                Works with or without a thread - without one, the reply goes
+                out by WhatsApp and email (see sendClosedTicketDirectly) */}
               {expertHelpCta && user?._id && (
                 <Tooltip title={expertHelpCta.offering.title}>
                   <Button
