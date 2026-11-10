@@ -1310,7 +1310,7 @@ export default function BrickChatv2({
           primaryImageSize: isMobile ? "100%" : "70%",
           mainImgUrl: isMobile
             ? "/images/landing/brick-chat/testimonial-mob.png"
-            : "/images/landing/brick-chat/testimonial.png",
+            : "/images/landing/brick-chat/testimonial.png?v=2",
           mainImgAltText: "Testimonials from Brickfi Customers",
           imageContainerWidth: 50,
           verticalPadding: isMobile ? 32 : 100,

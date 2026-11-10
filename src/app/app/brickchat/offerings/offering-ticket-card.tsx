@@ -15,8 +15,7 @@ const TICKET_STATUS_LABELS: Record<OfferingTicket["status"], string> = {
 
 // A request raised in this thread - just its offering and status. Shown
 // where the offering's CTA buttons were (live status, from
-// useThreadTickets), and above a ticket status update message (the status
-// it changed to). The offering's current title, else the one the update
+// useThreadTickets). The offering's current title, else the one the update
 // carries, else its key once the offering is no longer active.
 const formatTicketDate = (date: string) =>
   new Date(date).toLocaleDateString("en-IN", {
@@ -191,14 +190,7 @@ export default function OfferingTicketCard({
       >
         {title}
       </Typography.Text>
-      {/* <div style={{ marginLeft: "auto" }}>{statusTag(ticket.status)}</div> */}
-      <div style={{marginLeft:"auto"}}> <Tag
-    color={COLORS.greenIdentifier}
-    bordered={false}
-    style={{ margin: 0 }}
-  >
-    {"Task Created"}
-  </Tag></div>
+      <div style={{ marginLeft: "auto" }}>{statusTag(ticket.status)}</div>
     </Flex>
     <OfferingTicketDetailsModal
       ticket={open && fullTicket ? fullTicket : null}

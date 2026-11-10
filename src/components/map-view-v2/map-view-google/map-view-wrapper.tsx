@@ -52,6 +52,8 @@ interface MapViewWrapperProps {
     projectLocation: { lat: number; lng: number };
     projectType?: string;
   }[];
+  /** See MapViewGoogle's focusProjectsNearby. */
+  focusProjectsNearby?: boolean;
   projectSqftPricing?: number;
   showLocalities?: IdsOrAll;
   onMapReady?: (map: any) => void;

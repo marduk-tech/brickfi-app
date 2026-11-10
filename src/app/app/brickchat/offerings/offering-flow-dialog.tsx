@@ -2,7 +2,7 @@
 
 import { useDevice } from "@/hooks/use-device";
 import { FONT_SIZE } from "@/theme/style-constants";
-import { message, Modal, Typography } from "antd";
+import { Button, message, Modal, Result, Typography } from "antd";
 import { useEffect, useState } from "react";
 import { createOfferingTicket } from "./api";
 import { OFFERING_FLOWS } from "./flows";
@@ -13,6 +13,16 @@ import type {
   OfferingTicket,
   OfferingTicketOwner,
 } from "./types";
+
+// The confirmation's message, by what the request asked for (see
+// RequestOptions) - neither is possible in flows where a visit or loan offers
+// are the request on their own
+const submittedMessage = (data: Record<string, unknown>) =>
+  data.createTask
+    ? "You will receive a response on this request within 24-48 hours."
+    : data.askExpertToContact
+      ? "A Brickfi expert will reach out to schedule a call at your convenient time."
+      : "The Brickfi team will get back to you shortly.";
 
 export interface ActiveOfferingFlow {
   offering: BrickfiOffering;
@@ -44,6 +54,8 @@ export default function OfferingFlowDialog({
   const [submitting, setSubmitting] = useState(false);
   // a fresh form every time the dialog opens
   const [formKey, setFormKey] = useState(0);
+  // the confirmation shown once a request is created - its message, or null
+  const [submittedNote, setSubmittedNote] = useState<string | null>(null);
   useEffect(() => {
     if (flow) setFormKey((k) => k + 1);
   }, [flow]);
@@ -52,8 +64,10 @@ export default function OfferingFlowDialog({
 
   const submit = async (data: Record<string, unknown>) => {
     if (!flow) return;
-    if (!threadId || (!owner.userId && !owner.guestId)) {
-      message.error("Please start a conversation before sending a request.");
+    // no thread is fine - the request then reaches the user by WhatsApp and
+    // email instead of in a conversation
+    if (!owner.userId && !owner.guestId) {
+      message.error("Please sign in before sending a request.");
       return;
     }
     setSubmitting(true);
@@ -68,6 +82,7 @@ export default function OfferingFlowDialog({
       });
       onSubmitted(ticket);
       onClose();
+      setSubmittedNote(submittedMessage(data));
     } catch (error) {
       console.error("Offering request failed:", error);
       message.error("Couldn't send your request. Please try again.");
@@ -77,6 +92,7 @@ export default function OfferingFlowDialog({
   };
 
   return (
+    <>
     <Modal
       open={!!flow && !!Flow}
       title={
@@ -110,5 +126,24 @@ export default function OfferingFlowDialog({
         />
       ) : null}
     </Modal>
+    <Modal
+      open={!!submittedNote}
+      onCancel={() => setSubmittedNote(null)}
+      footer={null}
+      width={isMobile ? "90%" : 550}
+      centered
+    >
+      <Result
+        status="success"
+        title="Request Submitted"
+        subTitle={submittedNote}
+        extra={
+          <Button type="primary" onClick={() => setSubmittedNote(null)}>
+            Close
+          </Button>
+        }
+      />
+    </Modal>
+    </>
   );
 }

@@ -7,6 +7,13 @@ export const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 // e.g. the staging admin for staging builds
 export const adminUrl =
   process.env.NEXT_PUBLIC_ADMIN_URL;
+// only used to build links into LangSmith - defaults to the "Brickfi Prod"
+// project. Should match LANGSMITH_ORG_ID / LANGCHAIN_PROJECT on the services
+// backend this app points at, or links open a project without its runs.
+export const langsmithOrgId =
+  process.env.NEXT_PUBLIC_LANGSMITH_ORG_ID;
+export const langsmithProjectId =
+  process.env.NEXT_PUBLIC_LANGSMITH_PROJECT_ID;
 export const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 export const sitemapApiKey = process.env.SITEMAP_API_KEY;
 

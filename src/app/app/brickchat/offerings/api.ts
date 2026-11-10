@@ -73,7 +73,8 @@ export const createOfferingTicket = ({
   ...rest
 }: {
   owner: OfferingTicketOwner;
-  threadId: string;
+  /** absent for a request raised before there's a thread */
+  threadId?: string;
   turnId?: string;
   offeringKey: string;
   ctaId: string;

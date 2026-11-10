@@ -59,6 +59,7 @@ import BrickchatFeedback from "./brickchat-feedback";
 import CollapsibleAnswer from "./collapsible-answer";
 import PinnedProjectResults from "./pinned-project-results";
 import ReferredLocationChips, {
+  ReferredPricingComp,
   ReferredLocationChipItem,
   ReferredLocationType,
 } from "./referred-location-chips";
@@ -72,7 +73,6 @@ import {
   OfferingFlowContext,
   OfferingFlowDialog,
   OfferingTicket,
-  OfferingTicketCard,
   OfferingTicketUpdate,
   threadTicketsQueryKey,
   useOfferingCtaForFlow,
@@ -122,9 +122,16 @@ interface ResolvedLocation {
   lat: number;
   lng: number;
   /** empty for a direct-maps-geocoded landmark - see summarizeResolvedLocation in shared.js. */
-  type: "driver" | "locality" | "corridor" | "micropocket" | "surroundings" | "";
-  /** "surroundings" only - the project's surrounding elements (id is then the project's id) - see project-surroundings.js. */
-  data?: ISurroundingElement[];
+  type:
+    | "driver"
+    | "locality"
+    | "corridor"
+    | "micropocket"
+    | "surroundings"
+    | "pricing"
+    | "";
+  /** "surroundings" - the project's surrounding elements (see project-surroundings.js); "pricing" - its pricing comps (see projects-shortlist.js). The id is then the project's id. */
+  data?: ISurroundingElement[] | ReferredPricingComp[];
 }
 
 interface ExploreAnswer {
@@ -151,7 +158,7 @@ interface ExploreAnswer {
   turnId?: string;
   /** Requests raised from this answer's offering CTA - noted on it by the backend (see noteTicketOnAnswer). When set, the answer shows the request's card instead of the CTA buttons. */
   offeringTickets?: { ticketId: string; offeringKey: string }[];
-  /** Set on a message the backend posts when ops updates a request (see postTicketUpdates) - shown as request cards above the message, whose text is ops' reply (empty for a status-only change). */
+  /** Set on the message the backend posts when ops closes a request (see postTicketUpdates) - not shown; the message itself is the reply. */
   ticketUpdates?: OfferingTicketUpdate[];
 }
 
@@ -209,16 +216,21 @@ const getReferredLocationItems = (
     items.push({ key, id, type: "driver" });
   });
 
-  return items;
+  // pricing chips go last, after every place the answer referred to
+  return [
+    ...items.filter((i) => i.type !== "pricing"),
+    ...items.filter((i) => i.type === "pricing"),
+  ];
 };
 
 // An answer's chips start out with the first few selected (and the reset
 // icon goes back to this) - landmarks have no id and can't be focused, so
-// they're skipped rather than counted.
+// they're skipped rather than counted, and pricing chips only plot when
+// clicked.
 const DEFAULT_SELECTED_CHIP_COUNT = 3;
 const getDefaultReferredLocations = (answer: ExploreAnswer) =>
   getReferredLocationItems(answer)
-    .filter((i) => !!i.id)
+    .filter((i) => !!i.id && i.type !== "pricing")
     .slice(0, DEFAULT_SELECTED_CHIP_COUNT);
 
 // The summary cites places inline as "[<24-hex id>]" or "[<id>, <id>]" -
@@ -559,7 +571,19 @@ export function BrickChatCore({
   // an id to fetch - every selected one's elements are plotted together
   const focusedSurroundingElements = focusedReferredLocations
     .filter((i) => i.type === "surroundings")
-    .flatMap((i) => i.data || []);
+    .flatMap((i) => (i.data || []) as ISurroundingElement[]);
+  // same for pricing chips - memoized since the map rebuilds its icons and
+  // re-frames whenever this array changes. Two selected projects can share
+  // comps, and the map keys its markers by project name.
+  const focusedProjectsNearby = useMemo(() => {
+    const byName = new Map<string, ReferredPricingComp>();
+    focusedReferredLocations
+      .filter((i) => i.type === "pricing")
+      .flatMap((i) => (i.data || []) as ReferredPricingComp[])
+      .filter((p) => !!p.sqftCost)
+      .forEach((p) => byName.set(p.projectName, p));
+    return Array.from(byName.values());
+  }, [focusedReferredLocations]);
 
   // Default to the drivers relevant to the current results list; once any
   // chip is selected the map shows only the selected drivers (none if only
@@ -1390,6 +1414,8 @@ export function BrickChatCore({
   // show the new request straight away - its card replaces the buttons it
   // was raised from
   const handleOfferingSubmitted = (ticket: OfferingTicket) => {
+    // a request raised before there's a thread has no thread's list to join
+    if (!offeringThreadId) return;
     queryClient.setQueryData<OfferingTicket[]>(
       threadTicketsQueryKey(offeringThreadId),
       (prev) => [...(prev || []), ticket],
@@ -1519,7 +1545,7 @@ export function BrickChatCore({
           >
             <Flex justify="flex-end" style={{ marginBottom: 2 }}>
               {/* guests can't share - handleShare needs a user id */}
-              {user?._id && (activeThreadId || selectedThreadId) && (
+              {/* {user?._id && (activeThreadId || selectedThreadId) && (
                   <Tooltip title="Share chat">
                     <Button
                       type="text"
@@ -1540,7 +1566,7 @@ export function BrickChatCore({
                       onClick={handleShare}
                     />
                   </Tooltip>
-                )}
+                )} */}
               {/* hidden until the user query settles, so it doesn't flash
                 for a signed-in user whose profile is still loading */}
               {isGuest && !userLoading && (
@@ -1568,9 +1594,9 @@ export function BrickChatCore({
                   {showWelcome ? "Sign In": "Sign In To Continue"}
                 </Button>
               )}
-              {/* signed-in users only (so never alongside Sign In above),
-                and once there's a thread - a request is raised against one
-                (see OfferingFlowDialog's submit) */}
+              {/* signed-in users only (so never alongside Sign In above).
+                Works with or without a thread - without one, the reply goes
+                out by WhatsApp and email (see sendClosedTicketDirectly) */}
               {expertHelpCta && user?._id && (
                 <Tooltip title={expertHelpCta.offering.title}>
                   <Button
@@ -1696,7 +1722,7 @@ export function BrickChatCore({
                   threadyHistoryLoading ||
                   claimingGuestThread ||
                   isArchivedThread ||
-                  (!!questionValue?.trim().length) 
+                  (!questionValue?.trim().length) 
                 }
                 style={{
                   position: "absolute",
@@ -1905,23 +1931,6 @@ export function BrickChatCore({
                           skipOneLiner
                           skipSort
                         />
-                      </Flex>
-                    ) : null}
-
-                    {/* a ticket status update posted to the thread (see
-                      postTicketUpdates) - its request card(s) above the
-                      message */}
-                    {messageItem.answer.ticketUpdates?.length ? (
-                      <Flex vertical gap={8} style={{ marginBottom: 12 }}>
-                        {messageItem.answer.ticketUpdates.map((update) => (
-                          <OfferingTicketCard
-                            key={`${update.ticketId}-${update.status}`}
-                            ticket={update}
-                            details={threadTickets?.find(
-                              (t) => t.ticketId === update.ticketId,
-                            )}
-                          />
-                        ))}
                       </Flex>
                     ) : null}
 
@@ -2245,6 +2254,9 @@ export function BrickChatCore({
             focusedSurroundingElements={
               selectedProject ? undefined : focusedSurroundingElements
             }
+            focusedProjectsNearby={
+              selectedProject ? undefined : focusedProjectsNearby
+            }
           />
         </Flex>
       )}
@@ -2347,6 +2359,9 @@ export function BrickChatCore({
                 }
                 focusedSurroundingElements={
                   selectedProject ? undefined : focusedSurroundingElements
+                }
+                focusedProjectsNearby={
+                  selectedProject ? undefined : focusedProjectsNearby
                 }
               />
             </Flex>

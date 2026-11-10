@@ -15,8 +15,17 @@ export type ReferredLocationType =
   | "corridor"
   | "micropocket"
   | "surroundings"
+  | "pricing"
   | "project"
   | "";
+
+/** One comp in a "pricing" chip's data - LvnzyProject.investment.corridorPricing's shape, as the map's projectsNearby takes it. */
+export interface ReferredPricingComp {
+  projectName: string;
+  sqftCost: number;
+  projectLocation: { lat: number; lng: number };
+  projectType?: string;
+}
 
 export interface ReferredLocationChipItem {
   /** Unique per-item key for React/selection - distinct from `id` since a landmark has no id of its own (see brickchat-client's getReferredLocationItems). */
@@ -32,8 +41,8 @@ export interface ReferredLocationChipItem {
   keepLabelCase?: boolean;
   /** Text after the label that's never truncated (e.g. "6 mins") - only the label gets the ellipsis. */
   suffix?: string;
-  /** What the chip plots when there's no catalog record to fetch by id - a "surroundings" chip's project surroundings (see project-surroundings.js), passed to the map as surroundingElements. */
-  data?: ISurroundingElement[];
+  /** What the chip plots when there's no catalog record to fetch by id - a "surroundings" chip's project surroundings (see project-surroundings.js), passed to the map as surroundingElements, or a "pricing" chip's comps (see projects-shortlist.js), passed as projectsNearby. */
+  data?: ISurroundingElement[] | ReferredPricingComp[];
 }
 
 // chips never grow past this - the label is cut with an ellipsis instead
@@ -53,6 +62,7 @@ const CHIP_ICON_BY_TYPE: Partial<
   locality: { name: "PiMapPinAreaBold", set: "pi" },
   driver: { name: "TbMapPinStar", set: "tb" },
   surroundings: { name: "RiTreasureMapLine", set: "ri" },
+  pricing: { name: "MdCurrencyRupee", set: "md" },
   project: { name: "BiHomeCircle", set: "bi" },
 };
 

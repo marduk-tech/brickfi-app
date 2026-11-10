@@ -112,8 +112,9 @@ export function ProjectMarkers({
           (p) =>
             p.projectLocation?.lat &&
             p.projectLocation?.lng &&
-            projectSqftPricing !== undefined &&
-            Math.abs(p.sqftCost - projectSqftPricing) / projectSqftPricing <= 0.55
+            // no reference price (e.g. a brickchat "pricing" chip) - show them all
+            (projectSqftPricing === undefined ||
+              Math.abs(p.sqftCost - projectSqftPricing) / projectSqftPricing <= 0.55)
         )
         .map((p) => {
           const iconCfg = (p.projectType && HOME_TYPE_ICON[p.projectType]) || {

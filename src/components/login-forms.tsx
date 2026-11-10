@@ -110,7 +110,7 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
       if (response?.data?.user) {
         console.log(
           "Login successful, user authenticated:",
-          response.data.user
+          response.data.user,
         );
 
         setFeedbackText("Verification successful!");
@@ -179,8 +179,8 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
                               ? Promise.resolve()
                               : Promise.reject(
                                   new Error(
-                                    "Mobile number must be at least 10 digits long!"
-                                  )
+                                    "Mobile number must be at least 10 digits long!",
+                                  ),
                                 );
                           },
                         },
@@ -279,50 +279,22 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
                 );
               }}
             </Form.Item>
-            <Flex wrap gap={8} style={{ marginTop: 16 }}>
-                {(
-                  [
-                    {
-                      label: "No Spam Promise",
-                      iconName: "PiHandPeace",
-                      iconSet: "pi",
-                    },
-                    {
-                      label: "2000+ Properties",
-                      iconName: "PiMagicWand",
-                      iconSet: "pi",
-                    },
-                    {
-                      label: "Verified Data",
-                      iconName: "MdVerifiedUser",
-                      iconSet: "md",
-                    },
-                    
-                  ] as const
-                ).map((t) => (
-                  <Tag
-                    key={t.label}
-                    style={{
-                      margin: 0,
-                      color: COLORS.LANDING.LIGHT_PINK,
-                      backgroundColor: COLORS.primaryColor,
-                      border: 0,
-                      borderRadius: 8,
-                    }}
-                  >
-                    <Flex align="center" gap={4}>
-                      <DynamicReactIcon
-                        iconName={t.iconName}
-                        iconSet={t.iconSet}
-                        size={14}
-                        color={COLORS.LANDING.LIGHT_PINK}
-                      />
-                      {t.label}
-                    </Flex>
-                  </Tag>
-                ))}
+              <Flex align="center" gap={4} style={{backgroundColor: COLORS.primaryColor, borderRadius: 8, marginTop: 16, padding: "8px 8px"}}>
+                <DynamicReactIcon
+                  iconName={"PiHandPeace"}
+                  iconSet={"pi"}
+                  size={30}
+                  color={COLORS.LANDING.LIGHT_PINK}
+                />
+                <Typography.Text style={{color: "white", lineHeight: "120%"}}>
+                    We never share your number with builders or brokers.<br></br>We’ll only call if you ask us to.
+                </Typography.Text>
               </Flex>
-            <ContactConsent msg={"By signing up you agree to the terms and conditions as well as privacy policy of Brickfi."}></ContactConsent>
+            <ContactConsent
+              msg={
+                "By signing up you agree to the terms and conditions as well as privacy policy of Brickfi."
+              }
+            ></ContactConsent>
             <Form.Item style={{ marginTop: 16 }}>
               <Button
                 type="primary"

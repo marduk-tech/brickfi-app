@@ -11,6 +11,7 @@ import {
   Typography,
   type FormInstance,
 } from "antd";
+import { useEffect } from "react";
 import type { OfferingFlowContext } from "./types";
 
 // Form pieces shared by the offering flows
@@ -184,11 +185,32 @@ function RequestOption({
 // above (a visit, offers) is the request on its own.
 export function RequestOptions({
   callFirst = false,
+  defaultSelected,
 }: {
   /** show the expert call before the task, instead of after it */
   callFirst?: boolean;
+  /** the card selected when the options first show - none if left out */
+  defaultSelected?: "task" | "call";
 }) {
   const form = Form.useFormInstance();
+
+  // Set here, not through the Form's initialValues, which hold both as false
+  // and would win over a Form.Item initialValue. Skipped if a card is already
+  // selected, so coming back to a flow's step keeps the user's choice.
+  useEffect(() => {
+    if (
+      !defaultSelected ||
+      form.getFieldValue("createTask") ||
+      form.getFieldValue("askExpertToContact")
+    ) {
+      return;
+    }
+    form.setFieldValue(
+      defaultSelected === "task" ? "createTask" : "askExpertToContact",
+      true,
+    );
+  }, [defaultSelected, form]);
+
   const taskOption = (
     <Col key="createTask" xs={24} sm={12}>
       <Form.Item name="createTask" valuePropName="checked" noStyle>

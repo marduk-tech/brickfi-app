@@ -10,6 +10,7 @@ import type { ProjectMarkerInput } from "../../../components/map-view-v2/map-vie
 import type { LvnzyProject } from "../../../types/LvnzyProject";
 import type { PillarMapConfig } from "./brick360/tabs";
 import type { ProjectResult } from "./brickchat-client";
+import type { ReferredPricingComp } from "./referred-location-chips";
 const MapViewWrapper = dynamic(
   () => import("@/components/map-view-v2/map-view-google/map-view-wrapper"),
   { ssr: false },
@@ -67,6 +68,13 @@ interface BrickMapChatProps {
    * meaningful in the non-detailedProject view.
    */
   focusedSurroundingElements?: ISurroundingElement[];
+  /**
+   * A chat answer's "pricing" referred-location chip(s), clicked in
+   * brickchat-client - the selected projects' pricing comps (the chip's own
+   * `data`), plotted as projectsNearby and framed into view. Only meaningful
+   * in the non-detailedProject view.
+   */
+  focusedProjectsNearby?: ReferredPricingComp[];
   /** "360 Details" on the project card shown when a project marker is clicked - same as BrickChatResults'. */
   onSelectProject?: (project: ProjectResult) => void;
 }
@@ -82,6 +90,7 @@ export function BrickMapChat({
   focusedCorridorIds,
   focusedMicroPocketIds,
   focusedSurroundingElements,
+  focusedProjectsNearby,
   onSelectProject,
 }: BrickMapChatProps) {
   // No default "every driver in Bangalore" fetch - the base search-results
@@ -196,6 +205,8 @@ export function BrickMapChat({
           showMicroPockets={focusedMicroPocketIds ?? []}
           surroundingElements={focusedSurroundingElements ?? []}
           focusSurroundingElements
+          projectsNearby={focusedProjectsNearby}
+          focusProjectsNearby
           hideAllFilters={hideAllFilters}
           minMapZoom={10}
           categories={Object.keys(DRIVER_CATEGORIES).filter(
