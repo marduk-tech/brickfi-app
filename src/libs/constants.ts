@@ -46,6 +46,9 @@ export const LocalStorageKeys = {
   pinnedProjectsSeen: "pinned_projects_seen",
 
   brickchatGuest: "brickchat_guest",
+  // { userId, dismissCount, nextAt } - when brickchat may next ask a user
+  // with no name/email to fill in their details
+  profilePrompt: "profile_prompt",
 };
 
 export const env = process.env.NEXT_PUBLIC_ENV;

@@ -2,24 +2,28 @@ import { Button, Flex, Form, Input, Select, Typography } from "antd";
 import { useUser } from "../hooks/use-user";
 import { useUpdateUserMutation } from "../hooks/user-hooks";
 import { safeWindow } from "../libs/browser-utils";
-import { FONT_SIZE } from "../theme/style-constants";
+import { COLORS, FONT_SIZE } from "../theme/style-constants";
 import { useState } from "react";
 import DynamicReactIcon from "./common/dynamic-react-icon";
 
 const sourceOptions = [
-  { label: "Direct email", value: "Direct email" },
   {
-    label: "Found on Google Search/Other Search",
-    value: "Found on Google Search/Other Search",
+    label: "Found on Google/Other Search Engine",
+    value: "Found on Google or others",
   },
-  { label: "Social Media", value: "Social Media" },
-  { label: "Through a friend", value: "Through a friend" },
+  {
+    label: "Via ChatGPT/Gemini/Others",
+    value: "Via ChatGPT/Gemini/Others",
+  },
+  { label: "Social Media (Insta/FB)", value: "Social Media" },
+  { label: "Through a Friend", value: "Through a Friend" },
+   { label: "Direct email or Whatsapp", value: "Direct email or Whatsapp" },
   { label: "Other", value: "Other" },
 ];
 
 export function UserDetailsForm({
   ignoreSource = false,
-  ignoreCity = false,
+  ignoreCity = true,
 }: {
   ignoreSource?: boolean;
   ignoreCity?: boolean;
@@ -42,6 +46,7 @@ export function UserDetailsForm({
           profile: {
             ...user?.profile,
             ...values,
+            name: values.name?.trim(),
           },
         },
       })
@@ -56,45 +61,60 @@ export function UserDetailsForm({
   if (user) {
     return (
       <Form
-        style={{ width: "100%" }}
+        style={{ width: "100%", paddingTop: 32 }}
         form={form}
         layout="vertical"
         onFinish={handleUserUpdate}
         initialValues={user.profile}
       >
-        <Typography.Title level={3} style={{ marginBottom: 24, marginTop: 16 }}>
-          Enter basic details
-        </Typography.Title>
+        <Typography.Text style={{ color: COLORS.primaryColor, marginTop: 16, fontSize: FONT_SIZE.HEADING_2, marginBottom: 48, fontWeight: 500, lineHeight: "110%" }}>
+          If you can help us with a few basic details
+        </Typography.Text>
         <Form.Item
-          label="Name"
+          label="Your Good Name"
           name="name"
           rules={[
             {
               required: true,
+              whitespace: true,
+              message: "Please enter your name",
+            },
+            {
+              // counted without surrounding spaces, so "  a " doesn't pass
+              validator: (_, value?: string) =>
+                !value?.trim() || value.trim().length >= 2
+                  ? Promise.resolve()
+                  : Promise.reject(
+                      new Error("Name must be at least 2 characters"),
+                    ),
             },
           ]}
           validateTrigger="onSubmit"
-          style={{ marginBottom: 0 }}
+          style={{ marginTop: 32, marginBottom: 0 }}
         >
           <Input
             style={{
               width: "100%",
               fontSize: FONT_SIZE.HEADING_3,
             }}
-            placeholder="Jon Doe"
+            placeholder="Enter your full name"
           />
         </Form.Item>
 
         <Form.Item
-          label="Email"
+          label="Your Email"
           name="email"
+          // emails never contain spaces - drop any typed or pasted in
+          normalize={(value?: string) => value?.replace(/\s/g, "")}
           rules={[
             {
-              type: "email",
-              message: "Please enter a valid email!",
+              required: true,
+              message: "Please enter your email",
             },
             {
-              required: true,
+              // name@domain.tld, with a 2+ letter top-level domain
+              type: "email",
+              message: "Please enter a valid email",
             },
           ]}
           validateTrigger="onSubmit"
@@ -108,6 +128,7 @@ export function UserDetailsForm({
             placeholder="jondoe@gmail.com"
           />
         </Form.Item>
+        
 
         {!ignoreCity && (
           <Form.Item

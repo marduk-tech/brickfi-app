@@ -7,6 +7,7 @@ import ChatTimeline, { TimelineStep } from "@/app/app/brickchat/chat-timeline";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { Loader } from "@/components/common/loader";
 import { LoginForm } from "@/components/login-forms";
+import { ProfileEditModal } from "@/components/profile-edit-modal";
 import { useDevice } from "@/hooks/use-device";
 import {
   useFetchAllLivindexPlaces,
@@ -376,7 +377,6 @@ const hasStoredUser = () => {
 };
 
 const GUEST_LOGIN_PROMPT_DELAY_MS = 10000;
-
 // Streamed step ids that only occur when the answer will be a project list
 // (directAnswer false) - a discover search (vectorSearch) or paging through
 // one's results (formatResults, also "show me more"). See STEPS in the
@@ -2419,6 +2419,8 @@ export function BrickChatCore({
         onClose={() => setActiveOfferingFlow(null)}
         onSubmitted={handleOfferingSubmitted}
       />
+      {/* asks for a missing name/email; schedule lives in the modal */}
+      <ProfileEditModal autoPrompt />
       <Modal
         open={loginModalOpen && !user?._id}
         // dismissable - a guest who closes it gets it back on their next
