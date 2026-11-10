@@ -48,12 +48,17 @@ const detailRow = (label: string, value: React.ReactNode) => (
 );
 
 // A request's details, opened by clicking its card - with its current status
+// What the details dialog can show - a full ticket, or just what a reply
+// message carries about it (no createdAt / query / replies)
+type TicketDetails = Pick<OfferingTicket, "ticketId" | "status"> &
+  Partial<Pick<OfferingTicket, "createdAt" | "query" | "replies">>;
+
 function OfferingTicketDetailsModal({
   ticket,
   title,
   onClose,
 }: {
-  ticket: OfferingTicket | null;
+  ticket: TicketDetails | null;
   title: string;
   onClose: () => void;
 }) {
@@ -81,51 +86,22 @@ function OfferingTicketDetailsModal({
               {ticket.ticketId}
             </Typography.Text>,
           )}
-          {detailRow(
-            "Created on",
-            <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
-              {formatTicketDate(ticket.createdAt)}
-            </Typography.Text>,
-          )}
-          {detailRow(
-            "Your request",
-            <Typography.Text
-              style={{ fontSize: FONT_SIZE.PARA, whiteSpace: "pre-wrap" }}
-            >
-              {ticket.query?.trim() || "—"}
-            </Typography.Text>,
-          )}
-          {ticket.replies?.length
+          {ticket.createdAt
             ? detailRow(
-                "Replies from Brickfi",
-                <Flex vertical gap={8}>
-                  {ticket.replies.map((r, i) => (
-                    <Flex
-                      key={i}
-                      vertical
-                      gap={2}
-                      style={{
-                        padding: "8px 12px",
-                        borderRadius: 8,
-                        backgroundColor: COLORS.bgColorLightBlue,
-                      }}
-                    >
-                      <Typography.Text
-                        style={{ fontSize: FONT_SIZE.PARA, whiteSpace: "pre-wrap" }}
-                      >
-                        {r.text}
-                      </Typography.Text>
-                      <Typography.Text
-                        style={{
-                          fontSize: FONT_SIZE.SUB_TEXT,
-                          color: COLORS.textColorLight,
-                        }}
-                      >
-                        {formatTicketDate(r.createdAt)}
-                      </Typography.Text>
-                    </Flex>
-                  ))}
-                </Flex>,
+                "Created on",
+                <Typography.Text style={{ fontSize: FONT_SIZE.PARA }}>
+                  {formatTicketDate(ticket.createdAt)}
+                </Typography.Text>,
+              )
+            : null}
+          {ticket.createdAt
+            ? detailRow(
+                "Your request",
+                <Typography.Text
+                  style={{ fontSize: FONT_SIZE.PARA, whiteSpace: "pre-wrap" }}
+                >
+                  {ticket.query?.trim() || "—"}
+                </Typography.Text>,
               )
             : null}
         </Flex>
@@ -142,15 +118,23 @@ export default function OfferingTicketCard({
   details,
 }: {
   ticket: Pick<OfferingTicket, "offeringKey" | "status"> & {
+    ticketId?: string;
     offeringTitle?: string;
   };
   /** the full, live ticket for the details modal - defaults to `ticket`
-   * when that's already one; without either the card isn't clickable */
+   * when that's already one, else to what `ticket` carries (status and id);
+   * without a ticketId either the card isn't clickable */
   details?: OfferingTicket;
 }) {
   const offering = useActiveOfferings()(ticket.offeringKey);
   const [open, setOpen] = useState(false);
-  const fullTicket = details || (isFullTicket(ticket) ? ticket : undefined);
+  const fullTicket: TicketDetails | undefined =
+    details ||
+    (isFullTicket(ticket)
+      ? ticket
+      : ticket.ticketId
+        ? { ticketId: ticket.ticketId, status: ticket.status }
+        : undefined);
   const title = offering?.title || ticket.offeringTitle || ticket.offeringKey;
   return (
     <>

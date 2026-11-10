@@ -73,6 +73,7 @@ import {
   OfferingFlowContext,
   OfferingFlowDialog,
   OfferingTicket,
+  OfferingTicketCard,
   OfferingTicketUpdate,
   threadTicketsQueryKey,
   useOfferingCtaForFlow,
@@ -1411,6 +1412,18 @@ export function BrickChatCore({
     return byKey;
   }, [threadTickets]);
 
+  // requests the Brickfi team has replied to in this thread - their card
+  // shows above the reply, so it isn't repeated where the request was raised
+  const repliedTicketIds = useMemo(
+    () =>
+      new Set(
+        chatHistory.flatMap(
+          (m) => m.answer.ticketUpdates?.map((u) => u.ticketId) || [],
+        ),
+      ),
+    [chatHistory],
+  );
+
   // show the new request straight away - its card replaces the buttons it
   // was raised from
   const handleOfferingSubmitted = (ticket: OfferingTicket) => {
@@ -1545,7 +1558,7 @@ export function BrickChatCore({
           >
             <Flex justify="flex-end" style={{ marginBottom: 2 }}>
               {/* guests can't share - handleShare needs a user id */}
-              {user?._id && (activeThreadId || selectedThreadId) && (
+              {/* {user?._id && (activeThreadId || selectedThreadId) && (
                   <Tooltip title="Share chat">
                     <Button
                       type="text"
@@ -1566,7 +1579,7 @@ export function BrickChatCore({
                       onClick={handleShare}
                     />
                   </Tooltip>
-                )}
+                )} */}
               {/* hidden until the user query settles, so it doesn't flash
                 for a signed-in user whose profile is still loading */}
               {isGuest && !userLoading && (
@@ -1840,6 +1853,32 @@ export function BrickChatCore({
                     marginBottom: 16,
                   }}
                 >
+                  {/* a reply to a request - its card above the answer, with
+                    the live ticket (status, details) when the thread has it */}
+                  {messageItem.answer.ticketUpdates?.length ? (
+                    <Flex vertical gap={8} style={{ marginBottom: 8 }}>
+                      {messageItem.answer.ticketUpdates.map((update) => {
+                        const liveTicket = threadTickets?.find(
+                          (t) => t.ticketId === update.ticketId,
+                        );
+                        // the user's original request, shown like any question
+                        const ticketQuery = liveTicket?.query?.trim();
+                        return (
+                          <Flex key={update.ticketId} vertical gap={12}>
+                            <OfferingTicketCard
+                              ticket={{
+                                ...update,
+                                status: liveTicket?.status || update.status,
+                              }}
+                              details={liveTicket}
+                            />
+                            {ticketQuery ? renderQuestion(ticketQuery) : null}
+                          </Flex>
+                        );
+                      })}
+                    </Flex>
+                  ) : null}
+
                   {messageItem.steps?.length ? (
                     <ChatTimeline
                       steps={messageItem.steps}
@@ -2123,16 +2162,20 @@ export function BrickChatCore({
                       const notedTicket = messageItem.answer.offeringTickets?.find(
                         (t) => t.offeringKey === offeringKey,
                       );
+                      const existingTicket =
+                        (notedTicket &&
+                          threadTickets?.find(
+                            (t) => t.ticketId === notedTicket.ticketId,
+                          )) ||
+                        offeringTicketsByKey[offeringKey];
                       return (
                       <OfferingCtaButtons
                         offeringKey={offeringKey}
                         ticketNoted={!!notedTicket}
-                        existingTicket={
-                          (notedTicket &&
-                            threadTickets?.find(
-                              (t) => t.ticketId === notedTicket.ticketId,
-                            )) ||
-                          offeringTicketsByKey[offeringKey]
+                        existingTicket={existingTicket}
+                        hideTicketCard={
+                          !!existingTicket &&
+                          repliedTicketIds.has(existingTicket.ticketId)
                         }
                         onStart={(offering, cta) =>
                           setActiveOfferingFlow({

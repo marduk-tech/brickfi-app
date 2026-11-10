@@ -20,10 +20,14 @@ export default function OfferingCtaButtons({
   offeringKey,
   existingTicket,
   ticketNoted = false,
+  hideTicketCard = false,
   onStart,
 }: {
   offeringKey: string;
   existingTicket?: OfferingTicket;
+  /** the ticket's card already shows further down the thread (above the
+   * Brickfi team's reply to it) - don't repeat it here */
+  hideTicketCard?: boolean;
   /** a request was already raised from this answer (its offeringTickets
    * note) - only its card shows, never the buttons, even once it's closed */
   ticketNoted?: boolean;
@@ -32,12 +36,14 @@ export default function OfferingCtaButtons({
   const findOffering = useActiveOfferings();
   const offering = findOffering(offeringKey);
   if (ticketNoted) {
-    return existingTicket ? <OfferingTicketCard ticket={existingTicket} /> : null;
+    return existingTicket && !hideTicketCard ? (
+      <OfferingTicketCard ticket={existingTicket} />
+    ) : null;
   }
   if (existingTicket && existingTicket.status !== "closed") {
-    return <OfferingTicketCard ticket={existingTicket} />;
+    return hideTicketCard ? null : <OfferingTicketCard ticket={existingTicket} />;
   }
-  const ticketCard = existingTicket ? (
+  const ticketCard = existingTicket && !hideTicketCard ? (
     <OfferingTicketCard ticket={existingTicket} />
   ) : null;
   // still loading, or no longer active
