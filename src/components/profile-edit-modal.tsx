@@ -13,6 +13,10 @@ const FIRST_SNOOZE_MS = 1 * 60 * 60 * 1000;
 const SECOND_SNOOZE_MS = 4 * 60 * 60 * 1000;
 const REPEAT_SNOOZE_MS = 12 * 60 * 60 * 1000;
 
+// a user already signed in when the page loads gets the prompt after this
+// delay; one who signs in on the page gets it right away
+const ALREADY_SIGNED_IN_PROMPT_DELAY_MS = 3000;
+
 interface ProfilePromptEntry {
   userId: string;
   dismissCount: number;
@@ -64,15 +68,36 @@ export function ProfileEditModal(props: ProfileEditModalProps) {
   const profileIncomplete =
     !!userId && (!user?.profile?.name || !user?.profile?.email);
 
-  // ask for missing name/email once the user loads, unless snoozed
+  // signed in before this page loaded (vs. signing in on it) - read once on
+  // mount, before any login on this page writes the stored user
+  const [wasAlreadySignedIn] = useState(() => {
+    try {
+      return !!safeStorage.getItem(LocalStorageKeys.user);
+    } catch {
+      return false;
+    }
+  });
+
+  // ask for missing name/email once the user loads, unless snoozed - after
+  // ALREADY_SIGNED_IN_PROMPT_DELAY_MS for a returning user, so the page gets
+  // a moment first; straight away right after signing in
   useEffect(() => {
     if (!props.autoPrompt) return;
     if (!userId || !profileIncomplete) {
       setPromptOpen(false);
       return;
     }
-    if (isProfilePromptDue(userId)) setPromptOpen(true);
-  }, [props.autoPrompt, userId, profileIncomplete]);
+    if (!isProfilePromptDue(userId)) return;
+    if (!wasAlreadySignedIn) {
+      setPromptOpen(true);
+      return;
+    }
+    const timer = setTimeout(
+      () => setPromptOpen(true),
+      ALREADY_SIGNED_IN_PROMPT_DELAY_MS,
+    );
+    return () => clearTimeout(timer);
+  }, [props.autoPrompt, userId, profileIncomplete, wasAlreadySignedIn]);
 
   const open = props.autoPrompt ? promptOpen : props.open;
   const onCancel = props.autoPrompt
