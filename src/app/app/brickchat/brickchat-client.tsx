@@ -282,8 +282,9 @@ const shareThread = async (userId: string, threadId: string): Promise<void> => {
   if (!res.ok) throw new Error(`share ${res.status}`);
 };
 
+// userId left out = guest read-only view (no clone)
 const openSharedThread = async (
-  userId: string,
+  userId: string | undefined,
   sharedBy: string,
   threadId: string,
 ): Promise<{ history: ChatMessage[]; threadId?: string }> => {
@@ -427,6 +428,8 @@ export function BrickChatCore({
   const [showMobileMap, setShowMobileMap] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
   const [claimingGuestThread, setClaimingGuestThread] = useState(false);
+  // guest is looking at someone's shared thread - follow-ups need a login
+  const [sharedGuestPreview, setSharedGuestPreview] = useState(false);
   // set when the open thread is archived (read-only)
   const [archivedThreadId, setArchivedThreadId] = useState<string | null>(
     null,
@@ -945,8 +948,10 @@ export function BrickChatCore({
   }, [user?._id]);
 
   // clone the thread into the current user and swap the URL to it.
+  // Guests just get a read-only view; it's cloned once they log in.
   useEffect(() => {
-    if (!user?._id || !selectedThreadId || !sharedBy) {
+    const viewAsGuest = !user?._id && isGuest;
+    if ((!user?._id && !viewAsGuest) || !selectedThreadId || !sharedBy) {
       return;
     }
 
@@ -957,7 +962,7 @@ export function BrickChatCore({
 
       try {
         const { history, threadId: newThreadId } = await openSharedThread(
-          user._id,
+          user?._id,
           sharedBy,
           selectedThreadId,
         );
@@ -967,6 +972,15 @@ export function BrickChatCore({
         }
 
         setChatHistory(history);
+        setSharedGuestPreview(viewAsGuest);
+
+        if (viewAsGuest) {
+          // keep sharedBy in the URL so logging in clones it
+          setThreadyHistoryLoading(false);
+          scheduleLoginPrompt();
+          return;
+        }
+
         if (newThreadId) {
           setActiveThreadId(newThreadId);
         }
@@ -1015,7 +1029,7 @@ export function BrickChatCore({
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?._id, selectedThreadId, sharedBy]);
+  }, [user?._id, isGuest, selectedThreadId, sharedBy]);
 
   const handleSearch = async (values: { question: string }) => {
     const question = values.question?.trim();
@@ -1033,7 +1047,7 @@ export function BrickChatCore({
     }
 
     // guests only get the one free query
-    if (isGuest && readGuestEntry()?.threadId) {
+    if (isGuest && (sharedGuestPreview || readGuestEntry()?.threadId)) {
       openLoginPrompt();
       return;
     }
@@ -1278,8 +1292,10 @@ export function BrickChatCore({
     setMapResultsIndex(undefined);
     setProjectResults(undefined);
 
+    setSharedGuestPreview(false);
+
     form.resetFields();
-    syncThreadUrl();
+    syncThreadUrl(undefined, { dropParams: ["sharedBy"] });
   };
 
   const handleShare = async () => {
