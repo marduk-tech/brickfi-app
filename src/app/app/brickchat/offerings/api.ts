@@ -1,3 +1,4 @@
+import { getAttribution, type AdConversion } from "@/libs/ad-attribution";
 import { apiKey, baseApiUrl } from "@/libs/constants";
 import { useQuery } from "@tanstack/react-query";
 import type {
@@ -80,7 +81,12 @@ export const createOfferingTicket = ({
   ctaId: string;
   data: Record<string, unknown>;
 }) =>
-  postJson<OfferingTicket>("brickfi-offerings/tickets", { ...owner, ...rest });
+  // a new ticket is an ad conversion - attribution goes with it, and its
+  // event id comes back for the Pixel
+  postJson<OfferingTicket & { conversion?: AdConversion }>(
+    "brickfi-offerings/tickets",
+    { ...owner, ...rest, attribution: getAttribution() },
+  );
 
 export const threadTicketsQueryKey = (threadId?: string) => [
   "brickfi-thread-tickets",

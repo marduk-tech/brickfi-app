@@ -4,7 +4,6 @@ import { forwardRef, ReactNode, useState } from "react";
 import { BRICK360_CATEGORY, Brick360DataPoints } from "../../libs/constants";
 import {
   capitalize,
-  captureAnalyticsEvent,
   getCategoryScore,
 } from "../../libs/lvnzy-helper";
 import { parseProConHtml } from "../../libs/html-utils";
@@ -120,12 +119,6 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
           onClick={() => {
             setQuickSnapshotDialogOpen(true);
             setQuickSnapshotDialogContent(reasoningStmt(true));
-            captureAnalyticsEvent("summary-expand", {
-              summaryType: isPro ? "pros" : "cons",
-              summaryTitle: title,
-              projectName: lvnzyProject?.meta.projectName,
-              projectId: lvnzyProject._id,
-            });
           }}
           gap={4}
           vertical
@@ -254,12 +247,6 @@ export const Brick360Tab = forwardRef<any, Brick360TabProps>(
                             }}
                             onClick={() => {
                               onDataPointClick(sc, item);
-                              captureAnalyticsEvent("expand-datapoint", {
-                                pillar: sc.key,
-                                dataPoint: (item as any)[0],
-                                projectName: lvnzyProject?.meta.projectName,
-                                projectId: lvnzyProject._id
-                              });
                             }}
                           >
                             <Flex align="center" style={{ width: "100%" }}>

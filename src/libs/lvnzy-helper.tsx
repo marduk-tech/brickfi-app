@@ -119,11 +119,12 @@ export const thsndFormat = (amt: string | number) => {
   return amtNum;
 };
 
+// sent as-is (no prefix) - brickchat events are named bkchat-*
 export const captureAnalyticsEvent = (event: string, props: any) => {
   if (env == "production") {
     try {
       console.log("captured posthog event: ", event);
-      posthog.capture(`bkfi-${event}`, props || {});
+      posthog.capture(event, props || {});
     } catch (err: any) {
       console.warn("error while capturing posthog event: ", err);
     }

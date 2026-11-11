@@ -1,5 +1,4 @@
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Button, Flex } from "antd";
 
@@ -52,12 +51,6 @@ export const MapExpandBtn = ({
         }}
         onClick={() => {
           onClick();
-          captureAnalyticsEvent("expand-map", {
-            pillar: pillar || "",
-            dataPoint: dataPoint || "",
-            projectName: projectName || "",
-            projectId: projectId || ""
-          });
         }}
       >
         Expand

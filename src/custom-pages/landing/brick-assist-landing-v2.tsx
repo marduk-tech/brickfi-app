@@ -18,7 +18,6 @@ import { SectionCenter, SectionLeft, SectionRight } from "./section";
 import LandingFooter from "./footer";
 import { safeWindow } from "@/libs/browser-utils";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 
 export default function BrickAssistLandingV2({ initialIsMobile = false }: { initialIsMobile?: boolean }) {
   const [isMobile, setIsMobile] = useState(initialIsMobile);
@@ -43,9 +42,6 @@ export default function BrickAssistLandingV2({ initialIsMobile = false }: { init
     useState(false);
 
     
-  useEffect(() => {
-    captureAnalyticsEvent("brickassist-landing",{});
-  },[])
 
 
   const getCTA = () => {

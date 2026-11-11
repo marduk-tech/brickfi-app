@@ -6,6 +6,16 @@ import { ClientProviders } from "../components/client-providers";
 import "../theme/globals.scss";
 import { SEO_CONTENT } from "@/libs/constants";
 
+// Google tags - each one is left out when its id is unset
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID; // G-...
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID; // GTM-...
+// Google Ads tag (AW-...) - loaded through the same gtag as analytics
+const GOOGLE_ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID;
+// gtag.js loads with whichever of the two is set
+const GTAG_ID = GA_MEASUREMENT_ID || GOOGLE_ADS_ID;
+// Meta Pixel - not loaded at all when unset
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.brickfi.in"),
   title: {
@@ -137,41 +147,71 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(RootSEOSchema) }}
         />
-
-        <Script
-          strategy="afterInteractive"
-          src="https://www.googletagmanager.com/gtag/js?id=G-Q2HFD85Y22"
-        />
-        <Script
-          id="google-analytics"
-          strategy="afterInteractive"
+        {/* Google consent mode - before any Google tag loads. Ad storage is
+            denied until the visitor accepts the consent banner (see
+            setAdConsent in libs/ad-attribution.ts), whose answer is kept in
+            the bf_consent_ads cookie and restored here on later visits. */}
+        <script
           dangerouslySetInnerHTML={{
             __html: `
               window.dataLayer = window.dataLayer || [];
               function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-Q2HFD85Y22');
+              window.gtag = gtag;
+              var bfAds = /(?:^|; )bf_consent_ads=1/.test(document.cookie) ? 'granted' : 'denied';
+              gtag('consent', 'default', {
+                ad_storage: bfAds,
+                ad_user_data: bfAds,
+                ad_personalization: bfAds,
+                analytics_storage: 'granted'
+              });
             `,
           }}
         />
-        <Script
-          id="google-tag-mgr"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
+
+        {GTAG_ID && (
+          <>
+            <Script
+              strategy="afterInteractive"
+              src={`https://www.googletagmanager.com/gtag/js?id=${GTAG_ID}`}
+            />
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              dangerouslySetInnerHTML={{
+                __html: `
+              gtag('js', new Date());
+              ${
+                GA_MEASUREMENT_ID
+                  ? `gtag('config', '${GA_MEASUREMENT_ID}');`
+                  : ""
+              }
+              ${GOOGLE_ADS_ID ? `gtag('config', '${GOOGLE_ADS_ID}');` : ""}
+            `,
+              }}
+            />
+          </>
+        )}
+        {GTM_ID && (
+          <Script
+            id="google-tag-mgr"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
               (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
 new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-KTQL7X5S');
+})(window,document,'script','dataLayer','${GTM_ID}');
             `,
-          }}
-        />
-        <Script
-          id="meta-pixel"
-          strategy="afterInteractive"
-          dangerouslySetInnerHTML={{
-            __html: `
+            }}
+          />
+        )}
+        {META_PIXEL_ID && (
+          <Script
+            id="meta-pixel"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
               !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
@@ -180,29 +220,35 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '787676156936614');
+fbq('consent', /(?:^|; )bf_consent_ads=1/.test(document.cookie) ? 'grant' : 'revoke');
+fbq('init', '${META_PIXEL_ID}');
 fbq('track', 'PageView');
             `,
-          }}
-        ></Script>
+            }}
+          ></Script>
+        )}
       </head>
       <body>
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-KTQL7X5S"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          ></iframe>
-        </noscript>
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: "none", visibility: "hidden" }}
-            src="https://www.facebook.com/tr?id=787676156936614&ev=PageView&noscript=1"
-          />
-        </noscript>
+        {GTM_ID && (
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+            ></iframe>
+          </noscript>
+        )}
+        {META_PIXEL_ID && (
+          <noscript>
+            <img
+              height="1"
+              width="1"
+              style={{ display: "none", visibility: "hidden" }}
+              src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+            />
+          </noscript>
+        )}
 
         <AntdRegistry>
           <ClientProviders>{children}</ClientProviders>

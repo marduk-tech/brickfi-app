@@ -18,7 +18,7 @@ import {
   Brick360DataPoints,
   DRIVER_CATEGORIES,
 } from "@/libs/constants";
-import { capitalize, captureAnalyticsEvent } from "@/libs/lvnzy-helper";
+import { capitalize } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { LvnzyProject } from "@/types/LvnzyProject";
 import { ISurroundingElement } from "@/types/Project";
@@ -294,13 +294,6 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
       try {
         if (!question || question.length < 3) return;
 
-        captureAnalyticsEvent("question-asked", {
-          question,
-          pillar: dataPointSelected?.selectedDataPointCategory || "",
-          dataPoint: dataPointSelected?.selectedDataPointSubCategory || "",
-          projectName: lvnzyProject?.meta?.projectName || "",
-          projectId: lvnzyProject?._id,
-        });
 
         setQueryStreaming(true);
 
@@ -421,12 +414,6 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
         return;
       }
       handleSelectKey(key);
-      captureAnalyticsEvent("datapoint-map-view", {
-        pillar: categoryKey,
-        dataPoint: key.split("::")[1],
-        projectName: lvnzyProject?.meta?.projectName,
-        projectId: lvnzyProject?._id,
-      });
     };
 
     const mapFocus: PillarMapFocus = {

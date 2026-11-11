@@ -38,7 +38,6 @@ import { ISurroundingElement } from "../../types/Project";
 import DynamicReactIcon from "../common/dynamic-react-icon";
 
 //
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import dynamic from "next/dynamic";
 import { MapExpandBtn } from "../map-view-v2/map-utils/map-expand-btn";
 import {
@@ -418,13 +417,6 @@ export const Brick360Chat = forwardRef<Brick360ChatRef, Brick360Props>(
 
         setIsDrawerExpanded(true);
 
-        captureAnalyticsEvent("question-asked", {
-          question,
-          pillar: dataPointSelected?.selectedDataPointCategory || "",
-          dataPoint: dataPointSelected?.selectedDataPointSubCategory || "",
-          projectName: lvnzyProject?.meta.projectName || "",
-          projectId: lvnzyProject?._id,
-        });
 
         setQueryStreaming(true);
 

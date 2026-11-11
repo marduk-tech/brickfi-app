@@ -32,7 +32,6 @@ import {
 } from "../../libs/constants";
 import {
   capitalize,
-  captureAnalyticsEvent,
   driverStatusLabel,
   thsndFormat,
 } from "../../libs/lvnzy-helper";
@@ -409,12 +408,6 @@ export const Brick360Pillar = forwardRef<any, Brick360PillarProps>(
           })),
         ],
       });
-      captureAnalyticsEvent("driver-info-view", {
-        driverName: driver.name,
-        driverType: driver.driver,
-        projectName: lvnzyProject?.meta.projectName,
-        projectId: lvnzyProject?._id,
-      });
     };
 
     // --- data-point selection + Q&A (was Brick360Chat, now driven by which
@@ -594,13 +587,6 @@ export const Brick360Pillar = forwardRef<any, Brick360PillarProps>(
       try {
         if (!question || question.length < 3) return;
 
-        captureAnalyticsEvent("question-asked", {
-          question,
-          pillar: dataPointSelected?.selectedDataPointCategory || "",
-          dataPoint: dataPointSelected?.selectedDataPointSubCategory || "",
-          projectName: lvnzyProject?.meta.projectName || "",
-          projectId: lvnzyProject?._id,
-        });
 
         setQueryStreaming(true);
 
@@ -1204,12 +1190,6 @@ export const Brick360Pillar = forwardRef<any, Brick360PillarProps>(
                     const key = Array.isArray(keys) ? keys[0] : keys;
                     handleSelectKey(key || undefined);
                     if (key) {
-                      captureAnalyticsEvent("expand-datapoint", {
-                        pillar: sc.key,
-                        dataPoint: key.split("::")[1],
-                        projectName: lvnzyProject?.meta.projectName,
-                        projectId: lvnzyProject?._id,
-                      });
                     }
                   }}
                   items={orderedDataPoints.map((item: any, index: number) => {
@@ -1348,12 +1328,6 @@ export function Brick360Highlights({
         onClick={() => {
           setQuickSnapshotDialogOpen(true);
           setQuickSnapshotDialogContent(reasoningStmt(true));
-          captureAnalyticsEvent("summary-expand", {
-            summaryType: isPro ? "pros" : "cons",
-            summaryTitle: title,
-            projectName: lvnzyProject?.meta.projectName,
-            projectId: lvnzyProject?._id,
-          });
         }}
         gap={4}
         vertical

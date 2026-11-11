@@ -9,7 +9,7 @@ import LandingHeader from "./header";
 import LandingFooter from "./footer";
 import { CaretRightOutlined } from "@ant-design/icons";
 import { SectionLeft, SectionCenter, SectionRight } from "./section";
-import { captureAnalyticsEvent, txtToId } from "@/libs/lvnzy-helper";
+import { txtToId } from "@/libs/lvnzy-helper";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 import { ProjectSelectStep, ProjectSelectStepState } from "@/components/request-report/project-select-step";
 
@@ -101,7 +101,6 @@ export default function ReportLanding({ initialIsMobile = false }: { initialIsMo
         element.scrollIntoView({ behavior: "smooth" });
       }
     }
-    captureAnalyticsEvent("report-landing", {});
   }, []);
   const whoAreWeText = (
     <Flex vertical>

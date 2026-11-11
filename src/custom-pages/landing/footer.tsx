@@ -117,7 +117,7 @@ export default function LandingFooter() {
             >
               Brickfi App
             </Link>
-            <Link
+            {/* <Link
               href={`${LandingConstants.callbackLink}?srcIntent=footer`}
               style={{
                 color: COLORS.textColorLight,
@@ -126,7 +126,7 @@ export default function LandingFooter() {
               }}
             >
               Consult For Free
-            </Link>
+            </Link> */}
             <Link
               href="/aboutus"
               style={{

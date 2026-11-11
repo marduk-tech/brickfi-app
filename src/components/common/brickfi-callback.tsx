@@ -20,7 +20,6 @@ import { useParams } from "next/navigation";
 import { Loader } from "./loader";
 import { safeWindow } from "@/libs/browser-utils";
 import { LandingConstants } from "@/libs/constants";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import posthog from "posthog-js";
 
 const assistanceOptions = [
@@ -173,7 +172,6 @@ export function BrickfiCallback() {
     if (user) {
       form.setFieldsValue({ name: user.profile.name });
     }
-    captureAnalyticsEvent("callback-form", {});
   }, [user, form]);
 
   const onFinish = async (values: any) => {

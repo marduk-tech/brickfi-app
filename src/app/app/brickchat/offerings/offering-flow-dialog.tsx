@@ -1,6 +1,7 @@
 "use client";
 
 import { useDevice } from "@/hooks/use-device";
+import { trackPixelConversion } from "@/libs/ad-attribution";
 import { FONT_SIZE } from "@/theme/style-constants";
 import { Button, message, Modal, Result, Typography } from "antd";
 import { useEffect, useState } from "react";
@@ -72,7 +73,7 @@ export default function OfferingFlowDialog({
     }
     setSubmitting(true);
     try {
-      const ticket = await createOfferingTicket({
+      const { conversion, ...ticket } = await createOfferingTicket({
         owner,
         threadId,
         turnId: flow.turnId,
@@ -80,6 +81,7 @@ export default function OfferingFlowDialog({
         ctaId: flow.cta.ctaId,
         data,
       });
+      trackPixelConversion(conversion);
       onSubmitted(ticket);
       onClose();
       setSubmittedNote(submittedMessage(data));

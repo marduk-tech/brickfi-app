@@ -2,7 +2,6 @@
 
 import { forwardRef } from "react";
 import { BRICK360_CATEGORY, LivIndexDriversConfig } from "@/libs/constants";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { LvnzyProject } from "@/types/LvnzyProject";
 import ReferredLocationChips from "../../referred-location-chips";
 import {
@@ -160,12 +159,6 @@ export const LocationPillar = forwardRef<any, PillarProps>((props, ref) => {
           if (!driver) return;
           // empty categories = show every supplied driver (see useMapFilters)
           mapFocus.toggleFocus(item.key, { categories: [], drivers: [driver] });
-          captureAnalyticsEvent("driver-map-focus", {
-            driverName: driver.name,
-            driverType: driver.driver,
-            projectName: lvnzyProject?.meta?.projectName,
-            projectId: lvnzyProject?._id,
-          });
         }}
       />
     );

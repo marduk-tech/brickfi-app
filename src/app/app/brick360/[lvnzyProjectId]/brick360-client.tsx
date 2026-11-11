@@ -7,7 +7,6 @@ import { useDevice } from "@/hooks/use-device";
 import { useFetchAccessibleLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { useUser } from "@/hooks/use-user";
 import { CustomError } from "@/libs/error-handler";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Button, Flex, Modal, Typography } from "antd";
 import Link from "antd/es/typography/Link";
@@ -150,10 +149,6 @@ export default function Brick360Client({ slug }: { slug: string }) {
   }
 
   if (isAccessDenied || isDeniedByApi) {
-    captureAnalyticsEvent("report-invalid-access", {
-      projectName: lvnzyProject?.meta.projectName,
-      projectId: lvnzyProject?._id,
-    });
     return <AccessDeniedState />;
   }
 

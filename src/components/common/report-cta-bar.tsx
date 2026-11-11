@@ -30,12 +30,7 @@ const ReportCTABar: React.FC<ReportCTABarProps> = ({ msg, title, isMobile }) => 
       <img src="/images/real-estate-dev/report-cta-icon.png" height={120}></img>
       <Flex vertical>
         <Flex align="center" gap={4}>
-          <DynamicReactIcon
-            color={COLORS.primaryColor}
-            size={16}
-            iconName="TbView360Number"
-            iconSet="tb"
-          ></DynamicReactIcon>
+          
           <Typography.Text
             style={{
               fontSize: 18,
@@ -44,13 +39,14 @@ const ReportCTABar: React.FC<ReportCTABarProps> = ({ msg, title, isMobile }) => 
               fontWeight: 500,
             }}
           >
-            BRICK360° REPORT
+           
+✺  Brickfi AI
           </Typography.Text>
         </Flex>
         <Typography.Text
           style={{ fontSize: FONT_SIZE.HEADING_3, lineHeight: "110%", fontWeight: 500, width: isMobile ? "100%" : 500 }}
         >
-          {title || "Get a free Brick360 Report"}
+          {title || "Ask Brickfi Today"}
         </Typography.Text>
         <Typography.Text
           style={{
@@ -61,8 +57,8 @@ const ReportCTABar: React.FC<ReportCTABarProps> = ({ msg, title, isMobile }) => 
         >
           {msg || LandingConstants.brick360Descr}
         </Typography.Text>
-        <Button type="default" style={{ width: 150, height: 32, marginTop: 8 }}>
-          Get 360 Report
+        <Button type="default" style={{ width: 150, height: 32, marginTop: 8, fontWeight:500 }}>
+          Ask Brickfi &nbsp; 💬
         </Button>
       </Flex>
     </Flex>

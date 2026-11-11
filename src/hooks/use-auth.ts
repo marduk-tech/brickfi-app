@@ -8,6 +8,7 @@ import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { queryClient } from "../libs/query-client";
 import { safeStorage, safeWindow } from "../libs/browser-utils";
 import { getUtmHistory, clearUtmHistory } from "../libs/utm-utils";
+import { getAttribution, trackPixelConversion } from "../libs/ad-attribution";
 
 export type LoginStatus =
   | "OTP_SENT"
@@ -56,11 +57,15 @@ export function useAuth() {
         verificationId: verificationId,
         code: code,
         mobile: mobile,
+        // a first login is the sign-up ad conversion
+        attribution: getAttribution(),
       });
     },
 
     async onSuccess({ data }) {
       if (data.user) {
+        // set only on the user's first login (the sign-up)
+        trackPixelConversion(data.conversion);
         safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(data.user));
 
         await queryClient.invalidateQueries({

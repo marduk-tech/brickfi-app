@@ -105,6 +105,11 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
   const bookmarkedThreads = chatThreads?.filter((t) => t.isBookmarked) ?? [];
   // listed under "Saved" instead, so not repeated in the recent list
   const unbookmarkedThreads = chatThreads?.filter((t) => !t.isBookmarked) ?? [];
+  // archived ones (see brickchat-archive.service in services) are hidden
+  // until "See older threads"
+  const recentThreads = unbookmarkedThreads.filter((t) => !t.archivedAt);
+  const olderThreads = unbookmarkedThreads.filter((t) => !!t.archivedAt);
+  const [showOlderThreads, setShowOlderThreads] = useState(false);
 
   const openThread = (threadId: string) => {
     setSidebarOpen(false);
@@ -418,7 +423,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                             </Flex>
                           )}
                           <ThreadList
-                            threads={unbookmarkedThreads}
+                            threads={recentThreads}
                             loading={chatThreadsLoading}
                             emptyText={
                               bookmarkedThreads.length
@@ -427,6 +432,28 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                             }
                             onSelect={openThread}
                           />
+                          {!chatThreadsLoading && olderThreads.length > 0 && (
+                            <Flex vertical gap={4}>
+                              {showOlderThreads && (
+                                <ThreadList
+                                  threads={olderThreads}
+                                  loading={false}
+                                  emptyText=""
+                                  onSelect={openThread}
+                                />
+                              )}
+                              <Typography.Link
+                                style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                                onClick={() =>
+                                  setShowOlderThreads((open) => !open)
+                                }
+                              >
+                                {showOlderThreads
+                                  ? "Hide older threads"
+                                  : `See older threads (${olderThreads.length})`}
+                              </Typography.Link>
+                            </Flex>
+                          )}
                         </Flex>
                       ),
                     },

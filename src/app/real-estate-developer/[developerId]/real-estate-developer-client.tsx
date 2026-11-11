@@ -374,7 +374,7 @@ export default function RealEstateDeveloperClient({
                   fontWeight: 500,
                 }}
               >
-                BRICKFI ASSIST
+                BRICKFI AI
               </Typography.Text>
             </Flex>
             <Typography.Text
@@ -388,7 +388,7 @@ export default function RealEstateDeveloperClient({
                 wordBreak: "break-word",
               }}
             >
-              Experience The Difference in Home Buying with Brickfi Assist
+              Find The Home You Need Without Brokers or Spam
             </Typography.Text>
             <p style={{ opacity: 0.8 }}>
               Brickfi presents the new way to find your dream home. No hype, No
@@ -399,14 +399,14 @@ export default function RealEstateDeveloperClient({
               type="default"
               style={{ height: 32, width: 175 }}
               onClick={() => {
-                safeWindow.location.assign(LandingConstants.brickAssistLink);
+                safeWindow.location.assign(LandingConstants.appLink);
               }}
             >
-              Explore Brickfi Assist
+              Explore Brickfi AI
             </Button>
           </Flex>
           <img
-            src="/images/landing/brickassistv2/2.png"
+            src="/images/landing/brick-chat/brickchat-vs-broker.png"
             style={{
               height: "auto",
               width: isMobile ? "95%" : 400,
@@ -495,9 +495,8 @@ export default function RealEstateDeveloperClient({
           align="center"
         >
           <ReportCTABar
-            title={`Brick360 Report for ${developer.name}`}
-            msg="Get a free Brick360 report for detailed builder credibility analysis
-            including time committment, customer complaints and more."
+            title={`360 Analysis for ${developer.name}`}
+            msg="Explore in detail builder credibility with time committment, customer complaints and more."
             isMobile={isMobile}
           ></ReportCTABar>
         </Flex>

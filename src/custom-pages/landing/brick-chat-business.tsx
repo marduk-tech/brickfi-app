@@ -24,7 +24,6 @@ import { safeWindow } from "@/libs/browser-utils";
 import DynamicReactIcon, {
   IconSetKey,
 } from "@/components/common/dynamic-react-icon";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import styles from "./brick-chat.module.css";
 
 const SAMPLE_QUERIES: {
@@ -348,9 +347,6 @@ export default function BrickChatBusiness({
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
 
-  useEffect(() => {
-    captureAnalyticsEvent("brickassist-landing", {});
-  }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -360,7 +356,6 @@ export default function BrickChatBusiness({
   const submitSearch = () => {
     if (!isSearchQueryValid) return;
     const query = searchQuery.trim();
-    captureAnalyticsEvent("brickchat-landing-search", { query });
     safeWindow.location.href = `/app/brickchat?q=${encodeURIComponent(query)}`;
   };
 

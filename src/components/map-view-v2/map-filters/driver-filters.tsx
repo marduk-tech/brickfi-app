@@ -5,7 +5,7 @@ import {
   DRIVER_CATEGORIES,
   LivIndexDriversConfig,
 } from "../../../libs/constants";
-import { capitalize, captureAnalyticsEvent } from "../../../libs/lvnzy-helper";
+import { capitalize } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 
@@ -59,11 +59,6 @@ export const DriverFilters = ({
             cursor: "pointer",
           }}
           onClick={() => {
-            captureAnalyticsEvent("click-map-filter", {
-              filter: filterItem.key,
-              projectName: projectName || "",
-              projectId: projectId || ""
-            });
             setSelectedDriverFilter(filterItem.key);
           }}
         >
@@ -103,10 +98,6 @@ export const DriverFilters = ({
           cursor: "pointer",
         }}
         onClick={() => {
-          captureAnalyticsEvent("click-map-filter", {
-            filter: k,
-            projectName: projectName || "",
-          });
           setSelectedDriverFilter(k);
         }}
       >

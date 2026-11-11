@@ -17,6 +17,7 @@ import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import { usePinnedProjects } from "@/hooks/use-pinned-projects";
 import { useUser } from "@/hooks/use-user";
 import { useUpdateUserMutation } from "@/hooks/user-hooks";
+import { getAttribution, trackPixelConversion } from "@/libs/ad-attribution";
 import { safeStorage } from "@/libs/browser-utils";
 import {
   apiKey,
@@ -24,7 +25,10 @@ import {
   LocalStorageKeys,
   queryKeys,
 } from "@/libs/constants";
-import { addProjectToDefaultCollection } from "@/libs/lvnzy-helper";
+import {
+  addProjectToDefaultCollection,
+  captureAnalyticsEvent,
+} from "@/libs/lvnzy-helper";
 import { ProjectPhaseTimeline } from "@/libs/project-status";
 import { getLvnzyProjectDisplayCard } from "@/queries/lvnzy-projects";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
@@ -539,6 +543,13 @@ export function BrickChatCore({
   >([]);
   const hasFocusedReferredLocations = focusedReferredLocations.length > 0;
   const handleToggleReferredLocation = (item: ReferredLocationChipItem) => {
+    // selecting only - a click that deselects the chip isn't a map focus
+    if (!focusedReferredLocations.some((i) => i.key === item.key)) {
+      captureAnalyticsEvent("bkchat-map-focused", {
+        type: item.type,
+        thread_id: activeThreadId || null,
+      });
+    }
     setFocusedReferredLocations((prev) => {
       const next = prev.some((i) => i.key === item.key)
         ? prev.filter((i) => i.key !== item.key)
@@ -764,6 +775,14 @@ export function BrickChatCore({
       : undefined;
   const selectedThreadId = pathThreadId || undefined;
   const sharedBy = searchParams.get("sharedBy")?.trim() || undefined;
+  // the thread in the URL the page was opened with - its first load is a
+  // direct-link open (bkchat-thread-reopened's opened_via), later ones aren't
+  const linkedThreadIdRef = useRef(selectedThreadId);
+  const threadOpenedVia = (threadId: string) => {
+    if (linkedThreadIdRef.current !== threadId) return "app";
+    linkedThreadIdRef.current = undefined;
+    return "link";
+  };
   // Independent of PinnedProjectResults (always rendered above this, see
   // the JSX below) - shows whenever there's no conversation actually in
   // progress, regardless of whether a pinned/default project list exists.
@@ -898,6 +917,11 @@ export function BrickChatCore({
 
         setArchivedThreadId(archived ? selectedThreadId : null);
 
+        captureAnalyticsEvent("bkchat-thread-reopened", {
+          thread_id: selectedThreadId,
+          opened_via: threadOpenedVia(selectedThreadId),
+        });
+
         if ("guestId" in owner) scheduleLoginPrompt();
 
         setChatHistory(history);
@@ -999,6 +1023,14 @@ export function BrickChatCore({
         setChatHistory(history);
         setSharedGuestPreview(viewAsGuest);
 
+        // thread_id is the shared thread; a signed-in user gets their own
+        // copy (new_thread_id)
+        captureAnalyticsEvent("bkchat-thread-reopened", {
+          thread_id: selectedThreadId,
+          opened_via: "shared-link",
+          ...(newThreadId ? { new_thread_id: newThreadId } : {}),
+        });
+
         if (viewAsGuest) {
           // keep sharedBy in the URL so logging in clones it
           setThreadyHistoryLoading(false);
@@ -1059,8 +1091,8 @@ export function BrickChatCore({
   const handleSearch = async (values: { question: string }) => {
     const question = values.question?.trim();
 
-    if (!question || question.length < 3) {
-      message.warning("Please enter at least 3 characters");
+    if (!question || !question.length) {
+      message.warning("Please enter something");
       return;
     }
 
@@ -1127,6 +1159,8 @@ export function BrickChatCore({
                 ),
               }
             : {}),
+          // a signed-in user's first query is an ad conversion
+          ...(guestId ? {} : { attribution: getAttribution() }),
         }),
       });
 
@@ -1218,6 +1252,9 @@ export function BrickChatCore({
             label: event.message,
             status: "active",
           });
+        } else if (event.type === "conversion") {
+          // the user's first query - see trackFirstQuery in the backend
+          trackPixelConversion(event.conversion);
         } else if (event.type === "token") {
           streamedText += event.content;
           setStreamingSummary(streamedText);
@@ -1264,6 +1301,15 @@ export function BrickChatCore({
         },
       ]);
 
+      // sent once answered, so a new conversation's first question carries
+      // the thread id it was just given
+      captureAnalyticsEvent("bkchat-query-asked", {
+        thread_id: resolvedThreadId || activeThreadId || null,
+        query: question,
+        is_new_thread: !activeThreadId,
+        status: "answered",
+      });
+
       if (!activeThreadId && resolvedThreadId) {
         setActiveThreadId(resolvedThreadId);
         syncThreadUrl(resolvedThreadId);
@@ -1278,6 +1324,12 @@ export function BrickChatCore({
     } catch (error) {
       // aborted by "New chat" - expected, not a failure to report
       if ((error as any)?.name === "AbortError") return;
+      captureAnalyticsEvent("bkchat-query-asked", {
+        thread_id: activeThreadId || null,
+        query: question,
+        is_new_thread: !activeThreadId,
+        status: "failed",
+      });
       console.error("Search error:", error);
       message.error("Failed to search projects. Please try again.");
     } finally {
@@ -1366,6 +1418,18 @@ export function BrickChatCore({
   // the CTA flow open in its dialog, if any
   const [activeOfferingFlow, setActiveOfferingFlow] =
     useState<ActiveOfferingFlow | null>(null);
+
+  // each time the offering dialog opens (from an answer's CTA or the
+  // header's Expert Help)
+  useEffect(() => {
+    if (!activeOfferingFlow) return;
+    captureAnalyticsEvent("bkchat-offering-opened", {
+      offering: activeOfferingFlow.offering.key,
+      cta: activeOfferingFlow.cta.ctaId,
+      thread_id: activeThreadId || selectedThreadId || null,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeOfferingFlow]);
   // Expert Help, opened from the header rather than an answer's CTA - no
   // turnId or offeringContext, it isn't tied to an answer
   const expertHelpCta = useOfferingCtaForFlow("brkfi-expert");
@@ -1671,12 +1735,12 @@ export function BrickChatCore({
                 />
               </Tooltip>
             </Flex>
-            {isArchivedThread && (
+            {isArchivedThread ? (
               <Flex
                 align="center"
-                justify="space-between"
                 gap={8}
-                style={{ marginBottom: 8 }}
+                style={{ marginBottom: 24, marginTop: 24, paddingTop: 16, borderTop: `1px solid ${COLORS.borderColor}` }}
+                vertical
               >
                 <Typography.Text
                   style={{
@@ -1686,12 +1750,11 @@ export function BrickChatCore({
                 >
                   This conversation is archived and can no longer be continued.
                 </Typography.Text>
-                <Button size="small" onClick={handleNewChat}>
-                  New chat
+                <Button size="small" onClick={handleNewChat} style={{fontSize: FONT_SIZE.HEADING_4}}>
+                  Start a New Chat
                 </Button>
               </Flex>
-            )}
-            <div style={{ position: "relative" }}>
+            ) : <div style={{ position: "relative" }}>
               <Form.Item name="question" style={{ marginBottom: 0 }}>
                 <Input.TextArea
                   placeholder={
@@ -1745,7 +1808,8 @@ export function BrickChatCore({
                   color: COLORS.primaryColor,
                 }}
               />
-            </div>
+            </div>}
+            
           </Form>
         ) : null}
         <Flex
@@ -2132,11 +2196,17 @@ export function BrickChatCore({
                                     ]
                                   : focusedReferredLocationKeys
                               }
-                              onToggle={(item) =>
-                                item.key === ALL_PROJECTS_CHIP_KEY
-                                  ? handleShowAllProjects()
-                                  : handleToggleReferredLocation(item)
-                              }
+                              onToggle={(item) => {
+                                if (item.key !== ALL_PROJECTS_CHIP_KEY) {
+                                  handleToggleReferredLocation(item);
+                                  return;
+                                }
+                                captureAnalyticsEvent("bkchat-map-focused", {
+                                  type: "all-projects",
+                                  thread_id: activeThreadId || null,
+                                });
+                                handleShowAllProjects();
+                              }}
                             />
                           </Flex>
                         </Flex>

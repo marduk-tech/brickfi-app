@@ -27,7 +27,6 @@ import { safeWindow } from "@/libs/browser-utils";
 import DynamicReactIcon, {
   IconSetKey,
 } from "@/components/common/dynamic-react-icon";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import styles from "./brick-chat.module.css";
 
 const FAQs = [
@@ -392,9 +391,6 @@ export default function BrickChatv2({
   const [requestCallbackDialogOpen, setRequestCallbackDialogOpen] =
     useState(false);
 
-  useEffect(() => {
-    captureAnalyticsEvent("brickassist-landing", {});
-  }, []);
 
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<TextAreaRef>(null);
@@ -408,7 +404,6 @@ export default function BrickChatv2({
       return;
     }
     const query = searchQuery.trim();
-    captureAnalyticsEvent("brickchat-landing-search", { query });
     safeWindow.location.href = `/app/brickchat?q=${encodeURIComponent(query)}`;
   };
 

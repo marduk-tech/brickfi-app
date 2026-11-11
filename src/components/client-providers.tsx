@@ -8,6 +8,8 @@ import { isNativeApp } from "../libs/native-app";
 import { getQueryClient } from "../libs/query-client";
 import { extractUtmParams, saveUtmToHistory } from "../libs/utm-utils";
 import { antTheme } from "../theme/ant-theme";
+import { captureClickIds } from "../libs/ad-attribution";
+import AdConsentBanner from "./common/ad-consent-banner";
 import PosthogProvider from "./common/posthog-provider";
 import { NativeAppBridge } from "./native-app-bridge";
 
@@ -21,6 +23,8 @@ export function ClientProviders({ children }: ClientProvidersProps) {
     if (utmParams) {
       saveUtmToHistory(utmParams);
     }
+    // ad click ids the visit landed with, for the ad conversions
+    captureClickIds();
   }, []);
 
   useEffect(() => {
@@ -83,6 +87,7 @@ export function ClientProviders({ children }: ClientProvidersProps) {
       <NativeAppBridge />
       <ConfigProvider theme={antTheme}>
         <AntApp style={{ maxWidth: 2000, margin: "auto" }}>{children}</AntApp>
+        <AdConsentBanner />
       </ConfigProvider>
       <ReactQueryDevtools />
     </QueryClientProvider>

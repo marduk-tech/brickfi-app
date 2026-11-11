@@ -24,11 +24,13 @@ export function ErrorBoundaryFallback({ error }: { error: AxiosError<any> }) {
   const errorMessage =
     error.response?.data.message || error.message || "Something went wrong";
     
-    // useEffect(() => {
-    //   captureAnalyticsEvent('error-fallback', {
-    //     message: errorMessage
-    //   })
-    // }, [])
+  useEffect(() => {
+    captureAnalyticsEvent("bkchat-error-fallback", {
+      message: errorMessage,
+      path: safeWindow.location?.pathname,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Flex align="center" justify="center" style={{ width: "100%" }}>

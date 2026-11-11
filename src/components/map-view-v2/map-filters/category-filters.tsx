@@ -2,7 +2,7 @@ import { useDevice } from "@/hooks/use-device";
 import { Flex, Typography } from "antd";
 import React from "react";
 import { DRIVER_CATEGORIES } from "../../../libs/constants";
-import { capitalize, captureAnalyticsEvent } from "../../../libs/lvnzy-helper";
+import { capitalize } from "../../../libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "../../../theme/style-constants";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
 
@@ -50,11 +50,6 @@ export const CategoryFilters = ({
         <Flex
           key={category}
           onClick={() => {
-            captureAnalyticsEvent("click-map-filter", {
-              filter: category,
-              projectName: projectName || "",
-              projectId: projectId || ""
-            });
             setSelectedCategory(category);
           }}
           align="center"

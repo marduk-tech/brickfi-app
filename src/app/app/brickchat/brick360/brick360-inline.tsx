@@ -7,7 +7,7 @@ import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
 
 import { BRICK360_CATEGORY, Brick360CategoryInfo } from "@/libs/constants";
-import { captureAnalyticsEvent, getCategoryScore } from "@/libs/lvnzy-helper";
+import { getCategoryScore } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { LvnzyProject } from "@/types/LvnzyProject";
 import {
@@ -115,15 +115,6 @@ export function Brick360Inline({
   );
   const lvnzyProject = projectData || fetchedProject;
 
-  useEffect(() => {
-    if (!lvnzyProject) {
-      return;
-    }
-    captureAnalyticsEvent("report-view", {
-      projectName: lvnzyProject?.meta.projectName,
-      projectId: lvnzyProject?._id,
-    });
-  }, [lvnzyProject]);
 
   const [selectedTabKey, setSelectedTabKey] =
     useState<string>(HIGHLIGHTS_TAB_KEY);
@@ -201,11 +192,6 @@ export function Brick360Inline({
   }, [selectedTabKey]);
 
   const handleTabChange = (key: string) => {
-    captureAnalyticsEvent("tab-navigate", {
-      tabName: key,
-      projectName: lvnzyProject?.meta.projectName,
-      projectId: lvnzyProject?._id,
-    });
     setSelectedTabKey(key);
   };
 

@@ -2,7 +2,6 @@
 
 import LandingFooter from "@/custom-pages/landing/footer";
 import LandingHeader from "@/custom-pages/landing/header";
-import { captureAnalyticsEvent } from "@/libs/lvnzy-helper";
 import { COLORS, FONT_SIZE } from "@/theme/style-constants";
 import { Flex, Typography } from "antd";
 import { Metadata } from "next";
@@ -35,9 +34,6 @@ export default function BrickfiCallbackSuccess({ initialIsMobile = false }: { in
     return () => window.removeEventListener("resize", detect);
   }, []);
 
-  useEffect(() => {
-    captureAnalyticsEvent("callback-form-success", {});
-  });
 
   return (
     <Flex gap={8} vertical style={{ paddingTop: 24, paddingBottom: 16 }}>
