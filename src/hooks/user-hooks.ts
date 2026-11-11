@@ -2,7 +2,8 @@ import { useMutation } from "@tanstack/react-query";
 import { notification } from "antd";
 import { AxiosError } from "axios";
 import { axiosApiInstance } from "../libs/axios-api-Instance";
-import { queryKeys } from "../libs/constants";
+import { safeStorage } from "../libs/browser-utils";
+import { LocalStorageKeys, queryKeys } from "../libs/constants";
 import { queryClient } from "../libs/query-client";
 import { User } from "../types/User";
 
@@ -20,6 +21,18 @@ export function useUpdateUserMutation({ userId }: { userId: string }) {
 
     onSuccess: () => {
       console.log("user details saved successfully");
+      // useUser serves the localStorage copy for up to a minute, so without
+      // this the refetch below (and a page reload) would read the pre-save
+      // user back - e.g. the profile prompt reopening with name/email still
+      // "missing". Dropping `updated` makes the next read go to /auth/myinfo.
+      try {
+        const raw = safeStorage.getItem(LocalStorageKeys.user);
+        const stored = raw ? JSON.parse(raw) : null;
+        if (stored?.user) {
+          delete stored.updated;
+          safeStorage.setItem(LocalStorageKeys.user, JSON.stringify(stored));
+        }
+      } catch {}
     },
 
     onError: (error: AxiosError<any>) => {
