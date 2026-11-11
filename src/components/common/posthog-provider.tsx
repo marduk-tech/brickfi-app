@@ -2,13 +2,15 @@
 
 import { useEffect } from "react";
 import posthog from "posthog-js";
-import { posthogkey } from "@/libs/constants";
+import { env, posthogkey } from "@/libs/constants";
 import { useUser } from "@/hooks/use-user";
 
 export default function PosthogProvider() {
   const { user } = useUser();
- 
+
   useEffect(() => {
+    // only production is tracked - no init (or identify) elsewhere
+    if (env !== "production") return;
     if (posthogkey) {
       console.log(user);
       posthog.init(posthogkey, {
