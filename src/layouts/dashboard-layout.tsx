@@ -449,8 +449,8 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                                 }
                               >
                                 {showOlderThreads
-                                  ? "Hide older threads"
-                                  : `See older threads (${olderThreads.length})`}
+                                  ? "Hide old chats"
+                                  : `See old chats (${olderThreads.length})`}
                               </Typography.Link>
                             </Flex>
                           )}

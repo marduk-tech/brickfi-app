@@ -11,6 +11,7 @@ import {
 } from "@/libs/project-status";
 import {
   capitalize,
+  captureAnalyticsEvent,
   getSaveCollectionIndex,
   removeDuplicatesAndPrepend,
   rupeeAmountFormat,
@@ -290,6 +291,15 @@ export default function BrickChatResults({
           }
           refetch();
 
+          // additions only - removals aren't tracked
+          if (!isSaved) {
+            captureAnalyticsEvent("bk360-project-bookmark", {
+              lvnzy_project_id: lvnzyId,
+              project_id: project.projectId,
+              project_name: project.projectName,
+            });
+          }
+
           messageApi.success(
             isSaved ? "Removed from saved" : "Saved to your collection",
           );
@@ -298,6 +308,21 @@ export default function BrickChatResults({
         }
       },
     });
+  };
+
+  // every "360 Details" button goes through here so each click is tracked
+  const openBrick360 = (
+    project: ProjectResult,
+    source: "card" | "one-liner-dialog",
+  ) => {
+    captureAnalyticsEvent("bkchat-brick360-open", {
+      lvnzy_project_id: project.lvnzyProjectId || null,
+      project_id: project.projectId,
+      project_name: project.projectName,
+      source,
+      layout: minimal ? "minimal" : "full",
+    });
+    onSelectProject?.(project);
   };
 
   // full one-liner in a dialog - the card only shows the first 3 lines
@@ -340,7 +365,7 @@ export default function BrickChatResults({
             size="small"
             onClick={() => {
               instance.destroy();
-              onSelectProject(project);
+              openBrick360(project, "one-liner-dialog");
             }}
           >
             See 360 Details
@@ -480,7 +505,7 @@ export default function BrickChatResults({
                       // cards are wrapped in a Link - don't navigate on icon click
                       e.preventDefault();
                       e.stopPropagation();
-                      onSelectProject(project);
+                      openBrick360(project, "card");
                     }}
                     style={{
                       height: 24,
@@ -782,7 +807,7 @@ export default function BrickChatResults({
                       // cards are wrapped in a Link - don't navigate on icon click
                       e.preventDefault();
                       e.stopPropagation();
-                      onSelectProject(project);
+                      openBrick360(project, "card");
                     }}
                     style={{
                       height: 24,
