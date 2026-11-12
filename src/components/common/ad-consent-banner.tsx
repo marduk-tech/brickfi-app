@@ -47,8 +47,7 @@ export default function AdConsentBanner() {
       }}
     >
       <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, flex: "1 1 280px" }}>
-        We use cookies to measure our ads and show you relevant ones. You can
-        allow or decline this.
+        We use cookies to measure our ads and show you relevant ones.
       </Typography.Text>
       <Flex gap={8}>
         <Button size="small" onClick={() => answer(false)}>
