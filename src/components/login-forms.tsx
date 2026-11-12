@@ -292,7 +292,18 @@ export function LoginForm({ onMobVerified }: { onMobVerified?: any }) {
               </Flex>
             <ContactConsent
               msg={
-                "By signing up you agree to the terms and conditions as well as privacy policy of Brickfi."
+                // new tab - keeps the half-filled login in place
+                <>
+                  By signing up you agree to the{" "}
+                  <a href="/terms" target="_blank" rel="noopener noreferrer">
+                    terms and conditions
+                  </a>{" "}
+                  as well as{" "}
+                  <a href="/privacy" target="_blank" rel="noopener noreferrer">
+                    privacy policy
+                  </a>{" "}
+                  of Brickfi.
+                </>
               }
             ></ContactConsent>
             <Form.Item style={{ marginTop: 16 }}>
