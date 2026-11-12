@@ -1,0 +1,15 @@
+# Static legal pages in public/docs, served without the .html suffix.
+# Netlify serves public/ files from its CDN, so the rewrites in
+# next.config.ts (kept for `next dev`) don't reach them in production -
+# these rules do. 200 = rewrite (the URL stays /privacy), not a redirect.
+[[redirects]]
+  from = "/privacy"
+  to = "/docs/privacy.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/terms"
+  to = "/docs/terms.html"
+  status = 200
+  force = true

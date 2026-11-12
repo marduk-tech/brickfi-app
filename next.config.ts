@@ -35,7 +35,8 @@ const nextConfig: NextConfig = {
       (source) => ({ source, destination: "/", permanent: false }),
     );
   },
-  // static legal pages in public/docs, served without the .html suffix
+  // static legal pages in public/docs, served without the .html suffix - for
+  // `next dev`; on Netlify the same rewrites are in netlify.toml
   async rewrites() {
     return [
       { source: "/privacy", destination: "/docs/privacy.html" },
