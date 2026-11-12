@@ -35,6 +35,13 @@ const nextConfig: NextConfig = {
       (source) => ({ source, destination: "/", permanent: false }),
     );
   },
+  // static legal pages in public/docs, served without the .html suffix
+  async rewrites() {
+    return [
+      { source: "/privacy", destination: "/docs/privacy.html" },
+      { source: "/terms", destination: "/docs/terms.html" },
+    ];
+  },
 };
 
 export default nextConfig;

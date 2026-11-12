@@ -14,7 +14,8 @@ const APP_USER_AGENT = "BrickfiApp";
 const APP_HOME = "/app";
 
 // Non-/app paths that must stay reachable inside the app shell
-const ALLOWED_PREFIXES = [APP_HOME, "/offline", "/api"];
+// (/privacy, /terms - the legal pages must stay reachable in the app)
+const ALLOWED_PREFIXES = [APP_HOME, "/offline", "/api", "/privacy", "/terms"];
 
 function isAppRequest(req: NextRequest) {
   if (process.env.APP_ONLY_MODE === "true") return true;
