@@ -26,7 +26,7 @@ const LandingHeader: React.FC<{
     },
     {
       link: LandingConstants.appLink,
-      label: "My Account",
+      label: "Brickfi App",
     },
   ];
 
