@@ -104,8 +104,11 @@ export const rupeeAmountFormat = (amt: string | number) => {
     return amt;
   }
   const val = Math.abs(amtNum);
-  if (val >= 10000000) return `${(amtNum / 10000000).toFixed(1)} Cr`;
-  if (val >= 100000) return `${Math.round(amtNum / 100000)} Lacs`;
+  const lacs = Number((amtNum / 100000).toFixed(1));
+  // amounts that round to 100 Lacs (e.g. 99.96 L) read better as 1 Cr
+  if (val >= 10000000 || Math.abs(lacs) >= 100)
+    return `${Number((amtNum / 10000000).toFixed(1))} Cr`;
+  if (val >= 100000) return `${lacs} Lacs`;
   return amtNum;
 };
 
