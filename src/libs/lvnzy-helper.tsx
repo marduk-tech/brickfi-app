@@ -35,9 +35,16 @@ export const getMinMaxPrices = (prices: number[]) => {
     if (num > max) max = num;
   }
 
-  return max == min
-    ? rupeeAmountFormat(min)
-    : `${rupeeAmountFormat(min)}-${rupeeAmountFormat(max)}`;
+  const minText = String(rupeeAmountFormat(min));
+  const maxText = String(rupeeAmountFormat(max));
+  if (minText === maxText) return minText;
+  // show a unit shared by both ends once: "2.9-3.5 Cr", not "2.9 Cr-3.5 Cr"
+  const suffix = [" Cr", " Lacs"].find(
+    (s) => minText.endsWith(s) && maxText.endsWith(s),
+  );
+  return suffix
+    ? `${minText.slice(0, -suffix.length)}-${maxText}`
+    : `${minText}-${maxText}`;
 };
 const toRoman = (num: number) => {
   const romanMap: [number, string][] = [
