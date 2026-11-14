@@ -1,6 +1,15 @@
 "use client";
 
-import { Collapse, Drawer, Flex, Image, Layout, Modal, Spin, Typography } from "antd";
+import {
+  Collapse,
+  Drawer,
+  Flex,
+  Image,
+  Layout,
+  Modal,
+  Spin,
+  Typography,
+} from "antd";
 import Link from "next/link";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -8,7 +17,10 @@ import { CustomErrorBoundary } from "../components/common/custom-error-boundary"
 import DynamicReactIcon from "../components/common/dynamic-react-icon";
 import { LoginForm } from "../components/login-forms";
 import { UserDetailsForm } from "../components/user-details-form";
-import { formatThreadDate, useFetchChatThreads } from "../hooks/use-chat-threads";
+import {
+  formatThreadDate,
+  useFetchChatThreads,
+} from "../hooks/use-chat-threads";
 import { useDevice } from "../hooks/use-device";
 import { useUser } from "../hooks/use-user";
 import { safeStorage, safeWindow } from "../libs/browser-utils";
@@ -45,7 +57,10 @@ const ThreadList: React.FC<{
 
   if (!threads.length) {
     return (
-      <Typography.Text type="secondary" style={{ fontSize: FONT_SIZE.SUB_TEXT }}>
+      <Typography.Text
+        type="secondary"
+        style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+      >
         {emptyText}
       </Typography.Text>
     );
@@ -182,7 +197,7 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
     {
       key: "chat",
       title: "Brickfi Ai",
-      disabled: !user || user.role !== "admin" ,
+      disabled: !user || user.role !== "admin",
       link: "/app",
       icon: { name: "MdChat", set: "md" },
     },
@@ -324,6 +339,26 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                     src="/images/brickfi-logo.png"
                     style={{ height: 16, width: "auto" }}
                   ></img>
+                  {pathname.includes("/app") && (
+                  <Typography.Text
+                    type="secondary"
+                    style={{
+                      fontSize: FONT_SIZE.NOTE,
+                      marginTop: -16,
+                      // transforms don't apply to inline elements
+                      display: "inline-block",
+                      transform: "rotate(-7deg)",
+                      color: COLORS.textColorMedium,
+                      backgroundColor: COLORS.bgColor,
+                      border: `0.5px solid ${COLORS.borderColorMedium}`,
+                      padding: "0px 4px",
+                      borderRadius: 4,
+                      marginLeft: 2
+                    }}
+                  >
+                    Beta
+                  </Typography.Text>
+                  )}
                 </Flex>
               </Flex>
               <Flex style={{ marginLeft: "auto" }} align="center">
@@ -398,30 +433,31 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                       children: (
                         <Flex vertical gap={16}>
                           {/* bookmarked chats first, under their own header */}
-                          {!chatThreadsLoading && bookmarkedThreads.length > 0 && (
-                            <Flex vertical gap={4}>
-                              <Flex align="center" gap={4}>
-                                <DynamicReactIcon
-                                  iconName="MdBookmark"
-                                  iconSet="md"
-                                  size={14}
-                                  color={COLORS.textColorDark}
+                          {!chatThreadsLoading &&
+                            bookmarkedThreads.length > 0 && (
+                              <Flex vertical gap={4}>
+                                <Flex align="center" gap={4}>
+                                  <DynamicReactIcon
+                                    iconName="MdBookmark"
+                                    iconSet="md"
+                                    size={14}
+                                    color={COLORS.textColorDark}
+                                  />
+                                  <Typography.Text
+                                    strong
+                                    style={{ fontSize: FONT_SIZE.SUB_TEXT }}
+                                  >
+                                    Saved
+                                  </Typography.Text>
+                                </Flex>
+                                <ThreadList
+                                  threads={bookmarkedThreads}
+                                  loading={false}
+                                  emptyText=""
+                                  onSelect={openThread}
                                 />
-                                <Typography.Text
-                                  strong
-                                  style={{ fontSize: FONT_SIZE.SUB_TEXT }}
-                                >
-                                  Saved
-                                </Typography.Text>
                               </Flex>
-                              <ThreadList
-                                threads={bookmarkedThreads}
-                                loading={false}
-                                emptyText=""
-                                onSelect={openThread}
-                              />
-                            </Flex>
-                          )}
+                            )}
                           <ThreadList
                             threads={recentThreads}
                             loading={chatThreadsLoading}
@@ -458,7 +494,6 @@ export const DashboardLayout: React.FC<{ children: React.ReactNode }> = ({
                       ),
                     },
                   ]}
-                  
                 />
               )}
               <Flex gap={24} vertical style={{ marginTop: "auto" }}>
