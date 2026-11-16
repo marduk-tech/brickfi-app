@@ -152,9 +152,9 @@ interface ExploreAnswer {
   images?: ExploreImagesGroup[];
   /** brickfiId(s) of driver/infra records (schools, transit, tech parks etc) the answer discussed - see synthesize.js. */
   brickfiDriverIds?: string[];
-  /** LLM-suggested next step/question for this turn, e.g. "Want me to compare these?" - see synthesize.js. Empty when there's no sensible follow-up. */
+  /** LLM-suggested next step/question for this turn, e.g. "Want me to compare these?" - see nodes/post-synthesize.js. Empty when there's no sensible follow-up, or the answer carries an offering. */
   followupPrompt?: string;
-  /** A Brickfi offering whose CTA buttons go under this answer - followupPrompt is then its pitch, or the answer is about the offering itself. See resolveFollowupOffering in synthesize.js. */
+  /** A Brickfi offering whose CTA buttons go under this answer (followupPrompt is then empty) - picked as its next step, or the answer is about the offering itself. See nodes/post-synthesize.js. */
   followupOffering?: FollowupOffering | null;
   /** Set on old "[Submitted: ...]" request records the backend used to add to threads - not shown any more (requests show as a card where their offering's buttons were, see useThreadTickets). */
   offeringTicket?: unknown;
@@ -1126,6 +1126,9 @@ export function BrickChatCore({
     setPillarMapConfig(null);
 
     const runStartedAt = Date.now();
+    // the answer as shown on the stream's "answer" event, before its next
+    // step (follow-up or offering) arrives with "final"
+    let shownAnswer: ExploreAnswer | undefined;
 
     try {
       // "New chat" aborts this (see handleNewChat), so a reply still
@@ -1231,6 +1234,38 @@ export function BrickChatCore({
         setSteps(stepList);
       };
 
+      // puts the answer in the chat - on the "answer" event, so the cards
+      // don't wait for postSynthesize's next step (or on "final" when no
+      // "answer" event came)
+      const showAnswer = (shown: ExploreAnswer) => {
+        shownAnswer = shown;
+        if (shown.projectsList && shown.projectsList.length) {
+          setProjectResults(shown.projectsList);
+          setMapResultsIndex(chatHistory.length);
+        }
+        setFocusedReferredLocations(getDefaultReferredLocations(shown));
+
+        const completedSteps = stepList.map((s) =>
+          s.status === "active"
+            ? { ...s, status: "done" as const, endedAt: s.endedAt ?? Date.now() }
+            : s,
+        );
+        setChatHistory((prev) => [
+          ...prev,
+          {
+            question,
+            answer: shown,
+            steps: completedSteps,
+            durationMs: Date.now() - runStartedAt,
+          },
+        ]);
+        // the in-progress block (question, timeline, streamed text) is now
+        // the chat entry above; chatLoading stays on until "final"
+        setCurrentQuestion(undefined);
+        setSteps([]);
+        setStreamingSummary(undefined);
+      };
+
       const handleEvent = (raw: string) => {
         if (!raw.startsWith("data: ")) return;
         let event;
@@ -1258,6 +1293,8 @@ export function BrickChatCore({
         } else if (event.type === "token") {
           streamedText += event.content;
           setStreamingSummary(streamedText);
+        } else if (event.type === "answer") {
+          if (!shownAnswer) showAnswer(event.payload as ExploreAnswer);
         } else if (event.type === "final") {
           answer = event.payload as ExploreAnswer;
           resolvedThreadId = event.meta?.threadId;
@@ -1277,29 +1314,23 @@ export function BrickChatCore({
         }
       }
 
-      if (!answer) throw new Error("stream ended without a result");
-      const finalAnswer: ExploreAnswer = answer;
+      // an answer already shown still counts if "final" never came - it
+      // just goes without its next step
+      const finalAnswer: ExploreAnswer | undefined = answer ?? shownAnswer;
+      if (!finalAnswer) throw new Error("stream ended without a result");
 
-      if (finalAnswer.projectsList && finalAnswer.projectsList.length) {
-        setProjectResults(finalAnswer.projectsList);
-        setMapResultsIndex(chatHistory.length);
+      if (!shownAnswer) {
+        showAnswer(finalAnswer);
+      } else if (finalAnswer !== shownAnswer) {
+        // the shown answer's entry gets the final one - the same answer
+        // plus its follow-up or offering
+        const early = shownAnswer;
+        setChatHistory((prev) =>
+          prev.map((m) =>
+            m.answer === early ? { ...m, answer: finalAnswer } : m,
+          ),
+        );
       }
-      setFocusedReferredLocations(getDefaultReferredLocations(finalAnswer));
-
-      const completedSteps = stepList.map((s) =>
-        s.status === "active"
-          ? { ...s, status: "done" as const, endedAt: s.endedAt ?? Date.now() }
-          : s,
-      );
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          question,
-          answer: finalAnswer,
-          steps: completedSteps,
-          durationMs: Date.now() - runStartedAt,
-        },
-      ]);
 
       // sent once answered, so a new conversation's first question carries
       // the thread id it was just given
@@ -1324,6 +1355,12 @@ export function BrickChatCore({
     } catch (error) {
       // aborted by "New chat" - expected, not a failure to report
       if ((error as any)?.name === "AbortError") return;
+      // failed after the answer was shown (while picking its next step) -
+      // the user has their answer, so no failure toast
+      if (shownAnswer) {
+        console.error("Search error after the answer was shown:", error);
+        return;
+      }
       captureAnalyticsEvent("bkchat-query-asked", {
         thread_id: activeThreadId || null,
         query: question,
@@ -1562,11 +1599,12 @@ export function BrickChatCore({
       <Typography.Text
         style={{
           color: "white",
-          fontSize: FONT_SIZE.HEADING_4,
+          fontSize: FONT_SIZE.HEADING_4 * (isMobile ? 1.15 : 1),
           backgroundColor: COLORS.textColorDark,
           borderRadius: 16,
           padding: "4px 12px",
           maxWidth: 575,
+          lineHeight: "130%"
         }}
       >
         {question}
@@ -1621,29 +1659,7 @@ export function BrickChatCore({
             }}
           >
             <Flex justify="flex-end" style={{ marginBottom: 2 }}>
-              {/* guests can't share - handleShare needs a user id */}
-              {/* {user?._id && (activeThreadId || selectedThreadId) && (
-                  <Tooltip title="Share chat">
-                    <Button
-                      type="text"
-                      style={{
-                        padding: "8px 0",
-                        height: "auto",
-                        width: 32,
-                        lineHeight: 1,
-                      }}
-                      icon={
-                        <DynamicReactIcon
-                          iconName="IoIosShareAlt"
-                          iconSet="io"
-                          color={COLORS.textColorMedium}
-                          size={18}
-                        />
-                      }
-                      onClick={handleShare}
-                    />
-                  </Tooltip>
-                )} */}
+             
               {/* hidden until the user query settles, so it doesn't flash
                 for a signed-in user whose profile is still loading */}
               {isGuest && !userLoading && (
@@ -1675,30 +1691,36 @@ export function BrickChatCore({
                 Works with or without a thread - without one, the reply goes
                 out by WhatsApp and email (see sendClosedTicketDirectly) */}
               {expertHelpCta && user?._id && (
-                <Tooltip title={expertHelpCta.offering.title}>
-                  <Button
-                    type="text"
-                    style={{
-                      height: 24,
-                      width: 24,
-                      lineHeight: 1,
-                      // pushes it to the left edge, the rest stay right-aligned
-                      marginRight: "auto",
-                      backgroundColor: COLORS.textColorDark,
-                      marginTop: 4
+                <Flex
+                  align="center"
+                  gap={6}
+                  // pushes it to the left edge, the rest stay right-aligned
+                  style={{ marginRight: "auto", marginTop: 4 }}
+                >
+                  <Tooltip title={expertHelpCta.offering.title}>
+                    <Button
+                      type="text"
+                      style={{
+                        height: 24,
+                        width: 24,
+                        lineHeight: 1,
+                        backgroundColor: COLORS.textColorDark,
                       }}
-                    icon={
-                      <DynamicReactIcon
-                        iconName="GiAstronautHelmet"
-                        iconSet="gi"
-                        color={"white"}
-                        size={16}
-                      />
-                    }
-                    onClick={() => setActiveOfferingFlow(expertHelpCta)}
-                  />
-                </Tooltip>
+                      icon={
+                        <DynamicReactIcon
+                          iconName="GiAstronautHelmet"
+                          iconSet="gi"
+                          color={"white"}
+                          size={16}
+                        />
+                      }
+                      onClick={() => setActiveOfferingFlow(expertHelpCta)}
+                    />
+                  </Tooltip>
+                 
+                </Flex>
               )}
+               
               <BrickchatFeedback
                 threadId={activeThreadId || selectedThreadId}
                 userId={user?._id}
@@ -1709,6 +1731,29 @@ export function BrickChatCore({
                   userId={user._id}
                 />
               )}
+               {/* guests can't share - handleShare needs a user id */}
+              {user?._id && (activeThreadId || selectedThreadId) && (
+                  <Tooltip title="Share chat">
+                    <Button
+                      type="text"
+                      style={{
+                        padding: "8px 0",
+                        height: "auto",
+                        width: 32,
+                        lineHeight: 1,
+                      }}
+                      icon={
+                        <DynamicReactIcon
+                          iconName="IoIosShareAlt"
+                          iconSet="io"
+                          color={COLORS.textColorMedium}
+                          size={18}
+                        />
+                      }
+                      onClick={handleShare}
+                    />
+                  </Tooltip>
+                )}
               {isAdmin && (activeThreadId || selectedThreadId) && (
                 <ThreadLinksButton
                   threadId={(activeThreadId || selectedThreadId) as string}
@@ -2050,7 +2095,7 @@ export function BrickChatCore({
                           p: ({ children }) => (
                             <Typography.Text
                               style={{
-                                fontSize: FONT_SIZE.HEADING_4 * .9,
+                                fontSize: isMobile ? FONT_SIZE.HEADING_4 * 1.15 : FONT_SIZE.HEADING_4 * .9,
                                 fontWeight: 400,
                                 marginBottom: 16,
                                 display: "block",
@@ -2216,7 +2261,7 @@ export function BrickChatCore({
                     {messageItem.answer.followupPrompt ? (
                       <Typography.Text
                         style={{
-                          fontSize: FONT_SIZE.HEADING_4,
+                          fontSize: FONT_SIZE.HEADING_4 * (isMobile ? 1.15 : 1),
                           marginTop: 8,
                           fontWeight: 600,
                           maxWidth: 800,
@@ -2238,7 +2283,23 @@ export function BrickChatCore({
                             (t) => t.ticketId === notedTicket.ticketId,
                           )) ||
                         offeringTicketsByKey[offeringKey];
+                      const hook = messageItem.answer.followupOffering.hook;
                       return (
+                      <>
+                      {/* the offering's introduction - only with its
+                        buttons, not once a request has been raised */}
+                      {hook && !existingTicket ? (
+                        <Typography.Text
+                          style={{
+                            fontSize: FONT_SIZE.HEADING_4,
+                            marginTop: 8,
+                            fontWeight: 600,
+                            maxWidth: 800,
+                          }}
+                        >
+                          {hook}
+                        </Typography.Text>
+                      ) : null}
                       <OfferingCtaButtons
                         offeringKey={offeringKey}
                         ticketNoted={!!notedTicket}
@@ -2257,6 +2318,7 @@ export function BrickChatCore({
                           })
                         }
                       />
+                      </>
                       );
                     })() : null}
 

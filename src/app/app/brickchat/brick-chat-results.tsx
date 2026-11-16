@@ -29,12 +29,13 @@ import {
   Typography,
 } from "antd";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import DynamicReactIcon, {
   IconSetKey,
 } from "../../../components/common/dynamic-react-icon";
 import ProjectImageCarousel from "./project-image-carousel";
 import styles from "./brick-chat-results.module.css";
+import { useDevice } from "@/hooks/use-device";
 
 interface BrickChatResultsProps {
   results: ProjectResult[];
@@ -208,6 +209,8 @@ export default function BrickChatResults({
   minimal,
   selectedProjectId,
 }: BrickChatResultsProps) {
+  const { isMobile } = useDevice();
+
   const { user, refetch } = useUser();
   const updateUser = useUpdateUserMutation({ userId: user?._id || "" });
   const [messageApi, contextHolder] = message.useMessage();
@@ -235,7 +238,9 @@ export default function BrickChatResults({
       // the saved-projects heart instead of antd's default warning sign;
       // antd only spaces its own icons, hence the margin
       icon: (
-        <span style={{ display: "inline-flex", marginInlineEnd: 12, marginTop: 2 }}>
+        <span
+          style={{ display: "inline-flex", marginInlineEnd: 12, marginTop: 2 }}
+        >
           <DynamicReactIcon
             iconName="MdFavorite"
             iconSet="md"
@@ -339,7 +344,7 @@ export default function BrickChatResults({
             label={getMatchConfig(project)?.label}
             color={getMatchConfig(project)?.color}
             bgColor="white"
-            style={{border: `1px solid ${COLORS.borderColorMedium}`}}
+            style={{ border: `1px solid ${COLORS.borderColorMedium}` }}
           />
           <Typography.Paragraph
             style={{
@@ -399,7 +404,7 @@ export default function BrickChatResults({
     const orderedResults = orderResults(results, skipSort);
 
     return (
-      <Flex className={styles.scrollContainer} gap={8} >
+      <Flex className={styles.scrollContainer} gap={8}>
         {contextHolder}
         {modalContextHolder}
         {orderedResults.map((project) => (
@@ -423,7 +428,7 @@ export default function BrickChatResults({
                   flex: 1,
                   display: "flex",
                   flexDirection: "column",
-                  paddingBottom: 4
+                  paddingBottom: 4,
                 },
               }}
               cover={
@@ -438,7 +443,7 @@ export default function BrickChatResults({
                 >
                   {project.projectImages?.length ? (
                     <ProjectImageCarousel
-                      images={project.projectImages.slice(0,1)}
+                      images={project.projectImages.slice(0, 1)}
                       alt={project.projectName}
                     />
                   ) : project.projectImage ? (
@@ -486,7 +491,7 @@ export default function BrickChatResults({
                 <Tooltip title={project.projectName}>
                   <Typography.Text
                     style={{
-                      fontSize: FONT_SIZE.PARA,
+                      fontSize: FONT_SIZE.PARA * (isMobile ? 1.2 : 1),
                       color: COLORS.textColorDark,
                       padding: "4px 4px",
                     }}
@@ -497,38 +502,38 @@ export default function BrickChatResults({
                 </Tooltip>
                 <Flex align="flex-start" gap={0} style={{ padding: "4px 8px" }}>
                   {onSelectProject && (
-                  <Flex
-                    id="project-details"
-                    align="center"
-                    justify="center"
-                    onClick={(e) => {
-                      // cards are wrapped in a Link - don't navigate on icon click
-                      e.preventDefault();
-                      e.stopPropagation();
-                      openBrick360(project, "card");
-                    }}
-                    style={{
-                      height: 24,
-                      flexShrink: 0,
-                      padding: "2px 4px",
-                      borderRadius: 4,
-                      border: `0.5px solid ${COLORS.borderColor}`,
-                      backgroundColor: "white",
-                      boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                      cursor: "pointer",
-                      color: COLORS.textColorDark,
-                      fontSize: FONT_SIZE.SUB_TEXT,
-                    }}
-                  >
-                    {/* <DynamicReactIcon
+                    <Flex
+                      id="project-details"
+                      align="center"
+                      justify="center"
+                      onClick={(e) => {
+                        // cards are wrapped in a Link - don't navigate on icon click
+                        e.preventDefault();
+                        e.stopPropagation();
+                        openBrick360(project, "card");
+                      }}
+                      style={{
+                        height: 24,
+                        flexShrink: 0,
+                        padding: "2px 4px",
+                        borderRadius: 4,
+                        border: `0.5px solid ${COLORS.borderColor}`,
+                        backgroundColor: "white",
+                        boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                        cursor: "pointer",
+                        color: COLORS.textColorDark,
+                        fontSize: FONT_SIZE.SUB_TEXT,
+                      }}
+                    >
+                      {/* <DynamicReactIcon
                       iconName={project.projectStatus === "report-verified" ? "TbView360Number": "BiDetail"}
                       iconSet={project.projectStatus === "report-verified" ? "tb": "bi"}
                       size={18}
                       color={project.projectStatus === "report-verified" ? "white": COLORS.primaryColor}
                     /> */}
-                    360 Details
-                  </Flex>
-                )}
+                      360 Details
+                    </Flex>
+                  )}
                   <Flex align="center" gap={4} style={{ marginLeft: "auto" }}>
                     {project.lvnzyProjectId && (
                       <Tooltip title={saveTooltip(project.lvnzyProjectId)}>
@@ -561,7 +566,6 @@ export default function BrickChatResults({
                     )}
                   </Flex>
                 </Flex>
-                 
               </Flex>
             </Card>
           </Flex>
@@ -571,15 +575,19 @@ export default function BrickChatResults({
   }
 
   return (
-    <Flex className={styles.scrollContainer} gap={16} style={{marginBottom: 16 }}>
+    <Flex
+      className={styles.scrollContainer}
+      gap={16}
+      style={{ marginBottom: 16 }}
+    >
       {contextHolder}
       {modalContextHolder}
       {orderResults(results, skipSort).map((project) => (
-        <Flex style={{ width: 200 }}>
+        <Flex style={{ width: isMobile ? 300 : 225 }}>
           <Card
             hoverable
             style={{
-              width: 225,
+              width: isMobile ? 250 : 225,
               borderRadius: 12,
               // column so the body fills the card - the row stretches every
               // card to the tallest one, and the action row below is pinned
@@ -601,7 +609,7 @@ export default function BrickChatResults({
             cover={
               <div
                 style={{
-                  height: 100,
+                  height: isMobile ? 125: 100,
                   width: "100%",
                   backgroundColor: COLORS.bgColor,
                   position: "relative",
@@ -648,11 +656,17 @@ export default function BrickChatResults({
             }
           >
             <Flex style={{ padding: 4, flex: 1 }} gap={0} vertical>
-              <Flex style={{width: "100%", overflowX: "scroll", scrollbarWidth: "none"}}>
+              <Flex
+                style={{
+                  width: "100%",
+                  overflowX: "scroll",
+                  scrollbarWidth: "none",
+                }}
+              >
                 <MetaTag
                   label={project.projectMicroPocket || project.projectCorridor}
                   icon={{ iconSet: "ri", iconName: "RiRoadMapLine" }}
-                  style={{ marginTop: 8 }}
+                  style={{ marginTop: 8, fontSize: FONT_SIZE.NOTE * (isMobile ? 1.2 : 1) }}
                 />
                 {(() => {
                   const status = computeProjectStatusFromTimelines(
@@ -662,14 +676,14 @@ export default function BrickChatResults({
                     <MetaTag
                       label={status}
                       icon={PROJECT_STATUS_CONFIG[status]}
-                      style={{ marginTop: 8 }}
+                      style={{ marginTop: 8, fontSize: FONT_SIZE.NOTE * (isMobile ? 1.2 : 1) }}
                     />
                   ) : null;
                 })()}
               </Flex>
               <Typography.Text
                 style={{
-                  fontSize: FONT_SIZE.HEADING_4,
+                  fontSize: FONT_SIZE.HEADING_4 * (isMobile ? 1.1 : 1),
                   color: COLORS.textColorDark,
                   fontWeight: 500,
                 }}
@@ -693,7 +707,7 @@ export default function BrickChatResults({
               {!skipOneLiner && project.oneLiner && (
                 <Typography.Paragraph
                   style={{
-                    fontSize: FONT_SIZE.SUB_TEXT,
+                    fontSize: FONT_SIZE.SUB_TEXT * (isMobile ? 1.15 : 1),
                     color: COLORS.textColorLight,
                     lineHeight: "130%",
                     borderRadius: 4,
@@ -713,7 +727,7 @@ export default function BrickChatResults({
               )}
               <Flex
                 style={{ width: "100%", marginTop: "auto", paddingTop: 8 }}
-                gap={4}
+                gap={8 * (isMobile ? 1.2 : 1)}
               >
                 {project.lvnzyProjectId && (
                   <Tooltip title={saveTooltip(project.lvnzyProjectId)}>
@@ -722,8 +736,8 @@ export default function BrickChatResults({
                       justify="center"
                       onClick={(e) => handleToggleSave(e, project)}
                       style={{
-                        width: 20,
-                        height: 20,
+                        width: 20 * (isMobile ? 1.2 : 1),
+                        height: 20 * (isMobile ? 1.2 : 1),
                         flexShrink: 0,
                         borderRadius: "50%",
                         backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -738,7 +752,7 @@ export default function BrickChatResults({
                             : "MdFavoriteBorder"
                         }
                         iconSet="md"
-                        size={16}
+                        size={16 * (isMobile ? 1.15 : 1)}
                         color={COLORS.primaryColor}
                       />
                     </Flex>
@@ -755,8 +769,8 @@ export default function BrickChatResults({
                         justify="center"
                         onClick={(e) => handleLocateOnMap(e, project)}
                         style={{
-                          width: 20,
-                          height: 20,
+                          width: 20 * (isMobile ? 1.2 : 1),
+                          height: 20 * (isMobile ? 1.2 : 1),
                           flexShrink: 0,
                           borderRadius: "50%",
                           backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -767,36 +781,38 @@ export default function BrickChatResults({
                         <DynamicReactIcon
                           iconName="IoLocateOutline"
                           iconSet="io5"
-                          size={18}
+                          size={18 * (isMobile ? 1.15 : 1)}
                           color={COLORS.primaryColor}
                         />
                       </Flex>
                     </Tooltip>
                   )}
 
-                {project.isDeveloperPartner && (
-                  <Tooltip title="Brickfi Builder Buy Available">
-                    <Flex
-                      align="center"
-                      justify="center"
-                      style={{
-                        width: 20,
-                        height: 20,
-                        flexShrink: 0,
-                        borderRadius: "50%",
-                        backgroundColor: "rgba(255, 255, 255, 0.9)",
-                        boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
-                      }}
-                    >
-                      <DynamicReactIcon
-                        iconName="FaPeopleArrows"
-                        iconSet="fa6"
-                        size={14}
-                        color={COLORS.primaryColor}
-                      />
-                    </Flex>
-                  </Tooltip>
-                )}
+                {project.isDeveloperPartner &&
+                  user?._id &&
+                  ["admin", "member"].includes(user.role || "") && (
+                    <Tooltip title="Brickfi Builder Buy Available">
+                      <Flex
+                        align="center"
+                        justify="center"
+                        style={{
+                          width: 20 * (isMobile ? 1.2 : 1),
+                          height: 20 * (isMobile ? 1.2 : 1),
+                          flexShrink: 0,
+                          borderRadius: "50%",
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          boxShadow: "0 1px 4px rgba(0, 0, 0, 0.2)",
+                        }}
+                      >
+                        <DynamicReactIcon
+                          iconName="FaPeopleArrows"
+                          iconSet="fa6"
+                          size={14 * (isMobile ? 1.15 : 1)}
+                          color={COLORS.primaryColor}
+                        />
+                      </Flex>
+                    </Tooltip>
+                  )}
 
                 {onSelectProject && (
                   <Flex
@@ -820,8 +836,8 @@ export default function BrickChatResults({
                       cursor: "pointer",
                       color: "white",
                       fontSize: FONT_SIZE.SUB_TEXT,
-                      marginRight: 4, 
-                      marginBottom: 4
+                      marginRight: 4,
+                      marginBottom: 4,
                     }}
                   >
                     {/* <DynamicReactIcon

@@ -8,6 +8,10 @@ export interface FollowupOffering {
   /** the specific next step it's for (e.g. "Please onboard X with RERA
    * number Y") - prefills the flow's request, see promptUserNode */
   context?: string;
+  /** a line or two introducing the offering in terms of this conversation,
+   * shown above its buttons - set when postSynthesize picked the offering as
+   * the answer's next step (see nodes/post-synthesize.js) */
+  hook?: string;
 }
 
 // An active offering as the app shows it (GET /brickfi-offerings/active)
