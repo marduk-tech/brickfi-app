@@ -261,6 +261,20 @@ input#mobileNumber {
 
 .bkchat-summary {
   max-width: 800px;
+  // the answer's one text size - paragraphs, list items and tables all
+  // inherit it (FONT_SIZE.HEADING_4 * 0.9, * 1.15 on mobile - same
+  // breakpoint as .mobile-only)
+  font-size: 13.5px;
+  @media (max-width: 576px) {
+    font-size: 17.25px;
+  }
+
+  p,
+  li,
+  table {
+    font-size: inherit;
+  }
+
   h3,
   h4 {
     font-size: 15;
@@ -279,7 +293,6 @@ input#mobileNumber {
     li {
       padding-left: 4px;
       margin-bottom: 10px;
-      font-size: 14;
 
       ul {
         padding-left: 24px;
@@ -296,7 +309,6 @@ input#mobileNumber {
     border-collapse: collapse;
     margin-bottom: 16px;
     margin-top: 16px;
-    font-size: 13.5px;
     line-height: 1.5;
   }
 

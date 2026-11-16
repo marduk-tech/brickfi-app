@@ -50,7 +50,7 @@ import {
 } from "antd";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import { BiSend } from "react-icons/bi";
+import { BiCopy, BiSend } from "react-icons/bi";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { v4 as uuidV4 } from "uuid";
@@ -417,6 +417,9 @@ export function BrickChatCore({
   projectRef,
 }: BrickChatCoreProps) {
   const fs = useBrick360FontSize();
+  // antd's static message.* renders nothing under React 19 (the v5 patch
+  // isn't loaded), so toasts go through this hook's contextHolder instead
+  const [messageApi, messageContextHolder] = message.useMessage();
 
   const [form] = Form.useForm();
   const questionValue: string | undefined = Form.useWatch("question", form);
@@ -663,7 +666,7 @@ export function BrickChatCore({
       );
       setResolvedProjectRef(projectRef);
       if (!project) {
-        message.error("Project not found.");
+        messageApi.error("Project not found.");
         return;
       }
       handleSelectProject(project);
@@ -944,7 +947,7 @@ export function BrickChatCore({
         }
 
         console.error("Failed to load thread history:", error);
-        message.error("Failed to load thread history.");
+        messageApi.error("Failed to load thread history.");
         setActiveThreadId(undefined);
         setChatHistory([]);
 
@@ -985,7 +988,7 @@ export function BrickChatCore({
     claimGuestThread(user._id, guest.guestId, guest.threadId)
       .catch((error) => {
         console.error("Failed to save guest thread:", error);
-        message.error("Couldn't save this conversation to your account.");
+        messageApi.error("Couldn't save this conversation to your account.");
       })
       .finally(() => {
         writeGuestEntry(null);
@@ -1067,7 +1070,7 @@ export function BrickChatCore({
         }
 
         console.error("Failed to open shared thread:", error);
-        message.error("This conversation is not available.");
+        messageApi.error("This conversation is not available.");
         setActiveThreadId(undefined);
         setChatHistory([]);
 
@@ -1092,14 +1095,14 @@ export function BrickChatCore({
     const question = values.question?.trim();
 
     if (!question || !question.length) {
-      message.warning("Please enter something");
+      messageApi.warning("Please enter something");
       return;
     }
 
     if (claimingGuestThread || isArchivedThread) return;
 
     if (!user?._id && !isGuest) {
-      message.info("Loading your account, please try again in a moment.");
+      messageApi.info("Loading your account, please try again in a moment.");
       return;
     }
 
@@ -1368,7 +1371,7 @@ export function BrickChatCore({
         status: "failed",
       });
       console.error("Search error:", error);
-      message.error("Failed to search projects. Please try again.");
+      messageApi.error("Failed to search projects. Please try again.");
     } finally {
       setCurrentQuestion(undefined);
       setChatLoading(false);
@@ -1430,7 +1433,7 @@ export function BrickChatCore({
       setShareLink(link);
     } catch (error) {
       console.error("Failed to prepare share link:", error);
-      message.error("Failed to create share link. Please try again.");
+      messageApi.error("Failed to create share link. Please try again.");
       setShareModalOpen(false);
     } finally {
       setSharePreparing(false);
@@ -1444,9 +1447,9 @@ export function BrickChatCore({
 
     try {
       await navigator.clipboard.writeText(shareLink);
-      message.success("Link copied to clipboard");
+      messageApi.success("Link copied to clipboard");
     } catch {
-      message.error("Couldn't copy. Please copy the link manually.");
+      messageApi.error("Couldn't copy. Please copy the link manually.");
     }
   };
 
@@ -1629,6 +1632,7 @@ export function BrickChatCore({
         overflowY: "scroll",
       }}
     >
+      {messageContextHolder}
       <Flex
         vertical
         style={{
@@ -2095,7 +2099,8 @@ export function BrickChatCore({
                           p: ({ children }) => (
                             <Typography.Text
                               style={{
-                                fontSize: isMobile ? FONT_SIZE.HEADING_4 * 1.15 : FONT_SIZE.HEADING_4 * .9,
+                                // size comes from .bkchat-summary (globals.scss)
+                                fontSize: "inherit",
                                 fontWeight: 400,
                                 marginBottom: 16,
                                 display: "block",
@@ -2592,20 +2597,47 @@ export function BrickChatCore({
         title="Share this chat"
         styles={{ content: { padding: 24 } }}
       >
-        <Typography.Paragraph style={{ color: COLORS.textColorMedium }}>
-          Anyone with this link can open a copy of this conversation and
-          continue it on their own.
+        <Typography.Paragraph style={{ color: COLORS.textColorMedium, fontSize:FONT_SIZE.HEADING_4, lineHeight: "125%" }}>
+          Anyone with this link can open this conversation and
+          continue.
         </Typography.Paragraph>
         {sharePreparing || !shareLink ? (
           <Flex justify="center" style={{ padding: 16 }}>
             <Spin />
           </Flex>
         ) : (
-          <Flex gap={8}>
-            <Input value={shareLink} readOnly />
-            <Button type="primary" onClick={handleCopyShareLink}>
-              Copy link
-            </Button>
+          <Flex gap={12} align="center">
+            <Typography.Link
+              href={shareLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                flex: 1,
+                minWidth: 0,
+                wordBreak: "break-all",
+                fontSize: FONT_SIZE.SUB_TEXT,
+                lineHeight: 1.4,
+                color: COLORS.textColorDark,
+                backgroundColor: COLORS.bgColor,
+                padding: "2px 4px"
+              }}
+            >
+              {shareLink}
+            </Typography.Link>
+            <Tooltip title="Copy link">
+              <Button
+                aria-label="Copy link"
+                icon={<BiCopy size={16} />}
+                onClick={handleCopyShareLink}
+                size="small"
+                style={{
+                  flexShrink: 0,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              />
+            </Tooltip>
           </Flex>
         )}
       </Modal>
