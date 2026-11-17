@@ -27,6 +27,7 @@ import { safeWindow } from "@/libs/browser-utils";
 import DynamicReactIcon, {
   IconSetKey,
 } from "@/components/common/dynamic-react-icon";
+import { FlippingIcons } from "@/components/common/flipping-icons";
 import styles from "./brick-chat.module.css";
 
 const FAQs = [
@@ -160,86 +161,6 @@ const CTA_ICONS = SAMPLE_QUERIES.flatMap((q) => q.icons).filter(
         other.iconName === icon.iconName && other.iconSet === icon.iconSet,
     ) === i,
 );
-const CTA_ICON_FLIP_MS = 1500;
-
-// Cycles through CTA_ICONS, `count` at a time, with a flip. Its own component
-// so the ticks only re-render the icons, not the page.
-function FlippingIcons({
-  count,
-  size,
-  color,
-}: {
-  count: number;
-  size: number;
-  color: string;
-}) {
-  const [startIndex, setStartIndex] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(
-      () => setStartIndex((i) => (i + count) % CTA_ICONS.length),
-      CTA_ICON_FLIP_MS,
-    );
-    return () => clearInterval(id);
-  }, [count]);
-
-  const gap = 6;
-  // white circle around each icon
-  const circle = size + 10;
-  return (
-    // fixed box (and fixed slots) so loading/swapping icons never shifts the
-    // button width
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap,
-        width: count * circle + (count - 1) * gap,
-        height: circle,
-        flexShrink: 0,
-      }}
-    >
-      {Array.from({ length: count }, (_, slot) => {
-        const iconIndex = (startIndex + slot) % CTA_ICONS.length;
-        const icon = CTA_ICONS[iconIndex];
-        return (
-          // the circle stays put; only the icon inside it flips
-          <span
-            key={slot}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              width: circle,
-              height: circle,
-              borderRadius: "50%",
-              backgroundColor: "white",
-            }}
-          >
-            {/* key remounts on every change, replaying the flip; later slots
-                flip slightly after earlier ones */}
-            <span
-              key={iconIndex}
-              className={styles.flipIcon}
-              style={{
-                width: size,
-                height: size,
-                animationDelay: `${slot * 120}ms`,
-              }}
-            >
-              <DynamicReactIcon
-                iconName={icon.iconName}
-                iconSet={icon.iconSet}
-                size={size}
-                color={color}
-              />
-            </span>
-          </span>
-        );
-      })}
-    </span>
-  );
-}
 
 const REPORT_FEATURES: {
   label: string;
@@ -466,7 +387,12 @@ export default function BrickChatv2({
           style={{ flexShrink: 0 }}
         >
           <Flex align="center" gap={8} style={{ padding: "12px 4px" }}>
-            <FlippingIcons count={2} size={14} color={COLORS.primaryColor} />
+            <FlippingIcons
+              icons={CTA_ICONS}
+              count={2}
+              size={14}
+              color={COLORS.primaryColor}
+            />
             Ask Brickfi
           </Flex>
         </Button>
@@ -1431,6 +1357,7 @@ export default function BrickChatv2({
                 >
                   <Flex align="center" gap={16}>
                     <FlippingIcons
+                      icons={CTA_ICONS}
                       count={2}
                       size={16}
                       color={COLORS.primaryColor}

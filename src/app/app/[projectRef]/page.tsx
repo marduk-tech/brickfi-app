@@ -1,3 +1,4 @@
+import { BrickChatMaintenanceGate } from "@/components/common/brickchat-maintenance";
 import BrickChatClient from "../brickchat/brickchat-client";
 
 export { metadata } from "../brickchat/metadata";
@@ -13,5 +14,9 @@ interface AppProjectPageProps {
 // (brickchat, profile, brick360, ...) take precedence over this segment.
 export default async function AppProjectPage({ params }: AppProjectPageProps) {
   const { projectRef } = await params;
-  return <BrickChatClient projectRef={decodeURIComponent(projectRef)} />;
+  return (
+    <BrickChatMaintenanceGate>
+      <BrickChatClient projectRef={decodeURIComponent(projectRef)} />
+    </BrickChatMaintenanceGate>
+  );
 }

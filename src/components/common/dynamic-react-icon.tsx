@@ -1,3 +1,6 @@
+"use client";
+
+// loads the icon set in an effect, so it only renders client-side
 import React, { useState, useEffect } from "react";
 
 export type IconSetKey =

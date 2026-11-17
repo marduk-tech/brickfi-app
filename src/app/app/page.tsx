@@ -1,3 +1,4 @@
+import { BrickChatMaintenanceGate } from "@/components/common/brickchat-maintenance";
 import { Metadata } from "next";
 import BrickChatClient from "./brickchat/brickchat-client";
 
@@ -63,5 +64,9 @@ export const metadata: Metadata = {
 };
 
 export default async function AppHomePage() {
-  return <BrickChatClient />;
+  return (
+    <BrickChatMaintenanceGate>
+      <BrickChatClient />
+    </BrickChatMaintenanceGate>
+  );
 }

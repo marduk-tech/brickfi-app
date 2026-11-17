@@ -1,3 +1,4 @@
+import { BrickChatMaintenanceGate } from "@/components/common/brickchat-maintenance";
 import BrickChatClient from "../brickchat-client";
 
 export { metadata } from "../metadata";
@@ -6,5 +7,9 @@ export { metadata } from "../metadata";
 // read from the path by BrickChatCore itself (see threadPathBase), so
 // nothing needs passing down from the route params here.
 export default function BrickChatThreadPage() {
-  return <BrickChatClient />;
+  return (
+    <BrickChatMaintenanceGate>
+      <BrickChatClient />
+    </BrickChatMaintenanceGate>
+  );
 }
