@@ -39,10 +39,10 @@ export async function BrickChatMaintenanceGate({
         alignItems: "center",
         justifyContent: "center",
         minHeight: "60vh",
-        padding: 16,
+        padding: 8,
         textAlign: "center",
         width: "90%",
-        maxWidth: "1000px",
+        maxWidth: "800px",
         margin: "auto",
         border: `4px solid ${COLORS.primaryColor}`,
         borderRadius: 16,
@@ -53,13 +53,13 @@ export async function BrickChatMaintenanceGate({
       <FlippingIcons
         icons={HOME_ICONS}
         count={2}
-        size={48}
+        size={36}
         color={COLORS.primaryColor}
         random
         circled={false}
       />
-      <p style={{ fontSize: FONT_SIZE.HEADING_2, color: COLORS.textColorMedium, maxWidth: 420 }}>
-        Brickfi is currently undergoing maintenance. Please check back in
+      <p style={{ fontSize: FONT_SIZE.HEADING_3, color: COLORS.textColorMedium, maxWidth: 420 }}>
+        Brickfi is currently undergoing maintenance.<br></br>Please check back in
         sometime.
       </p>
     </Flex>
