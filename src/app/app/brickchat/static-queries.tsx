@@ -40,7 +40,7 @@ const SAMPLE_PROMPTS: {
     ],
   },
   {
-    text: "Show me detailed report for Prestige Lakeside Habitat",
+    text: "Show me detailed report for Prestige Southern Star",
     icons: [
       { iconName: "PiKey", iconSet: "pi" },
       { iconName: "PiCurrencyInr", iconSet: "pi" },
