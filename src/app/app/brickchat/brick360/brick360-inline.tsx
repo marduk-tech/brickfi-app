@@ -288,7 +288,7 @@ export function Brick360Inline({
         overflowX: "hidden",
         width: "100%",
         border: `1.5px solid ${COLORS.LANDING.MEDIUM_PINK}`,
-        backgroundColor: COLORS.LANDING.LIGHT_PINK,
+        backgroundColor:"#f9f8f5",
         borderRadius: 12,
         padding: isMobile ? "8px 4px" : "8px 4px",
         opacity: isClosing ? 0 : 1,
