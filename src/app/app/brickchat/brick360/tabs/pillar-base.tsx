@@ -294,7 +294,6 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
       try {
         if (!question || question.length < 3) return;
 
-
         setQueryStreaming(true);
 
         if (currentQuestion) {
@@ -414,6 +413,22 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
         return;
       }
       handleSelectKey(key);
+    };
+
+    // The sub-criterion whose filter chip is selected - only its reasoning is
+    // shown. Defaults to the first (in Brick360DataPoints order), and falls
+    // back to it if the chosen one isn't rated for this project.
+    const [filterKey, setFilterKey] = useState<string | undefined>();
+    const activeDataPoint: any =
+      orderedDataPoints.find((dp: any) => dp[0] === filterKey) ||
+      orderedDataPoints[0];
+
+    // switching filters drops whatever the previous one had on the map
+    const handleSelectFilter = (dataPointKey: string) => {
+      if (dataPointKey === activeDataPoint?.[0]) return;
+      setFilterKey(dataPointKey);
+      setCustomFocus(undefined);
+      handleSelectKey(undefined);
     };
 
     const mapFocus: PillarMapFocus = {
@@ -630,102 +645,155 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
           <Flex vertical key={sc.key}>
             {header}
 
-            {orderedDataPoints.length ? (
+            {orderedDataPoints.length && activeDataPoint ? (
               <Flex vertical style={{ marginTop: 16 }}>
-                <Flex vertical gap={16}>
-                  {orderedDataPoints.map((item: any, index: number) => {
-                    const key = `${sc.key}::${item[0]}`;
-                    const isActive = selectedKey === key;
-                    // only offered when this data point has something to plot
-                    const hasMap =
-                      !!lvnzyProject && !!getMapConfig?.(item[0], lvnzyProject);
+                {/* one filter chip per sub-criterion - the selected one's
+                    rating, map buttons and reasoning show below */}
+                <Flex
+                  ref={ref}
+                  gap={8}
+                  style={{
+                    overflowX: "auto",
+                    flexWrap: "nowrap",
+                    scrollbarWidth: "none",
+                    paddingBottom: 2,
+                  }}
+                >
+                  {orderedDataPoints.map((item: any) => {
+                    const isFilterActive = item[0] === activeDataPoint[0];
                     return (
-                      <Flex
-                        vertical
-                        key={key}
+                      <button
+                        key={item[0]}
+                        type="button"
+                        aria-pressed={isFilterActive}
+                        onClick={() => handleSelectFilter(item[0])}
                         style={{
-                          paddingLeft: 0,
+                          flexShrink: 0,
+                          cursor: "pointer",
+                          padding: "4px 10px",
+                          borderRadius: 16,
+                          border: `1px solid ${
+                            isFilterActive
+                              ? COLORS.primaryColor
+                              : COLORS.borderColorMedium
+                          }`,
+                          backgroundColor: isFilterActive
+                            ? COLORS.primaryColor
+                            : "white",
+                          color: isFilterActive
+                            ? "white"
+                            : item[1].rating > 0
+                            ? COLORS.textColorDark
+                            : COLORS.textColorLight,
+                          fontSize: fs.HEADING_4,
+                          fontWeight: isFilterActive ? 600 : 500,
+                          whiteSpace: "nowrap",
+                          fontFamily: "inherit",
+                          lineHeight: 1.4,
                         }}
                       >
-                        <div ref={index === 0 ? ref : null}>
-                          <Flex align="center" gap={8} style={{ minWidth: 0 }}>
-                            <Typography.Text
-                              style={{
-                                fontSize: fs.HEADING_3,
-                                color:
-                                  item[1].rating > 0
-                                    ? COLORS.textColorDark
-                                    : COLORS.textColorLight,
-                                fontWeight: 600,
-                                marginLeft: 4,
-                                textTransform: "uppercase"
-                              }}
-                            >
-                              {capitalize(
-                                (Brick360DataPoints as any)[sc.key][item[0]][
-                                  "label"
-                                ],
-                              )}
-                            </Typography.Text>
-                            {/* pushed to the right end of the criteria row */}
-                            <Flex style={{ marginLeft: "auto", flexShrink: 0 }}>
-                              <RatingBar value={item[1].rating}></RatingBar>
-                            </Flex>
-                          </Flex>
-                        </div>
-                        {/* See on Map, then the data point's own chips (e.g.
-                            locations), in one scrollable row under the name */}
-                        {(() => {
-                          const actions = renderDataPointActions?.(
-                            item[0],
-                            mapFocus,
-                          );
-                          if (!hasMap && !actions) return null;
-                          return (
-                            <Flex
-                              align="center"
-                              gap={8}
-                              style={{
-                                marginTop: 6,
-                                marginLeft: 4,
-                                overflowX: "auto",
-                                flexWrap: "nowrap",
-                                paddingBottom: 2,
-                                scrollbarWidth: "none",
-                              }}
-                            >
-                              {hasMap ? (
-                                <Flex style={{ flexShrink: 0 }}>
-                                  <ReferredLocationChips
-                                    items={[
-                                      {
-                                        key,
-                                        id: key,
-                                        type: "",
-                                        name: isActive
-                                          ? "Showing on Map"
-                                          : "See All on Map",
-                                        keepLabelCase: true,
-                                      },
-                                    ]}
-                                    selectedKey={isActive ? key : null}
-                                    onToggle={() => handleSeeOnMap(key)}
-                                  />
-                                </Flex>
-                              ) : null}
-                              {actions}
-                            </Flex>
-                          );
-                        })()}
-
-                        {renderDataPointDetail(item[0], item[1])}
-                      </Flex>
+                        {capitalize(
+                          (Brick360DataPoints as any)[sc.key][item[0]]["label"],
+                        )}
+                      </button>
                     );
                   })}
                 </Flex>
+
+                {(() => {
+                  const [dataPointKey, dataPoint] = activeDataPoint;
+                  const key = `${sc.key}::${dataPointKey}`;
+                  const isActive = selectedKey === key;
+                  // only offered when this data point has something to plot
+                  const hasMap =
+                    !!lvnzyProject &&
+                    !!getMapConfig?.(dataPointKey, lvnzyProject);
+                  const actions = renderDataPointActions?.(
+                    dataPointKey,
+                    mapFocus,
+                  );
+                  return (
+                    <Flex vertical style={{ marginTop: 12 }}>
+                      {/* rating on the left, above the map buttons */}
+                      {/* <Flex
+                        align="flex-start"
+                        gap={12}
+                        style={{
+                          alignSelf: "flex-start",
+                          marginLeft: 4,
+                          padding: "8px 12px",
+                          backgroundColor: "white",
+                          borderRadius: 8,
+                        }}
+                        vertical
+                      >
+                        <Typography.Text
+                          style={{
+                            fontSize: fs.HEADING_4,
+                            fontWeight: 500,
+                            color: COLORS.textColorMedium,
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          Average Rating
+                        </Typography.Text>
+                        <Flex>
+                          <RatingBar
+                            value={dataPoint.rating}
+                            valueFontSize={fs.HEADING_3}
+                          ></RatingBar>
+                        </Flex>
+                      </Flex> */}
+                      {/* See on Map, then the data point's own chips (e.g.
+                          locations), in one scrollable row */}
+                      {hasMap || actions ? (
+                        <Flex
+                          align="center"
+                          gap={8}
+                          style={{
+                            marginTop: 8,
+                            marginLeft: 4,
+                            overflowX: "auto",
+                            flexWrap: "nowrap",
+                            paddingBottom: 2,
+                            scrollbarWidth: "none",
+                          }}
+                        >
+                          {hasMap ? (
+                            <Flex style={{ flexShrink: 0 }}>
+                              <ReferredLocationChips
+                                items={[
+                                  {
+                                    key,
+                                    id: key,
+                                    type: "",
+                                    name: isActive
+                                      ? "Showing on Map"
+                                      : "See All on Map",
+                                    keepLabelCase: true,
+                                  },
+                                ]}
+                                selectedKey={isActive ? key : null}
+                                onToggle={() => handleSeeOnMap(key)}
+                              />
+                            </Flex>
+                          ) : null}
+                          {actions}
+                        </Flex>
+                      ) : null}
+
+                      {renderDataPointDetail(dataPointKey, dataPoint)}
+                    </Flex>
+                  );
+                })()}
               </Flex>
             ) : (
-              <Flex vertical gap={0} align="center" style={{ marginTop: 24, marginBottom: 24}}>
+              <Flex
+                vertical
+                gap={0}
+                align="center"
+                style={{ marginTop: 24, marginBottom: 24 }}
+              >
                 <DynamicReactIcon
                   size={32}
                   iconName="TbFaceIdError"
@@ -736,16 +804,17 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                   gap={2}
                   vertical
                   style={{
-                   marginTop: 16,
+                    marginTop: 16,
                     marginLeft: 16,
                     padding: "8px 16px",
                     backgroundColor: "white",
                     maxWidth: 400,
                     borderRadius: 8,
-                    border:`1px dashed ${COLORS.borderColorDark}`
+                    border: `1px dashed ${COLORS.borderColorDark}`,
                   }}
                 >
-                  {categoryKey == BRICK360_CATEGORY.developer && !!lvnzyProject?.originalProjectId?.info?.developerId? (
+                  {categoryKey == BRICK360_CATEGORY.developer &&
+                  !!lvnzyProject?.originalProjectId?.info?.developerId ? (
                     <Typography.Text
                       style={{
                         textTransform: "uppercase",
@@ -756,7 +825,12 @@ export const PillarBase = forwardRef<any, PillarBaseProps>(
                       {lvnzyProject?.originalProjectId?.info?.developerId?.name}
                     </Typography.Text>
                   ) : null}
-                  <Typography.Text style={{ fontSize: FONT_SIZE.SUB_TEXT, color: COLORS.textColorMedium }}>
+                  <Typography.Text
+                    style={{
+                      fontSize: FONT_SIZE.SUB_TEXT,
+                      color: COLORS.textColorMedium,
+                    }}
+                  >
                     {noDataPlaceholder ??
                       (Brick360DataPoints as any)[sc.key]?.noDataPlaceholder}
                   </Typography.Text>

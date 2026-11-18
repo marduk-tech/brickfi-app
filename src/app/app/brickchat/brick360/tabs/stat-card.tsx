@@ -13,11 +13,12 @@ export const STAT_CARD_STYLE: CSSProperties = {
   borderRadius: 8,
   backgroundColor: "white",
   width: "fit-content",
-  border: `1px solid ${COLORS.borderColorMedium}`,
-  padding: 8,
+  border: `0px solid ${COLORS.textColorDark}`,
+  padding: "8px 8px",
   minWidth: 100,
   // keep full size in the horizontally scrolling StatCardRow
   flexShrink: 0,
+  minHeight: 100
 };
 
 export const STAT_LABEL_STYLE: CSSProperties = {
@@ -62,6 +63,7 @@ export const StatCardRow = ({
       paddingBottom: bottomSpace,
       ...style,
     }}
+    justify="flex-start"
   >
     {children}
   </Flex>

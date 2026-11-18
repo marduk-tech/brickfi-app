@@ -10,13 +10,15 @@ const rgbToHex = (r: number, g: number, b: number): string =>
 
 interface RatingBarProps {
   value: number;
+  /** Font size of the out-of-5 number - defaults to FONT_SIZE.SUB_TEXT. */
+  valueFontSize?: number;
 }
 
 // Same overall width the old five 16px blocks took, so layouts don't shift
 const BAR_WIDTH = 125;
 const BAR_HEIGHT = 8;
 
-const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
+const RatingBar: React.FC<RatingBarProps> = ({ value, valueFontSize }) => {
   const clampedValue = Math.max(0, Math.min(100, Number(value) || 0));
 
   const interpolate = (start: number, end: number, factor: number): number => {
@@ -64,10 +66,10 @@ const RatingBar: React.FC<RatingBarProps> = ({ value }) => {
       <Typography.Text
         style={{
           alignSelf: "flex-end",
-          lineHeight: "12px",
+          lineHeight: valueFontSize ? `${valueFontSize}px` : "12px",
           fontWeight: 500,
           color: COLORS.textColorDark,
-          fontSize: FONT_SIZE.SUB_TEXT
+          fontSize: valueFontSize ?? FONT_SIZE.SUB_TEXT,
         }}
       >
         {outOfFive}

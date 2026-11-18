@@ -179,7 +179,7 @@ export default function ReferredLocationChips({
                 <DynamicReactIcon
                   iconName={icon.name}
                   iconSet={icon.set}
-                  size={10}
+                  size={16}
                   color={isSelected ? "white" : COLORS.textColorDark}
                 ></DynamicReactIcon>
               </span>
@@ -189,7 +189,7 @@ export default function ReferredLocationChips({
                     ellipsis={{ tooltip: displayLabel }}
                     style={{
                       minWidth: 0,
-                      fontSize: FONT_SIZE.NOTE,
+                      fontSize: FONT_SIZE.HEADING_4,
                       fontWeight: 500,
                       color: isSelected ? "white" : COLORS.textColorMedium,
                     }}
@@ -200,7 +200,7 @@ export default function ReferredLocationChips({
                     <Typography.Text
                       style={{
                         flexShrink: 0,
-                        fontSize: FONT_SIZE.NOTE,
+                        fontSize: FONT_SIZE.HEADING_4,
                         fontWeight: 500,
                         marginLeft: 2,
                         color: isSelected ? "white" : COLORS.textColorMedium,

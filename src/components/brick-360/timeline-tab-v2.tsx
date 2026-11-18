@@ -211,7 +211,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
 
   return (
     <Flex vertical style={{ padding: "0 16px" }}>
-      <Flex
+      {/* <Flex
         style={{
           width: "100",
           display: "inline",
@@ -234,7 +234,7 @@ const TimelineTabV2 = ({ lvnzyProject }: TimelineTabProps) => {
           The timeline shows different phases of the same project as per RERA in
           chronological order.
         </Tag>
-      </Flex>
+      </Flex> */}
       <Timeline items={timelines}></Timeline>
     </Flex>
   );

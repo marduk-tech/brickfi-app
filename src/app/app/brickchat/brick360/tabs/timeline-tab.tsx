@@ -127,7 +127,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                 <Flex gap={8} align="center" style={{ marginBottom: 4 }}>
                   <Typography.Text
                     style={{
-                      fontSize: FONT_SIZE.PARA,
+                      fontSize: FONT_SIZE.HEADING_4,
                       lineHeight: "110%",
                       textTransform: "uppercase",
                       color: COLORS.primaryColor,
@@ -145,7 +145,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                           color: COLORS.orangeIdentifier,
                           border: `1px solid ${COLORS.orangeIdentifier}`,
                           padding: "1px 2px",
-                          fontSize: FONT_SIZE.SUB_TEXT,
+                          fontSize: FONT_SIZE.HEADING_3,
                           borderRadius: 4,
                         }}
                       >
@@ -170,7 +170,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                     </Typography.Text>
                     <Typography.Text
                       style={{
-                        fontSize: FONT_SIZE.SUB_TEXT,
+                        fontSize: FONT_SIZE.HEADING_4,
                         lineHeight: "110%",
                         textTransform: "uppercase",
                         color: COLORS.textColorLight,
@@ -188,7 +188,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                           style={{
                             marginRight: 4,
                             color: COLORS.textColorMedium,
-                            fontSize: fs.HEADING_4,
+                            fontSize: fs.HEADING_3,
                           }}
                         >
                           {index == 0 ? "Initial Timeline" : "Extension"}:
@@ -196,7 +196,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                         <Typography.Text
                           style={{
                             color: COLORS.textColorMedium,
-                            fontSize: fs.HEADING_4,
+                            fontSize: fs.HEADING_3,
                           }}
                         >
                           {getFormattedDateString(entry.startDate)} -{" "}
@@ -217,8 +217,8 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
   }, [lvnzyProject]);
 
   return (
-    <Flex vertical style={{ padding: "0 16px" }}>
-      <Flex
+    <Flex vertical style={{ padding: "32px 16px" }}>
+      {/* <Flex
         style={{
           width: "100",
           display: "inline",
@@ -241,7 +241,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
           The timeline shows different phases of the same project as per RERA in
           chronological order.
         </Tag>
-      </Flex>
+      </Flex> */}
       <Timeline items={timelines}></Timeline>
     </Flex>
   );
