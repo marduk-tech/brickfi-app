@@ -38,7 +38,7 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
               style={{
                 margin: "0",
                 lineHeight: "100%",
-                fontSize: FONT_SIZE.HEADING_2,
+                fontSize: FONT_SIZE.HEADING_2 * 1.15,
                 fontWeight: 500,
               }}
             >

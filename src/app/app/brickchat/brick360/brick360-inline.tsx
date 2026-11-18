@@ -215,18 +215,20 @@ export function Brick360Inline({
           vertical
         >
           <Flex align="center" gap={6} style={{}}>
+            <Flex style={{backgroundColor: isActive ? COLORS.primaryColor: 'transparent',border: isActive ? `1px solid ${isActive ? COLORS.primaryColor: COLORS.textColorDark}`: 0, padding: 6, borderRadius: "12px"}}>
             <DynamicReactIcon
               iconName={tab.iconName}
               iconSet={tab.iconSet}
-              color={isActive ? COLORS.primaryColor : COLORS.textColorMedium}
-              size={isMobile ? 20: 24}
+              color={isActive? "white": COLORS.textColorDark}
+              size={isMobile ? 24: 24}
             ></DynamicReactIcon>
+            </Flex>
           </Flex>
           <Flex align="center" gap={4}>
             <Typography.Text
               style={{
                 // the selected tab's label is bolder and 10% larger
-                fontSize: isActive ? fs.HEADING_4 * 1.1 : fs.HEADING_4,
+                fontSize: isActive ? fs.HEADING_4 * 1.25 : fs.HEADING_4 * 1.2,
                 fontWeight: isActive ? 600 : 400,
                 color: isActive ? COLORS.primaryColor : COLORS.textColorMedium,
               }}
@@ -285,8 +287,8 @@ export function Brick360Inline({
         margin: "auto",
         overflowX: "hidden",
         width: "100%",
-        border: `2px solid ${COLORS.borderColor}`,
-        backgroundColor: COLORS.bgColor,
+        border: `1.5px solid ${COLORS.LANDING.MEDIUM_PINK}`,
+        backgroundColor: COLORS.LANDING.LIGHT_PINK,
         borderRadius: 12,
         padding: isMobile ? "8px 4px" : "8px 4px",
         opacity: isClosing ? 0 : 1,
@@ -322,7 +324,7 @@ export function Brick360Inline({
             gap={8}
             style={{
               width: "100%",
-              height: isMobile ? 75: 100,
+              height: isMobile ? 150: 150,
               overflowX: "scroll",
               scrollbarWidth: "none",
             }}

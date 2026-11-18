@@ -121,12 +121,12 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           {priceText}
           {corridorText ? `, ${corridorText}` : ""}
         </div>
-        <Flex align="center" gap={16} style={{marginTop: 0}}>
-          <Flex align="center" gap={8} style={{backgroundColor: COLORS.bgColorMedium, padding: "2px 4px", borderRadius: 4}}>
+        <Flex align="center" gap={8} style={{marginTop: 0}}>
+          <Flex align="center" gap={8} style={{backgroundColor: "transparent", border:`1px solid ${COLORS.textColorDark}`, padding: "2px 4px", borderRadius: 4}}>
             <DynamicReactIcon
               iconSet="tb"
               iconName="TbBuildingBank"
-              size={18}
+              size={14}
               color={COLORS.textColorDark}
             />
             <Typography.Text
@@ -147,14 +147,14 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           onClick={() => setStatusModalOpen(true)}
           style={{
             cursor: "pointer",
-            backgroundColor: COLORS.bgColorMedium, 
+            backgroundColor: "transparent", border:`1px solid ${COLORS.textColorDark}`,
             padding: "2px 4px", borderRadius: 4
           }}
         >
           <DynamicReactIcon
             iconSet={projectStatusConfig.iconSet}
             iconName={projectStatusConfig.iconName}
-            size={18}
+            size={16}
             color={COLORS.textColorDark}
           />
           <Typography.Text

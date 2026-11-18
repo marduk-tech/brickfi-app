@@ -43,7 +43,11 @@ const normalizeUnitType = (c: any): { category: string; label: string } => {
   else if (lower.includes("penthouse")) category = "Penthouse";
   else if (lower.includes("farmland")) category = "Farmland";
   else if (lower.includes("plot")) category = "Plot";
-  else if (lower.includes("bhk") || lower.includes("apartment") || lower.includes("studio"))
+  else if (
+    lower.includes("bhk") ||
+    lower.includes("apartment") ||
+    lower.includes("studio")
+  )
     category = "Apartment";
 
   const bhkMatch = lower.match(/(\d+(?:\.\d+)?)\s*bhk/);
@@ -100,7 +104,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
   useEffect(() => {
     if (lvnzyProject && lvnzyProject.originalProjectId?.info?.financialPlan) {
       setPmtPlan(
-        fetchPmtPlan(lvnzyProject.originalProjectId.info.financialPlan)
+        fetchPmtPlan(lvnzyProject.originalProjectId.info.financialPlan),
       );
     }
   }, [lvnzyProject]);
@@ -194,7 +198,15 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                       padding: "4px 8px",
                       cursor: "pointer",
                       fontWeight: 500,
-                      borderBottom: filter == selectedConfigFilter ? `3px solid ${COLORS.primaryColor}`: `0px`
+                      borderRadius: 8,
+                       border:`1px solid`,
+                      color:
+                        filter == selectedConfigFilter ? `white` : COLORS.textColorMedium,
+
+                      backgroundColor:
+                        filter == selectedConfigFilter
+                          ? `${COLORS.primaryColor}`
+                          : `transparent`,
                     }}
                     onClick={() => {
                       setSelectedConfigFilter(filter);
@@ -214,8 +226,8 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
               icon={<ExclamationCircleFilled style={{ fontSize: 18 }} />}
               message={
                 <>
-                  Limited property and layout details available as the
-                  project remains in pre-launch stage.{" "}<br></br>
+                  Limited property and layout details available as the project
+                  remains in pre-launch stage.{" "}
                   <a
                     href="https://www.brickfi.in/callback-request?srcIntent=brick360-report"
                     target="_blank"
@@ -275,16 +287,27 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                     >
                       {c.sizeBuiltup ? (
                         <Flex vertical style={{ marginBottom: 8 }}>
-                          <Typography.Text
-                            style={{
-                              fontSize: fs.HEADING_3,
-                              fontWeight: 500,
-                              color: COLORS.primaryColor,
-                              
-                            }}
-                          >
-                            {c.type}
-                          </Typography.Text>
+                          <Flex>
+                            <Typography.Text
+                              style={{
+                                fontSize: fs.HEADING_2,
+                                fontWeight: 500,
+                                color: COLORS.primaryColor,
+                              }}
+                            >
+                              {c.type},
+                            </Typography.Text>
+                            <Typography.Text
+                              style={{
+                                fontSize: fs.HEADING_2,
+                                fontWeight: 500,
+                                color: COLORS.primaryColor,
+                                marginLeft: 4
+                              }}
+                            >
+                              ₹{rupeeAmountFormat(c.price)}
+                            </Typography.Text>
+                          </Flex>
                           <Typography.Text
                             style={{
                               fontSize: fs.HEADING_3,
@@ -292,7 +315,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                             }}
                           >
                             {lvnzyProject?.originalProjectId.info.homeType.includes(
-                              "plot"
+                              "plot",
                             ) && !c.type.toLowerCase().includes("bhk")
                               ? "Plot "
                               : "Builtup "}
@@ -333,11 +356,6 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                         </Flex>
                       )}
 
-                      <Typography.Text
-                        style={{ fontSize: fs.HEADING_2, fontWeight: 500 }}
-                      >
-                        ₹{rupeeAmountFormat(c.price)}
-                      </Typography.Text>
                       {c.floorplans &&
                       c.floorplans.filter((f: string) => !!f).length > 0 ? (
                         <Flex
@@ -362,7 +380,7 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
                                 }}
                                 style={{
                                   height: 125,
-                                  minWidth:100,
+                                  minWidth: 100,
                                   width: "auto",
                                   border: `2px solid ${COLORS.borderColorMedium}`,
                                   borderRadius: 8,
@@ -379,7 +397,6 @@ export const FloorplansTab = ({ lvnzyProject }: FloorplansTabProps) => {
           </Flex>
         </Flex>
       </Flex>
-     
     </>
   );
 };
