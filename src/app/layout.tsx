@@ -5,6 +5,9 @@ import AntdRegistry from "../components/antd-registry";
 import { ClientProviders } from "../components/client-providers";
 import "../theme/globals.scss";
 import { SEO_CONTENT } from "@/libs/constants";
+import { getDeviceHint } from "@/libs/device-hint";
+import { headers } from "next/headers";
+import { DeviceProvider } from "../components/device-provider";
 
 // Google tags - each one is left out when its id is unset
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID; // G-...
@@ -122,11 +125,18 @@ const RootSEOSchema = {
     },
   ],
 };
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // the device class from the request, so pages render the right layout
+  // from the first paint (see useMobileDetection)
+  const requestHeaders = await headers();
+  const deviceHint = getDeviceHint(
+    requestHeaders.get("user-agent"),
+    requestHeaders.get("sec-ch-ua-mobile"),
+  );
   return (
     <html lang="en">
       <head>
@@ -251,7 +261,9 @@ fbq('track', 'PageView');
         )}
 
         <AntdRegistry>
-          <ClientProviders>{children}</ClientProviders>
+          <DeviceProvider hint={deviceHint}>
+            <ClientProviders>{children}</ClientProviders>
+          </DeviceProvider>
         </AntdRegistry>
       </body>
     </html>

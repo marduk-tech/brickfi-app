@@ -445,9 +445,9 @@ export const SurroundingElementLabels = {
 };
 
 export const LandingConstants = {
-  brickAssistLink: "/brickassist",
+  brickAssistLink: "/app/brickchat?reachout=callback",
   callbackSuccessLink: "/callback-request-success",
-  callbackLink: "/callback-request",
+  callbackLink: "/app/brickchat?reachout=callback",
   aboutUsLink: "/aboutus",
   instaLink: "https://www.instagram.com/brickfi.online/",
   twitterLink: "https://x.com/brickfi_in",

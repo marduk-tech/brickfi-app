@@ -1,4 +1,3 @@
-import BrickAssistLandingV2 from "@/custom-pages/landing/brick-assist-landing-v2";
 import BrickChatBusiness from "@/custom-pages/landing/brick-chat-business";
 import { SEO_CONTENT } from "@/libs/constants";
 import { Metadata } from "next";

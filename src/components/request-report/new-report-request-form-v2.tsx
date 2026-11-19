@@ -222,7 +222,7 @@ export const NewReportRequestFormV3 = () => {
               number of free reports.
             </Typography.Text>
             <Link
-              href="/brickassist"
+              href="/app/brickchat?reachout=callback"
               style={{
                 fontSize: FONT_SIZE.HEADING_4,
                 marginTop: 16,

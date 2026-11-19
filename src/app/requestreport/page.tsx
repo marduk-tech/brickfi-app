@@ -2,13 +2,13 @@
 
 import LandingHeader from "@/custom-pages/landing/header";
 import { useDevice } from "@/hooks/use-device";
-import { COLORS } from "@/theme/style-constants";
-import { Flex, Typography } from "antd";
+import { COLORS, FONT_SIZE } from "@/theme/style-constants";
+import { Button, Flex, Typography } from "antd";
 import { Metadata } from "next";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-const REDIRECT_SECONDS = 3;
+const REDIRECT_SECONDS = 7;
 
 export default function RequestReportPage() {
     const { isMobile } = useDevice();
@@ -25,8 +25,16 @@ export default function RequestReportPage() {
       return () => clearTimeout(id);
     }, [secondsLeft, router]);
 
+    // skips the rest of the countdown
+    const redirectNow = () => setSecondsLeft(0);
+
     const redirectText = (
-      <div style={{fontSize: 24}}>Redirecting you in {secondsLeft}..</div>
+      <Flex vertical align={isMobile? "center": "flex-start"} gap={4}>
+        <div style={{fontSize: FONT_SIZE.HEADING_3}}>Redirecting you in {secondsLeft}..</div>
+        <Button style={{fontSize: FONT_SIZE.HEADING_4, padding: "0px px"}} size="small" type="default" onClick={redirectNow} disabled={secondsLeft === 0}>
+          Redirect Now
+        </Button>
+      </Flex>
     );
 
   return (
@@ -42,15 +50,13 @@ export default function RequestReportPage() {
         logo={"/images/brickfi-logo.png"}
         color={COLORS.textColorDark}
       />
-      <Flex gap={16} vertical={isMobile} align="center" style={{marginTop: isMobile ? 150: 125}}>
-            {isMobile ? redirectText : null}
-
+      <Flex gap={16} vertical={isMobile} align="center" style={{marginTop: isMobile ? 100: 125}}>
       <img
-        src="images/landing/brick-chat/request-report-redirect.png"
-        width="600px"
+      src={isMobile ? "images/landing/brick-chat/request-report-redirect-mob.png?v=1": "images/landing/brick-chat/request-report-redirect.png?v=1"}
+        width="800px"
         style={{  maxWidth: "95%" }}
       ></img>
-      {!isMobile ? redirectText : null}
+      {redirectText}
       </Flex>
      
     </Flex>

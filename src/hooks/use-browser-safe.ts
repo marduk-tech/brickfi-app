@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { safeWindow, safeStorage, isBrowser } from '../libs/browser-utils';
+import { useDeviceHint } from '../components/device-provider';
 
 /**
  * Hook to detect if we're on the client side (hydrated)
@@ -214,57 +215,43 @@ export function useLocation() {
   return location;
 }
 
+// same breakpoints as the .mobile-only / .tablet-mobile-only classes in
+// globals.scss
+const MOBILE_QUERY = '(max-width: 576px)';
+const TABLET_OR_MOBILE_QUERY = '(max-width: 992px)';
+
 /**
- * Hook for detecting mobile devices with SSR support
- * Uses our CSS-based approach from use-device.ts
+ * Hook for detecting mobile devices with SSR support.
+ * Starts from the server's user-agent guess (DeviceProvider, set in the root
+ * layout) so the server render and the first client render already have the
+ * right layout - no desktop-then-mobile jump - then follows the real
+ * viewport width once mounted.
  */
 export function useMobileDetection() {
-  const [isMobile, setIsMobile] = useState(false);
-  const [isTabletOrMobile, setIsTabletOrMobile] = useState(false);
+  const hint = useDeviceHint();
+  const [isMobile, setIsMobile] = useState(hint.isMobile);
+  const [isTabletOrMobile, setIsTabletOrMobile] = useState(
+    hint.isTabletOrMobile
+  );
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    if (!isBrowser()) return;
+    const mobile = window.matchMedia(MOBILE_QUERY);
+    const tabletOrMobile = window.matchMedia(TABLET_OR_MOBILE_QUERY);
+    const update = () => {
+      setIsMobile(mobile.matches);
+      setIsTabletOrMobile(tabletOrMobile.matches);
+    };
+    update();
     setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted || !isBrowser()) return;
-
-    const detectDevice = () => {
-      // Use CSS test elements (same as our updated use-device.ts)
-      const testMobile = document.createElement('div');
-      const testTablet = document.createElement('div');
-      
-      testMobile.className = 'mobile-only';
-      testTablet.className = 'tablet-mobile-only';
-      testMobile.style.position = 'absolute';
-      testMobile.style.visibility = 'hidden';
-      testTablet.style.position = 'absolute';
-      testTablet.style.visibility = 'hidden';
-      
-      document.body.appendChild(testMobile);
-      document.body.appendChild(testTablet);
-      
-      const mobileMatch = window.getComputedStyle(testMobile).display === 'block';
-      const tabletMobileMatch = window.getComputedStyle(testTablet).display === 'block';
-      
-      setIsMobile(mobileMatch);
-      setIsTabletOrMobile(tabletMobileMatch);
-      
-      // Cleanup
-      document.body.removeChild(testMobile);
-      document.body.removeChild(testTablet);
-    };
-
-    detectDevice();
-    
-    const handleResize = () => detectDevice();
-    safeWindow.addEventListener('resize', handleResize);
-    
+    mobile.addEventListener('change', update);
+    tabletOrMobile.addEventListener('change', update);
     return () => {
-      safeWindow.removeEventListener('resize', handleResize);
+      mobile.removeEventListener('change', update);
+      tabletOrMobile.removeEventListener('change', update);
     };
-  }, [mounted]);
+  }, []);
 
   return { isMobile, isTabletOrMobile, mounted };
 }

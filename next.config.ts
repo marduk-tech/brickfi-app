@@ -27,14 +27,21 @@ const nextConfig: NextConfig = {
       // with an extension), the service worker's /offline page and
       // /app/brickchat (that exact path, not its threads).
       // "/:path((?!_next/|offline$|app/brickchat$|.*\\.).+)",
-      "/brick360",
-      "/brickassist",
       "/brkassistv2",
       "/buy-with-brickfi",
-      "/callback-request",
-    ].map(
-      (source) => ({ source, destination: "/", permanent: false }),
-    );
+    ]
+      .map((source) => ({ source, destination: "/", permanent: false }))
+      .concat(
+        // callback landings - straight to brickchat with the expert help
+        // dialog open on the call option (see the reachout param in
+        // brickchat-client.tsx); a query string on the source (e.g.
+        // ?srcIntent=) is carried over
+        ["/brickassist", "/callback-request"].map((source) => ({
+          source,
+          destination: "/app/brickchat?reachout=callback",
+          permanent: true,
+        })),
+      );
   },
   // static legal pages in public/docs, served without the .html suffix - for
   // `next dev`; on Netlify the same rewrites are in netlify.toml
