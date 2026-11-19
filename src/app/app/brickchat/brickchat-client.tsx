@@ -1648,6 +1648,7 @@ export function BrickChatCore({
   return (
     <Flex
       vertical={isMobile}
+      className={styles.chatLayout}
       style={{
         width: "100%",
         maxWidth: 2000,
@@ -1663,6 +1664,7 @@ export function BrickChatCore({
       {messageContextHolder}
       <Flex
         vertical
+        className={styles.chatColumn}
         style={{
           margin: "0 auto",
           position: "relative",
@@ -1676,6 +1678,7 @@ export function BrickChatCore({
           <Form
             form={form}
             onFinish={handleSearch}
+            className={styles.chatSearchForm}
             style={{
               marginTop: 8,
               position: "absolute",
@@ -1892,6 +1895,7 @@ export function BrickChatCore({
         <Flex
           vertical
           gap={24}
+          className={styles.chatList}
           style={{
             height: "100%",
             overflowY: "scroll",
@@ -2440,6 +2444,7 @@ export function BrickChatCore({
       {/* Map View for Desktop */}
       {!isMobile && (
         <Flex
+          className={styles.desktopMap}
           style={{
             width: "47%",
             minWidth: "44%",

@@ -23,3 +23,27 @@
 .scrollContainer::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+/* Mobile layout of brickchat-client, applied by CSS at the same breakpoint
+   as globals.scss's .mobile-only (which useDevice's isMobile reads). isMobile
+   is false until the page hydrates, so without these the server-rendered
+   page shows the desktop split (chat at 50% beside the map) on a phone for
+   the seconds until JS loads. !important beats the desktop inline styles. */
+@media (max-width: 576px) {
+  .chatLayout {
+    flex-direction: column !important;
+    padding: 8px 0 !important;
+  }
+  .chatColumn {
+    width: 100% !important;
+  }
+  .chatSearchForm {
+    padding: 0 8px !important;
+  }
+  .chatList {
+    padding: 0 8px !important;
+  }
+  .desktopMap {
+    display: none !important;
+  }
+}
