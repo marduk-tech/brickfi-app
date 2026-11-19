@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
       // with an extension), the service worker's /offline page and
       // /app/brickchat (that exact path, not its threads).
       // "/:path((?!_next/|offline$|app/brickchat$|.*\\.).+)",
+      "/brick360",
       "/brickassist",
       "/brkassistv2",
       "/buy-with-brickfi",
