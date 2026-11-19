@@ -43,6 +43,7 @@ import {
   Input,
   message,
   Modal,
+  Skeleton,
   Spin,
   Tag,
   Tooltip,
@@ -2158,7 +2159,7 @@ export function BrickChatCore({
                       };
                       return (
                         <Flex vertical gap={4} style={{ marginBottom: 2 }}>
-                          <Flex align="center" gap={6}>
+                          <Flex align="center" gap={2}>
                             <Flex gap={4} align="center">
                               <DynamicReactIcon color={COLORS.textColorMedium} size={12} iconName="FaMapMarkedAlt" iconSet="fa"></DynamicReactIcon>
                             <Typography.Text
@@ -2168,10 +2169,10 @@ export function BrickChatCore({
                                 color: COLORS.textColorMedium,
                               }}
                             >
-                              See on map
+                              See on Map
                             </Typography.Text>
                             </Flex>
-                            {hasFocusable ? (
+                            {/* {hasFocusable ? (
                               <Tooltip title="Reset">
                                 <Button
                                   type="text"
@@ -2193,7 +2194,7 @@ export function BrickChatCore({
                                   style={{ height: 20, width: 20 }}
                                 />
                               </Tooltip>
-                            ) : null}
+                            ) : null} */}
                           </Flex>
                           <Flex
                             style={{
@@ -2386,11 +2387,8 @@ export function BrickChatCore({
               <Flex vertical gap={12}>
                 {renderQuestion(currentQuestion)}
                 <ChatTimeline steps={steps} running />
-                {/* a project-list answer (directAnswer false) is on its way
-                    - placeholder cards until the real ones arrive */}
-                {steps.some((s) => PROJECT_LIST_STEP_IDS.includes(s.id)) ? (
-                  <BrickChatResultsSkeleton />
-                ) : null}
+                {/* the summary as it streams - three placeholder lines
+                    until its first words arrive */}
                 {streamingSummary ? (
                   <Markdown
                     className="bkchat-summary"
@@ -2398,6 +2396,19 @@ export function BrickChatCore({
                   >
                     {stripLocationRefs(streamingSummary)}
                   </Markdown>
+                ) : (
+                  <Skeleton
+                    active
+                    title={false}
+                    paragraph={{ rows: 2 }}
+                    style={{ maxWidth: 800 }}
+                  />
+                )}
+                {/* a project-list answer (directAnswer false) is on its way
+                    - placeholder cards until the real ones arrive, below the
+                    summary as the answer itself lays them out */}
+                {steps.some((s) => PROJECT_LIST_STEP_IDS.includes(s.id)) ? (
+                  <BrickChatResultsSkeleton />
                 ) : null}
               </Flex>
             )}

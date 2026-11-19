@@ -125,7 +125,7 @@ export default function ReferredLocationChips({
       style={
         inline
           ? { display: "inline-flex", verticalAlign: "middle" }
-          : { padding: 4, flexShrink: 0 }
+          : { padding: "2px 0", flexShrink: 0 }
       }
     >
       <Flex align="center" gap={4}>

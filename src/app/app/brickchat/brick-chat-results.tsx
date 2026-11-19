@@ -578,7 +578,7 @@ export default function BrickChatResults({
     <Flex
       className={styles.scrollContainer}
       gap={16}
-      style={{ marginBottom: 16 }}
+      style={{ marginBottom: 1 }}
     >
       {contextHolder}
       {modalContextHolder}
