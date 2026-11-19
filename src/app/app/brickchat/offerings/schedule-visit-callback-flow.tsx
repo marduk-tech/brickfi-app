@@ -169,6 +169,8 @@ export default function ScheduleVisitCallbackFlow({
           </Typography.Text>
         </Divider>
 
+        <RequestOptions />
+
         <Form.Item
           name="query"
           rules={[
@@ -191,8 +193,6 @@ export default function ScheduleVisitCallbackFlow({
             }
           />
         </Form.Item>
-
-        <RequestOptions />
 
         <MobileField context={context} />
       </Flex>

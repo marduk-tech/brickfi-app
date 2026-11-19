@@ -1098,6 +1098,8 @@ export default function HomeLoanFlow({
                       Additionally You Can
                     </Typography.Text>
                   </Divider>
+          <RequestOptions />
+
           <Form.Item
             name="query"
             validateStatus={taskMissingQuery ? "error" : undefined}
@@ -1109,8 +1111,6 @@ export default function HomeLoanFlow({
               placeholder={queryPlaceholder}
             />
           </Form.Item>
-
-          <RequestOptions />
 
           <MobileField context={context} />
         </Flex>

@@ -54,6 +54,8 @@ export default function LegalConsultationFlow({
           borderRadius: 8,
         }}
       >
+        <RequestOptions defaultSelected="call" callFirst={true}/>
+
         <Form.Item
           name="query"
           validateStatus={taskMissingQuery ? "error" : undefined}
@@ -65,8 +67,6 @@ export default function LegalConsultationFlow({
             placeholder={queryPlaceholder}
           />
         </Form.Item>
-
-        <RequestOptions defaultSelected="call" callFirst={true}/>
 
         <MobileField context={context} />
       </Flex>

@@ -234,7 +234,7 @@ export function RequestOptions({
     </Col>
   );
   return (
-    <Row gutter={[12, 12]} style={{ marginBottom: 24 }}>
+    <Row gutter={[12, 12]} style={{ marginBottom: 16 }}>
       {callFirst ? [callOption, taskOption] : [taskOption, callOption]}
     </Row>
   );
@@ -258,7 +258,17 @@ export function MobileField({ context }: { context: OfferingFlowContext }) {
   return (
     <Form.Item
       name="mobile"
-      label={fieldLabel("Mobile number")}
+      label={fieldLabel("Your Mobile Number")}
+      style={{ maxWidth: 275 }}
+      // digits only, at most 10 - spaces, dashes and a leading +91/0 (e.g. a
+      // pasted "+91 98765 43210") are stripped as typed
+      normalize={(value: string) =>
+        (value || "")
+          .replace(/\D/g, "")
+          .replace(/^(91|0)(?=\d{10,}$)/, "")
+          .slice(0, 10)
+      }
+      validateTrigger={["onChange", "onBlur"]}
       rules={[
         { required: true, message: "Please enter your mobile number" },
         {
@@ -267,7 +277,13 @@ export function MobileField({ context }: { context: OfferingFlowContext }) {
         },
       ]}
     >
-      <Input addonBefore="+91" inputMode="numeric" maxLength={10} />
+      <Input
+        addonBefore="+91"
+        type="tel"
+        inputMode="numeric"
+        autoComplete="tel-national"
+        placeholder="10-digit mobile number"
+      />
     </Form.Item>
   );
 }

@@ -82,6 +82,8 @@ export interface OfferingFlowProps {
   context: OfferingFlowContext;
   /** the answer's followupOffering.context, when it has one */
   offeringContext?: string;
+  /** request option to show first and preselect (e.g. from ?reachout=) */
+  preferredRequestOption?: "task" | "call";
   submitting: boolean;
   onSubmit: (data: Record<string, unknown>) => void;
   onCancel: () => void;

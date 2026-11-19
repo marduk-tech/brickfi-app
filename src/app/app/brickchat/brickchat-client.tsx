@@ -1474,6 +1474,34 @@ export function BrickChatCore({
   // turnId or offeringContext, it isn't tied to an answer
   const expertHelpCta = useOfferingCtaForFlow("brkfi-expert");
 
+  // ?reachout=request|callback opens Expert Help straight away, with that
+  // option shown first and selected - once per page load, as soon as the
+  // offering is loaded. The param is then dropped from the URL so a refresh
+  // or a shared thread link doesn't reopen it.
+  const reachoutParam = searchParams.get("reachout")?.trim().toLowerCase();
+  const reachoutHandled = useRef(false);
+  useEffect(() => {
+    if (reachoutHandled.current || !expertHelpCta) return;
+    if (reachoutParam !== "request" && reachoutParam !== "callback") return;
+    reachoutHandled.current = true;
+    // a signed-out visitor landing straight on this link hasn't chatted yet,
+    // so has no guest id - the ticket needs one as its owner (the flow asks
+    // for their mobile as its contact, see MobileField)
+    if (!user?._id && !hasStoredUser()) getOrCreateGuestId();
+    setActiveOfferingFlow({
+      ...expertHelpCta,
+      preferredRequestOption: reachoutParam === "callback" ? "call" : "task",
+    });
+    const params = new URLSearchParams(window.location.search);
+    params.delete("reachout");
+    const query = params.toString();
+    window.history.replaceState(
+      null,
+      "",
+      query ? `${window.location.pathname}?${query}` : window.location.pathname,
+    );
+  }, [expertHelpCta, reachoutParam]);
+
   // what a flow can prefill from: projects in this conversation (the open
   // one, then the latest answers' cards first, then saved ones) and the
   // signed-in user's contact
@@ -2018,73 +2046,7 @@ export function BrickChatCore({
                     ) : null} */}
 
                     {renderImages(messageItem.answer.images)}
-                    {!messageItem.answer.directAnswer ? (
-                      <Flex vertical gap={8} style={{}}>
-                        {!skipsProjectResults(messageItem.answer) ? (
-                          <BrickChatResults
-                            results={messageItem.answer.projectsList}
-                            onLocateProject={(projectId) =>
-                              handleLocateProject(projectId, index)
-                            }
-                            onSelectProject={handleSelectProject}
-                            selectedProjectId={selectedProject?.projectId}
-                          />
-                        ) : null}
-                        {/* out of the whole result set (shown + still to
-                          page through), not totalCount - relaxed matches
-                          can push the shown count past it */}
-                        {messageItem.answer.shownCount != null &&
-                        !!messageItem.answer.projectsList?.length &&
-                        !skipsProjectResults(messageItem.answer) ? (
-                          <Typography.Text
-                            style={{
-                              fontSize: FONT_SIZE.SUB_TEXT,
-                              color: COLORS.textColorMedium,
-                            }}
-                          >
-                            Showing {messageItem.answer.shownCount} out of{" "}
-                            {messageItem.answer.shownCount +
-                              (messageItem.answer.nextSetCount ?? 0)}{" "}
-                            projects
-                          </Typography.Text>
-                        ) : null}
-                        {!chatLoading &&
-                          (messageItem.answer.nextSetCount ?? 0) > 0 &&
-                          index === chatHistory.length - 1 && (
-                            <Flex justify="flex-start" style={{marginBottom: 8}}>
-                              <Button
-                                size="small"
-                                style={{
-                                  fontSize: FONT_SIZE.PARA,
-                                  height: 24,
-                                }}
-                                onClick={() => {
-                                  form.setFieldsValue({
-                                    question: "show me more",
-                                  });
-                                  form.submit();
-                                }}
-                              >
-                                Show more
-                              </Button>
-                            </Flex>
-                          )}
-                      </Flex>
-                    ) : !!messageItem.answer.projectsList?.length &&
-                      !skipsProjectResults(messageItem.answer) ? (
-                      <Flex vertical gap={8}>
-                        <BrickChatResults
-                          results={messageItem.answer.projectsList}
-                          onLocateProject={(projectId) =>
-                            handleLocateProject(projectId, index)
-                          }
-                          onSelectProject={handleSelectProject}
-                          selectedProjectId={selectedProject?.projectId}
-                          skipOneLiner
-                          skipSort
-                        />
-                      </Flex>
-                    ) : null}
+                    
 
                     {/* earlier turns clamp to 300px behind "See more" so
                       the thread stays scannable; the latest turn always
@@ -2144,7 +2106,7 @@ export function BrickChatCore({
                       </Markdown>
                     </CollapsibleAnswer>
 
-                    {(() => {
+                       {(() => {
                       const referredLocationItems = getReferredLocationItems(
                         messageItem.answer,
                       );
@@ -2262,6 +2224,78 @@ export function BrickChatCore({
                         </Flex>
                       );
                     })()}
+
+                    {!messageItem.answer.directAnswer ? (
+                      <Flex vertical gap={8} style={{}}>
+                        {!skipsProjectResults(messageItem.answer) ? (
+                          <BrickChatResults
+                            results={messageItem.answer.projectsList}
+                            onLocateProject={(projectId) =>
+                              handleLocateProject(projectId, index)
+                            }
+                            onSelectProject={handleSelectProject}
+                            selectedProjectId={selectedProject?.projectId}
+                          />
+                        ) : null}
+                        {/* out of the whole result set (shown + still to
+                          page through), not totalCount - relaxed matches
+                          can push the shown count past it */}
+                          <Flex gap={4} vertical align="flex-start">
+                        {messageItem.answer.shownCount != null &&
+                        !!messageItem.answer.projectsList?.length &&
+                        !skipsProjectResults(messageItem.answer) ? (
+                          <Typography.Text
+                            style={{
+                              fontSize: FONT_SIZE.SUB_TEXT,
+                              color: COLORS.textColorMedium,
+                            }}
+                          >
+                            Showing {messageItem.answer.shownCount} out of{" "}
+                            {messageItem.answer.shownCount +
+                              (messageItem.answer.nextSetCount ?? 0)}{" "}
+                            projects
+                          </Typography.Text>
+                        ) : null}
+                        {!chatLoading &&
+                          (messageItem.answer.nextSetCount ?? 0) > 0 &&
+                          index === chatHistory.length - 1 && (
+                            <Flex justify="flex-start" style={{marginBottom: 8}}>
+                              <Button
+                                size="small"
+                                style={{
+                                  fontSize: FONT_SIZE.SUB_TEXT,
+                                  height: 24,
+                                }}
+                                onClick={() => {
+                                  form.setFieldsValue({
+                                    question: "show me more",
+                                  });
+                                  form.submit();
+                                }}
+                              >
+                                Show more
+                              </Button>
+                            </Flex>
+                          )}
+                          </Flex>
+                      </Flex>
+                    ) : !!messageItem.answer.projectsList?.length &&
+                      !skipsProjectResults(messageItem.answer) ? (
+                      <Flex vertical gap={8}>
+                        <BrickChatResults
+                          results={messageItem.answer.projectsList}
+                          onLocateProject={(projectId) =>
+                            handleLocateProject(projectId, index)
+                          }
+                          onSelectProject={handleSelectProject}
+                          selectedProjectId={selectedProject?.projectId}
+                          skipOneLiner
+                          skipSort
+                        />
+                      </Flex>
+                    ) : null}
+
+                 
 
                     {messageItem.answer.followupPrompt ? (
                       <Typography.Text

@@ -20,6 +20,7 @@ import type { OfferingFlowProps } from "./types";
 export default function ExpertHelpFlow({
   context,
   offeringContext,
+  preferredRequestOption = "task",
   submitting,
   onSubmit,
   onCancel,
@@ -62,6 +63,11 @@ export default function ExpertHelpFlow({
           borderRadius: 8,
         }}
       >
+        <RequestOptions
+          defaultSelected={preferredRequestOption}
+          callFirst={preferredRequestOption === "call"}
+        />
+
         <Form.Item
           name="query"
           validateStatus={taskMissingQuery ? "error" : undefined}
@@ -73,8 +79,6 @@ export default function ExpertHelpFlow({
             placeholder={queryPlaceholder}
           />
         </Form.Item>
-
-        <RequestOptions defaultSelected="task"/>
 
         <MobileField context={context} />
       </Flex>

@@ -32,6 +32,8 @@ export interface ActiveOfferingFlow {
   turnId?: string;
   /** that answer's followupOffering.context, passed on to the flow */
   offeringContext?: string;
+  /** request option the flow shows first and preselects - see RequestOptions */
+  preferredRequestOption?: "task" | "call";
 }
 
 // The dialog a CTA button opens - runs the CTA's flow and creates the ticket
@@ -122,6 +124,7 @@ export default function OfferingFlowDialog({
           key={formKey}
           context={context}
           offeringContext={flow.offeringContext}
+          preferredRequestOption={flow.preferredRequestOption}
           submitting={submitting}
           onSubmit={submit}
           onCancel={onClose}
