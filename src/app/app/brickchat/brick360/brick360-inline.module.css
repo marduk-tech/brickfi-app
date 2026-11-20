@@ -3,7 +3,13 @@
    selected tab scrolled to the middle. No scrollbar, no overflow menu and no
    underline: the selected tab is marked by its label's own colour. */
 .tabBar {
-  position: relative; /* tab offsetLeft is measured from here */
+  /* sticky also makes it the tabs' offsetParent - tab offsetLeft is
+     measured from here. Needs no overflow:hidden/auto ancestor between it
+     and the element that scrolls (see overflowX: clip on the container). */
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  background-color: #f9f8f5; /* the container's - content scrolls under it */
   display: flex;
   gap: 16px;
   padding: 0 8px;
@@ -25,6 +31,11 @@
   font: inherit;
   color: inherit;
   cursor: pointer;
+}
+
+/* title row above each stacked section's content */
+.sectionHeader {
+  margin-bottom: 16px;
 }
 
 .tabButton:focus-visible {

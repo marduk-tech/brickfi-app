@@ -52,9 +52,9 @@ export const ProjectHeader = forwardRef<any, ProjectHeaderProps>(
           vertical
           style={{
             margin: "4px 8px",
-            width: isMobile ? "initial" : "fit-content",
+            width: "initial",
             borderRadius: 8,
-            marginBottom: 8
+            marginBottom: 0
           }}
         >
           <MetaInfo lvnzyProject={lvnzyProject!} ref={ref}></MetaInfo>

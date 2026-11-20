@@ -4,14 +4,24 @@ import React, { useEffect } from "react";
 import * as turf from "@turf/turf";
 import { AdvancedMarker, AdvancedMarkerAnchorPoint, useMap } from "@vis.gl/react-google-maps";
 import { useMapZoom } from "../use-map-zoom";
-import { DRIVER_CATEGORIES, PLACE_TIMELINE } from "../../../../libs/constants";
+import { DRIVER_CATEGORIES } from "../../../../libs/constants";
 import { capitalize, driverStatusLabel } from "../../../../libs/lvnzy-helper";
 import { COLORS } from "../../../../theme/style-constants";
 import { IDriverPlace } from "../../../../types/Project";
 import { GeoJSONPointFeature, TransitDriverPlace } from "../../types";
 import { MapModalContent, MapModalGeoPosition } from "../../map-modal";
-import { processRoadFeatures } from "../../utils";
+import {
+  getFeatureStatus,
+  isUnderConstructionStatus,
+  processRoadFeatures,
+} from "../../utils";
 import { MarkerIcon } from "../marker-icon";
+
+// status chip for a line / station's own (or the driver's) status
+const statusTag = (status: string) => ({
+  label: driverStatusLabel(status),
+  color: isUnderConstructionStatus(status) ? "warning" : "success",
+});
 
 interface TransitDriversProps {
   drivers?: IDriverPlace[];
@@ -56,29 +66,6 @@ function TransitPolylines(props: TransitDriversProps) {
     const filtered = filterTransit(drivers, currentSelectedCategory, noCategoriesProvided, isDriverMatchingFilter);
 
     for (const driver of filtered) {
-      const isDashed = ![
-        PLACE_TIMELINE.LAUNCHED,
-        PLACE_TIMELINE.POST_LAUNCH,
-        PLACE_TIMELINE.PARTIAL_LAUNCH,
-      ].includes(driver.status as PLACE_TIMELINE);
-
-      const handleClick = (e: google.maps.PolyMouseEvent) =>
-        openModal(
-          {
-            title: driver.name,
-            subHeading:
-              driver.distance && driver.duration
-                ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
-                : "",
-            content: driver.details?.oneLiner || driver.details?.description || "",
-            tags: [
-              { label: driverStatusLabel(driver.status), color: isDashed ? "warning" : "success" },
-              ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: "info" })),
-            ],
-          },
-          e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
-        );
-
       const lineFeatures = processRoadFeatures(
         driver.features.filter(
           (f: any) => f.type === "Feature" && f.geometry?.type !== "Point"
@@ -86,6 +73,27 @@ function TransitPolylines(props: TransitDriversProps) {
       );
 
       for (const feature of lineFeatures) {
+        // each stretch of a line can carry its own properties.status (part
+        // launched, part under construction) - falls back to the driver's
+        const status = getFeatureStatus(feature.properties, driver.status);
+        const isDashed = isUnderConstructionStatus(status);
+        const handleClick = (e: google.maps.PolyMouseEvent) =>
+          openModal(
+            {
+              title: driver.name,
+              subHeading:
+                driver.distance && driver.duration
+                  ? fetchTravelDurationElement(driver.distance, driver.duration, driver.comments)
+                  : "",
+              content: driver.details?.oneLiner || driver.details?.description || "",
+              tags: [
+                statusTag(status),
+                ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: "info" })),
+              ],
+            },
+            e.latLng ? { lat: e.latLng.lat(), lng: e.latLng.lng() } : undefined,
+          );
+
         const color = feature.properties?.strokeColor || COLORS.textColorDark;
         const line = new google.maps.Polyline({
           map,
@@ -201,18 +209,14 @@ export function TransitDrivers(props: TransitDriversProps) {
   // ── Station markers (FaTrainSubway, matches transitStationIcon from OpenStreet) ──
   const stationMarkers: React.ReactNode[] = [];
   for (const driver of filtered) {
-    const isDashed = ![
-      PLACE_TIMELINE.LAUNCHED,
-      PLACE_TIMELINE.POST_LAUNCH,
-      PLACE_TIMELINE.PARTIAL_LAUNCH,
-    ].includes(driver.status as PLACE_TIMELINE);
-
     const pointFeatures = driver.features.filter(
       (f: any): f is GeoJSONPointFeature =>
         f.type === "Feature" && f.geometry.type === "Point"
     );
 
     for (const feature of pointFeatures) {
+      const status = getFeatureStatus(feature.properties, driver.status);
+      const isDashed = isUnderConstructionStatus(status);
       const [lng, lat] = feature.geometry.coordinates;
       const stationName = feature.properties?.name || feature.properties?.Name || driver.name;
 
@@ -231,7 +235,7 @@ export function TransitDrivers(props: TransitDriversProps) {
                 content: driver.details?.oneLiner || driver.details?.description || "",
                 tags: [
                   { label: `Station: ${stationName}`, color: COLORS.primaryColor },
-                  { label: driverStatusLabel(driver.status), color: isDashed ? "warning" : "success" },
+                  statusTag(status),
                   ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: "info" })),
                 ],
               },
@@ -255,12 +259,8 @@ export function TransitDrivers(props: TransitDriversProps) {
   // ── Rotated transit-line name labels (matches OpenStreet zoom > 14 behaviour) ──
   const labelCandidates = buildTransitLabelCandidates(filtered, zoom);
   const labelMarkers: React.ReactNode[] = labelCandidates.map(
-    ({ coords, angle, labelColor, driver }, idx) => {
-      const isDashed = ![
-        PLACE_TIMELINE.LAUNCHED,
-        PLACE_TIMELINE.POST_LAUNCH,
-        PLACE_TIMELINE.PARTIAL_LAUNCH,
-      ].includes(driver.status as PLACE_TIMELINE);
+    ({ coords, angle, labelColor, driver, feature }, idx) => {
+      const status = getFeatureStatus(feature.properties, driver.status);
       return (
       <AdvancedMarker
         key={`transit-label-${driver._id}-${idx}`}
@@ -277,7 +277,7 @@ export function TransitDrivers(props: TransitDriversProps) {
                   : "",
               content: driver.details?.oneLiner || driver.details?.description || "",
               tags: [
-                { label: driverStatusLabel(driver.status), color: isDashed ? "warning" : "success" },
+                statusTag(status),
                 ...(driver.tags ?? []).map((t: string) => ({ label: capitalize(t), color: "info" })),
               ],
             },

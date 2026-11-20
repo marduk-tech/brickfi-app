@@ -109,7 +109,7 @@ export function Brick360Highlights({
 
   return (
     <>
-      <Flex vertical style={{ marginBottom: 0 }}>
+      <Flex vertical style={{ marginBottom: 0, marginTop: 16 }}>
         {/* <Typography.Text
           style={{
             fontSize: fs.HEADING_4,

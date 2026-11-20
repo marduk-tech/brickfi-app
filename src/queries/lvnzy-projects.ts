@@ -36,10 +36,14 @@ export const getLvnzyProjectById = async (
   return data;
 };
 
-// Get project by slug (for public pages)
+// Get project by slug (for public pages). runOnServer: called from a server
+// component (e.g. /brick360/[slug]) - server requests carry no Origin header,
+// which the backend requires for the public key in production, so they use
+// the sitemap key instead (same as getLvnzyProjectById / getDeveloper).
 export const getLvnzyProjectBySlug = async (
   slug: string,
   throwError = true,
+  runOnServer = false,
 ) => {
   const res = await fetch(
     `${baseApiUrl}lvnzy-projects/slug/${slug.toLowerCase()}`,
@@ -47,7 +51,7 @@ export const getLvnzyProjectBySlug = async (
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
-        "x-api-key": apiKey || "",
+        "x-api-key": (runOnServer ? sitemapApiKey || apiKey : apiKey) || "",
       },
     },
   );
@@ -69,6 +73,31 @@ export const getLvnzyProjectBySlug = async (
 
   const data = await res.json();
   return data;
+};
+
+// Slugs of every project with a verified Brick360 report - the ones the
+// public /brick360/[slug] pages index (see sitemap.ts). Server only: uses
+// the sitemap key.
+export const getVerifiedLvnzyProjectSlugs = async (): Promise<
+  { slug: string }[]
+> => {
+  const res = await fetch(
+    `${baseApiUrl}lvnzy-projects?onlyVerifiedReports=true`,
+    {
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": sitemapApiKey || apiKey || "",
+      },
+    },
+  );
+  if (!res.ok) {
+    throw new Error(`Failed to fetch verified projects: ${res.status}`);
+  }
+  const projects = await res.json();
+  return (Array.isArray(projects) ? projects : [])
+    .filter((p: any) => p?.slug)
+    .map((p: any) => ({ slug: p.slug as string }));
 };
 
 // Project "card" display data (same shape as any other brickchat project

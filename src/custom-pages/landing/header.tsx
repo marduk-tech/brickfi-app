@@ -15,7 +15,9 @@ const LandingHeader: React.FC<{
   isMobile?: boolean;
   /** Fits the nearest positioned parent instead of being fixed to the viewport - that parent needs `position: relative`. */
   contained?: boolean;
-}> = ({ bgColor, color, logo, isMobile: isMobileProp, contained }) => {
+  /** 20% shorter (74px instead of 92px), with the logo, nav text and menu icon scaled down to match. */
+  compact?: boolean;
+}> = ({ bgColor, color, logo, isMobile: isMobileProp, contained, compact }) => {
   const router = useRouter();
   const { isMobile: isMobileDetected } = useDevice();
   const isMobile = isMobileProp ?? isMobileDetected;
@@ -38,7 +40,7 @@ const LandingHeader: React.FC<{
         left: contained ? 0 : undefined,
         boxSizing: contained ? "border-box" : undefined,
         width: "100%",
-        padding: 16,
+        padding: compact ? "12px 16px" : 16,
         backgroundColor: bgColor || "#32495e",
         zIndex: 1000
       }}
@@ -49,22 +51,22 @@ const LandingHeader: React.FC<{
           router.push("/");
         }}
         style={{
-          height: 60,
+          height: compact ? 50 : 60,
           display: "flex",
           alignItems: "center",
           cursor: "pointer",
         }}
       >
-        <img src={logo || "/images/brickfi-logo-white.png"} height="20"></img>
+        <img src={logo || "/images/brickfi-logo-white.png"} height={compact ? 16 : 20}></img>
       </Flex>
       
       <Flex
         style={{
           marginLeft: "auto",
-          marginRight: 32,
+          marginRight: compact ? 26 : 32,
           color: color || COLORS.textColorMedium,
         }}
-        gap={16}
+        gap={compact ? 13 : 16}
       >
         {isMobile ? (
           <Dropdown
@@ -92,7 +94,7 @@ const LandingHeader: React.FC<{
               <DynamicReactIcon
                 iconName="RiMenu3Line"
                 iconSet="ri"
-                size={24}
+                size={compact ? 20 : 24}
                 color={color || COLORS.textColorDark}
               ></DynamicReactIcon>
             </a>
@@ -105,7 +107,7 @@ const LandingHeader: React.FC<{
                 href={item.link}
                 style={{
                   color: color || COLORS.textColorLight,
-                  fontSize: FONT_SIZE.PARA,
+                  fontSize: compact ? FONT_SIZE.SUB_TEXT : FONT_SIZE.PARA,
                   textDecoration: 'none',
                   textShadow: color ? "0.5px 0.5px 0 white" : "none"
                 }}

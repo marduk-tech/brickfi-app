@@ -1,0 +1,9 @@
+/* The report's own scroll area on desktop (see brick360-public-client.tsx) -
+   scrolls by wheel, trackpad or the section nav, with no visible scrollbar. */
+.reportScroll {
+  scrollbar-width: none;
+}
+
+.reportScroll::-webkit-scrollbar {
+  display: none;
+}

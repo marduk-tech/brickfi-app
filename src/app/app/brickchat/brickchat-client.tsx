@@ -443,6 +443,11 @@ export function BrickChatCore({
   const [activeThreadId, setActiveThreadId] = useState<string>();
   const [currentQuestion, setCurrentQuestion] = useState<string>();
   const [chatLoading, setChatLoading] = useState(false);
+  // the answer shown early (on the stream's "answer" event) whose next step -
+  // follow-up or offering - hasn't arrived yet; it gets "Thinking..." until
+  // "final" replaces it in chatHistory, or the run ends
+  const [nextStepPendingFor, setNextStepPendingFor] =
+    useState<ExploreAnswer | null>(null);
   const [steps, setSteps] = useState<TimelineStep[]>([]);
   const [streamingSummary, setStreamingSummary] = useState<string>();
   const [threadyHistoryLoading, setThreadyHistoryLoading] = useState(false);
@@ -1298,7 +1303,12 @@ export function BrickChatCore({
           streamedText += event.content;
           setStreamingSummary(streamedText);
         } else if (event.type === "answer") {
-          if (!shownAnswer) showAnswer(event.payload as ExploreAnswer);
+          if (!shownAnswer) {
+            showAnswer(event.payload as ExploreAnswer);
+            // its follow-up/offering comes with "final" - "Thinking..."
+            // under it until then
+            setNextStepPendingFor(event.payload as ExploreAnswer);
+          }
         } else if (event.type === "final") {
           answer = event.payload as ExploreAnswer;
           resolvedThreadId = event.meta?.threadId;
@@ -1372,10 +1382,11 @@ export function BrickChatCore({
         status: "failed",
       });
       console.error("Search error:", error);
-      messageApi.error("Failed to search projects. Please try again.");
+      messageApi.error("Oops! Encountered an error. Please try again.");
     } finally {
       setCurrentQuestion(undefined);
       setChatLoading(false);
+      setNextStepPendingFor(null);
       setSteps([]);
       setStreamingSummary(undefined);
     }
@@ -1399,6 +1410,7 @@ export function BrickChatCore({
     setChatHistory([]);
     setCurrentQuestion(undefined);
     setChatLoading(false);
+    setNextStepPendingFor(null);
     setSteps([]);
     setStreamingSummary(undefined);
     setThreadyHistoryLoading(false);
@@ -2232,7 +2244,10 @@ export function BrickChatCore({
 
                     {!messageItem.answer.directAnswer ? (
                       <Flex vertical gap={8} style={{}}>
-                        {!skipsProjectResults(messageItem.answer) ? (
+                        {/* nothing at all when the search found no projects
+                          - the summary already says so */}
+                        {!!messageItem.answer.projectsList?.length &&
+                        !skipsProjectResults(messageItem.answer) ? (
                           <BrickChatResults
                             results={messageItem.answer.projectsList}
                             onLocateProject={(projectId) =>
@@ -2315,6 +2330,23 @@ export function BrickChatCore({
                       </Typography.Text>
                     ) : null}
 
+                    {messageItem.answer === nextStepPendingFor &&
+                    !messageItem.answer.followupPrompt &&
+                    !messageItem.answer.followupOffering ? (
+                      <Typography.Text
+                        style={{
+                          fontSize: FONT_SIZE.HEADING_4 * (isMobile ? 1.15 : 1),
+                          marginTop: 8,
+                          color: COLORS.textColorLight,
+                        }}
+                      >
+                        Thinking
+                        <span className={styles.thinkingDot}>.</span>
+                        <span className={styles.thinkingDot}>.</span>
+                        <span className={styles.thinkingDot}>.</span>
+                      </Typography.Text>
+                    ) : null}
+
                     {messageItem.answer.followupOffering ? (() => {
                       const offeringKey = messageItem.answer.followupOffering.key;
                       // the request raised from this very answer, if any
@@ -2361,6 +2393,14 @@ export function BrickChatCore({
                               messageItem.answer.followupOffering?.context,
                           })
                         }
+                        // asked as a new turn, like typing it in - not
+                        // while an answer is still streaming
+                        onLearnMore={(offering) => {
+                          if (chatLoading) return;
+                          handleSearch({
+                            question: `More about ${offering.title} offering`,
+                          });
+                        }}
                       />
                       </>
                       );

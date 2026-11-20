@@ -1,13 +1,16 @@
+import { getVerifiedLvnzyProjectSlugs } from "@/queries/lvnzy-projects";
 import { getAllGlossaryTerms } from "@/queries/marketing";
 import { getAllDevelopers } from "@/queries/real-estate-developer";
 import { MetadataRoute } from "next";
 
 function logSitemapGeneration(routes: MetadataRoute.Sitemap) {
   // Categorize routes by URL pattern
+  const projectRoutes = routes.filter((r) => r.url.includes("/brick360/"));
   const staticRoutes = routes.filter(
     (r) =>
       (!r.url.includes("/real-estate-developer/") &&
-        !r.url.includes("/glossary/")) ||
+        !r.url.includes("/glossary/") &&
+        !r.url.includes("/brick360/")) ||
       r.url.endsWith("/glossary"),
   );
   const developerRoutes = routes.filter((r) =>
@@ -26,7 +29,8 @@ function logSitemapGeneration(routes: MetadataRoute.Sitemap) {
   console.log("Route Breakdown:");
   console.log(`  • Static routes: ${staticRoutes.length}`);
   console.log(`  • Developer pages: ${developerRoutes.length}`);
-  console.log(`  • Glossary articles: ${glossaryRoutes.length}\n`);
+  console.log(`  • Glossary articles: ${glossaryRoutes.length}`);
+  console.log(`  • Brick360 project pages: ${projectRoutes.length}\n`);
 
   console.log("Generated Sitemap URLs:");
   console.log("-".repeat(50));
@@ -54,7 +58,8 @@ function logSitemapGeneration(routes: MetadataRoute.Sitemap) {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://brickfi.in";
+  // www - brickfi.in redirects there, and every page's canonical uses it
+  const baseUrl = "https://www.brickfi.in";
 
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -119,6 +124,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     allRoutes = [...allRoutes, ...glossaryTermRoutes];
   } catch (error) {
     console.error("Error generating sitemap for glossary articles:", error);
+  }
+
+  // public Brick360 reports - only verified ones, the same set the pages
+  // themselves allow indexing for (see isIndexable in brick360/[slug])
+  try {
+    const projects = await getVerifiedLvnzyProjectSlugs();
+    const projectRoutes: MetadataRoute.Sitemap = projects.map(({ slug }) => ({
+      url: `${baseUrl}/brick360/${slug}`,
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
+    }));
+
+    allRoutes = [...allRoutes, ...projectRoutes];
+  } catch (error) {
+    console.error("Error generating sitemap for Brick360 projects:", error);
   }
 
   // Log generated sitemap

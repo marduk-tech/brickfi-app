@@ -10,6 +10,9 @@ import { OFFERING_FLOWS } from "./flows";
 import OfferingTicketCard from "./offering-ticket-card";
 import type { BrickfiOffering, OfferingCta, OfferingTicket } from "./types";
 
+// offerings whose CTAs show without the "Learn More" button
+const NO_LEARN_MORE_OFFERINGS = ["bkfi-expert-help"];
+
 // The CTA buttons under an answer's offering. Once the thread has a request
 // for this offering, the buttons are replaced by that request's card, with
 // its current status - the backend stops suggesting an offering while its
@@ -22,6 +25,7 @@ export default function OfferingCtaButtons({
   ticketNoted = false,
   hideTicketCard = false,
   onStart,
+  onLearnMore,
 }: {
   offeringKey: string;
   existingTicket?: OfferingTicket;
@@ -32,6 +36,8 @@ export default function OfferingCtaButtons({
    * note) - only its card shows, never the buttons, even once it's closed */
   ticketNoted?: boolean;
   onStart: (offering: BrickfiOffering, cta: OfferingCta) => void;
+  /** "Learn More" - asks the chat about the offering (see brickchat-client) */
+  onLearnMore?: (offering: BrickfiOffering) => void;
 }) {
   const findOffering = useActiveOfferings();
   const offering = findOffering(offeringKey);
@@ -60,7 +66,8 @@ export default function OfferingCtaButtons({
           marginTop: 16,
           width: 235,
           borderRadius: 8,
-          border: `1px solid ${COLORS.borderColor}`,
+          border: `1px solid ${COLORS.borderColorMedium}`,
+          padding: 4
         }}
       >
         {ctas.map((cta) => (
@@ -81,13 +88,37 @@ export default function OfferingCtaButtons({
                   color={COLORS.textColorDark}
                 />
               ) : null}
+              <Flex vertical>
               <Typography.Text
-                style={{ color: COLORS.textColorMedium,  fontSize: FONT_SIZE.HEADING_4, lineHeight: "140%" }}
+                style={{ fontWeight: 500,color: COLORS.primaryColor, textTransform: "uppercase", fontSize: FONT_SIZE.HEADING_3, lineHeight: "140%" }}
+              >{offering.title}</Typography.Text>
+              <Typography.Text
+                style={{ color: COLORS.textColorMedium,  fontSize: FONT_SIZE.HEADING_4, lineHeight: "120%" }}
               >
                 {cta.description}
               </Typography.Text>
+              </Flex>
             </Flex>
-            <Flex>
+            <Flex gap={4} style={{ margin: 4}}>
+              {onLearnMore &&
+              !NO_LEARN_MORE_OFFERINGS.includes(offering.key) ? (
+               <Button
+                type="default"
+                size="small"
+                onClick={() => onLearnMore(offering)}
+                style={{
+                  width: "100%",
+                  textAlign: "center",
+                  fontSize: FONT_SIZE.SUB_TEXT,
+                  borderRadius: 8,
+                 fontWeight: 500,
+                 height: 32,
+                 padding: "0px 4px",
+                }}
+              >
+               Learn More
+              </Button>
+              ) : null}
               <Button
                 type="primary"
                 size="small"
@@ -96,6 +127,10 @@ export default function OfferingCtaButtons({
                   width: "100%",
                   textAlign: "center",
                   fontSize: FONT_SIZE.SUB_TEXT,
+                  borderRadius: 8,
+                  fontWeight: 500,
+                  padding: "0px 4px",
+                  height: 32
                 }}
               >
                 {cta.label}

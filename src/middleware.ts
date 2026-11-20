@@ -38,6 +38,16 @@ export function middleware(req: NextRequest) {
   if (isAllowed(pathname)) return NextResponse.next();
 
   const url = req.nextUrl.clone();
+
+  // a public Brick360 report opened in the app (e.g. a shared link) - open
+  // that project in the app's own brickchat view instead of the app home
+  const brick360Slug = pathname.match(/^\/brick360\/([^/]+)\/?$/)?.[1];
+  if (brick360Slug) {
+    url.pathname = `${APP_HOME}/${brick360Slug}`;
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
+
   url.pathname = APP_HOME;
   url.search = "";
   return NextResponse.redirect(url);

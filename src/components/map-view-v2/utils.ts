@@ -126,6 +126,29 @@ export async function getIcon(
 /**
  * Process road features from GeoJSON
  */
+const OPERATIONAL_STATUSES: string[] = [
+  PLACE_TIMELINE.LAUNCHED,
+  PLACE_TIMELINE.POST_LAUNCH,
+  PLACE_TIMELINE.PARTIAL_LAUNCH,
+];
+
+/**
+ * Status of a single feature of a driver - a feature's own properties.status
+ * (e.g. one stretch of a metro line under construction while the rest runs)
+ * wins over the driver's overall status.
+ */
+export const getFeatureStatus = (
+  properties: Record<string, any> | null | undefined,
+  driverStatus: string,
+): string => {
+  const status = properties?.status;
+  return typeof status === "string" && status.trim() ? status : driverStatus;
+};
+
+/** True when a status is not yet operational (drawn dashed on the map). */
+export const isUnderConstructionStatus = (status?: string) =>
+  !OPERATIONAL_STATUSES.includes(status as string);
+
 export const processRoadFeatures = (features: GeoJSONFeature[]) => {
   return features.flatMap((feature) => {
     if (feature.type === "Feature" && feature.geometry) {

@@ -82,7 +82,7 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
     : null;
 
   return (
-    <Flex style={{ margin: 0, minWidth: 0, maxWidth: "100%" }}>
+    <Flex style={{ margin: 0, minWidth: 0, width: "100%" }}>
      
       <Flex
         style={{
@@ -91,10 +91,10 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           marginBottom: 0,
           borderRadius: 8,
           minWidth: 0,
-          maxWidth: "100%",
+          width: "100%",
         }}
         gap={isMobile ? 8: 16}
-        vertical
+        vertical={isMobile}
       >
         <div
           onClick={() => setSummaryModalOpen(true)}
@@ -121,8 +121,8 @@ const MetaInfo = forwardRef<any, MetaInfoProps>(({ lvnzyProject }, ref) => {
           {priceText}
           {corridorText ? `, ${corridorText}` : ""}
         </div>
-        <Flex align="center" gap={8} style={{marginTop: 0}}>
-          <Flex align="center" gap={8} style={{backgroundColor: "transparent", border:`1px solid ${COLORS.textColorDark}`, padding: "2px 4px", borderRadius: 4}}>
+        <Flex align="center" gap={8} style={{marginTop: 0, marginLeft: isMobile ? "initial": "auto", marginRight:8}}>
+          <Flex align="center" gap={4} style={{backgroundColor: "transparent", border:`1px solid ${COLORS.textColorDark}`, padding: "2px 4px", borderRadius: 4}}>
             <DynamicReactIcon
               iconSet="tb"
               iconName="TbBuildingBank"

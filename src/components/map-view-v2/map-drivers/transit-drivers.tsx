@@ -3,10 +3,7 @@ import * as turf from "@turf/turf";
 import L from "leaflet";
 import { Flex } from "antd";
 import { Marker, useMap } from "react-leaflet";
-import {
-  DRIVER_CATEGORIES,
-  PLACE_TIMELINE,
-} from "../../../libs/constants";
+import { DRIVER_CATEGORIES } from "../../../libs/constants";
 import {
   capitalize,
   driverStatusLabel,
@@ -15,7 +12,11 @@ import {
 import { COLORS } from "../../../theme/style-constants";
 import { IDriverPlace } from "../../../types/Project";
 import { TransitDriverPlace, GeoJSONPointFeature } from "../types";
-import { processRoadFeatures } from "../utils";
+import {
+  getFeatureStatus,
+  isUnderConstructionStatus,
+  processRoadFeatures,
+} from "../utils";
 import { FlickerPolyline } from "../shapes/flicker-polyline";
 import DynamicReactIcon from "../../common/dynamic-react-icon";
 import { MapModalGeoPosition } from "../map-modal";
@@ -100,13 +101,23 @@ export const TransitDriversComponent = ({
             )
           );
 
-          const isDashed = ![
-            PLACE_TIMELINE.LAUNCHED,
-            PLACE_TIMELINE.POST_LAUNCH,
-            PLACE_TIMELINE.PARTIAL_LAUNCH,
-          ].includes(driver.status as PLACE_TIMELINE);
+          // each line / station can carry its own properties.status (part of
+          // a line launched, part still under construction) - falls back to
+          // the driver's status
+          const statusOf = (properties: any) =>
+            getFeatureStatus(properties, driver.status);
+          const statusTag = (properties: any) => {
+            const status = statusOf(properties);
+            return {
+              label: driverStatusLabel(status),
+              color: isUnderConstructionStatus(status) ? "warning" : "success",
+            };
+          };
 
           const transitLines = lineFeatures.map((feature, lineIndex) => {
+            const isDashed = isUnderConstructionStatus(
+              statusOf(feature.properties),
+            );
             const positions = feature.coordinates.map(
               ([lng, lat]) => [lat, lng] as [number, number]
             );
@@ -238,10 +249,7 @@ export const TransitDriversComponent = ({
                                 : "",
                             content: driver.details?.oneLiner || driver.details?.description || "",
                             tags: [
-                              {
-                                label: driverStatusLabel(driver.status),
-                                color: isDashed ? "warning" : "success",
-                              },
+                              statusTag(feature.properties),
                               ...(driver.tags || []).map((t: string) => ({
                                 label: capitalize(t),
                                 color: "info",
@@ -296,10 +304,7 @@ export const TransitDriversComponent = ({
                                   feature.properties?.Name),
                               color: COLORS.primaryColor,
                             },
-                            {
-                              label: driverStatusLabel(driver.status),
-                              color: isDashed ? "warning" : "success",
-                            },
+                            statusTag(feature.properties),
                             ...(driver.tags || []).map((t: string) => {
                               return {
                                 label: capitalize(t),

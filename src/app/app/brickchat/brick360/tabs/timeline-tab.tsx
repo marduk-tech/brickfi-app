@@ -162,7 +162,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                   <Flex vertical gap={4}>
                     <Typography.Text
                       style={{
-                        fontSize: fs.HEADING_2,
+                        fontSize: fs.HEADING_3,
                         lineHeight: "110%",
                       }}
                     >
@@ -188,7 +188,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                           style={{
                             marginRight: 4,
                             color: COLORS.textColorMedium,
-                            fontSize: fs.HEADING_3,
+                            fontSize: fs.HEADING_4,
                           }}
                         >
                           {index == 0 ? "Initial Timeline" : "Extension"}:
@@ -196,7 +196,7 @@ export const TimelineTab = ({ lvnzyProject }: TimelineTabProps) => {
                         <Typography.Text
                           style={{
                             color: COLORS.textColorMedium,
-                            fontSize: fs.HEADING_3,
+                            fontSize: fs.HEADING_4,
                           }}
                         >
                           {getFormattedDateString(entry.startDate)} -{" "}

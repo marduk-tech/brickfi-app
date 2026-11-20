@@ -1,7 +1,7 @@
 "use client";
 
 import { useBrick360FontSize } from "./use-font-size";
-import { Button, Flex, Modal, Tabs, Typography } from "antd";
+import { Button, Flex, Modal, Typography } from "antd";
 import { useEffect, useRef, useState } from "react";
 import { useFetchLvnzyProjectBySlug } from "@/hooks/use-lvnzy-project";
 import DynamicReactIcon from "@/components/common/dynamic-react-icon";
@@ -76,12 +76,21 @@ interface Brick360InlineProps {
   onClose?: () => void;
   /** Forwarded from the pillar tabs - see tabs/pillar-base.tsx and brick-map-chat.tsx. */
   onMapConfigChange?: (config: PillarMapConfig | null) => void;
+  /**
+   * Distance from the top of the scroll area at which the section nav sticks
+   * - the height of anything fixed above it (e.g. the site header on the
+   * public /brick360/[slug] page). 0 inside brickchat's chat list.
+   */
+  stickyTop?: number;
 }
 
 // Inline, brickchat-embedded variant of Brick360v2 (see
 // components/brick-360/brick360-v2.tsx) - same tabs/data, two differences:
-// - tabs are rendered as buttons instead of antd <Tabs>, since this sits
-//   inside the chat panel rather than owning a full page.
+// - every tab's content is rendered at once, stacked vertically as titled
+//   sections (so the whole report is in the HTML - see the public
+//   /brick360/[slug] page). The tab row is a sticky section nav: a click
+//   scrolls its section into view, and scrolling highlights the section
+//   currently under the bar.
 // - the Map tab is dropped entirely. Map-view duties are handled by
 //   BrickMapChat, which brickchat-client already keeps mounted alongside
 //   this component and re-initializes with this same project's connectivity
@@ -91,6 +100,7 @@ export function Brick360Inline({
   projectData,
   onClose,
   onMapConfigChange,
+  stickyTop = 0,
 }: Brick360InlineProps) {
   const [isClosing, setIsClosing] = useState(false);
   const handleClose = () => {
@@ -191,8 +201,87 @@ export function Brick360Inline({
     });
   }, [selectedTabKey]);
 
+  // --- section nav: click to scroll, scroll to highlight ---
+  const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
+  // the sticky bar's height - sections keep this much clear (scroll-margin)
+  // so their titles don't land underneath it
+  const [tabBarHeight, setTabBarHeight] = useState(0);
+  useEffect(() => {
+    const bar = tabBarRef.current;
+    if (!bar) return;
+    const observer = new ResizeObserver(() =>
+      setTabBarHeight(bar.offsetHeight),
+    );
+    observer.observe(bar);
+    return () => observer.disconnect();
+  }, []);
+
+  // While a click's smooth scroll is running, the scroll-spy below would
+  // highlight every section it passes - so it's paused until scrolling has
+  // been idle for SPY_RESUME_MS (or SPY_MAX_PAUSE_MS, if the section was
+  // already in view and nothing scrolled at all).
+  const spyPaused = useRef(false);
+  const spyResumeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const SPY_RESUME_MS = 150;
+  const SPY_MAX_PAUSE_MS = 1500;
+
+  const sectionKeys = tabButtons.map((t) => t.key).join(",");
+  useEffect(() => {
+    if (!lvnzyProject) return;
+    const keys = sectionKeys.split(",");
+    let frame = 0;
+    // the active section = the last one whose top has reached the bar's
+    // bottom edge. Listens in the capture phase on document, since the
+    // element that actually scrolls is an ancestor (brickchat's chat list,
+    // or the page) and scroll events don't bubble.
+    const updateActive = () => {
+      frame = 0;
+      const bar = tabBarRef.current;
+      if (!bar) return;
+      const line = bar.getBoundingClientRect().bottom + 8;
+      let active = keys[0];
+      for (const key of keys) {
+        const el = sectionRefs.current[key];
+        if (el && el.getBoundingClientRect().top <= line) active = key;
+      }
+      setSelectedTabKey(active);
+    };
+    const onScroll = () => {
+      if (spyPaused.current) {
+        clearTimeout(spyResumeTimer.current);
+        spyResumeTimer.current = setTimeout(() => {
+          spyPaused.current = false;
+        }, SPY_RESUME_MS);
+        return;
+      }
+      if (!frame) frame = requestAnimationFrame(updateActive);
+    };
+    document.addEventListener("scroll", onScroll, {
+      capture: true,
+      passive: true,
+    });
+    return () => {
+      document.removeEventListener("scroll", onScroll, { capture: true });
+      if (frame) cancelAnimationFrame(frame);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sectionKeys, !!lvnzyProject]);
+
+  useEffect(() => () => clearTimeout(spyResumeTimer.current), []);
+
   const handleTabChange = (key: string) => {
     setSelectedTabKey(key);
+    spyPaused.current = true;
+    clearTimeout(spyResumeTimer.current);
+    spyResumeTimer.current = setTimeout(() => {
+      spyPaused.current = false;
+    }, SPY_MAX_PAUSE_MS);
+    sectionRefs.current[key]?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
   };
 
   const tabItems = tabButtons.map((tab) => {
@@ -202,6 +291,10 @@ export function Brick360Inline({
       : undefined;
     return {
       key: tab.key,
+      title: tab.label,
+      iconName: tab.iconName,
+      iconSet: tab.iconSet,
+      categoryScore,
       label: (
         <Flex
           align="center"
@@ -285,7 +378,9 @@ export function Brick360Inline({
       vertical
       style={{
         margin: "auto",
-        overflowX: "hidden",
+        // clip, not hidden: overflow hidden would make this box a scroll
+        // container and break the sticky tab bar below
+        overflowX: "clip",
         width: "100%",
         border: `1.5px solid ${COLORS.LANDING.MEDIUM_PINK}`,
         backgroundColor:"#f9f8f5",
@@ -318,7 +413,13 @@ export function Brick360Inline({
       ) : null}
    {previewImages.length ? (
         <div
-          style={{ margin: "36px 0 16px 0", padding: "0 8px 0", position: "relative" }}
+          style={{
+            // 36px clears the close button (top right) when there is one;
+            // without it the strip starts at the container's 8px padding
+            margin: onClose ? "36px 0 16px 0" : "0 0 16px 0",
+            padding: "0 8px 0",
+            position: "relative",
+          }}
         >
           <Flex
             gap={8}
@@ -373,12 +474,14 @@ export function Brick360Inline({
 
    
 
-      {/* tab bar - see tabBarRef above for why it isn't antd's */}
-      <div
+      {/* section nav - sticky at the top of whatever scrolls this view; see
+          tabBarRef above for why it isn't antd's tab bar */}
+      <nav
         ref={tabBarRef}
-        role="tablist"
+        aria-label="Report sections"
         className={styles.tabBar}
         style={{
+          top: stickyTop,
           // shadow along the bottom edge, fading upwards into the bar
           boxShadow: "inset 0 -4px 4px -4px rgba(0, 0, 0, 0.15)",
           marginBottom: 16,
@@ -389,27 +492,63 @@ export function Brick360Inline({
           <button
             key={item.key}
             type="button"
-            role="tab"
-            aria-selected={item.key === selectedTabKey}
+            aria-current={item.key === selectedTabKey ? "true" : undefined}
+            aria-controls={`brick360-section-${item.key}`}
             data-tab-key={item.key}
             className={styles.tabButton}
-            onClick={() =>
-              item.key !== selectedTabKey && handleTabChange(item.key)
-            }
+            onClick={() => handleTabChange(item.key)}
           >
             {item.label}
           </button>
         ))}
-      </div>
+      </nav>
 
-      {/* only the selected tab's content - the bar above replaces antd's */}
-      <Tabs
-        activeKey={selectedTabKey}
-        items={tabItems}
-        destroyOnHidden
-        renderTabBar={() => <></>}
-        style={{ padding: "0 8px", marginTop: 0, marginLeft: 0 }}
-      />
+      {/* every tab's content, stacked - each under its own title */}
+      <Flex vertical gap={40} style={{ padding: "0 8px" }}>
+        {tabItems.map((item) => (
+          <section
+            key={item.key}
+            id={`brick360-section-${item.key}`}
+            data-section-key={item.key}
+            ref={(el) => {
+              sectionRefs.current[item.key] = el;
+            }}
+            style={{ scrollMarginTop: stickyTop + tabBarHeight + 8 }}
+          >
+            <Flex
+              align="center"
+              gap={8}
+              className={styles.sectionHeader}
+            >
+              {/* <DynamicReactIcon
+                iconName={item.iconName}
+                iconSet={item.iconSet}
+                color={COLORS.primaryColor}
+                size={22}
+              ></DynamicReactIcon> */}
+              <Typography.Title
+                level={2}
+                style={{
+                  margin: 0,
+                  fontSize: isMobile ? FONT_SIZE.HEADING_1 * .8: FONT_SIZE.HEADING_1 * .8,
+                  fontWeight: 300,
+                  color: COLORS.textColorDark,
+                }}
+              >
+                {item.title}
+              </Typography.Title>
+              {item.categoryScore ? (
+                <GradientBar
+                  value={getCategoryScore(item.categoryScore)}
+                  showSmileyOnly
+                  smileySize={isMobile ? 24: 28}
+                ></GradientBar>
+              ) : null}
+            </Flex>
+            {item.children}
+          </section>
+        ))}
+      </Flex>
 
       <Modal
         open={mediaModalOpen}
