@@ -285,33 +285,33 @@ export default function Brick360PublicClient({
 
       {isMobile ? (
         <>
-          <Button
-            aria-label={showMobileMap ? "Close map" : "Open map"}
-            onClick={() => setShowMobileMap((open) => !open)}
-            style={{
-              position: "fixed",
-              right: 16,
-              // just above the sticky "Ask" box
-              bottom: 16 + askBoxHeight + 12,
-              width: 52,
-              height: 52,
-              borderRadius: 26,
-              zIndex: 1001,
-              backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
-              borderColor: showMobileMap
-                ? COLORS.primaryColor
-                : COLORS.textColorMedium,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
-            }}
-            icon={
-              <DynamicReactIcon
-                color={showMobileMap ? "white" : COLORS.textColorDark}
-                iconName={showMobileMap ? "IoClose" : "FaMapLocationDot"}
-                iconSet={showMobileMap ? "io5" : "fa6"}
-                size={24}
-              />
-            }
-          />
+          {!showMobileMap ? (
+            <Button
+              aria-label="Open map"
+              onClick={() => setShowMobileMap(true)}
+              style={{
+                position: "fixed",
+                right: 16,
+                // just above the sticky "Ask" box
+                bottom: 16 + askBoxHeight + 12,
+                width: 52,
+                height: 52,
+                borderRadius: 26,
+                zIndex: 1001,
+                backgroundColor: COLORS.textColorDark,
+                borderColor: COLORS.textColorDark,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+              }}
+              icon={
+                <DynamicReactIcon
+                  color="white"
+                  iconName="FaMapLocationDot"
+                  iconSet="fa6"
+                  size={24}
+                />
+              }
+            />
+          ) : null}
           <Drawer
             placement="bottom"
             open={showMobileMap}
@@ -324,6 +324,34 @@ export default function Brick360PublicClient({
               content: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
             }}
           >
+            {/* close, top right of the map - inside the drawer so it slides
+                up and down with it */}
+            <Button
+              aria-label="Close map"
+              onClick={() => setShowMobileMap(false)}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 12,
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                touchAction: "manipulation",
+                // above the map's own overlays (filter chips are 1000)
+                zIndex: 1100,
+                backgroundColor: COLORS.textColorDark,
+                borderColor: COLORS.textColorDark,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+              }}
+              icon={
+                <DynamicReactIcon
+                  color="white"
+                  iconName="IoClose"
+                  iconSet="io5"
+                  size={22}
+                />
+              }
+            />
             <Flex vertical style={{ position: "absolute", inset: 0 }}>
               {showMobileMap ? map : null}
             </Flex>

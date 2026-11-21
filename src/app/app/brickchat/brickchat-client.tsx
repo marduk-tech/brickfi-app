@@ -486,8 +486,31 @@ export function BrickChatCore({
   };
   useEffect(() => clearLoginPromptTimer, []);
 
-  const getMobileMapDrawerWidth = () =>
-    typeof window !== "undefined" ? Math.round(window.innerWidth * 0.85) : 320;
+  // Mobile: the floating map button sits 12px above the chat input, which is
+  // pinned to the bottom of the chat column. It is measured from the input's
+  // top edge because its height changes (guest sign-in row, multi-line
+  // question). The input is hidden while the map is open, and the last
+  // position is kept so the button doesn't jump.
+  const [mapButtonBottom, setMapButtonBottom] = useState(96);
+  useEffect(() => {
+    if (!isMobile || showMobileMap) return;
+    const searchForm = document.querySelector<HTMLElement>(
+      `.${styles.chatSearchForm}`,
+    );
+    if (!searchForm) return;
+    const place = () =>
+      setMapButtonBottom(
+        Math.max(16, window.innerHeight - searchForm.getBoundingClientRect().top + 12),
+      );
+    place();
+    const observer = new ResizeObserver(place);
+    observer.observe(searchForm);
+    window.addEventListener("resize", place);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", place);
+    };
+  }, [isMobile, showMobileMap]);
 
   const [projectResults, setProjectResults] = useState<
     ProjectResult[] | undefined
@@ -1656,8 +1679,6 @@ export function BrickChatCore({
     </Flex>
   );
 
-  const mobileDrawerWidth = getMobileMapDrawerWidth();
-
   return (
     <Flex
       vertical={isMobile}
@@ -2534,73 +2555,80 @@ export function BrickChatCore({
       {/* Map View For Mobile in Expandable Drawer */}
       {isMobile && (
         <>
-          <Flex
-            justify="center"
-            align="center"
+          {/* floating map button, bottom right - same as the public report
+              page (/brick360/[slug]): sits just above the chat input. Hidden
+              while the map is open - the drawer has its own close button */}
+{!showMobileMap ? (
+<Button
+            aria-label="Open map"
             onClick={() => {
-              setShowMobileMap((prev) => {
-                const next = !prev;
-                if (next) setFocusedReferredLocations([]);
-                return next;
-              });
+              setFocusedReferredLocations([]);
+              setShowMobileMap(true);
             }}
             style={{
               position: "fixed",
-              top: "50%",
-              right: showMobileMap ? mobileDrawerWidth : 0,
-              transform: "translateY(-50%)",
-              width: 48,
-              height: 48,
-              backgroundColor: showMobileMap ? COLORS.primaryColor : "white",
-              border: `1px solid ${showMobileMap ? COLORS.primaryColor : COLORS.textColorMedium}`,
-              borderRight: showMobileMap ? undefined : "none",
-              borderTopLeftRadius: 12,
-              borderBottomLeftRadius: 12,
-              cursor: "pointer",
+              right: 16,
+              bottom: mapButtonBottom,
+              width: 52,
+              height: 52,
+              borderRadius: 26,
               touchAction: "manipulation",
-              zIndex: 1000,
-              transition: "right 0.25s ease",
-              boxShadow: "-2px 0 6px rgba(0,0,0,0.15)",
+              zIndex: 1001,
+              backgroundColor: COLORS.textColorDark,
+              borderColor: COLORS.textColorDark,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
             }}
-          >
-            {/* <div
-              style={{
-                width: 8,
-                height: 50,
-                borderRadius: 4,
-                backgroundColor: "black",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.3)",
-              }}
-            /> */}
-            <DynamicReactIcon
-              color={showMobileMap ? "white" : COLORS.textColorDark}
-              iconName="FaMapLocationDot"
-              iconSet="fa6"
-              size={28}
-            ></DynamicReactIcon>
-          </Flex>
+            icon={
+              <DynamicReactIcon
+                color="white"
+                iconName="FaMapLocationDot"
+                iconSet="fa6"
+                size={24}
+              />
+            }
+          />
+          ) : null}
 
           <Drawer
-            placement="right"
+            placement="bottom"
             open={showMobileMap}
             onClose={() => setShowMobileMap(false)}
-            mask={false}
             closable={false}
-            width={mobileDrawerWidth}
+            height="80vh"
             styles={{
               header: { display: "none" },
               body: { padding: 0, position: "relative", overflow: "hidden" },
-              content: {
-                borderTopLeftRadius: 20,
-                borderBottomLeftRadius: 20,
-              },
-              wrapper: {
-                borderTopLeftRadius: 20,
-                borderBottomLeftRadius: 20,
-                borderLeft: `1px solid ${COLORS.textColorMedium}`,
-              },
+              content: { borderTopLeftRadius: 20, borderTopRightRadius: 20 },
             }}
           >
+            {/* close, top right of the map - inside the drawer so it slides
+                up and down with it */}
+            <Button
+              aria-label="Close map"
+              onClick={() => setShowMobileMap(false)}
+              style={{
+                position: "absolute",
+                top: 16,
+                right: 12,
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                touchAction: "manipulation",
+                // above the map's own overlays (filter chips are 1000)
+                zIndex: 1100,
+                backgroundColor: COLORS.textColorDark,
+                borderColor: COLORS.textColorDark,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)",
+              }}
+              icon={
+                <DynamicReactIcon
+                  color="white"
+                  iconName="IoClose"
+                  iconSet="io5"
+                  size={22}
+                />
+              }
+            />
             <Flex
               vertical
               style={{ position: "absolute", inset: 0, zIndex: 0 }}

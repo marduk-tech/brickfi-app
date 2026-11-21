@@ -40,9 +40,12 @@ export const CategoryFilters = ({
         position: "absolute",
         top: isMobile ? 24: 8,
         zIndex: 1000,
+        // spans exactly the map's width (a 100% width plus the 8px offset
+        // ran past the map's right edge, so the end of the row - and any
+        // padding there - was clipped out of view)
         left: 8,
-        width: "100%",
-        paddingRight: 125,
+        right: 0,
+        boxSizing: "border-box",
       }}
       gap={8}
     >
@@ -89,6 +92,12 @@ export const CategoryFilters = ({
           </Typography.Text>
         </Flex>
       ))}
+      {/* empty space after the last chip, so the row scrolls far enough
+          to clear what sits in the map's top-right corner - on mobile the
+          map drawer's 40px close button, 12px from the edge. A spacer
+          rather than padding-right, which scroll containers don't
+          reliably include at the end. */}
+      <div aria-hidden style={{ flexShrink: 0, width: isMobile ? 56 : 117 }} />
     </Flex>
   );
 };
